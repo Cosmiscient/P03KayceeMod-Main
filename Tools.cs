@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using BepInEx;
 using BepInEx.Bootstrap;
@@ -6,6 +7,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
+using InscryptionAPI.Helpers;
 using InscryptionAPI.Items.Extensions;
 using UnityEngine;
 using UnityEngine.SceneManagement;

@@ -23,7 +23,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Full of Oil";
-            info.rulebookDescription = "When [creature] dies, it adds 2 health to the creature on either side and across from it.";
+            info.rulebookDescription = "When [creature] dies, it adds 3 health to the creature on either side and across from it.";
             info.canStack = false;
             info.powerLevel = 2;
             info.opponentUsable = false;
@@ -56,7 +56,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 this.Card.Anim.StrongNegationEffect();
                 slot.Card.Anim.StrongNegationEffect();
                 yield return new WaitForSeconds(0.25f);
-                slot.Card.TemporaryMods.Add(new(0, 2));
+                slot.Card.TemporaryMods.Add(new(0, 3));
                 yield return new WaitForSeconds(0.25f);
             }
 

@@ -6,9 +6,12 @@ using BepInEx.Logging;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
+using InscryptionAPI.Helpers;
 using InscryptionAPI.Items.Extensions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Diagnostics;
+using DiskCardGame;
 
 namespace Infiniscryption.P03KayceeRun
 {
@@ -21,8 +24,6 @@ namespace Infiniscryption.P03KayceeRun
 		public const string PluginName = "Infiniscryption P03 in Kaycee's Mod";
 		public const string PluginVersion = "2.3";   
         public const string CardPrefx = "P03KCM";
-
-        private const string PREFAB = "Weight_DataFile_GB";
 
         internal static P03Plugin Instance;  
 
@@ -49,8 +50,8 @@ namespace Infiniscryption.P03KayceeRun
         private void Awake()
         {
             CreateShockerItem();
-            CreateCubeItem();
-            CreateGooItem();
+            //CreateCubeItem();
+            //CreateGooItem();
 
             Instance = this;
 
@@ -101,41 +102,50 @@ namespace Infiniscryption.P03KayceeRun
         private void CreateShockerItem()
         {
             GameObject teslaCoil = new GameObject("TeslaCoil");
-            GameObject animation = new GameObject("Anim");
-            animation.AddComponent<Animator>();
-            animation.transform.SetParent(teslaCoil.transform);
+            //GameObject animation = new GameObject("Anim");
+            //animation.AddComponent<Animator>();
+            //animation.transform.SetParent(teslaCoil.transform);
+            //GameObject model = GameObject.Instantiate(Resources.Load<GameObject>("prefabs/specialnodesequences/teslacoil"));
+            //model.transform.SetParent(animation.transform);
 
-            GameObject model = new GameObject("Model");
-            model.transform.SetParent(animation.transform);
-            //model.transform.localPosition = new Vector3(0, 0.85f, 0);
-            //model.transform.localRotation = Quaternion.Euler(0, 180, 0);
-            //model.AddComponent<MeshFilter>().mesh = Resources.Load<Mesh>("art/assets3d/cabin/camera/leshy_camera");
-            //model.AddComponent<MeshRenderer>().materials = new Material[]
-            //{
-            //    Resources.Load<Material>("art/assets3d/cabin/camera/Leshy_Camera_2"),
-            //    Resources.Load<Material>("art/assets3d/cabin/camera/Leshy_Camera_1")
-            //};
+            ////"prefabs/specialnodesequences/teslacoil";
 
-            //ShockerItem.FixGameObject(teslaCoil);
-            //"prefabs/specialnodesequences/teslacoil";
-            //Texture2D shockerTexture = Resources.Load<Texture2D>("art/rulebookitemicon_hourglass.png");
-            //Tools.LoadTexture("ability_necromancer.png");
-            //Texture2D shockerTexture = TextureHelper.GetImageAsTexture("ability_necromancer.png", typeof(P03KayceeRun).Assembly);
-            //Texture2D shockerTexture = TextureHelper.GetImageAsTexture("Art/rulebookitemicon_meatpile.png");
+            //print(teslaCoil);
+            //print(model);
+
+
+
+            //Transform coil = teslaCoil.transform.Find("TeslaCoil(Clone)");
+            //Vector3 BASE_POSITION = new(0f, 0.2f, 0f);
+            //coil.localPosition = BASE_POSITION;
+            //Renderer renderer = teslaCoil.transform.Find("TeslaCoil(Clone)/Base/Rod/rings_low").gameObject.GetComponent<Renderer>();
+            //renderer.material.EnableKeyword("_EMISSION");
+            //renderer.material.SetColor("_EmissionColor", GameColors.Instance.blue);
+
+            //GameObject.Destroy(teslaCoil.GetComponentInChildren<AutoRotate>());
+
+            //print(coil);
+            //print(renderer);
+
+            //teslaCoil.AddComponent<ShockerItem>();
+
+            Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(ShockerItem).Assembly);
 
             InscryptionAPI.Items.ConsumableItemManager.New(
                 PluginGuid,
                 "Amplification Coil",
                 "Increases your max energy. I suppose you can find some use for this.",
-                Tools.LoadTexture("ability_necromancer");,
+                ruleIcon,
                 typeof(ShockerItem),
                 teslaCoil)
-            //.SetAct3()
+            .SetAct3()
             .SetPickupSoundId("teslacoil_spark")
             .SetPlacedSoundId("metal_object_short")
             .SetExamineSoundId("metal_object_short")
             .SetRegionSpecific(true)
-            .SetNotRandomlyGiven(true);
+            .SetNotRandomlyGiven(true)
+            .SetPrefabID("prefabs/specialnodesequences/teslacoil")
+            .SetRulebookCategory(AbilityMetaCategory.Part3Rulebook);
         }
 
         private void CreateCubeItem()
@@ -144,27 +154,25 @@ namespace Infiniscryption.P03KayceeRun
             GameObject animation = new GameObject("Anim");
             animation.AddComponent<Animator>();
             animation.transform.SetParent(FileCube.transform);
-
-            GameObject model = new GameObject("Model");
+            string PREFAB = "Weight_DataFile_GB";
+            GameObject model = GameObject.Instantiate(Resources.Load<GameObject>($"Prefabs/Environment/ScaleWeights/{PREFAB}"));
+            model.transform.localEulerAngles = Vector3.zero;
+            model.transform.localPosition = new Vector3(0f, 0.322f, 0f);
             model.transform.SetParent(animation.transform);
-            //model.transform.localPosition = new Vector3(0, 0.85f, 0);
-            //model.transform.localRotation = Quaternion.Euler(0, 180, 0);
-            //model.AddComponent<MeshFilter>().mesh = Resources.Load<Mesh>("art/assets3d/cabin/camera/leshy_camera");
-            //model.AddComponent<MeshRenderer>().materials = new Material[]
-            //{
-            //    Resources.Load<Material>("art/assets3d/cabin/camera/Leshy_Camera_2"),
-            //    Resources.Load<Material>("art/assets3d/cabin/camera/Leshy_Camera_1")
-            //};
 
-            LifeItem.FixGameObject(FileCube);
+            Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(LifeItem).Assembly);
+
+            //LifeItem.FixGameObject(FileCube);
             //$"Prefabs/Environment/ScaleWeights/{PREFAB}";
-            InscryptionAPI.Items.ConsumableItemManager.New(PluginGuid, "Data Cube", "Can be placed on the scales for some damage, if you're into that sort of thing.", null, typeof(LifeItem), FileCube)
-            //.SetAct3()
+            InscryptionAPI.Items.ConsumableItemManager.New(PluginGuid, "Data Cube", "Can be placed on the scales for some damage, if you're into that sort of thing.", ruleIcon, typeof(LifeItem), FileCube)
+            .SetAct3()
             .SetPickupSoundId("archivist_spawn_filecube")
             .SetPlacedSoundId("metal_object_short")
             .SetExamineSoundId("metal_object_short")
             .SetRegionSpecific(true)
-            .SetNotRandomlyGiven(true);
+            .SetNotRandomlyGiven(true)
+            .SetPrefabID($"Prefabs/Environment/ScaleWeights/{PREFAB}")
+            .SetRulebookCategory(AbilityMetaCategory.Part3Rulebook);
         }
 
         private void CreateGooItem()
@@ -173,27 +181,21 @@ namespace Infiniscryption.P03KayceeRun
             GameObject animation = new GameObject("Anim");
             animation.AddComponent<Animator>();
             animation.transform.SetParent(GooBottle.transform);
-
-            GameObject model = new GameObject("Model");
+            GameObject model = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Items/GooBottleItem"));
             model.transform.SetParent(animation.transform);
-            //model.transform.localPosition = new Vector3(0, 0.85f, 0);
-            //model.transform.localRotation = Quaternion.Euler(0, 180, 0);
-            //model.AddComponent<MeshFilter>().mesh = Resources.Load<Mesh>("art/assets3d/cabin/camera/leshy_camera");
-            //model.AddComponent<MeshRenderer>().materials = new Material[]
-            //{
-            //    Resources.Load<Material>("art/assets3d/cabin/camera/Leshy_Camera_2"),
-            //    Resources.Load<Material>("art/assets3d/cabin/camera/Leshy_Camera_1")
-            //};
 
-            GoobertHuh.FixGameObject(GooBottle);
+            Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(GoobertHuh).Assembly);
+            //GoobertHuh.FixGameObject(GooBottle);
             //"Prefabs/Items/GooBottleItem";
-            InscryptionAPI.Items.ConsumableItemManager.New(PluginGuid, "Goobert", "Please! You've got to help me get out of here!", null, typeof(GoobertHuh), GooBottle)
-            //.SetAct3()
+            InscryptionAPI.Items.ConsumableItemManager.New(PluginGuid, "Goobert", "Please! You've got to help me get out of here!", ruleIcon, typeof(GoobertHuh), GooBottle)
+            .SetAct3()
             .SetPickupSoundId("eyeball_squish")
             .SetPlacedSoundId("eyeball_drop_metal")
             .SetExamineSoundId("eyeball_squish")
             .SetRegionSpecific(true)
-            .SetNotRandomlyGiven(true);
+            .SetNotRandomlyGiven(true)
+            .SetPrefabID("Prefabs/Items/GooBottleItem")
+            .SetRulebookCategory(AbilityMetaCategory.Part3Rulebook); ;
         }
     }
 }

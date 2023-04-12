@@ -34,45 +34,45 @@ namespace Infiniscryption.P03KayceeRun.Items
             return new Vector3(maxX - minX, maxY - minY, maxZ - minZ);
         }
 
-        private static ConsumableItem CreateObject(ConsumableItemData data, Transform parent)
-        {
-            GameObject gameObject = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("prefabs/items/bombremoteitem"), parent);
-            gameObject.transform.localPosition = Vector3.zero;
-            gameObject.name = data.name;
+        //private static ConsumableItem CreateObject(ConsumableItemData data, Transform parent)
+        //{
+        //    GameObject gameObject = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("prefabs/items/bombremoteitem"), parent);
+        //    gameObject.transform.localPosition = Vector3.zero;
+        //    gameObject.name = data.name;
 
-            GameObject tempObject = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>(data.PrefabId), gameObject.transform);
+        //    GameObject tempObject = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>(data.PrefabId), gameObject.transform);
 
-            if (tempObject.GetComponent<Animator>() != null)
-                GameObject.Destroy(tempObject.GetComponent<Animator>());
+        //    if (tempObject.GetComponent<Animator>() != null)
+        //        GameObject.Destroy(tempObject.GetComponent<Animator>());
 
-            GameObject.Destroy(gameObject.GetComponent<BombRemoteItem>());
-            GameObject.Destroy(gameObject.gameObject.transform.Find("BombRemote").gameObject);
+        //    GameObject.Destroy(gameObject.GetComponent<BombRemoteItem>());
+        //    GameObject.Destroy(gameObject.gameObject.transform.Find("BombRemote").gameObject);
 
-            return KNOWN_ITEMS[data](gameObject);
-        }
+        //    return KNOWN_ITEMS[data](gameObject);
+        //}
 
-        [HarmonyPatch(typeof(ItemSlot), nameof(ItemSlot.CreateItem))]
-        [HarmonyPrefix]
-        private static bool CreateItem(ref ItemSlot __instance, ItemData data, bool skipDropAnimation)
-        {
-            if (data is not ConsumableItemData)
-                return true;
+        //[HarmonyPatch(typeof(ItemSlot), nameof(ItemSlot.CreateItem))]
+        //[HarmonyPrefix]
+        //private static bool CreateItem(ref ItemSlot __instance, ItemData data, bool skipDropAnimation)
+        //{
+        //    if (data is not ConsumableItemData)
+        //        return true;
 
-            if (data != null && KNOWN_ITEMS.ContainsKey(data as ConsumableItemData))
-            {
-                if (__instance.Item != null)
-                    GameObject.Destroy(__instance.Item.gameObject);
+        //    if (data != null && KNOWN_ITEMS.ContainsKey(data as ConsumableItemData))
+        //    {
+        //        if (__instance.Item != null)
+        //            GameObject.Destroy(__instance.Item.gameObject);
 
-                __instance.Item = CreateObject(data as ConsumableItemData, __instance.transform);
-                __instance.Item.SetData(data);
+        //        __instance.Item = CreateObject(data as ConsumableItemData, __instance.transform);
+        //        __instance.Item.SetData(data);
 
-                if (skipDropAnimation)
-                    __instance.Item.PlayEnterAnimation(true);
+        //        if (skipDropAnimation)
+        //            __instance.Item.PlayEnterAnimation(true);
                 
-                return false;
-            }
-            return true;
-        }
+        //        return false;
+        //    }
+        //    return true;
+        //}
 
         [HarmonyPatch(typeof(ItemPage), nameof(ItemPage.FillPage))]
         [HarmonyPrefix]
@@ -95,7 +95,7 @@ namespace Infiniscryption.P03KayceeRun.Items
 				{
 					GameObject.Destroy(__instance.itemModel);
 				}
-				__instance.itemModel = CreateObject(consumableByName, __instance.itemModelParent).gameObject;
+				//__instance.itemModel = CreateObject(consumableByName, __instance.itemModelParent).gameObject;
 
                 Animator anim = __instance.itemModel.GetComponentInChildren<Animator>();
                 if (anim != null)

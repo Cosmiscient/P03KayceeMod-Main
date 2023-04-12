@@ -4,6 +4,7 @@ using DiskCardGame;
 using InscryptionAPI.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Guid;
+using System.Diagnostics;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -81,9 +82,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(Ability.StrafeSwap, LatchRampage.AbilityID);
 
             // flying Latcher
-            CardManager.New(EXP_1_PREFIX, "FlyingLatcher", "Sky Latcher", 0, 1)
+            CardManager.New(EXP_1_PREFIX, "FlyingLatcher", "Sky Latcher", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_skylatcher.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetCost(energyCost:1)
+                .SetCost(energyCost:3)
                 .SetRegionalP03Card(CardTemple.Undead)
                 .AddAbilities(Ability.Flying, LatchFlying.AbilityID);
 
@@ -311,7 +312,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.New(EXP_1_PREFIX, "GemRotator", "Gem Cycler", 1, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gemcycler.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetCost(energyCost:5)
+                .SetCost(energyCost: 5)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(GemRotator.AbilityID);
         }     
@@ -321,11 +322,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static void ModifyCardForAscension(ref CardInfo __result)
         {
             string compName = __result.name.ToLowerInvariant();
-            if (compName.StartsWith($"{EXP_1_PREFIX}_gemrotator"))
+            if (compName.StartsWith($"{EXP_1_PREFIX.ToLowerInvariant()}_gemrotator"))
             {
                 if (!__result.Gemified)
+                {
+                    //Debug.WriteLine("GEMMED");
                     __result.mods.Add(new() { gemify = true });
+                }
             }
+
+            //Debug.WriteLine(compName);
         }
     }
 }

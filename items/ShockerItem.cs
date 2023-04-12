@@ -43,6 +43,9 @@ namespace Infiniscryption.P03KayceeRun.Items
             renderer.material.SetColor("_EmissionColor", GameColors.Instance.blue);
 
             GameObject.Destroy(obj.GetComponentInChildren<AutoRotate>());
+
+            print("SHOCKER ITEM FIXED");
+
             return obj.AddComponent<ShockerItem>();
         }
 
