@@ -9,7 +9,12 @@ namespace Infiniscryption.P03KayceeRun.Items
     public class GoobertHuh : ConsumableItem
     {
         public static ConsumableItemData ItemData { get; private set; }
-
+        static GoobertHuh()
+        {
+            ItemData = ScriptableObject.CreateInstance<ConsumableItemData>();
+            //ItemData.name = $"{P03Plugin.CardPrefx}_GoobertHuh";
+            ItemData.name = P03Plugin.PluginGuid + "_Goobert";
+        }
         internal static Tuple<Color, string> GetGoobertRulebookDialogue()
         {
             if (StoryEventsData.EventCompleted(EventManagement.SAW_GOOBERT_AT_SHOP_NODE))
@@ -28,24 +33,7 @@ namespace Infiniscryption.P03KayceeRun.Items
             }
             return new (GameColors.Instance.brightLimeGreen, "Please! You've got to help me get out of here!");
         }
-
-        static GoobertHuh()
-        {
-            
-
-            ItemData = ScriptableObject.CreateInstance<ConsumableItemData>();
-            ItemData.name = $"{P03Plugin.CardPrefx}_GoobertHuh";
-            ItemData.placedSoundId = "eyeball_drop_metal";
-            ItemData.examineSoundId = "eyeball_squish";
-            ItemData.pickupSoundId = "eyeball_squish";
-            ItemData.rulebookCategory = AbilityMetaCategory.Part3Rulebook;
-            ItemData.rulebookName = "Goobert";
-            ItemData.regionSpecific = true;
-            ItemData.rulebookDescription = "Please! You've got to help me get out of here!";
-            ItemData.prefabId = "Prefabs/Items/GooBottleItem";
-            ItemData.notRandomlyGiven = true;
-            ItemSlotPatches.KNOWN_ITEMS.Add(ItemData, FixGameObject);
-        }
+        //public string rulebookName = "Goobert";
 
         public static ConsumableItem FixGameObject(GameObject obj)
         {

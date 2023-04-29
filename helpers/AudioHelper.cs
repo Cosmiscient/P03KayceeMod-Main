@@ -111,6 +111,16 @@ namespace Infiniscryption.P03KayceeRun.Helpers
         //     return tempPath;
         // }
 
+        //private static string FindAudioClip(string clipName)
+        //{
+        //    string fname = $"{clipName}.wav";
+        //    string[] found = Directory.GetFiles(Paths.PluginPath, $"{clipName}.wav", SearchOption.AllDirectories);
+        //    if (found.Length > 0)
+        //        return found[0];
+
+        //    throw new InvalidOperationException($"Could not find any file matching {clipName}");
+        //}
+
         private static string FindAudioClip(string clipName)
         {
             string fname = $"{clipName}.wav";
@@ -120,6 +130,7 @@ namespace Infiniscryption.P03KayceeRun.Helpers
 
             throw new InvalidOperationException($"Could not find any file matching {clipName}");
         }
+
 
         public static void LoadAudioClip(string clipname, string group = "Loops")
         {

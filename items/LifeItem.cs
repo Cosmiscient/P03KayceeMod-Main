@@ -7,6 +7,8 @@ using System;
 using DigitalRuby.LightningBolt;
 using System.Collections.Generic;
 using Infiniscryption.P03KayceeRun.Patchers;
+using InscryptionAPI.Helpers;
+using InscryptionAPI.Items.Extensions;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
@@ -22,26 +24,15 @@ namespace Infiniscryption.P03KayceeRun.Items
                 this.transform.localPosition = new Vector3(0f, 0.322f, 0f);
             }
         }
-
+        //public string rulebookName = "Data Cube";
         public static ConsumableItemData ItemData { get; private set; }
         private const string PREFAB = "Weight_DataFile_GB";
 
         static LifeItem()
         {
-          
-
             ItemData = ScriptableObject.CreateInstance<ConsumableItemData>();
-            ItemData.name = $"{P03Plugin.CardPrefx}_LifeCube";
-            ItemData.placedSoundId = "metal_object_short";
-            ItemData.examineSoundId = "metal_object_short";
-            ItemData.pickupSoundId = "archivist_spawn_filecube";
-            ItemData.regionSpecific = true;
-            ItemData.rulebookCategory = AbilityMetaCategory.Part3Rulebook;
-            ItemData.rulebookName = "Data Cube";
-            ItemData.rulebookDescription = "Can be placed on the scales for some damage, if you're into that sort of thing.";
-            ItemData.prefabId = $"Prefabs/Environment/ScaleWeights/{PREFAB}";
-            ItemData.notRandomlyGiven = true;
-            ItemSlotPatches.KNOWN_ITEMS.Add(ItemData, FixGameObject);
+            //ItemData.name = $"{P03Plugin.CardPrefx}_LifeCube";
+            ItemData.name = P03Plugin.PluginGuid + "_Data Cube";
         }
 
         public static ConsumableItem FixGameObject(GameObject obj)
@@ -68,6 +59,58 @@ namespace Infiniscryption.P03KayceeRun.Items
             ViewManager.Instance.SwitchToView(View.Default);
             yield return EventManagement.SayDialogueOnce("P03AscensionLifeItem", EventManagement.USED_LIFE_ITEM);
             yield break;
+        }
+
+        public static void CreateCubeItem()
+        {
+            GameObject lifeCube = new GameObject("LifeCube");
+            GameObject animation = new GameObject("Anim");
+            animation.AddComponent<Animator>();
+            animation.transform.SetParent(lifeCube.transform);
+            GameObject model = Instantiate(Resources.Load<GameObject>($"Prefabs/Environment/ScaleWeights/{PREFAB}"));
+            model.transform.SetParent(lifeCube.transform);
+
+
+
+            //GameObject model = Instantiate(Resources.Load<GameObject>($"Prefabs/Environment/ScaleWeights/{PREFAB}"));
+            //GameObject model = Instantiate(ResourceBank.Get<GameObject>($"Prefabs/Environment/ScaleWeights/{PREFAB}"));
+            //GameObject model = new GameObject("LifeCube(Clone)");
+            //GameObject model = (Resources.Load<GameObject>("prefabs/specialnodesequences/teslacoil"));
+
+            //model.AddComponent<MeshFilter>().mesh = Resources.Load<Mesh>($"Prefabs/Environment/ScaleWeights/{PREFAB}");
+            //model.AddComponent<MeshRenderer>().materials = new Material[]
+            //{
+            //    Resources.Load<Material>($"Prefabs/Environment/ScaleWeights/{PREFAB}")
+            //};
+
+            //GameObject gameObject = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("prefabs/items/bombremoteitem"), LifeCube.transform);
+            //gameObject.transform.localPosition = Vector3.zero;
+
+            //GameObject tempObject = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>($"Prefabs/Environment/ScaleWeights/{PREFAB}"), LifeCube.transform);
+
+            //if (tempObject.GetComponent<Animator>() != null)
+            //    GameObject.Destroy(tempObject.GetComponent<Animator>());
+
+            //GameObject.Destroy(gameObject.GetComponent<BombRemoteItem>());
+            //GameObject.Destroy(gameObject.gameObject.transform.Find("BombRemote").gameObject);
+
+            //print(LifeCube);
+            //print(model);
+
+            LifeItem.FixGameObject(lifeCube);
+            Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(LifeItem).Assembly);
+
+            //LifeItem.FixGameObject(FileCube);
+            //$"Prefabs/Environment/ScaleWeights/{PREFAB}";
+            InscryptionAPI.Items.ConsumableItemManager.New(P03KayceeRun.P03Plugin.PluginGuid, "Data Cube", "Can be placed on the scales for some damage, if you're into that sort of thing.", ruleIcon, typeof(LifeItem), lifeCube)
+            .SetAct3()
+            .SetPickupSoundId("archivist_spawn_filecube")
+            .SetPlacedSoundId("metal_object_short")
+            .SetExamineSoundId("metal_object_short")
+            .SetRegionSpecific(true)
+            .SetNotRandomlyGiven(true)
+            //.SetPrefabID($"Prefabs/Environment/ScaleWeights/{PREFAB}")
+            .SetRulebookCategory(AbilityMetaCategory.Part3Rulebook);
         }
     }
 }

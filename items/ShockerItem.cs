@@ -12,15 +12,16 @@ namespace Infiniscryption.P03KayceeRun.Items
     [HarmonyPatch]
     public class ShockerItem : ConsumableItem
     {
-        public static ConsumableItemData ItemData { get; private set; }
 
         private static readonly Vector3 BASE_POSITION = new(0f, 0.2f, 0f);
 
+        //public string rulebookName = "Amplification Coil";
+        public static ConsumableItemData ItemData { get; private set; }
         static ShockerItem()
         {
-
             ItemData = ScriptableObject.CreateInstance<ConsumableItemData>();
-            ItemData.name = $"{P03Plugin.CardPrefx}_Shocker";
+            //ItemData.name = $"{P03Plugin.CardPrefx}_Shocker";
+            ItemData.name = P03Plugin.PluginGuid + "_Amplification Coil";
             ItemData.placedSoundId = "metal_object_short";
             ItemData.examineSoundId = "metal_object_short";
             ItemData.pickupSoundId = "teslacoil_spark";
@@ -30,8 +31,10 @@ namespace Infiniscryption.P03KayceeRun.Items
             ItemData.rulebookDescription = "Increases your max energy. I suppose you can find some use for this.";
             ItemData.prefabId = "prefabs/specialnodesequences/teslacoil";
             ItemData.notRandomlyGiven = true;
+            //Debug.Log("HEREHJRP(USHIUFHIOYUSFGBUIOYGBFDUOHLB FUIOLKFBGUIO FHD*OYSD");
+            //Debug.Log(ItemData.name);
 
-            ItemSlotPatches.KNOWN_ITEMS.Add(ItemData, FixGameObject);
+            //ItemSlotPatches.KNOWN_ITEMS.Add(ItemData, FixGameObject);
         }
 
         public static ConsumableItem FixGameObject(GameObject obj)
@@ -43,15 +46,12 @@ namespace Infiniscryption.P03KayceeRun.Items
             renderer.material.SetColor("_EmissionColor", GameColors.Instance.blue);
 
             GameObject.Destroy(obj.GetComponentInChildren<AutoRotate>());
-
-            print("SHOCKER ITEM FIXED");
-
             return obj.AddComponent<ShockerItem>();
         }
 
         public override bool ExtraActivationPrerequisitesMet()
         {
-            return (ResourcesManager.Instance.PlayerMaxEnergy < 6 
+            return (ResourcesManager.Instance.PlayerMaxEnergy < 6
                  || ResourcesManager.Instance.PlayerEnergy < ResourcesManager.Instance.PlayerMaxEnergy);
         }
 
@@ -62,6 +62,7 @@ namespace Infiniscryption.P03KayceeRun.Items
         }
 
         private Transform _coilTransform;
+
         private Transform CoilTransform => (_coilTransform ??= this.gameObject.transform.Find("TeslaCoil(Clone)"));
 
         public override IEnumerator ActivateSequence()
