@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Items.Extensions;
+using InscryptionAPI.Items;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
@@ -64,12 +65,11 @@ namespace Infiniscryption.P03KayceeRun.Items
         public static void CreateCubeItem()
         {
             GameObject lifeCube = new GameObject("LifeCube");
-            GameObject animation = new GameObject("Anim");
-            animation.AddComponent<Animator>();
-            animation.transform.SetParent(lifeCube.transform);
+            //GameObject animation = new GameObject("Anim");
+            //animation.AddComponent<Animator>();
+            //animation.transform.SetParent(lifeCube.transform);
             GameObject model = Instantiate(Resources.Load<GameObject>($"Prefabs/Environment/ScaleWeights/{PREFAB}"));
             model.transform.SetParent(lifeCube.transform);
-
 
 
             //GameObject model = Instantiate(Resources.Load<GameObject>($"Prefabs/Environment/ScaleWeights/{PREFAB}"));
@@ -98,6 +98,12 @@ namespace Infiniscryption.P03KayceeRun.Items
             //print(model);
 
             LifeItem.FixGameObject(lifeCube);
+
+            //ConsumableItemResource resource = new ConsumableItemResource();
+            //resource.FromPrefab(model);
+
+            //ConsumableItemManager.ModelType modelType = ConsumableItemManager.RegisterPrefab(P03KayceeRun.P03Plugin.PluginGuid, "Data Cube", resource);
+
             Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(LifeItem).Assembly);
 
             //LifeItem.FixGameObject(FileCube);
@@ -111,6 +117,8 @@ namespace Infiniscryption.P03KayceeRun.Items
             .SetNotRandomlyGiven(true)
             //.SetPrefabID($"Prefabs/Environment/ScaleWeights/{PREFAB}")
             .SetRulebookCategory(AbilityMetaCategory.Part3Rulebook);
+            //.SetRulebookName("Data Cube")
+            //.SetRulebookDescription("Can be placed on the scales for some damage, if you're into that sort of thing.");
         }
     }
 }

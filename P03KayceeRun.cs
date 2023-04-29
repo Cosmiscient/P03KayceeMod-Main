@@ -107,9 +107,9 @@ namespace Infiniscryption.P03KayceeRun
         private void CreateShockerItem()
         {
             GameObject teslaCoil = new GameObject("TeslaCoil");
-            GameObject animation = new GameObject("Anim");
-            animation.AddComponent<Animator>();
-            animation.transform.SetParent(teslaCoil.transform);
+            //GameObject animation = new GameObject("Anim");
+            //animation.AddComponent<Animator>();
+            //animation.transform.SetParent(teslaCoil.transform);
             GameObject model = GameObject.Instantiate(Resources.Load<GameObject>("prefabs/specialnodesequences/teslacoil"));
             model.transform.SetParent(teslaCoil.transform);
 
@@ -147,7 +147,9 @@ namespace Infiniscryption.P03KayceeRun
             .SetRegionSpecific(true)
             .SetNotRandomlyGiven(true)
             //.SetPrefabID("prefabs/specialnodesequences/teslacoil")
-            .SetRulebookCategory(AbilityMetaCategory.Part3Rulebook);
+            .SetRulebookCategory(AbilityMetaCategory.Part3Rulebook)
+            .SetRulebookName("Amplification Coil")
+            .SetRulebookDescription("Increases your max energy. I suppose you can find some use for this.");
         }
 
         private void CreateGooItem()
