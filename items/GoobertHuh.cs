@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Patchers;
+using InscryptionAPI.Helpers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Items
@@ -11,9 +12,34 @@ namespace Infiniscryption.P03KayceeRun.Items
         public static ConsumableItemData ItemData { get; private set; }
         static GoobertHuh()
         {
-            ItemData = ScriptableObject.CreateInstance<ConsumableItemData>();
-            //ItemData.name = $"{P03Plugin.CardPrefx}_GoobertHuh";
+            GameObject GooBottle = new GameObject("GooBottle");
+            //GameObject animation = new GameObject("Anim");
+            //animation.AddComponent<Animator>();
+            //animation.transform.SetParent(GooBottle.transform);
+            GameObject model = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Items/GooBottleItem"));
+            //model.transform.SetParent(animation.transform);
+            model.transform.SetParent(GooBottle.transform);
+
+            GoobertHuh.FixGameObject(GooBottle);
+
+            Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(GoobertHuh).Assembly);
+            //GoobertHuh.FixGameObject(GooBottle);
+            //"Prefabs/Items/GooBottleItem";
+            ItemData = InscryptionAPI.Items.ConsumableItemManager.New(P03Plugin.PluginGuid, "Goobert", "Please! You've got to help me get out of here!", ruleIcon, typeof(GoobertHuh), GooBottle);
+
             ItemData.name = P03Plugin.PluginGuid + "_Goobert";
+            ItemData.placedSoundId = "eyeball_drop_metal";
+            ItemData.examineSoundId = "eyeball_squish";
+            ItemData.pickupSoundId = "eyeball_squish";
+            ItemData.rulebookCategory = AbilityMetaCategory.Part3Rulebook;
+            ItemData.rulebookName = "Goobert";
+            ItemData.regionSpecific = true;
+            ItemData.rulebookDescription = "Please! You've got to help me get out of here!";
+            ItemData.prefabId = "Prefabs/Items/GooBottleItem";
+            ItemData.notRandomlyGiven = true;
+
+            //ItemData = ScriptableObject.CreateInstance<ConsumableItemData>();
+            //ItemData.name = $"{P03Plugin.CardPrefx}_GoobertHuh";
         }
         internal static Tuple<Color, string> GetGoobertRulebookDialogue()
         {

@@ -71,38 +71,7 @@ namespace Infiniscryption.P03KayceeRun.Items
             GameObject model = Instantiate(Resources.Load<GameObject>($"Prefabs/Environment/ScaleWeights/{PREFAB}"));
             model.transform.SetParent(lifeCube.transform);
 
-
-            //GameObject model = Instantiate(Resources.Load<GameObject>($"Prefabs/Environment/ScaleWeights/{PREFAB}"));
-            //GameObject model = Instantiate(ResourceBank.Get<GameObject>($"Prefabs/Environment/ScaleWeights/{PREFAB}"));
-            //GameObject model = new GameObject("LifeCube(Clone)");
-            //GameObject model = (Resources.Load<GameObject>("prefabs/specialnodesequences/teslacoil"));
-
-            //model.AddComponent<MeshFilter>().mesh = Resources.Load<Mesh>($"Prefabs/Environment/ScaleWeights/{PREFAB}");
-            //model.AddComponent<MeshRenderer>().materials = new Material[]
-            //{
-            //    Resources.Load<Material>($"Prefabs/Environment/ScaleWeights/{PREFAB}")
-            //};
-
-            //GameObject gameObject = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("prefabs/items/bombremoteitem"), LifeCube.transform);
-            //gameObject.transform.localPosition = Vector3.zero;
-
-            //GameObject tempObject = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>($"Prefabs/Environment/ScaleWeights/{PREFAB}"), LifeCube.transform);
-
-            //if (tempObject.GetComponent<Animator>() != null)
-            //    GameObject.Destroy(tempObject.GetComponent<Animator>());
-
-            //GameObject.Destroy(gameObject.GetComponent<BombRemoteItem>());
-            //GameObject.Destroy(gameObject.gameObject.transform.Find("BombRemote").gameObject);
-
-            //print(LifeCube);
-            //print(model);
-
             LifeItem.FixGameObject(lifeCube);
-
-            //ConsumableItemResource resource = new ConsumableItemResource();
-            //resource.FromPrefab(model);
-
-            //ConsumableItemManager.ModelType modelType = ConsumableItemManager.RegisterPrefab(P03KayceeRun.P03Plugin.PluginGuid, "Data Cube", resource);
 
             Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(LifeItem).Assembly);
 
@@ -119,6 +88,9 @@ namespace Infiniscryption.P03KayceeRun.Items
             .SetRulebookCategory(AbilityMetaCategory.Part3Rulebook);
             //.SetRulebookName("Data Cube")
             //.SetRulebookDescription("Can be placed on the scales for some damage, if you're into that sort of thing.");
+
+            // you are really awesome and cool it'd be awesome if the rulebook worked
+            // correctly with custom items mwah mwah
         }
     }
 }

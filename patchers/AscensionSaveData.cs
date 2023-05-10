@@ -332,21 +332,23 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 if (IsP03Run)
                 {
-                    //Add cube to custom item pool before distributing items
-                    //(Needs scales to exist to be instantiated)
                     LifeItem.CreateCubeItem();
 
                     if (__instance.items == null)
                         __instance.items = new List<string>();
 
                     if (MaxNumberOfItems >= 1)
-                        __instance.items.Add(LifeItem.ItemData.name);
-
-                    if (MaxNumberOfItems >= 2)
                         __instance.items.Add(ShockerItem.ItemData.name);
 
+                    if (MaxNumberOfItems >= 2)
+                    {
+                        __instance.items.Add(LifeItem.ItemData.name);
+                    }
+                        //__instance.items.Add("PocketWatch");
+
                     if (MaxNumberOfItems >= 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoHook))
-                        __instance.items.Add("BombRemote");
+                        // __instance.items.Add("BombRemote");
+                        __instance.items.Add(GoobertHuh.ItemData.name);
                 }
 
                 __instance.reachedCheckpoints.Add("NorthNeutralPath"); // This makes bounty hunters work properly

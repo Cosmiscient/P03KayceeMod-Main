@@ -52,10 +52,6 @@ namespace Infiniscryption.P03KayceeRun
         private void Awake()
         {
             PluginDirectory = this.Info.Location.Replace("Infiniscryption.P03KayceeRun.dll", "");
-            CreateShockerItem();
-            //The cube item is created in AscensionSaveData.cs instead
-            //CreateCubeItem();
-            CreateGooItem();
 
             Instance = this;
 
@@ -102,80 +98,6 @@ namespace Infiniscryption.P03KayceeRun
         {
             if (Chainloader.PluginInfos.ContainsKey("inscryption_deckeditor"))
                 FixDeckEditor();
-        }
-
-        private void CreateShockerItem()
-        {
-            GameObject teslaCoil = new GameObject("TeslaCoil");
-            //GameObject animation = new GameObject("Anim");
-            //animation.AddComponent<Animator>();
-            //animation.transform.SetParent(teslaCoil.transform);
-            GameObject model = GameObject.Instantiate(Resources.Load<GameObject>("prefabs/specialnodesequences/teslacoil"));
-            model.transform.SetParent(teslaCoil.transform);
-
-            //"prefabs/specialnodesequences/teslacoil";
-
-            //print(teslaCoil); //"TeslaCoil"
-            //print(model); //"TeslaCoil(Clone)"
-
-            //Transform coil = teslaCoil.transform.Find("TeslaCoil(Clone)");
-            //Vector3 BASE_POSITION = new(0f, 0.2f, 0f);
-            //coil.localPosition = BASE_POSITION;
-            //Renderer renderer = teslaCoil.transform.Find("TeslaCoil(Clone)/Base/Rod/rings_low").gameObject.GetComponent<Renderer>();
-            //renderer.material.EnableKeyword("_EMISSION");
-            //renderer.material.SetColor("_EmissionColor", GameColors.Instance.blue);
-
-            //GameObject.Destroy(teslaCoil.GetComponentInChildren<AutoRotate>());
-
-            //teslaCoil.AddComponent<ShockerItem>();
-
-            ShockerItem.FixGameObject(teslaCoil);
-
-            Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(ShockerItem).Assembly);
-
-            InscryptionAPI.Items.ConsumableItemManager.New(
-                PluginGuid,
-                "Amplification Coil",
-                "Increases your max energy. I suppose you can find some use for this.",
-                ruleIcon,
-                typeof(ShockerItem),
-                teslaCoil)
-            .SetAct3()
-            .SetPickupSoundId("teslacoil_spark")
-            .SetPlacedSoundId("metal_object_short")
-            .SetExamineSoundId("metal_object_short")
-            .SetRegionSpecific(true)
-            .SetNotRandomlyGiven(true)
-            //.SetPrefabID("prefabs/specialnodesequences/teslacoil")
-            .SetRulebookCategory(AbilityMetaCategory.Part3Rulebook)
-            .SetRulebookName("Amplification Coil")
-            .SetRulebookDescription("Increases your max energy. I suppose you can find some use for this.");
-        }
-
-        private void CreateGooItem()
-        {
-            GameObject GooBottle = new GameObject("GooBottle");
-            //GameObject animation = new GameObject("Anim");
-            //animation.AddComponent<Animator>();
-            //animation.transform.SetParent(GooBottle.transform);
-            GameObject model = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Items/GooBottleItem"));
-            //model.transform.SetParent(animation.transform);
-            model.transform.SetParent(GooBottle.transform);
-
-            GoobertHuh.FixGameObject(GooBottle);
-
-            Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(GoobertHuh).Assembly);
-            //GoobertHuh.FixGameObject(GooBottle);
-            //"Prefabs/Items/GooBottleItem";
-            InscryptionAPI.Items.ConsumableItemManager.New(PluginGuid, "Goobert", "Please! You've got to help me get out of here!", ruleIcon, typeof(GoobertHuh), GooBottle)
-            .SetAct3()
-            .SetPickupSoundId("eyeball_squish")
-            .SetPlacedSoundId("eyeball_drop_metal")
-            .SetExamineSoundId("eyeball_squish")
-            .SetRegionSpecific(true)
-            .SetNotRandomlyGiven(true)
-            //.SetPrefabID("Prefabs/Items/GooBottleItem")
-            .SetRulebookCategory(AbilityMetaCategory.Part3Rulebook); ;
         }
     }
 }

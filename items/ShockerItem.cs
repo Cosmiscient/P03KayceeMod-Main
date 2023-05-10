@@ -6,6 +6,7 @@ using Pixelplacement;
 using System;
 using DigitalRuby.LightningBolt;
 using System.Collections.Generic;
+using InscryptionAPI.Helpers;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
@@ -15,26 +16,40 @@ namespace Infiniscryption.P03KayceeRun.Items
 
         private static readonly Vector3 BASE_POSITION = new(0f, 0.2f, 0f);
 
-        //public string rulebookName = "Amplification Coil";
         public static ConsumableItemData ItemData { get; private set; }
+
         static ShockerItem()
         {
-            ItemData = ScriptableObject.CreateInstance<ConsumableItemData>();
+            GameObject teslaCoil = new GameObject("TeslaCoil");
+            GameObject model = GameObject.Instantiate(Resources.Load<GameObject>("prefabs/specialnodesequences/teslacoil"));
+            model.transform.SetParent(teslaCoil.transform);
+
+            ShockerItem.FixGameObject(teslaCoil);
+
+            Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(ShockerItem).Assembly);
+
+            ItemData = InscryptionAPI.Items.ConsumableItemManager.New(
+                P03Plugin.PluginGuid,
+                "Amplification Coil",
+                "Increases your max energy. I suppose you can find some use for this.",
+                ruleIcon,
+                typeof(ShockerItem),
+                teslaCoil);
+
+
+            //newItem = ScriptableObject.CreateInstance<ConsumableItemData>();
             //ItemData.name = $"{P03Plugin.CardPrefx}_Shocker";
-            ItemData.name = P03Plugin.PluginGuid + "_Amplification Coil";
             ItemData.placedSoundId = "metal_object_short";
             ItemData.examineSoundId = "metal_object_short";
             ItemData.pickupSoundId = "teslacoil_spark";
             ItemData.rulebookCategory = AbilityMetaCategory.Part3Rulebook;
-            ItemData.rulebookName = "Amplification Coil";
+            //ItemData.rulebookName = "Amplification Coil";
             ItemData.regionSpecific = true;
-            ItemData.rulebookDescription = "Increases your max energy. I suppose you can find some use for this.";
+            //ItemData.rulebookDescription = "Increases your max energy. I suppose you can find some use for this.";
             ItemData.prefabId = "prefabs/specialnodesequences/teslacoil";
             ItemData.notRandomlyGiven = true;
-            //Debug.Log("HEREHJRP(USHIUFHIOYUSFGBUIOYGBFDUOHLB FUIOLKFBGUIO FHD*OYSD");
-            //Debug.Log(ItemData.name);
-
-            //ItemSlotPatches.KNOWN_ITEMS.Add(ItemData, FixGameObject);
+            
+            //InscryptionAPI.Items.ConsumableItemManager.Add(P03Plugin.PluginGuid, ItemData);
         }
 
         public static ConsumableItem FixGameObject(GameObject obj)
