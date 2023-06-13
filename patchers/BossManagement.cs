@@ -5,6 +5,8 @@ using UnityEngine;
 using Infiniscryption.P03KayceeRun.Sequences;
 using Infiniscryption.P03KayceeRun.Faces;
 using InscryptionAPI.Encounters;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -13,6 +15,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     {
         public static readonly string P03FinalBossAI = AIManager.Add(P03Plugin.PluginGuid, "P03FinalBossAI", typeof(P03FinalBossOpponentAI)).Id;
         public static Opponent.Type P03FinalBossOpponent { get; private set; }
+
+        private static int bossMoneyReward = 10;
+
+        //10 was way too quiet... 0.15?
+        public static float bossMusicVolume = 0.15f;
 
         [HarmonyPatch(typeof(DamageRaceBattleSequencer), nameof(DamageRaceBattleSequencer.DamageAddedToScale))]
         [HarmonyPostfix]
@@ -33,9 +40,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 yield break;
             }
 
+            //If traditional lives isnt activated, set the number of lives remaning to 1
+            if (!AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TRADITIONAL_LIVES))
+            {
+                EventManagement.NumberOfLivesRemaining = 1;
+            }
+
             bool hasShownLivesDrop = false;
             while (sequence.MoveNext())
             {
+
                 if (sequence.Current is WaitForSeconds)
                 {
                     yield return sequence.Current;
@@ -53,6 +67,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
                 yield return sequence.Current;
             }
+            
+
+            yield return AscensionChallengeManagement.RandomCanvasRule(sequence);
+
             yield break;
         }
 
@@ -60,15 +78,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         public static IEnumerator CanvasResetLives(IEnumerator sequence)
         {
-            yield return ReduceLivesOnBossNode(sequence);
-            ViewManager.Instance.SwitchToView(View.Default, false, false);
+             yield return ReduceLivesOnBossNode(sequence);
+
+             ViewManager.Instance.SwitchToView(View.Default, false, false);
         }
 
         [HarmonyPatch(typeof(Part3BossOpponent), nameof(Part3BossOpponent.BossDefeatedSequence))]
         [HarmonyPostfix]
         public static IEnumerator AscensionP03ResetLives(IEnumerator sequence, Part3BossOpponent __instance)
         {
-            if (SaveFile.IsAscension)
+            if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TRADITIONAL_LIVES))
             {
                 // Reset lives to maximum
                 if (EventManagement.NumberOfLivesRemaining < AscensionSaveData.Data.currentRun.maxPlayerLives)
@@ -78,18 +97,82 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     yield return new WaitForSeconds(0.5f);
                     EventManagement.NumberOfLivesRemaining = AscensionSaveData.Data.currentRun.maxPlayerLives;
                 }
+            }
 
-                if (__instance is not P03AscensionOpponent && __instance is not MycologistAscensionBossOpponent)
-                {
-                    if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoBossRares))
-                        TurnManager.Instance.PostBattleSpecialNode = new CardChoicesNodeData();
-                    else
-                        TurnManager.Instance.PostBattleSpecialNode = new CardChoiceGenerator.Part3RareCardChoicesNodeData();
-                }
+            if (__instance is not P03AscensionOpponent && __instance is not MycologistAscensionBossOpponent)
+            {
+                if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoBossRares))
+                    TurnManager.Instance.PostBattleSpecialNode = new CardChoicesNodeData();
+                else
+                    TurnManager.Instance.PostBattleSpecialNode = new CardChoiceGenerator.Part3RareCardChoicesNodeData();
             }
 
             yield return sequence;
             yield break;
+        }
+
+        private static IEnumerator DropLoot(IEnumerator sequence, HoloMapBossNode bossNode)
+        {
+            Debug.Log("Droploot begin");
+            List<HoloMapNode> droppedNodes;
+
+            droppedNodes = new List<HoloMapNode>(); //this line shouldnt be necessary wtf
+
+            droppedNodes.ForEach(delegate (HoloMapNode x)
+            {
+                if (x != null)
+                {
+                    Debug.Log("Triggered");
+                    x.gameObject.SetActive(!x.Completed);
+                }
+            });
+
+            foreach (HoloMapNode lootNode in droppedNodes)
+            {
+                lootNode.PlaySpawnAnimation(bossNode.transform.position, lootNode.transform.position);
+                Debug.Log("Triggered 1");
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            //HoloMapGainCurrencyNode holoMapGainCurrencyNode = new HoloMapGainCurrencyNode();
+            //holoMapGainCurrencyNode.amount = 3;
+            //holoMapGainCurrencyNode.SetActive(true);
+            //holoMapGainCurrencyNode.SetEnabled(true);
+            //holoMapGainCurrencyNode.gameObject.
+            ////holoMapGainCurrencyNode.transform.parent = bossNode.transform;
+            ////holoMapGainCurrencyNode.gameObject.SetActive(true);
+            //droppedNodes.Add(holoMapGainCurrencyNode);
+
+            //Debug.Log("List Size: " + droppedNodes.Count());
+            //foreach (HoloMapNode lootNode in droppedNodes)
+            //{
+            //    bool lootnodeNull;
+            //    if (lootNode == null)
+            //    {
+            //        lootnodeNull = true;
+            //    }
+            //    else
+            //    {
+            //        lootnodeNull = false;
+            //    }
+
+            //    Debug.Log("Is lootnode null? " + lootnodeNull);
+
+            //    if (bossNode == null)
+            //    {
+            //        lootnodeNull = true;
+            //    }
+            //    else
+            //    {
+            //        lootnodeNull = false;
+            //    }
+
+            //    Debug.Log("Is boss node null? " + lootnodeNull);
+            //    lootNode.PlaySpawnAnimation(bossNode.transform.position, lootNode.transform.position);
+            //    Debug.Log("7");
+            //    yield return new WaitForSeconds(0.1f);
+            //}
+            Debug.Log("Droploot over");
         }
 
         [HarmonyPatch(typeof(HoloMapBossNode), nameof(HoloMapBossNode.BossDefeatedSequence))]
@@ -98,15 +181,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             // The game doesn't play the normal boss defeated sequence when you beat the mycologists because
             // they are a different sort of boss. We need mycologists to behave more normally, hence this patch
-            if (SaveFile.IsAscension && __instance.bossDefeatedStoryEvent == StoryEvent.MycologistsDefeated)
+            if (SaveFile.IsAscension)
             {
-                (GameFlowManager.Instance as Part3GameFlowManager).DisableTransitionToFirstPerson = true;
-				ViewManager.Instance.Controller.LockState = ViewLockState.Locked;
-				yield return new WaitForSeconds(0.1f);
-				yield return new WaitUntil(() => HoloGameMap.Instance.FullyUnrolled);
-				StoryEventsData.SetEventCompleted(__instance.bossDefeatedStoryEvent, false, true);
-				HoloGameMap.Instance.ShowBossDefeated(__instance.bossDefeatedStoryEvent);
-                yield break;
+                if (__instance.bossDefeatedStoryEvent == StoryEvent.MycologistsDefeated)
+                {
+                    (GameFlowManager.Instance as Part3GameFlowManager).DisableTransitionToFirstPerson = true;
+                    ViewManager.Instance.Controller.LockState = ViewLockState.Locked;
+                    yield return new WaitForSeconds(0.1f);
+                    yield return new WaitUntil(() => HoloGameMap.Instance.FullyUnrolled);
+                    StoryEventsData.SetEventCompleted(__instance.bossDefeatedStoryEvent, false, true);
+                    HoloGameMap.Instance.ShowBossDefeated(__instance.bossDefeatedStoryEvent);
+                    yield break;
+                }
+
+                //yield return DropLoot(sequence, __instance);
             }
             yield return sequence;
         }
@@ -141,10 +229,72 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 //     yield return TextDisplayer.Instance.PlayDialogueEvent("Part3AscensionBossRareToken", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 // }
 
-                // yield return FastTravelManagement.ReturnToHomeBase();
-                yield return new WaitForSeconds(0.65f);
-                HoloMapAreaManager.Instance.MoveAreas(HoloMapAreaManager.Instance.CurrentArea, LookDirection.South, 1);
+                yield return new WaitForSeconds(0.2f);
 
+                if (!AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TRADITIONAL_LIVES))
+                {
+                    P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Default, true, true);
+
+                    P03AnimationController.Face currentFace = P03AnimationController.Instance.CurrentFace;
+                    View currentView = ViewManager.Instance.CurrentView;
+
+                    ViewManager.Instance.SwitchToView(View.P03Face, false, true);
+                    yield return new WaitForSeconds(0.05f);
+
+                    HoloGameMap.Instance.Jump();
+                    HoloGameMap.Instance.ShowPoweredOn(poweredOn: false);
+                    yield return new WaitForSeconds(0.2f);
+
+                    //Increase respawn cost if the player has already dropped below 0
+                    //if (LifeManagement.respawnCost != 0)
+                    //{
+                    //    yield return P03PaidRespawnFace.ShowChangePRCost(-LifeManagement.respawnCost, true);
+                    //    yield return new WaitForSeconds(0.4f);
+                    //}
+
+                    List<string> dialogueOptions = new List<string>();
+                    dialogueOptions.Add("Part3AscensionPayBoss");
+                    dialogueOptions.Add("Part3AscensionPayBoss2");
+                    dialogueOptions.Add("Part3AscensionPayBoss3");
+                    dialogueOptions.Add("Part3AscensionPayBoss4");
+                    dialogueOptions.Add("Part3AscensionPayBoss5");
+                    dialogueOptions.Add("Part3AscensionPayBoss6");
+                    dialogueOptions.Add("Part3AscensionPayBoss7");
+                    dialogueOptions.Add("Part3AscensionPayBoss8");
+                    dialogueOptions.Add("Part3AscensionPayBoss9");
+
+                    string finalDialogue = dialogueOptions[UnityEngine.Random.Range(0, dialogueOptions.Count)];
+
+                    yield return TextDisplayer.Instance.PlayDialogueEvent(finalDialogue, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+                    yield return new WaitForSeconds(0.4f);
+
+                    yield return P03AnimationController.Instance.ShowChangeCurrency(bossMoneyReward, true);
+                    Part3SaveData.Data.currency += bossMoneyReward;
+
+                    yield return new WaitForSeconds(0.2f);
+                    P03AnimationController.Instance.SwitchToFace(currentFace);
+                    yield return new WaitForSeconds(0.1f);
+                    Part3SaveData.WorldPosition worldPosition = new(HoloMapAreaManager.Instance.CurrentWorld.Id, HoloMapAreaManager.Instance.CurrentArea.GridX, HoloMapAreaManager.Instance.CurrentArea.GridY);
+                    HoloMapAreaManager.Instance.MoveToAreaDirectly(worldPosition);
+
+                    if (ViewManager.Instance.CurrentView != currentView)
+                    {
+                        ViewManager.Instance.SwitchToView(currentView, false, false);
+                        yield return new WaitForSeconds(0.2f);
+                    }
+                    //P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Default, true, true);
+                    //yield return new WaitForSeconds(0.1f);
+
+                    //VictoryFeastNodeData.IsAscension.Equals(true);
+                }
+
+                HoloGameMap.Instance.Jump();
+                HoloGameMap.Instance.ShowPoweredOn(poweredOn: true);
+
+                //Wait a moment
+                yield return new WaitForSeconds(0.45f);
+                //Move outside boss room
+                HoloMapAreaManager.Instance.MoveAreas(HoloMapAreaManager.Instance.CurrentArea, LookDirection.South, 1);
             }
             else
             {
@@ -153,6 +303,30 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             yield break;
+        }
+
+        [HarmonyPatch(typeof(Part3BossOpponent), nameof(Part3BossOpponent.CleanupBossEffects))]
+        [HarmonyPostfix]
+        private static IEnumerator CleanupBossEffects(IEnumerator sequence)
+        {
+            //Debug.Log("Boss cleanup initiated!!!");
+            if (!SaveFile.IsAscension)
+            {
+                yield break;
+            }
+
+            if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.PAINTING_CHALLENGE))
+            {
+                //Debug.Log("About to call clear canvas rule!!!");
+                //AscensionChallengeManagement.dummyCanvasBoss.CleanupBossEffects();
+                //AscensionChallengeManagement.dummyCanvasBoss.DestroyScenery();
+                GameObject CanvasBackground = GameObject.Find("LightQuadTableEffect(Clone)");
+                //CanvasBackground.SetActive(false);
+                Object.Destroy(CanvasBackground);
+
+            }
+
+            yield return sequence;
         }
 
         public static void RegisterBosses()

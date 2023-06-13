@@ -2,45 +2,18 @@ using System;
 using System.Collections;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Patchers;
-using InscryptionAPI.Helpers;
 using UnityEngine;
+using InscryptionAPI.Items;
+using InscryptionAPI.Items.Extensions;
+using InscryptionAPI.Helpers;
+using InscryptionAPI.Resource;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
     public class GoobertHuh : ConsumableItem
     {
         public static ConsumableItemData ItemData { get; private set; }
-        static GoobertHuh()
-        {
-            GameObject GooBottle = new GameObject("GooBottle");
-            //GameObject animation = new GameObject("Anim");
-            //animation.AddComponent<Animator>();
-            //animation.transform.SetParent(GooBottle.transform);
-            GameObject model = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Items/GooBottleItem"));
-            //model.transform.SetParent(animation.transform);
-            model.transform.SetParent(GooBottle.transform);
 
-            GoobertHuh.FixGameObject(GooBottle);
-
-            Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(GoobertHuh).Assembly);
-            //GoobertHuh.FixGameObject(GooBottle);
-            //"Prefabs/Items/GooBottleItem";
-            ItemData = InscryptionAPI.Items.ConsumableItemManager.New(P03Plugin.PluginGuid, "Goobert", "Please! You've got to help me get out of here!", ruleIcon, typeof(GoobertHuh), GooBottle);
-
-            ItemData.name = P03Plugin.PluginGuid + "_Goobert";
-            ItemData.placedSoundId = "eyeball_drop_metal";
-            ItemData.examineSoundId = "eyeball_squish";
-            ItemData.pickupSoundId = "eyeball_squish";
-            ItemData.rulebookCategory = AbilityMetaCategory.Part3Rulebook;
-            ItemData.rulebookName = "Goobert";
-            ItemData.regionSpecific = true;
-            ItemData.rulebookDescription = "Please! You've got to help me get out of here!";
-            ItemData.prefabId = "Prefabs/Items/GooBottleItem";
-            ItemData.notRandomlyGiven = true;
-
-            //ItemData = ScriptableObject.CreateInstance<ConsumableItemData>();
-            //ItemData.name = $"{P03Plugin.CardPrefx}_GoobertHuh";
-        }
         internal static Tuple<Color, string> GetGoobertRulebookDialogue()
         {
             if (StoryEventsData.EventCompleted(EventManagement.SAW_GOOBERT_AT_SHOP_NODE))
@@ -59,12 +32,34 @@ namespace Infiniscryption.P03KayceeRun.Items
             }
             return new (GameColors.Instance.brightLimeGreen, "Please! You've got to help me get out of here!");
         }
-        //public string rulebookName = "Goobert";
 
-        public static ConsumableItem FixGameObject(GameObject obj)
+        public static GameObject GetGameObject()
         {
-            GameObject.Destroy(obj.GetComponentInChildren<GooBottleItem>());
-            return obj.AddComponent<GoobertHuh>();
+            GameObject gameObject = ShockerItem.GetBaseGameObject("Prefabs/Items/GooBottleItem", "GoobertBottle");
+            GameObject.Destroy(gameObject.GetComponentInChildren<GooBottleItem>());
+            gameObject.AddComponent<GoobertHuh>();
+            return gameObject;
+        }
+
+        static GoobertHuh()
+        {
+            string prefabPathKey = "p03kayceemodgoobert";
+            ResourceBankManager.Add(P03Plugin.PluginGuid, $"Prefabs/Items/{prefabPathKey}", GetGameObject());
+
+            ItemData = ConsumableItemManager.New(
+                P03Plugin.PluginGuid,
+                "Goobert",
+                "Please! You've got to help me get out of here!",
+                TextureHelper.GetImageAsTexture("ability_full_of_oil.png", typeof(ShockerItem).Assembly), // TODO: get a proper texture so this can be used in Part 1 maybe?
+                typeof(LifeItem),
+                GetGameObject() // Make another copy for the manager
+            ).SetAct3()
+            .SetExamineSoundId("eyeball_squish")
+            .SetPickupSoundId("eyeball_squish")
+            .SetPlacedSoundId("eyeball_drop_metal")
+            .SetRegionSpecific(true)
+            .SetPrefabID(prefabPathKey)
+            .SetNotRandomlyGiven(true);
         }
 
         public override IEnumerator ActivateSequence()

@@ -9,7 +9,7 @@ dominantTribes: []
 redundantAbilities: []
 unlockedCardPrerequisites: []
 randomReplacementCards: []
-overclockBlueprint: [D:3/T:0]
+overclockBlueprint: []
 P03KCMXP1_ConduitProtector
 NullConduit -> HealerConduit 1,HealerConduit
 Thickbot,Thickbot -> SwapBot 5

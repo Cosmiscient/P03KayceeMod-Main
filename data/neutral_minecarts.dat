@@ -9,7 +9,7 @@ dominantTribes: []
 redundantAbilities: []
 unlockedCardPrerequisites: []
 randomReplacementCards: []
-overclockBlueprint: [D:5/T:0,D:6/T:2,D:3/T:6]
+overclockBlueprint: []
 MineCart -> Shieldbot 6,NONE -> Automaton 2,NONE -> P03KCM_FIREWALL_BATTLE 6
 LeapBot -> Automaton 2,Bombbot -> MineCart 2
 Insectodrone -> CloserBot 4,NONE -> MineCart 3

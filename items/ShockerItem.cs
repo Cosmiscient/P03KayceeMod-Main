@@ -6,67 +6,79 @@ using Pixelplacement;
 using System;
 using DigitalRuby.LightningBolt;
 using System.Collections.Generic;
+using InscryptionAPI.Items;
+using InscryptionAPI.Items.Extensions;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Resource;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
     [HarmonyPatch]
     public class ShockerItem : ConsumableItem
     {
+        public static ConsumableItemData ItemData { get; private set; }
 
         private static readonly Vector3 BASE_POSITION = new(0f, 0.2f, 0f);
 
-        public static ConsumableItemData ItemData { get; private set; }
-
-        static ShockerItem()
+        public static GameObject GetBaseGameObject(string basePrefabId, string objName)
         {
-            GameObject teslaCoil = new GameObject("TeslaCoil");
-            GameObject model = GameObject.Instantiate(Resources.Load<GameObject>("prefabs/specialnodesequences/teslacoil"));
-            model.transform.SetParent(teslaCoil.transform);
+            GameObject gameObject = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("prefabs/items/bombremoteitem"));
+            gameObject.transform.localPosition = Vector3.zero;
+            gameObject.name = $"{P03Plugin.CardPrefx}_{objName}";
 
-            ShockerItem.FixGameObject(teslaCoil);
+            GameObject tempObject = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>(basePrefabId), gameObject.transform);
 
-            Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(ShockerItem).Assembly);
+            if (tempObject.GetComponent<Animator>() != null)
+                GameObject.Destroy(tempObject.GetComponent<Animator>());
 
-            ItemData = InscryptionAPI.Items.ConsumableItemManager.New(
-                P03Plugin.PluginGuid,
-                "Amplification Coil",
-                "Increases your max energy. I suppose you can find some use for this.",
-                ruleIcon,
-                typeof(ShockerItem),
-                teslaCoil);
+            GameObject.Destroy(gameObject.GetComponent<BombRemoteItem>());
+            GameObject.Destroy(gameObject.gameObject.transform.Find("BombRemote").gameObject);
 
+            GameObject.DontDestroyOnLoad(gameObject);
 
-            //newItem = ScriptableObject.CreateInstance<ConsumableItemData>();
-            //ItemData.name = $"{P03Plugin.CardPrefx}_Shocker";
-            ItemData.placedSoundId = "metal_object_short";
-            ItemData.examineSoundId = "metal_object_short";
-            ItemData.pickupSoundId = "teslacoil_spark";
-            ItemData.rulebookCategory = AbilityMetaCategory.Part3Rulebook;
-            //ItemData.rulebookName = "Amplification Coil";
-            ItemData.regionSpecific = true;
-            //ItemData.rulebookDescription = "Increases your max energy. I suppose you can find some use for this.";
-            ItemData.prefabId = "prefabs/specialnodesequences/teslacoil";
-            ItemData.notRandomlyGiven = true;
-            
-            //InscryptionAPI.Items.ConsumableItemManager.Add(P03Plugin.PluginGuid, ItemData);
+            return gameObject;
         }
 
-        public static ConsumableItem FixGameObject(GameObject obj)
+        private static GameObject GetGameObject()
         {
-            Transform coil = obj.transform.Find("TeslaCoil(Clone)");
+            GameObject gameObject = GetBaseGameObject("prefabs/specialnodesequences/teslacoil", "Shocker");
+
+            Transform coil = gameObject.transform.Find("TeslaCoil(Clone)");
             coil.localPosition = BASE_POSITION;
-            Renderer renderer = obj.transform.Find("TeslaCoil(Clone)/Base/Rod/rings_low").gameObject.GetComponent<Renderer>();
+            Renderer renderer = gameObject.transform.Find("TeslaCoil(Clone)/Base/Rod/rings_low").gameObject.GetComponent<Renderer>();
             renderer.material.EnableKeyword("_EMISSION");
             renderer.material.SetColor("_EmissionColor", GameColors.Instance.blue);
 
-            GameObject.Destroy(obj.GetComponentInChildren<AutoRotate>());
-            return obj.AddComponent<ShockerItem>();
+            GameObject.Destroy(gameObject.GetComponentInChildren<AutoRotate>());
+            gameObject.AddComponent<ShockerItem>();
+
+            return gameObject;
         }
+
+        static ShockerItem()
+        {
+            string prefabPathKey = "p03kayceemodshocker";
+            ResourceBankManager.Add(P03Plugin.PluginGuid, $"Prefabs/Items/{prefabPathKey}", GetGameObject());
+
+            ItemData = ConsumableItemManager.New(
+                P03Plugin.PluginGuid,
+                "Amplification Coil",
+                "Increases your max energy by 2. I suppose you can find some use for this.",
+                TextureHelper.GetImageAsTexture("ability_full_of_oil.png", typeof(ShockerItem).Assembly), // TODO: get a proper texture so this can be used in Part 1 maybe?
+                typeof(ShockerItem),
+                GetGameObject() // Make another copy for the manager
+            ).SetAct3()
+            .SetExamineSoundId("metal_object_short")
+            .SetPickupSoundId("teslacoil_spark")
+            .SetPlacedSoundId("metal_object_short")
+            .SetRegionSpecific(true)
+            .SetPrefabID(prefabPathKey)
+            .SetNotRandomlyGiven(true);
+        }       
 
         public override bool ExtraActivationPrerequisitesMet()
         {
-            return (ResourcesManager.Instance.PlayerMaxEnergy < 6
+            return (ResourcesManager.Instance.PlayerMaxEnergy < 6 
                  || ResourcesManager.Instance.PlayerEnergy < ResourcesManager.Instance.PlayerMaxEnergy);
         }
 
@@ -77,7 +89,6 @@ namespace Infiniscryption.P03KayceeRun.Items
         }
 
         private Transform _coilTransform;
-
         private Transform CoilTransform => (_coilTransform ??= this.gameObject.transform.Find("TeslaCoil(Clone)"));
 
         public override IEnumerator ActivateSequence()
@@ -143,7 +154,12 @@ namespace Infiniscryption.P03KayceeRun.Items
             AudioController.Instance.PlaySound3D("teslacoil_spark", MixerGroup.TableObjectsSFX, selfLightning.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
 
             yield return ResourcesManager.Instance.AddMaxEnergy(1);
-            yield return ResourcesManager.Instance.AddEnergy(1);
+            //yield return ResourcesManager.Instance.AddEnergy(1);
+
+            yield return new WaitForSeconds(0.2f);
+
+            yield return ResourcesManager.Instance.AddMaxEnergy(1);
+            //yield return ResourcesManager.Instance.AddEnergy(1);
 
             yield return new WaitForSeconds(0.5f);
 

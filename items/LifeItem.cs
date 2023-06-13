@@ -7,9 +7,10 @@ using System;
 using DigitalRuby.LightningBolt;
 using System.Collections.Generic;
 using Infiniscryption.P03KayceeRun.Patchers;
-using InscryptionAPI.Helpers;
-using InscryptionAPI.Items.Extensions;
 using InscryptionAPI.Items;
+using InscryptionAPI.Items.Extensions;
+using InscryptionAPI.Resource;
+using InscryptionAPI.Helpers;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
@@ -25,23 +26,56 @@ namespace Infiniscryption.P03KayceeRun.Items
                 this.transform.localPosition = new Vector3(0f, 0.322f, 0f);
             }
         }
-        //public string rulebookName = "Data Cube";
+
         public static ConsumableItemData ItemData { get; private set; }
         private const string PREFAB = "Weight_DataFile_GB";
 
+        private static GameObject GetGameObject()
+        {
+            GameObject gameObject = ShockerItem.GetBaseGameObject($"Prefabs/Environment/ScaleWeights/{PREFAB}", "LifeCube");
+
+            GameObject.Destroy(gameObject.GetComponentInChildren<Rigidbody>());
+            GameObject.Destroy(gameObject.GetComponentInChildren<Part3Weight>());
+            
+            Transform weight = gameObject.transform.Find($"{PREFAB}(Clone)");
+            // weight.transform.localEulerAngles = Vector3.zero;
+            // weight.transform.localPosition = new Vector3(0f, 0.322f + 0.322f + .1636f, 0f);
+            weight.gameObject.AddComponent<LifeItemUglyHack>();
+
+            weight.Find("Cube").gameObject.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+
+            gameObject.AddComponent<LifeItem>();
+
+            return gameObject;
+        }
+
         static LifeItem()
         {
-            ItemData = ScriptableObject.CreateInstance<ConsumableItemData>();
-            //ItemData.name = $"{P03Plugin.CardPrefx}_LifeCube";
-            ItemData.name = P03Plugin.PluginGuid + "_Data Cube";
+            string prefabPathKey = "p03kayceemodlifecube";
+            ResourceBankManager.Add(P03Plugin.PluginGuid, $"Prefabs/Items/{prefabPathKey}", GetGameObject());
+
+            ItemData = ConsumableItemManager.New(
+                P03Plugin.PluginGuid,
+                "Data Cube",
+                "Can be placed on the scales for some damage, if you're into that sort of thing.",
+                TextureHelper.GetImageAsTexture("ability_full_of_oil.png", typeof(ShockerItem).Assembly), // TODO: get a proper texture so this can be used in Part 1 maybe?
+                typeof(LifeItem),
+                GetGameObject() // Make another copy for the manager
+            ).SetAct3()
+            .SetExamineSoundId("metal_object_short")
+            .SetPickupSoundId("archivist_spawn_filecube")
+            .SetPlacedSoundId("metal_object_short")
+            .SetRegionSpecific(true)
+            .SetPrefabID(prefabPathKey)
+            .SetNotRandomlyGiven(true);
         }
 
         public static ConsumableItem FixGameObject(GameObject obj)
         {
             GameObject.Destroy(obj.GetComponentInChildren<Rigidbody>());
             GameObject.Destroy(obj.GetComponentInChildren<Part3Weight>());
+            
             Transform weight = obj.transform.Find($"{PREFAB}(Clone)");
-
             // weight.transform.localEulerAngles = Vector3.zero;
             // weight.transform.localPosition = new Vector3(0f, 0.322f + 0.322f + .1636f, 0f);
             weight.gameObject.AddComponent<LifeItemUglyHack>();
@@ -60,37 +94,6 @@ namespace Infiniscryption.P03KayceeRun.Items
             ViewManager.Instance.SwitchToView(View.Default);
             yield return EventManagement.SayDialogueOnce("P03AscensionLifeItem", EventManagement.USED_LIFE_ITEM);
             yield break;
-        }
-
-        public static void CreateCubeItem()
-        {
-            GameObject lifeCube = new GameObject("LifeCube");
-            //GameObject animation = new GameObject("Anim");
-            //animation.AddComponent<Animator>();
-            //animation.transform.SetParent(lifeCube.transform);
-            GameObject model = Instantiate(Resources.Load<GameObject>($"Prefabs/Environment/ScaleWeights/{PREFAB}"));
-            model.transform.SetParent(lifeCube.transform);
-
-            LifeItem.FixGameObject(lifeCube);
-
-            Texture2D ruleIcon = TextureHelper.GetImageAsTexture("ability_coder.png", typeof(LifeItem).Assembly);
-
-            //LifeItem.FixGameObject(FileCube);
-            //$"Prefabs/Environment/ScaleWeights/{PREFAB}";
-            InscryptionAPI.Items.ConsumableItemManager.New(P03KayceeRun.P03Plugin.PluginGuid, "Data Cube", "Can be placed on the scales for some damage, if you're into that sort of thing.", ruleIcon, typeof(LifeItem), lifeCube)
-            .SetAct3()
-            .SetPickupSoundId("archivist_spawn_filecube")
-            .SetPlacedSoundId("metal_object_short")
-            .SetExamineSoundId("metal_object_short")
-            .SetRegionSpecific(true)
-            .SetNotRandomlyGiven(true)
-            //.SetPrefabID($"Prefabs/Environment/ScaleWeights/{PREFAB}")
-            .SetRulebookCategory(AbilityMetaCategory.Part3Rulebook);
-            //.SetRulebookName("Data Cube")
-            //.SetRulebookDescription("Can be placed on the scales for some damage, if you're into that sort of thing.");
-
-            // you are really awesome and cool it'd be awesome if the rulebook worked
-            // correctly with custom items mwah mwah
         }
     }
 }

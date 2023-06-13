@@ -49,6 +49,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public const string MYCO_HEALING_CONDUIT = "P03KCM_MYCO_HEALING_CONDUIT";
         public const string MYCO_CONSTRUCT_BASE = "P03KCM_MYCO_CONSTRUCT_BASE";
 
+        public const string TURBO_VESSEL = "P03KCM_TURBO_VESSEL";
+        public const string TURBO_VESSEL_BLUEGEM = "P03KCM_TURBO_VESSEL_BLUEGEM";
+        public const string TURBO_VESSEL_REDGEM = "P03KCM_TURBO_VESSEL_REDGEM";
+        public const string TURBO_VESSEL_GREENGEM = "P03KCM_TURBO_VESSEL_GREENGEM";
+        public const string TURBO_LEAPBOT = "P03KCM_TURBO_LEAPBOT";
+
         private readonly static List<CardMetaCategory> GBC_RARE_PLAYABLES = new() { CardMetaCategory.GBCPack, CardMetaCategory.GBCPlayable, CardMetaCategory.Rare, CardMetaCategory.ChoiceNode };
 
         [HarmonyPatch(typeof(CardLoader), nameof(CardLoader.Clone))]
@@ -57,6 +63,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (P03AscensionSaveData.IsP03Run || ScreenManagement.ScreenState == CardTemple.Tech)
             {
+                //Debug.Log(__result.name);
+
                 string compName = __result.name.ToLowerInvariant();
                 if (compName.StartsWith("sentinel") || __result.name == "TechMoxTriple")
                 {
@@ -109,6 +117,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 {
                     __result.mods.Add(new() { gemify = true, abilities = new() { Ability.GemDependant } });
                     __result.energyCost = 6;
+                }
+
+                else if (compName.Equals("sentinelblue"))
+                {
+                    __result.energyCost = 4;
+                }
+
+                else if (compName.Equals("sentinelorange"))
+                {
+                    __result.energyCost = 2;
                 }
 
                 else if (compName.Equals("robomice"))
@@ -287,6 +305,36 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             //     .AddAbilities(Artist.AbilityID)
             //     .temple = CardTemple.Tech;
 
+            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL, "Turbo Vessel", 0, 2)
+                    .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
+                    .SetCost(energyCost: 1)
+                    .AddAbilities(DoubleSprint.AbilityID, Ability.ConduitNull)
+                    .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_BLUEGEM, "Turbo Vessel", 0, 2)
+                    .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
+                    .SetCost(energyCost: 1)
+                    .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemBlue)
+                    .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_REDGEM, "Turbo Vessel", 0, 2)
+                    .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
+                    .SetCost(energyCost: 1)
+                    .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemOrange)
+                    .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_GREENGEM, "Turbo Vessel", 0, 2)
+                    .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
+                    .SetCost(energyCost: 1)
+                    .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemGreen)
+                    .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, TURBO_LEAPBOT, "Turbo L33pb0t", 0, 2)
+                    .SetPortrait(TextureHelper.GetImageAsTexture("portrait_TurboL33pBot.png", typeof(CustomCards).Assembly))
+                    .SetCost(energyCost: 1)
+                    .AddAbilities(Ability.Reach, DoubleSprint.AbilityID)
+                    .temple = CardTemple.Tech;
+
             CardManager.New(P03Plugin.CardPrefx, FIREWALL, "Firewall", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_firewall.png", typeof(CustomCards).Assembly))
                 .AddAbilities(Ability.PreventAttack)
@@ -360,8 +408,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             CardManager.New(P03Plugin.CardPrefx, SKELETON_LORD, "Skeleton Master", 0, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_skeleton_lord.png", typeof(CustomCards).Assembly))
-                .AddAbilities(BrittleGainsUndying.AbilityID)
-                .SetCost(energyCost:2)
+                .AddAbilities(BrittleGainsUndying.AbilityID, DrawBrittle.AbilityID)
+                .SetCost(energyCost: 2)
+                .SetRare()
                 .temple = CardTemple.Tech;
 
             // CardManager.New(P03Plugin.CardPrefx, MYCO_CONSTRUCT_PONTOON, "PONTOON", 0, 1)

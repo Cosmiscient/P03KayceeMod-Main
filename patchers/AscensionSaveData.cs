@@ -292,6 +292,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 EventManagement.NumberOfZoneEnemiesKilled = 0;
 
+                //Reset challenge activation UI variables
+                AscensionChallengeManagement.ResetChallengeActivationUI();
+
                 __instance.deck = new DeckInfo();
                 __instance.deck.Cards.Clear();
 
@@ -332,7 +335,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 if (IsP03Run)
                 {
-                    LifeItem.CreateCubeItem();
 
                     if (__instance.items == null)
                         __instance.items = new List<string>();
@@ -341,14 +343,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         __instance.items.Add(ShockerItem.ItemData.name);
 
                     if (MaxNumberOfItems >= 2)
-                    {
-                        __instance.items.Add(LifeItem.ItemData.name);
-                    }
-                        //__instance.items.Add("PocketWatch");
+                        __instance.items.Add("PocketWatch");
 
                     if (MaxNumberOfItems >= 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoHook))
-                        // __instance.items.Add("BombRemote");
-                        __instance.items.Add(GoobertHuh.ItemData.name);
+                        __instance.items.Add("BombRemote");
                 }
 
                 __instance.reachedCheckpoints.Add("NorthNeutralPath"); // This makes bounty hunters work properly

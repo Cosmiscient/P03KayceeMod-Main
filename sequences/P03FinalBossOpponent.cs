@@ -28,6 +28,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private bool FasterEvents = false;
 
+        private GameObject audioObject = new GameObject("P03BossMusicAudioObject");
+        public AudioSource audioSource;
+
         private List<Color> slotColors;
         private List<Color> queueSlotColors;
 
@@ -92,8 +95,20 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.SwitchToView(View.P03Face, false, true);
             yield return new WaitForSeconds(0.1f);
             this.SetSceneEffectsShown(true);
-            AudioController.Instance.SetLoopAndPlay($"P03_Phase1", 0, true, true);
-            AudioController.Instance.SetLoopVolumeImmediate(0.35f, 0);
+
+            //Pause background audio?
+            AudioController.Instance.SetLoopPaused(true);
+
+            audioSource = audioObject.AddComponent<AudioSource>();
+            string path = AudioHelper.FindAudioClip("P03_Phase1");
+            AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
+            audioSource.clip = audioClip;
+            audioSource.loop = true;
+            audioSource.volume = BossManagement.bossMusicVolume;
+            audioSource.Play();
+
+            //AudioController.Instance.SetLoopAndPlay($"P03_Phase1", 0, true, true);
+            //AudioController.Instance.SetLoopVolumeImmediate(0.35f, 0);
             yield return this.StartBattleSequence();
             yield break;
         }
@@ -132,10 +147,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Angry, true, true);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseTwo", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
-                AudioController.Instance.SetLoopAndPlay($"P03_Phase2", 1, true, true);
-                AudioController.Instance.SetLoopVolume(0f, 1f, 0, false);
-                AudioController.Instance.SetLoopVolume(0.35f, 1f, 1, false);
-                
+                string path = AudioHelper.FindAudioClip("P03_Phase2");
+                AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
+                audioSource.clip = audioClip;
+                audioSource.loop = true;
+                audioSource.volume = BossManagement.bossMusicVolume;
+                audioSource.Play();
+
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseTwoInControl", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield return new WaitForSeconds(1f);
@@ -302,7 +320,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Angry, true, true);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseThree", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
-            AudioController.Instance.SetLoopVolumeImmediate(0f, 1);
+            //AudioController.Instance.SetLoopVolumeImmediate(0f, 1);
+            audioSource.volume = 0;
 
             yield return new WaitForSeconds(FasterEvents ? 0.6f : 1.5f);
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Happy, true, true);
@@ -354,8 +373,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             source.Stop();
             yield return new WaitForSeconds(1f);
 
-            AudioController.Instance.SetLoopAndPlay($"P03_Phase3", 2, true, true);
-            AudioController.Instance.SetLoopVolumeImmediate(0.35f, 2);
+            string path = AudioHelper.FindAudioClip("P03_Phase3");
+            AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
+            audioSource.clip = audioClip;
+            audioSource.loop = true;
+            audioSource.volume = BossManagement.bossMusicVolume;
+            audioSource.Play();
+
             yield return new WaitForSeconds(1f);
 
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseThreeBehold", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);

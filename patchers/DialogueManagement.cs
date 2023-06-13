@@ -5,6 +5,8 @@ using System;
 using System.Linq;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Faces;
+using InscryptionAPI.Dialogue;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -66,22 +68,49 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (string.IsNullOrEmpty(id))
                 return;
 
-            DialogueDataUtil.Data.events.Add(new DialogueEvent() {
+            //DialogueDataUtil.Data.events.Add(new DialogueEvent()
+            //{
+            //    id = id,
+            //    speakers = new List<DialogueEvent.Speaker>() { DialogueEvent.Speaker.Single, speaker },
+            //    mainLines = new(faces.Zip(lines, (face, line) => new DialogueEvent.Line()
+            //    {
+            //        text = line,
+            //        specialInstruction = "",
+            //        p03Face = leshy ? P03AnimationController.Face.NoChange : ParseFace(face),
+            //        speakerIndex = 1,
+            //        emotion = leshy ? leshyEmotion : ParseFace(face).FaceEmotion()
+            //    })
+            //    .Zip(dialogueWavies, delegate (DialogueEvent.Line line, string wavy)
+            //    {
+            //        if (!string.IsNullOrEmpty(wavy) && wavy.ToLowerInvariant() == "y")
+            //            line.letterAnimation = TextDisplayer.LetterAnimation.WavyJitter;
+            //        return line;
+            //    }).ToList())
+            //});
+
+            DialogueEvent dialogueEvent = (new DialogueEvent()
+            {
                 id = id,
                 speakers = new List<DialogueEvent.Speaker>() { DialogueEvent.Speaker.Single, speaker },
-                mainLines = new(faces.Zip(lines, (face, line) => new DialogueEvent.Line() {
+                mainLines = new(faces.Zip(lines, (face, line) => new DialogueEvent.Line()
+                {
                     text = line,
                     specialInstruction = "",
                     p03Face = leshy ? P03AnimationController.Face.NoChange : ParseFace(face),
                     speakerIndex = 1,
                     emotion = leshy ? leshyEmotion : ParseFace(face).FaceEmotion()
                 })
-                .Zip(dialogueWavies, delegate(DialogueEvent.Line line, string wavy) {
+                .Zip(dialogueWavies, delegate (DialogueEvent.Line line, string wavy)
+                {
                     if (!string.IsNullOrEmpty(wavy) && wavy.ToLowerInvariant() == "y")
                         line.letterAnimation = TextDisplayer.LetterAnimation.WavyJitter;
                     return line;
                 }).ToList())
             });
+
+            //Debug.Log("DIALOGUE EVENT DEBUG: " + dialogueEvent.id);
+
+            DialogueManager.Add(P03Plugin.PluginGuid, dialogueEvent);
         }
 
         public static List<string> SplitColumn(string col, char sep = ',', char quote = '"')
@@ -116,8 +145,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return retval;
         }
 
-        [HarmonyPatch(typeof(DialogueDataUtil), "ReadDialogueData")]
-        [HarmonyPostfix]
+        //[HarmonyPatch(typeof(DialogueDataUtil), "ReadDialogueData")]
+        //[HarmonyPostfix]
         public static void AddSequenceDialogue()
         {
             string database = DataHelper.GetResourceString("dialogue_database", "csv");
@@ -127,10 +156,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             List<string> dialogueLines = new();
             List<string> dialogueWavies = new();
             List<string> dialogueFaces = new();
-            foreach(string line in lines.Skip(1))
+            foreach (string line in lines.Skip(1))
             {
                 List<string> cols = SplitColumn(line);
-                
+
                 if (string.IsNullOrEmpty(cols[0]))
                 {
                     dialogueLines.Add(cols[3]);
@@ -149,14 +178,36 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             AddDialogue(dialogueId, dialogueLines, dialogueFaces, dialogueWavies);
 
-            AudioHelper.LoadAudioClip("goovoice_curious#1", group:"SFX");
-            AudioHelper.LoadAudioClip("goovoice_curious#2", group:"SFX");
-            AudioHelper.LoadAudioClip("goovoice_curious#3", group:"SFX");
-            AudioHelper.LoadAudioClip("bottle_break", group:"SFX");
+            //Old audio code
 
-            AudioHelper.LoadAudioClip("P03_Phase1", group:"Loops");
-            AudioHelper.LoadAudioClip("P03_Phase2", group:"Loops");
-            AudioHelper.LoadAudioClip("P03_Phase3", group:"Loops");
+            //AudioHelper.LoadAudioClip("goovoice_curious#1", group:"SFX");
+            //AudioHelper.LoadAudioClip("goovoice_curious#2", group:"SFX");
+            //AudioHelper.LoadAudioClip("goovoice_curious#3", group:"SFX");
+            //AudioHelper.LoadAudioClip("bottle_break", group:"SFX");
+
+            //AudioHelper.LoadAudioClip("P03_Phase1", group:"Loops");
+            //AudioHelper.LoadAudioClip("P03_Phase2", group:"Loops");
+            //AudioHelper.LoadAudioClip("P03_Phase3", group:"Loops");
+
+            //Up to date audio code
+
+            //string path1 = AudioHelper.FindAudioClip("goovoice_curious#1");
+            //string path2 = AudioHelper.FindAudioClip("goovoice_curious#2");
+            //string path3 = AudioHelper.FindAudioClip("goovoice_curious#3");
+            //string path4 = AudioHelper.FindAudioClip("bottle_break");
+
+            //string path5 = AudioHelper.FindAudioClip("P03_Phase1");
+            //string path6 = AudioHelper.FindAudioClip("P03_Phase2");
+            //string path7 = AudioHelper.FindAudioClip("P03_Phase3");
+
+            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path1);
+            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path2);
+            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path3);
+            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path4);
+
+            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path5);
+            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path6);
+            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path7);
         }
     }
 }

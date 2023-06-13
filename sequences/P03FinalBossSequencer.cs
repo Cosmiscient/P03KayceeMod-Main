@@ -82,6 +82,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             if (playerWon)
             {
+                //Turn off the boss music
+                GameObject bossMusic = GameObject.Find("P03BossMusicAudioObject");
+                GameObject.Destroy(bossMusic);
+
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03BeatFinalBoss", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 ViewManager.Instance.SwitchToView(View.Default, false, false);

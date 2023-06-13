@@ -20,13 +20,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
         static BuckWild()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
-            info.rulebookName = "Buck Wild";
+            info.rulebookName = "Buck Wild (old)";
             info.rulebookDescription = "When [creature] takes damage, the creature that dealt damage is pushed back to the queue.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
             BuckWild.AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
@@ -48,8 +48,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return new WaitForSeconds(0.2f);
             if (source.OpponentCard)
             {
-                BoardManager.Instance.ReturnCardToQueue(source);
-                yield return new WaitForSeconds(0.75f);
+                if (TurnManager.Instance.Opponent is not null)
+                {
+                    yield return TurnManager.Instance.Opponent.ReturnCardToQueue(source, 0.25f);
+                }
+                else
+                {
+                    BoardManager.Instance.ReturnCardToQueue(source);
+                    yield return new WaitForSeconds(0.75f);
+                }
             }
             else
             {

@@ -98,6 +98,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if ((compound & WEST) == 0) yield return WEST;
         }
 
+        internal static string GetAscensionWorldbyId(Func<string, Zone> getRegionCodeFromWorldID)
+        {
+            throw new NotImplementedException();
+        }
+
         internal static GameObject GetGameObject(string singleMapKey)
         {
             if (singleMapKey == default(string))
@@ -182,7 +187,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             SpecialNodePrefabs.AddReplace(HoloMapSpecialNode.NodeDataType.CardChoice, () => GetGameObject("StartingIslandJunction", "Nodes/CardChoiceNode3D"));
             SpecialNodePrefabs.AddReplace(HoloMapSpecialNode.NodeDataType.AddCardAbility, () => GetGameObject("Shop", "Nodes/ShopNode3D_AddAbility"));
             SpecialNodePrefabs.AddReplace(HoloMapSpecialNode.NodeDataType.OverclockCard, () => GetGameObject("Shop", "Nodes/ShopNode3D_Overclock"));
-            SpecialNodePrefabs.AddReplace(HoloMapSpecialNode.NodeDataType.CreateTransformer, () => GetTransformerNode());
+            SpecialNodePrefabs.AddReplace(HoloMapSpecialNode.NodeDataType.CreateTransformer, () => GetGameObject("Shop", "Nodes/ShopNode3D_Transformer"));
+            SpecialNodePrefabs.AddReplace(AscensionTransformerCardNodeData.AscensionTransformCard, () => GetTransformerNode());
             SpecialNodePrefabs.AddReplace(HoloMapSpecialNode.NodeDataType.AttachGem, () => GetGameObject("Shop", "Nodes/ShopNode3D_AttachGem"));
             SpecialNodePrefabs.AddReplace(HoloMapSpecialNode.NodeDataType.RecycleCard, () => GetGameObject("NeutralWestMain_1", "Nodes/RecycleCardNode3D"));
             SpecialNodePrefabs.AddReplace(HoloMapSpecialNode.NodeDataType.BuildACard, () => GetGameObject("Shop", "Nodes/ShopNode3D_BuildACard"));

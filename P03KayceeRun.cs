@@ -4,14 +4,9 @@ using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
-using InscryptionAPI.Helpers;
-using InscryptionAPI.Items.Extensions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Diagnostics;
-using DiskCardGame;
 
 namespace Infiniscryption.P03KayceeRun
 {
@@ -21,18 +16,16 @@ namespace Infiniscryption.P03KayceeRun
     {
 
         public const string PluginGuid = "zorro.inscryption.infiniscryption.p03kayceerun";
-        public const string PluginName = "Infiniscryption P03 in Kaycee's Mod";
-        public const string PluginVersion = "2.3";
-        public const string CardPrefx = "P03KCM";
+		public const string PluginName = "Infiniscryption P03 in Kaycee's Mod";
+		public const string PluginVersion = "2.3";   
+        public const string CardPrefx = "P03KCM"; 
 
-        public static string PluginDirectory;
+        internal static P03Plugin Instance;  
 
-        internal static P03Plugin Instance;
-
-        internal static ManualLogSource Log;
+        internal static ManualLogSource Log; 
 
         internal static bool Initialized = false;
-
+        
         internal string DebugCode
         {
             get
@@ -51,8 +44,6 @@ namespace Infiniscryption.P03KayceeRun
 
         private void Awake()
         {
-            PluginDirectory = this.Info.Location.Replace("Infiniscryption.P03KayceeRun.dll", "");
-
             Instance = this;
 
             Log = base.Logger;
@@ -61,19 +52,21 @@ namespace Infiniscryption.P03KayceeRun
             Harmony harmony = new Harmony(PluginGuid);
             harmony.PatchAll();
 
+            // Call dialogue sequence
+            DialogueManagement.AddSequenceDialogue();
+
             foreach (Type t in typeof(P03Plugin).Assembly.GetTypes())
             {
                 try
                 {
                     System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(t.TypeHandle);
-                }
-                catch (TypeLoadException ex)
+                } catch (TypeLoadException ex)
                 {
                     Log.LogWarning("Failed to force load static constructor!");
                     Log.LogWarning(ex);
                 }
             }
-
+            
             CustomCards.RegisterCustomCards(harmony);
             StarterDecks.RegisterStarterDecks();
             AscensionChallengeManagement.UpdateP03Challenges();

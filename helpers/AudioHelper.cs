@@ -111,17 +111,7 @@ namespace Infiniscryption.P03KayceeRun.Helpers
         //     return tempPath;
         // }
 
-        //private static string FindAudioClip(string clipName)
-        //{
-        //    string fname = $"{clipName}.wav";
-        //    string[] found = Directory.GetFiles(Paths.PluginPath, $"{clipName}.wav", SearchOption.AllDirectories);
-        //    if (found.Length > 0)
-        //        return found[0];
-
-        //    throw new InvalidOperationException($"Could not find any file matching {clipName}");
-        //}
-
-        private static string FindAudioClip(string clipName)
+        public static string FindAudioClip(string clipName)
         {
             string fname = $"{clipName}.wav";
             string[] found = Directory.GetFiles(Paths.PluginPath, $"{clipName}.wav", SearchOption.AllDirectories);
@@ -131,9 +121,9 @@ namespace Infiniscryption.P03KayceeRun.Helpers
             throw new InvalidOperationException($"Could not find any file matching {clipName}");
         }
 
-
         public static void LoadAudioClip(string clipname, string group = "Loops")
         {
+
             // Is this a hack?
             // Hell yes, this is a hack.
 
@@ -153,7 +143,7 @@ namespace Infiniscryption.P03KayceeRun.Helpers
             using (UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.WAV))
             {
                 request.SendWebRequest();
-                while (request.IsExecuting()); // Wait for this thing to finish
+                while (request.IsExecuting()) ; // Wait for this thing to finish
 
                 if (request.isHttpError)
                 {
@@ -163,7 +153,7 @@ namespace Infiniscryption.P03KayceeRun.Helpers
                 {
                     AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
                     clip.name = clipname;
-                    
+
                     clips.Add(clip);
                 }
             }

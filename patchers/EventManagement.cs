@@ -60,6 +60,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly StoryEvent ALL_BOSSES_KILLED = NewStory("AllBossesKilled");
         public static readonly StoryEvent HAS_DRAFT_TOKEN = NewStory("HasDraftToken");
         public static readonly StoryEvent SAW_P03_INTRODUCTION = NewStory("SawP03Introduction", save:true);
+        public static readonly StoryEvent SAW_P03_PAIDRESPAWN_EXPLAIN = NewStory("SawP03PaidRespawnExplain", save: true);
+        public static readonly StoryEvent SAW_P03_BOSSPAIDRESPAWN_EXPLAIN = NewStory("SawP03PaidRespawnExplain", save: true);
         public static readonly StoryEvent GOLLY_NFT = NewStory("GollyNFTIntro", save:true);
         public static readonly StoryEvent DEFEATED_P03 = NewStory("DefeatedP03");    
         public static readonly StoryEvent ONLY_ONE_BOSS_LIFE = NewStory("P03AscensionOneBossLife", save:true);    
@@ -214,9 +216,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (se == SpecialEvent.TippedScales)
             {
                 node.SetDialogueRule("P03TooEasyQuest", "TOO EASY...", se, antiPreRequisite:TIPPED_SCALES_INTRO, completeStory:TIPPED_SCALES_INTRO);
-                node.SetDialogueRule("P03TooEasyAccepted", "TOO EASY...", se, preRequisite:TIPPED_SCALES_INTRO, completeStory:TIPPED_SCALES_ACCEPTED);
-                node.SetDialogueRule("P03TooEasyInProgress", "TOO EASY...", se, preRequisite:TIPPED_SCALES_ACCEPTED, antiPreRequisite:TIPPED_SCALES_COMPLETED);
-                node.SetDialogueRule("P03TooEasyComplete", "TOO EASY...", se, antiPreRequisite: TIPPED_SCALES_REWARD, preRequisite:TIPPED_SCALES_COMPLETED, completeAfter:true, specialReward:SpecialReward.RandomCardGainsUndying, completeStory:TIPPED_SCALES_REWARD);
+                node.SetDialogueRule("P03TooEasyAccepted", "TOO EASY...", se, preRequisite:TIPPED_SCALES_INTRO, completeStory:TIPPED_SCALES_ACCEPTED, antiPreRequisite: TIPPED_SCALES_ACCEPTED);
+                node.SetDialogueRule("P03TooEasyInProgress", "KEEP GOING...", se, preRequisite:TIPPED_SCALES_ACCEPTED, antiPreRequisite:TIPPED_SCALES_COMPLETED);
+                node.SetDialogueRule("P03TooEasyComplete", "IMPRESSIVE...", se, antiPreRequisite: TIPPED_SCALES_REWARD, preRequisite:TIPPED_SCALES_COMPLETED, completeAfter:true, specialReward:SpecialReward.RandomCardGainsUndying, completeStory:TIPPED_SCALES_REWARD);
             }
             if (se == SpecialEvent.BrokenGeneratorQuest)
             {
@@ -707,6 +709,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             set { ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "NumberOfLivesRemaining", value); }
         }
 
+        public static int NumberOfLosses
+        {
+            get { return ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, "NumberOfLosses"); }
+            set { ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "NumberOfLosses", value); }
+        }
+
         public const int ENEMIES_TO_UNLOCK_BOSS = 4;
         public static int NumberOfZoneEnemiesKilled
         {
@@ -1113,6 +1121,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             // Figure out the number of lives
             NumberOfLivesRemaining = __instance.currentRun.maxPlayerLives;
+
+            //Reset respawn cost
+            LifeManagement.respawnCost = 0;
         }
 
         public static void FinishAscension(bool success=true)

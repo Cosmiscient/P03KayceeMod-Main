@@ -54,6 +54,27 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             P03AnimationController.Instance.SwitchToFace(this.face, true, true);
             yield return new WaitForSeconds(0.1f);
             yield return TextDisplayer.Instance.PlayDialogueEvent(this.dialogueId, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+
+            int nullNumber = 0;
+            int notNullNumber = 0;
+
+            foreach (var i in DialogueDataUtil.Data.events)
+            {
+                Debug.Log($"{i != null} {i?.id}");
+
+                if (i != null)
+                {
+                    notNullNumber++;
+                }
+                else
+                {
+                    nullNumber++;
+                }
+            }
+
+            //Debug.Log("Null: " + nullNumber);
+            //Debug.Log("NotNull: " + notNullNumber);
+
             yield return new WaitForSeconds(0.1f);
 
             if (this.completeStory != StoryEvent.NUM_EVENTS)
@@ -61,6 +82,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 P03Plugin.Log.LogDebug($"Completing story event {this.completeStory}");
                 StoryEventsData.SetEventCompleted(this.completeStory);
             }
+
             if (this.currencyReward != 0)
             {
                 P03AnimationController.Face currentFace = P03AnimationController.Instance.CurrentFace;
@@ -74,14 +96,17 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 ViewManager.Instance.SwitchToView(currentView, false, false);
                 yield return new WaitForSeconds(0.2f);
             }
+
             if (!string.IsNullOrEmpty(this.cardReward))
             {
                 Part3SaveData.Data.deck.AddCard(CardLoader.GetCardByName(this.cardReward));
             }
+
             if (!string.IsNullOrEmpty(this.loseCardReward))
             {
                 Part3SaveData.Data.deck.RemoveCardByName(this.loseCardReward);
             }
+
             if (!string.IsNullOrEmpty(this.loseItemReward))
             {
                 if (Part3SaveData.Data.items.Contains(this.loseItemReward))
@@ -100,6 +125,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     yield return new WaitForSeconds(0.2f);
                 }
             }
+
             if (!string.IsNullOrEmpty(this.gainItemReward))
             {
                 if (Part3SaveData.Data.items.Count < P03AscensionSaveData.MaxNumberOfItems)
@@ -116,9 +142,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     yield return new WaitForSeconds(0.2f);
                 }
             }
-            
-            EventManagement.GrantSpecialReward(this.specialReward);
 
+            EventManagement.GrantSpecialReward(this.specialReward);
             ViewManager.Instance.SwitchToView(View.MapDefault, false, false);
             yield return new WaitForSeconds(0.15f);
             HoloGameMap.Instance.StartCoroutine(HoloGameMap.Instance.FlickerHoloElements(true, 2));
@@ -144,6 +169,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             foreach(string rule in dialogueRules)
             {
                 P03Plugin.Log.LogDebug($"Rule string: {rule}");
+
+                Debug.Log("TRIGGERED");
 
                 string[] ruleSplit = rule.Split(',');
                 StoryEvent preRequisite = (StoryEvent)int.Parse(ruleSplit[0]);

@@ -4,7 +4,6 @@ using DiskCardGame;
 using InscryptionAPI.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Guid;
-using System.Diagnostics;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -32,15 +31,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
             wolfBot.SetEvolve(wolfBeast, 1);
 
             // Viperbeast
-            CardInfo viperBeast = CardManager.New(EXP_1_PREFIX, "ViperBeast", "V1P3R", 1, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_viperbeast.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetCost(energyCost:3)
-                .AddAbilities(Ability.Transformer, Ability.Deathtouch);
+            CardInfo viperBeast = CardManager.New(EXP_1_PREFIX, "ViperBeast", "V1P3R", 3, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_rattler.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetCost(energyCost:5)
+                .AddAbilities(Ability.Transformer);
 
             // Viperbot
             CardInfo viperBot = CardManager.New(EXP_1_PREFIX, "ViperBot", "V1P3R", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_viperbot.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetCost(energyCost:3)
+                .SetCost(energyCost:5)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .AddAbilities(Ability.Transformer);
 
@@ -58,13 +57,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_mantisbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost:4)
                 .SetRare()
+                .SetRegionalP03Card(CardTemple.Nature)
                 .AddAbilities(Ability.Transformer);
 
             mantisBeast.SetEvolve(mantisBot, 1);
             mantisBot.SetEvolve(mantisBeast, 1);
-
-            mantisBeast.temple = CardTemple.Tech;
-            mantisBot.temple = CardTemple.Tech;
 
             // Seedbot
             CardManager.New(EXP_1_PREFIX, "SeedBot", "SeedBot", 0, 1)
@@ -82,9 +79,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(Ability.StrafeSwap, LatchRampage.AbilityID);
 
             // flying Latcher
-            CardManager.New(EXP_1_PREFIX, "FlyingLatcher", "Sky Latcher", 1, 1)
+            CardManager.New(EXP_1_PREFIX, "FlyingLatcher", "Sky Latcher", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_skylatcher.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetCost(energyCost:3)
+                .SetCost(energyCost:1)
                 .SetRegionalP03Card(CardTemple.Undead)
                 .AddAbilities(Ability.Flying, LatchFlying.AbilityID);
 
@@ -122,12 +119,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(SummonFamiliar.AbilityID);
 
             // Bull
-            CardManager.New(EXP_1_PREFIX, "BuckingBull", "T4URU5", 1, 3)
+            CardManager.New(EXP_1_PREFIX, "BuckingBull", "T4URU5", 1, 8)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_bull.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetCost(energyCost:4)
+                .SetCost(energyCost:3)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .SetRare()
-                .AddAbilities(BuckWild.AbilityID);
+                .AddAbilities(BuckWildRework.AbilityID);
 
             // Googlebot
             CardManager.New(EXP_1_PREFIX, "GoogleBot", "SearchBot", 0, 2)
@@ -272,7 +269,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost:3)
                 .AddAbilities(RotatingAlarm.AbilityID)
                 .SetExtendedProperty(RotatingAlarm.DEFAULT_STATE_KEY, 3);
-            
+
+            CardManager.New(EXP_1_PREFIX, "RubberDuck", "RU883R DUCK", 3, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_scrapbot.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetCost(energyCost: 4)
+                .SetRare()
+                .SetRegionalP03Card(CardTemple.Nature)
+                .AddAbilities(Ability.BuffEnemy, Ability.Submerge);
+
             // Titans
             CardManager.New(EXP_1_PREFIX, "RubyTitan", "Ruby Titan", 1, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ruby_titan.png", typeof(ExpansionPackCards_1).Assembly))
@@ -312,7 +316,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.New(EXP_1_PREFIX, "GemRotator", "Gem Cycler", 1, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gemcycler.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetCost(energyCost: 5)
+                .SetCost(energyCost:5)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(GemRotator.AbilityID);
         }     
@@ -322,16 +326,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static void ModifyCardForAscension(ref CardInfo __result)
         {
             string compName = __result.name.ToLowerInvariant();
-            if (compName.StartsWith($"{EXP_1_PREFIX.ToLowerInvariant()}_gemrotator"))
+            if (compName.StartsWith($"{EXP_1_PREFIX}_gemrotator"))
             {
                 if (!__result.Gemified)
-                {
-                    //Debug.WriteLine("GEMMED");
                     __result.mods.Add(new() { gemify = true });
-                }
             }
-
-            //Debug.WriteLine(compName);
         }
     }
 }

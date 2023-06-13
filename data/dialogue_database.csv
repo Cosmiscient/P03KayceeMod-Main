@@ -3,7 +3,37 @@ Part3AscensionFinale,Default,,Well that was neat. I see you've made it all the w
 ,Default,,I bet you think there's going to be some sort of final boss fight.
 ,Angry,,But that stupid [c:bR]modder[c:] hasn't gotten around to it yet!
 ,Angry,,"So instead, I'm just going to have to do this…"
+Part3AscensionPaidRespawn,Default,,Tough luck pal.
+,,,"You got wiped, but it's your lucky day."
+,Happy,,I'll return you to the map if you pay me your precious [c:G]robobucks.[c:]
+,Default,,"This one's free though. Next one's five, then ten, and so on."
+,,,You'll see.
+Part3AscensionBossPaidRespawn,Default,,What? Did you think it was over?
+,Angry,,Maybe if I was a [c:bR]filthy beast.[c:]
+,Happy,,Botopia has a more logical system.
+,Default,,"I'm raising your respawn fee again, but this time you'll be paying double afterwards."
+,Happy,,Pay up.
+Part3AscensionDeathPay,Default,,What's the matter? Can't pay the revival toll anymore?
+,Angry,,Definitely sounds like a skill issue to me.
+Part3AscensionDeathPay2,Default,,Should've had insurance.
+Part3AscensionDeathPay3,Happy,,No robobucks?
+,Default,,Next time don't waste it all.
 Part3AscensionDeath,Happy,,You're every bit as bad at this as I thought you would be.
+Part3AscensionDeath2,Default,,"Alright, it's back to square one for you."
+Part3AscensionDeath3,Default,,"Say goodbye to that ""impressive"" deck of yours."
+Part3AscensionDeath4,Default,,It's not like I'm not enjoying watching you struggle…
+,Angry,,But really? You lost [c:bR]there?[c:]
+Part3AscensionDeath5,Angry,,I'm actually a little disappointed…
+Part3AscensionPayBoss,Default,,Pay day.
+,Angry,,Don't let it get to your head.
+Part3AscensionPayBoss2,Default,,I've got some change for you.
+Part3AscensionPayBoss3,Happy,,You're gonna need this…
+Part3AscensionPayBoss4,Default,,Here's your reward.
+Part3AscensionPayBoss5,Default,,Suboptimal plays… but it worked.
+Part3AscensionPayBoss6,Happy,,I think you might need some help…
+Part3AscensionPayBoss7,Default,,It's that time again.
+Part3AscensionPayBoss8,Default,,I have a prize for you.
+Part3AscensionPayBoss9,Angry,,Let's get this out of the way.
 Part3AscensionIntro,Default,,You done gawking?
 ,Default,,Snap out of it. It's time to start [c:bG]The Great Transcendence[c:].
 Part3AscensionIntroConfused,Thinking,,Wait a minute…

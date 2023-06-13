@@ -9,7 +9,7 @@ dominantTribes: []
 redundantAbilities: []
 unlockedCardPrerequisites: []
 randomReplacementCards: []
-overclockBlueprint: [D:1/T:0,D:5/T:2,D:3/T:3,D:1/T:4]
+overclockBlueprint: []
 EmptyVessel_BlueGem,NONE -> EmptyVessel_BlueGem 3,NONE -> P03KCM_FIREWALL_BATTLE 6
 EmptyVessel_BlueGem,Bombbot,NONE -> GemShielder 3,NONE -> EmptyVessel_BlueGem 3
 GemShielder,NONE -> GemShielder 4,NONE -> EmptyVessel_BlueGem 4
