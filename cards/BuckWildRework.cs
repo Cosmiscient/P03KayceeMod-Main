@@ -7,6 +7,7 @@ using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
+using Pixelplacement;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -41,20 +42,41 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override IEnumerator OnTakeDamage(PlayableCard source)
         {
             CardSlot opposingSlot = base.Card.Slot.opposingSlot;
+
             //PlayableCard target = this.Card.OpposingCard();
 
             if (opposingSlot.Card != null)
             {
                 //target.Die(false, base.Card);
                 //base.Card.Slot.opposingSlot.Card.Die(false, base.Card);
-                opposingSlot.Card.Die(false, base.Card);
-                Debug.Log("Card found");
+                this.Card.Anim.StrongNegationEffect();
+                yield return new WaitForSeconds(0.2f);
+                yield return opposingSlot.Card.Die(false, base.Card);
+                //Debug.Log("Card found");
             }
 
-            this.Card.Anim.StrongNegationEffect();
-            yield return new WaitForSeconds(0.2f);
-            yield return Singleton<BoardManager>.Instance.AssignCardToSlot(base.Card, base.Card.OpposingSlot(), 0.25f);
+            yield return new WaitForSeconds(0.05f);
+
+            base.Card.SetIsOpponentCard(!base.Card.OpponentCard);
+
             base.Card.transform.eulerAngles += new Vector3(0f, 0f, -180f);
+            yield return Singleton<BoardManager>.Instance.AssignCardToSlot(base.Card, base.Card.OpposingSlot(), 0.25f);
+
+            //base.Card.Anim.Anim.rootRotation = new Quaternion(0.6f, 0.4f, -0.4f, 0.6f);
+
+            //if (base.Card.transform.eulerAngles != new Vector3(0f, 0f, -180f))
+            //{
+            //    base.Card.transform.eulerAngles = new Vector3(0f, 0f, -180f);
+            //    Debug.Log("flipped");
+            //}
+            //else
+            //{
+            //    Debug.Log("Didn't flip");
+            //}
+
+            Debug.Log(base.Card.transform.eulerAngles);
+            Debug.Log(base.Card.transform.rotation);
+
             yield return new WaitForSeconds(0.5f);
         }
     }

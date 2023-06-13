@@ -39,7 +39,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 P03Plugin.PluginGuid,
                 info,
                 typeof(Shove),
-                TextureHelper.GetImageAsTexture("ability_lifecycle.png", typeof(Shove).Assembly)
+                TextureHelper.GetImageAsTexture("ability_shovepowered.png", typeof(Shove).Assembly)
             ).Id;
         }
 

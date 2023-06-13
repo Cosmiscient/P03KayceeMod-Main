@@ -32,7 +32,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 P03Plugin.PluginGuid,
                 info,
                 typeof(TakeDamageSigil),
-                TextureHelper.GetImageAsTexture("ability_lifecycle.png", typeof(TakeDamageSigil).Assembly)
+                TextureHelper.GetImageAsTexture("ability_parasite.png", typeof(TakeDamageSigil).Assembly)
             ).Id;
         }
 
