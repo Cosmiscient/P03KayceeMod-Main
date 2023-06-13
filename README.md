@@ -1,5 +1,5 @@
 # P03 Kaycee's Mod
-## Version 2.0: The NPC Update
+## Version 3.0: The Challenge Update
 
 **Check out this super spicy 720p trailer made in a free video editor**
 
@@ -118,6 +118,9 @@ While the full credits will play in-game when you win for the first time, I have
 - Froenzi
 - Answearing Machine
 - Nevernamed
+- Anne Bean
+- Gold
+- Amy
 
 **Card Design, Balance, and Playtesting**
 - TheGreenDigi
@@ -129,6 +132,10 @@ While the full credits will play in-game when you win for the first time, I have
 - Sire
 - Sylvie
 - Tresh
+- Keks307
+
+**Writing Contributions**
+- Mr. Etc
 
 **Kickass Final Boss Music**
 - Purist, the Specter
@@ -143,6 +150,51 @@ While the full credits will play in-game when you win for the first time, I have
 
 <details>
 <summary>Changelog</summary>
+
+3.0.2
+- Bosses now make you pay double your respawn fee after increasing it
+- P03 final boss music volume increased
+- Wording corrected on Turbo Vessels challenge
+- Fixed bug: projector quad remained active once P03 dialogue started for the lives system explanation
+
+3.0.1
+- Eccentric Painter no longer places the canvas boss background behind bosses
+- Side Deck Review sequence now updates along with enabled challenges
+- Updated icon
+- Updated challenge point values
+- Fixed bug: l33pbots counted as gems
+- Fixed bug: Viper was 3 energy, it was supposed to be 5
+- Fixed bug: Boss rares didn’t appear
+- Fixed bug: After dying once, players would receive a penalty after interacting with some nodes
+- Known bug: When playing with Turbo Vessels enabled only, enemy vessels recieve the Double Sprinter sigil
+
+3.0.0
+- New lives system! When you die, you get one freebie. The next death, you’ll have to pay 5 coins to respawn. Next time, 10 coins, and so on.
+- New dialogue possibilities on losing a run
+- Explosive challenge and conveyor challenge are made neutral challenges and moved to the next page
+- New Eccentric Painter challenge
+- New Leaping Sidedeck challenge
+- New Turbo Vessels challenge
+- New Traditional Lives challenge
+- New(ish?) Costly Lives challenge
+- Tesla Coil item buffed, now provides two additional max energy
+- Viper card buffed
+- Oil Jerry buffed
+- Goranj Vessel nerfed
+- Bleene Vessel buffed
+- Skeleton Lord buffed
+- New Swapper Latcher card
+- New art for mirror tentacle
+- Fixed an API compatibility issue that made the quest system break with mods that added dialogue (thanks WhistleWind and NeverNamed)
+
+2.3.7
+- Fixed pack manager issue from 2.3.6
+- NPCs have new faces
+- Beast node is now the base game version
+
+2.3.6
+- Mod works on API 2.12.0
+- Too Easy quest is fixed
 
 2.3.5
 - Final update by DivisionByZ0rro - see note.
