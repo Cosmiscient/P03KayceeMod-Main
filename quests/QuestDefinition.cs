@@ -171,7 +171,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 if (this.PriorEventId != SpecialEvent.None)
                 {
                     QuestDefinition priorQuest = QuestManager.Get(this.PriorEventId);
-                    if (priorQuest.CurrentState.Status == QuestState.QuestStateStatus.Success)
+                    if (priorQuest.IsCompleted && priorQuest.CurrentState.Status == QuestState.QuestStateStatus.Success)
                         return true;
                 }
 
