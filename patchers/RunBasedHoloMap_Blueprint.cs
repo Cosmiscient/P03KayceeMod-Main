@@ -5,6 +5,7 @@ using System.Linq;
 using InscryptionAPI.Saves;
 using System;
 using Infiniscryption.P03KayceeRun.Sequences;
+using Infiniscryption.P03KayceeRun.Quests;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -611,21 +612,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static void BuildStoryEvents(List<HoloMapBlueprint> blueprint, Zone region)
         {
             // Get all the story events we're supposed to get
-            var stevents = EventManagement.GetSpecialEventForZone(region);
+            var stevents = QuestManager.GetSpecialEventForZone(region);
             foreach (var storyData in stevents)
             {
-                EventManagement.SpecialEvent se = storyData.Item1;
+                SpecialEvent se = storyData.Item1;
                 Predicate<HoloMapBlueprint> pred = storyData.Item2;
 
-                List<HoloMapBlueprint> locations = blueprint.Where(bp => bp.dialogueEvent == EventManagement.SpecialEvent.None && pred(bp)).ToList();
+                List<HoloMapBlueprint> locations = blueprint.Where(bp => bp.dialogueEvent == SpecialEvent.None && pred(bp)).ToList();
                 if (locations.Count == 0)
-                    locations = blueprint.Where(bp => bp.dialogueEvent == EventManagement.SpecialEvent.None).ToList();
+                    locations = blueprint.Where(bp => bp.dialogueEvent == SpecialEvent.None).ToList();
 
                 HoloMapBlueprint target = locations[UnityEngine.Random.Range(0, locations.Count)];
                 target.dialogueEvent = se;
 
                 // Special rule for the generator
-                if (se == EventManagement.SpecialEvent.BrokenGeneratorQuest)
+                if (se == DefaultQuestDefinitions.BrokenGenerator.EventId)
                     target.specialTerrain = HoloMapBlueprint.BROKEN_GENERATOR;
             }
         }

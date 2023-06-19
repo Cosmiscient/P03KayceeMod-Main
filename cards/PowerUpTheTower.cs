@@ -2,6 +2,7 @@ using System.Collections;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03KayceeRun.Quests;
 using InscryptionAPI.Card;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private IEnumerator SayDialogue(string dialogueCode)
         {
-            string faceCode = EventManagement.GetDescriptorForNPC(EventManagement.SpecialEvent.PowerUpTheTower).faceCode;
+            string faceCode = NPCDescriptor.GetDescriptorForNPC(DefaultQuestDefinitions.PowerUpTheTower.EventId).faceCode;
             P03ModularNPCFace.Instance.SetNPCFace(faceCode);
             ViewManager.Instance.SwitchToView(View.P03Face, false, false);
             yield return new WaitForSeconds(0.1f);
@@ -42,13 +43,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (!playerUpkeep)
                 yield break;
 
-            if (EventManagement.PowerUpkeepCount >= EventManagement.POWER_TURNS)
+            if (DefaultQuestDefinitions.PowerUpTheTower.GetQuestCounter() >= DefaultQuestDefinitions.POWER_TURNS)
                 yield break;
 
             if (Active)
             {
-                EventManagement.PowerUpkeepCount += 1;
-                yield return SayDialogue($"P03PowerTower{EventManagement.PowerUpkeepCount}");
+                DefaultQuestDefinitions.PowerUpTheTower.IncrementQuestCounter();
+                yield return SayDialogue($"P03PowerTower{DefaultQuestDefinitions.PowerUpTheTower.GetQuestCounter()}");
             }
             else
             {
@@ -60,13 +61,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
-            if (EventManagement.PowerUpkeepCount >= EventManagement.POWER_TURNS)
+            if (DefaultQuestDefinitions.PowerUpTheTower.GetQuestCounter() >= DefaultQuestDefinitions.POWER_TURNS)
                 yield break;
 
             yield return SayDialogue("P03PowerTowerDied");
 
-            if (EventManagement.PowerUpkeepCount > 0)
-                EventManagement.PowerUpkeepCount -= 1;
+            if (DefaultQuestDefinitions.PowerUpTheTower.GetQuestCounter() > 0)
+                DefaultQuestDefinitions.PowerUpTheTower.IncrementQuestCounter(-1);
         }
 
         static PowerUpTheTower()

@@ -5,6 +5,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03KayceeRun.Quests;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
@@ -22,7 +23,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public override void OnCursorSelectEnd()
         {
-            DetermineDialogue();
             this.SetHoveringEffectsShown(false);
             this.OnSelected();
             base.StartCoroutine(this.DialogueThenStorySequence());
@@ -30,9 +30,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public override void OnCursorEnter()
         {
-            DetermineDialogue();
             label.gameObject.SetActive(true);
-            this.label.SetText(Localization.Translate(this.floatingLabelText));
+            QuestDefinition quest = QuestManager.Get(this.eventId);
+            this.label.SetText(Localization.Translate(quest.CurrentState.NPCHoverText));
             base.OnCursorEnter();
         }
 
@@ -44,106 +44,35 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private IEnumerator DialogueThenStorySequence()
         {
+            // Go ahead and get a reference to the quest
+            QuestDefinition quest = QuestManager.Get(this.eventId);
+
             MapNodeManager.Instance.SetAllNodesInteractable(false);
             (GameFlowManager.Instance as Part3GameFlowManager).DisableTransitionToFirstPerson = true;
             ViewManager.Instance.Controller.LockState = ViewLockState.Locked;
-            P03ModularNPCFace.Instance.SetNPCFace(this.npcCode);
+
+            NPCDescriptor npc = NPCDescriptor.GetDescriptorForNPC(this.eventId);
+            P03ModularNPCFace.Instance.SetNPCFace(npc.faceCode);
+
             yield return HoloGameMap.Instance.FlickerHoloElements(false, 1);
             ViewManager.Instance.SwitchToView(View.P03Face, false, false);
             yield return new WaitForSeconds(0.1f);
             P03AnimationController.Instance.SwitchToFace(this.face, true, true);
             yield return new WaitForSeconds(0.1f);
-            yield return TextDisplayer.Instance.PlayDialogueEvent(this.dialogueId, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
-            int nullNumber = 0;
-            int notNullNumber = 0;
-
-            foreach (var i in DialogueDataUtil.Data.events)
-            {
-                Debug.Log($"{i != null} {i?.id}");
-
-                if (i != null)
-                {
-                    notNullNumber++;
-                }
-                else
-                {
-                    nullNumber++;
-                }
-            }
-
-            //Debug.Log("Null: " + nullNumber);
-            //Debug.Log("NotNull: " + notNullNumber);
-
+            // Need to play the dialogue associated with the current state of the quest
+            yield return TextDisplayer.Instance.PlayDialogueEvent(quest.CurrentState.DialogueId, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             yield return new WaitForSeconds(0.1f);
 
-            if (this.completeStory != StoryEvent.NUM_EVENTS)
-            {
-                P03Plugin.Log.LogDebug($"Completing story event {this.completeStory}");
-                StoryEventsData.SetEventCompleted(this.completeStory);
-            }
+            // Now we advance the quest if necessary (if this is an autocomplete quest state)
+            if (quest.CurrentState.AutoComplete)
+                quest.CurrentState.Status = QuestState.QuestStateStatus.Success;
+            
+            // Now we play all quest rewards that haven't yet been granted
+            ViewManager.Instance.SwitchToView(View.Default);
+            yield return quest.GrantAllUngrantedRewards();
 
-            if (this.currencyReward != 0)
-            {
-                P03AnimationController.Face currentFace = P03AnimationController.Instance.CurrentFace;
-                View currentView = ViewManager.Instance.CurrentView;
-                yield return new WaitForSeconds(0.4f);
-                yield return P03AnimationController.Instance.ShowChangeCurrency(this.currencyReward, true);
-                Part3SaveData.Data.currency += this.currencyReward;
-                yield return new WaitForSeconds(0.2f);
-                P03AnimationController.Instance.SwitchToFace(currentFace);
-                yield return new WaitForSeconds(0.1f);
-                ViewManager.Instance.SwitchToView(currentView, false, false);
-                yield return new WaitForSeconds(0.2f);
-            }
-
-            if (!string.IsNullOrEmpty(this.cardReward))
-            {
-                Part3SaveData.Data.deck.AddCard(CardLoader.GetCardByName(this.cardReward));
-            }
-
-            if (!string.IsNullOrEmpty(this.loseCardReward))
-            {
-                Part3SaveData.Data.deck.RemoveCardByName(this.loseCardReward);
-            }
-
-            if (!string.IsNullOrEmpty(this.loseItemReward))
-            {
-                if (Part3SaveData.Data.items.Contains(this.loseItemReward))
-                {
-                    ItemSlot slot = ItemsManager.Instance.Slots.First(s => s.Item != null && s.Item.name.Equals(this.loseItemReward));
-
-                    View currentView = ViewManager.Instance.CurrentView;
-                    yield return new WaitForEndOfFrame();
-                    ViewManager.Instance.SwitchToView(View.ConsumablesOnly, false, true);
-                    yield return new WaitForSeconds(0.8f);
-                    slot.Item.PlayExitAnimation();
-                    yield return new WaitForSeconds(1f);
-                    ItemsManager.Instance.RemoveItemFromSaveData(this.loseItemReward);
-                    slot.DestroyItem();
-                    ViewManager.Instance.SwitchToView(currentView, false, false);
-                    yield return new WaitForSeconds(0.2f);
-                }
-            }
-
-            if (!string.IsNullOrEmpty(this.gainItemReward))
-            {
-                if (Part3SaveData.Data.items.Count < P03AscensionSaveData.MaxNumberOfItems)
-                {
-                    View currentView = ViewManager.Instance.CurrentView;
-                    yield return new WaitForEndOfFrame();
-                    ViewManager.Instance.SwitchToView(View.ConsumablesOnly, false, true);
-                    yield return new WaitForSeconds(0.8f);
-                    Part3SaveData.Data.items.Add(this.gainItemReward);
-                    yield return new WaitForEndOfFrame();
-                    ItemsManager.Instance.UpdateItems(false);
-                    yield return new WaitForSeconds(1f);
-                    ViewManager.Instance.SwitchToView(currentView, false, false);
-                    yield return new WaitForSeconds(0.2f);
-                }
-            }
-
-            EventManagement.GrantSpecialReward(this.specialReward);
+            // Reset back to normal game state
             ViewManager.Instance.SwitchToView(View.MapDefault, false, false);
             yield return new WaitForSeconds(0.15f);
             HoloGameMap.Instance.StartCoroutine(HoloGameMap.Instance.FlickerHoloElements(true, 2));
@@ -151,7 +80,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             (GameFlowManager.Instance as Part3GameFlowManager).DisableTransitionToFirstPerson = false;
             ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
 
-            if (this.completeAfter)
+            P03Plugin.Log.LogDebug($"After dialogue, the current state of the quest is {quest.CurrentState.StateName} with a status of {quest.CurrentState.Status}. Is the quest completed? {quest.IsCompleted}");
+            
+            if (quest.IsCompleted)
             {
                 this.SetCompleted();
                 if (this.npc != null)
@@ -163,87 +94,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield break;
         }
 
-        protected virtual void DetermineDialogue()
-        {
-            this.repeatable = true;
-            foreach(string rule in dialogueRules)
-            {
-                P03Plugin.Log.LogDebug($"Rule string: {rule}");
-
-                Debug.Log("TRIGGERED");
-
-                string[] ruleSplit = rule.Split(',');
-                StoryEvent preRequisite = (StoryEvent)int.Parse(ruleSplit[0]);
-                StoryEvent antiPreRequisite = (StoryEvent)int.Parse(ruleSplit[1]);
-                StoryEvent completeStory = (StoryEvent)int.Parse(ruleSplit[3]);
-                string dialogueEvent = ruleSplit[2];
-                int currency = int.Parse(ruleSplit[4]);
-                string cardReward = ruleSplit[5];
-                string loseCardReward = ruleSplit[6];
-                string gainItem = ruleSplit[7];
-                string loseItem = ruleSplit[8];
-                bool completeAFter = bool.Parse(ruleSplit[9]);
-                string npcCode = ruleSplit[10];
-                EventManagement.SpecialReward reward = (EventManagement.SpecialReward)int.Parse(ruleSplit[11]);
-                string floatingLabel = ruleSplit[12];
-
-                if (((int)preRequisite == (int)StoryEvent.NUM_EVENTS || StoryEventsData.EventCompleted(preRequisite)) &&
-                    ((int)antiPreRequisite == (int)StoryEvent.NUM_EVENTS || !StoryEventsData.EventCompleted(antiPreRequisite)))
-                {
-                    this.dialogueId = dialogueEvent;
-                    this.completeStory = completeStory;
-                    this.currencyReward = currency;
-                    this.cardReward = cardReward;
-                    this.loseCardReward = loseCardReward;
-                    this.gainItemReward = gainItem;
-                    this.loseItemReward = loseItem;
-                    this.completeAfter = completeAFter;
-                    this.npcCode = npcCode;
-                    this.specialReward = reward;
-                    this.floatingLabelText = floatingLabel;
-                    return;
-                }
-            }
-        }
-
-        public void SetDialogueRule(string dialogueEvent, string floatingLabel, EventManagement.SpecialEvent specialEvent, StoryEvent preRequisite = StoryEvent.NUM_EVENTS, StoryEvent antiPreRequisite = StoryEvent.NUM_EVENTS, StoryEvent completeStory = StoryEvent.NUM_EVENTS, int completedCurrencyReward = 0, string completedCardReward = "", string loseCardReward = "", string gainItemReward = "", string loseItemReward = "", bool completeAfter = false, EventManagement.SpecialReward specialReward = EventManagement.SpecialReward.None)
-        {
-            string npcCode = EventManagement.GetDescriptorForNPC(specialEvent).faceCode;
-            dialogueRules.Add($"{(int)preRequisite},{(int)antiPreRequisite},{dialogueEvent},{(int)completeStory},{completedCurrencyReward},{completedCardReward},{loseCardReward},{gainItemReward},{loseItemReward},{completeAfter},{npcCode},{(int)specialReward},{floatingLabel}");
-        }
-
         [SerializeField]
-        public List<string> dialogueRules = new();
-
-        [SerializeField]
-        public StoryEvent completeStory;
-
-        [SerializeField]
-        public int currencyReward;
-
-        [SerializeField]
-        public string cardReward;
-        
-        [SerializeField]
-        public string gainItemReward;
-
-        [SerializeField]
-        public string loseItemReward;
-
-        [SerializeField]
-        public string loseCardReward;
-
-        [SerializeField]
-        public bool completeAfter;
-
-        [SerializeField]
-        public string npcCode;
-
-        [SerializeField]
-        public EventManagement.SpecialReward specialReward;
-
-        [SerializeField]
-        public string floatingLabelText;
+        public SpecialEvent eventId;
 
         [SerializeField]
         public HoloFloatingLabel label;

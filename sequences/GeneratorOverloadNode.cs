@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03KayceeRun.Quests;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
@@ -9,7 +10,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     {
         private void SetThingsActive()
         {
-            bool generatorAlive = !StoryEventsData.EventCompleted(EventManagement.GENERATOR_FAILURE);
+            QuestState genState = DefaultQuestDefinitions.BrokenGenerator.InitialState;
+            bool generatorAlive = genState.Status == QuestState.QuestStateStatus.NotStarted || genState.Status == QuestState.QuestStateStatus.Active;
             
             foreach (GameObject obj in LivingGeneratorPieces)
                 obj.SetActive(generatorAlive);

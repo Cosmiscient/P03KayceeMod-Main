@@ -5,6 +5,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03KayceeRun.Quests;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
@@ -80,12 +81,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             while (items.Count > 3)
                 items.RemoveAt(SeededRandom.Range(0, items.Count, randomSeed++));
 
-            if (StoryEventsData.EventCompleted(EventManagement.TALKED_TO_GOOBERTS_FRIEND) && 
-                !StoryEventsData.EventCompleted(EventManagement.SAW_GOOBERT_AT_SHOP_NODE) &&
+            // If the goobert quest has progressed to the point where it is supposed to be available to buy, force it to appear
+            if (DefaultQuestDefinitions.FindGoobert.CurrentState.StateName == "GoobertAvailable"
+                && DefaultQuestDefinitions.FindGoobert.CurrentState.Status == QuestState.QuestStateStatus.Active &&
                 EventManagement.CompletedZones.Count == 0) // Can only do this at the first zone
             {
                 items[2] = GoobertHuh.ItemData.name;
-                StoryEventsData.SetEventCompleted(EventManagement.SAW_GOOBERT_AT_SHOP_NODE);
             }
 
             return items.Select(ItemsUtil.GetConsumableByName).ToList();
@@ -117,12 +118,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             if (selectedSlot.Item.Data.name.Equals(GoobertHuh.ItemData.name))
             {
+                // If you buy Goobert, you "succeed" at that state of the quest
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03Wut", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
-                StoryEventsData.SetEventCompleted(EventManagement.BOUGHT_GOOBERT);
+                DefaultQuestDefinitions.FindGoobert.CurrentState.Status = QuestState.QuestStateStatus.Success;
             }
             else if (this.slots[2].Item.Data.name.Equals(GoobertHuh.ItemData.name))
             {
-                StoryEventsData.SetEventCompleted(EventManagement.DID_NOT_BUY_GOOBERT);
+                // If you fail to buy Goobert, you "fail" at that state of the quest
+                yield return DefaultQuestDefinitions.FindGoobert.CurrentState.Status = QuestState.QuestStateStatus.Failure;
             }
 
             RuleBookController.Instance.SetShown(false);

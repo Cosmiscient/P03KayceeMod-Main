@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Quests;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -37,7 +38,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public int encounterDifficulty;
         public bool isSecretRoom;
 
-        public EventManagement.SpecialEvent dialogueEvent;
+        public SpecialEvent dialogueEvent;
 
         public int encounterIndex;
 
@@ -71,7 +72,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // From this point forward, extensions to the blueprint HAVE TO CHECK AND HAVE DEFAULTS
             // because we have to be backwards compatible
-            dialogueEvent = (EventManagement.SpecialEvent)(split.Length > 14 ? int.Parse(split[14]) : 0);
+            dialogueEvent = (SpecialEvent)(split.Length > 14 ? int.Parse(split[14]) : 0);
             secretDirection = split.Length > 15 ? int.Parse(split[15]) : 0;
             isSecretRoom = split.Length > 16 ? bool.Parse(split[16]) : false;
             encounterIndex = split.Length > 17 ? int.Parse(split[17]) : -1;
@@ -95,7 +96,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             get
             {
-                return this.dialogueEvent == EventManagement.SpecialEvent.None;
+                return this.dialogueEvent == SpecialEvent.None;
             }
         }
 

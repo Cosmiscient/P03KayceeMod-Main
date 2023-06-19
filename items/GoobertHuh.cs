@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Patchers;
@@ -7,6 +8,7 @@ using InscryptionAPI.Items;
 using InscryptionAPI.Items.Extensions;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Resource;
+using Infiniscryption.P03KayceeRun.Quests;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
@@ -16,21 +18,24 @@ namespace Infiniscryption.P03KayceeRun.Items
 
         internal static Tuple<Color, string> GetGoobertRulebookDialogue()
         {
-            if (StoryEventsData.EventCompleted(EventManagement.SAW_GOOBERT_AT_SHOP_NODE))
-            {
-                if (Part3SaveData.Data.items.Contains(ItemData.name))
+            // We look at the name of the current state of the goobert quest to figure out what to display in the rulebook
+            QuestState goobertState = DefaultQuestDefinitions.FindGoobert.CurrentState;
+
+            if (goobertState == DefaultQuestDefinitions.FindGoobert.InitialState || goobertState.StateName.EndsWith("P03WhereIsGoobert"))
+                return new (GameColors.Instance.brightLimeGreen, "Please! You've got to help me get out of here!");
+
+            if (Part3SaveData.Data.items.Contains(ItemData.name))
                     return new (GameColors.Instance.brightLimeGreen, "Thank you! I hope he doesn't notice me here...");
 
-                if (StoryEventsData.EventCompleted(EventManagement.FLUSHED_GOOBERT))
-                    return new (GameColors.Instance.brightBlue, "You're a heartless bastard, aren't you?");
+            if (DefaultQuestDefinitions.FindGoobert.CurrentState.StateName.ToLowerInvariant().EndsWith("P03GoobertHome"))
+                return new (GameColors.Instance.brightLimeGreen, "Thank you!");
 
-                if (StoryEventsData.EventCompleted(EventManagement.SAVED_GOOBERT))
-                    return new (GameColors.Instance.brightLimeGreen, "Thank you!");
+            // Okay, you only get to this point if you've bought goobert but don't have him anymore.
+            // If he's in your collection as a card, we'll say something different
+            if (Part3SaveData.Data.deck.Cards.Any(c => c.name == CustomCards.MYCO_CONSTRUCT_BASE))
+                return new (GameColors.Instance.brightLimeGreen, "So much power, but so much pain...");
 
-                if (StoryEventsData.EventCompleted(EventManagement.LOST_GOOBERT))
-                    return new (GameColors.Instance.brightBlue, "I took care of him for you. You're welcome. I can't believe you wasted your money on that idiot.");
-            }
-            return new (GameColors.Instance.brightLimeGreen, "Please! You've got to help me get out of here!");
+            return new (GameColors.Instance.brightBlue, "Good riddance to that little freak.");
         }
 
         public static GameObject GetGameObject()
@@ -73,8 +78,10 @@ namespace Infiniscryption.P03KayceeRun.Items
             yield return new WaitForSeconds(0.1f);
             yield return new WaitForSeconds(0.3f);
             ViewManager.Instance.SwitchToView(View.Default, false, false);
-            StoryEventsData.SetEventCompleted(EventManagement.LOST_GOOBERT);
-            StoryEventsData.SetEventCompleted(EventManagement.HAS_NO_GOOBERT);
+
+            // Mark the quest as a failure - you lost Goobert.
+            DefaultQuestDefinitions.FindGoobert.CurrentState.Status = QuestState.QuestStateStatus.Failure;
+            
             this.PlayExitAnimation();
             yield break;
         }
