@@ -154,7 +154,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
             // I Love Bones
             ILoveBones = QuestManager.Add(P03Plugin.PluginGuid, "I Love Bones");
-            ILoveBones.AddDialogueState("I LOVE BONES!!", "P03ILoveBones")
+            ILoveBones.SetRegionCondition(RunBasedHoloMap.Zone.Undead)
+                      .AddDialogueState("I LOVE BONES!!", "P03ILoveBones")
                       .SetDynamicStatus(() => {
                         if (Part3SaveData.Data.deck.Cards.Where(
                             c => c.HasAbility(Ability.Brittle) || c.HasAbility(Ability.PermaDeath) || c.HasAbility(NewPermaDeath.AbilityID)
