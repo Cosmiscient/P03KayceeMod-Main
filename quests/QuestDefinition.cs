@@ -123,8 +123,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     return false;
 
                 // Is this quest completed? If so, we can't generate it again
-                QuestState current = this.CurrentState;
-                if (current.Status == QuestState.QuestStateStatus.Success || current.Status == QuestState.QuestStateStatus.Failure)
+                if (this.QuestGenerated)
                     return false;
 
                 // Does this quest have a prior? If so, no. You can't randomly select this
