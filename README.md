@@ -156,7 +156,7 @@ While the full credits will play in-game when you win for the first time, I have
 - There is now an animation for whenever a quest reward involves cards in your deck (to show you what's actually changed).
 - The data cube is now functional during a damage race battle.
 - NFTs should now be unique.
-- The entire quest system was rewritten and now supports adding custom quests via an API.
+- The entire quest system was rewritten and now supports adding custom quests via an API (see included QuestAPI.md file for full documentation)
 
 3.0.2
 - Bosses now make you pay double your respawn fee after increasing it
