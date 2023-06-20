@@ -451,20 +451,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 .temple = CardTemple.Tech;
 
             //NEW BEAST CARDS
-            CardManager.New(P03Plugin.CardPrefx, "RoboRiverSnapper", "R!V3R 5N4PP3R", 1, 6)
+            CardManager.New(P03Plugin.CardPrefx, "CXformerRiverSnapper", "R!V3R 5N4PP3R", 1, 6)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_riversnapper.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 5)
                 .AddMetaCategories(NewBeastTransformers)
                 .temple = CardTemple.Tech;
 
-            CardManager.New(P03Plugin.CardPrefx, "RoboMole", "M013", 0, 4)
+            CardManager.New(P03Plugin.CardPrefx, "CXformerMole", "M013", 0, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_mole.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 4)
                 .AddAbilities(Ability.WhackAMole)
                 .AddMetaCategories(NewBeastTransformers)
                 .temple = CardTemple.Tech;
 
-            CardManager.New(P03Plugin.CardPrefx, "RoboRabbit", "R488!7", 0, 1)
+            CardManager.New(P03Plugin.CardPrefx, "CXformerRabbit", "R488!7", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_rabbit.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 0)
                 .AddMetaCategories(NewBeastTransformers)

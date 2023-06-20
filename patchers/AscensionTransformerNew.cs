@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
@@ -137,6 +138,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        [HarmonyPatch(typeof(Transformer))]
+        [HarmonyPatch("GetTransformCardInfo")]
+        [HarmonyPrefix]
+        private static bool FixCXFormer(ref Transformer __instance, ref CardInfo __result)
+        {
+            if (__instance.Card.Info.name.Contains("CXformer"))
+            {
+                __result = __instance.Card.Info.evolveParams.evolution.Clone() as CardInfo;
+                return false;
+            }
+
+            return true;
+        }
+
+
         private static int getCardAdjustment(bool energyChange, string beastCardName)
         {
             int cardEnergyChange = 0;
@@ -165,21 +181,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         break;
                     }
 
-                case "P03KCM_RoboRiverSnapper":
+                case "P03KCM_CXformerRiverSnapper":
                     {
                         cardEnergyChange = 1;
                         cardHealthChange = 4;
                         break; 
                     }
 
-                case "P03KCM_RoboMole":
+                case "P03KCM_CXformerMole":
                     {
                         cardEnergyChange = 1;
                         cardHealthChange = 2;
                         break;
                     }
 
-                case "P03KCM_RoboRabbit":
+                case "P03KCM_CXformerRabbit":
                     {
                         cardEnergyChange = -2;
                         cardHealthChange = 0;
