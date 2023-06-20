@@ -1,6 +1,8 @@
 # P03 Kaycee's Mod
 ## Version 3.0: The Challenge Update
 
+**Join our Discord!! [https://discord.gg/PxCHsKtfGc](https://discord.gg/PxCHsKtfGc)**
+
 **Check out this super spicy 720p trailer made in a free video editor**
 
 [![SUPER SPICY 720p TRAILER](https://img.youtube.com/vi/f68rs2rJ_jM/0.jpg)](https://www.youtube.com/watch?v=f68rs2rJ_jM)
