@@ -131,7 +131,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     .AddDialogueState("SPARE SOME CASH?", "P03DonationComplete")
                     .AddMonetaryReward(-10);
 
-            DonationPartTwo = QuestManager.Add(P03Plugin.PluginGuid, "DonationPartTwo");
+            DonationPartTwo = QuestManager.Add(P03Plugin.PluginGuid, "DonationPartTwo").SetPriorQuest(Donation);
             DonationPartTwo.AddDialogueState("THANK YOU!", "P03DonationReward").AddGemifyCardsReward(2);
 
             // Fully Upgraded

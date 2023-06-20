@@ -327,7 +327,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.UNC_TOKEN));
 
                 
-                // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));
+                __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));
 
                 // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));
                 // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));

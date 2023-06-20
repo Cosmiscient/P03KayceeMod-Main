@@ -120,6 +120,14 @@ namespace Infiniscryption.P03KayceeRun.Quests
             card.Anim.PlayPermaDeathAnimation();
             yield break;
         }
+
+        public override IEnumerator GrantReward()
+        {
+            if (!Part3SaveData.Data.deck.Cards.Any(c => c.name == this.CardName))
+                yield break;
+
+            yield return base.GrantReward();
+        }
     }
 
     public class QuestRewardItem : QuestReward

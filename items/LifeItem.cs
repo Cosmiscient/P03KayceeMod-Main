@@ -89,7 +89,10 @@ namespace Infiniscryption.P03KayceeRun.Items
         {
             base.PlayExitAnimation();
             yield return new WaitForSeconds(0.5f);
-            yield return LifeManager.Instance.ShowDamageSequence(2, 1, false, 0f, ResourceBank.Get<GameObject>("Prefabs/Environment/ScaleWeights/Weight_DataFile_KB"), 0.1f);
+            if (TurnManager.Instance.SpecialSequencer != null && TurnManager.Instance.SpecialSequencer is DamageRaceBattleSequencer)
+                TurnManager.Instance.SpecialSequencer.DamageAddedToScale(2, true);
+            else
+                yield return LifeManager.Instance.ShowDamageSequence(2, 1, false, 0f, ResourceBank.Get<GameObject>("Prefabs/Environment/ScaleWeights/Weight_DataFile_KB"), 0.1f);
             yield return new WaitForSeconds(0.5f);
             ViewManager.Instance.SwitchToView(View.Default);
             yield return EventManagement.SayDialogueOnce("P03AscensionLifeItem", EventManagement.USED_LIFE_ITEM);

@@ -124,6 +124,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 CardModificationInfo cardMod = new();
                 cardMod.abilities = new List<Ability>(abilities);
+                cardMod.energyCostAdjustment = abilities.Count;
                 baseCard.mods.Add(cardMod);
             }
 

@@ -9,11 +9,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 {
     public class TelegrapherAscensionSequencer : TelegrapherBattleSequencer
     {
-        private static string[] APE_ADJECTIVES = new string[] { "Bored", "Annoyed", "Sexy", "Tech", "Broseph", "Overgrown", "Fancy", "Expensive", "Scandalous", "Medium", "Personal", "Non-Fungible", "Trimmed", "Golly", "Devious", "Grape"};
+        private static string[] APE_ADJECTIVES = new string[] { "Fungible", "Terminally Online", "AI Generated", "Wholesome", "Investment", "Inquisitive", "Endangered", "Bored", "Annoyed", "Sexy", "Tech", "Broseph", "Overgrown", "Fancy", "Expensive", "Scandalous", "Medium", "Personal", "Non-Fungible", "Trimmed", "Golly", "Devious", "Grape"};
 
         private static Sprite[] APE_PORTRATS;
         private const int NUMBER_OF_APES = 5;
         private int apesCreated = 0;
+        private static List<string> apeAdjectivesRemaining = new(APE_ADJECTIVES);
 
         private bool introducedNFTs = false;
 
@@ -27,13 +28,21 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private static CardInfo GenerateStupidAssApe(int statPoints)
         {
+            // Sort out the name
+            if (apeAdjectivesRemaining.Count == 0)
+                apeAdjectivesRemaining = new (APE_ADJECTIVES);
+
             CardInfo cardByName = CardLoader.GetCardByName(CustomCards.NFT);
 
             int seed = P03AscensionSaveData.RandomSeed + 100 * TurnManager.Instance.TurnNumber;
+
+            int apeNameIndex = SeededRandom.Range(0, APE_ADJECTIVES.Length, seed++);
+            string apeName = apeAdjectivesRemaining[apeNameIndex];
+            apeAdjectivesRemaining.RemoveAt(apeNameIndex);
             
             List<AbilityInfo> validAbilities = ScriptableObjectLoader<AbilityInfo>.AllData.FindAll((AbilityInfo x) => x.metaCategories.Contains(AbilityMetaCategory.BountyHunter));
             CardModificationInfo cardModificationInfo = CardInfoGenerator.CreateRandomizedAbilitiesStatsMod(validAbilities, statPoints, 1, 1);
-            cardModificationInfo.nameReplacement = Localization.Translate(APE_ADJECTIVES[SeededRandom.Range(0, APE_ADJECTIVES.Length, seed++)]) + " " + Localization.Translate("Ape");
+            cardModificationInfo.nameReplacement = Localization.Translate(apeName + " " + "Ape");
             cardModificationInfo.energyCostAdjustment = statPoints / 2;
             cardByName.Mods.Add(cardModificationInfo);
             return cardByName;
