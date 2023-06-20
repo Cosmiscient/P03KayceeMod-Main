@@ -218,7 +218,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             waitingState.AddDialogueState("MY FRIEND IS LOST", "P03DidNotBuyGoobert", QuestState.QuestStateStatus.Failure);
 
             // When you buy goobert, you end up here
-            QuestState boughtState = waitingState.AddNamedState("CarryingGoobert", $"P03FoundGoobert{GoobertDropoffZone.ToString()}", "YOU FOUND HIM!");
+            QuestState boughtState = waitingState.AddNamedState("CarryingGoobert", "YOU FOUND HIM!", $"P03FoundGoobert{GoobertDropoffZone.ToString()}");
             boughtState.SetDynamicStatus(() => {
                 if (!Part3SaveData.Data.items.Any(item => GoobertHuh.ItemData.name.ToLowerInvariant() == item.ToLowerInvariant()))
                     return QuestState.QuestStateStatus.Failure;
