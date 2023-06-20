@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -95,6 +96,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        //[HarmonyPatch(typeof(CreateTransformerSequencer))]
+        //[HarmonyPatch("OnEndModSelection")]
+        //[HarmonyPrefix]
+        //private static void HealthEnergyFix(CreateTransformerSequencer __instance)
+        //{
+
+        //}
 
         [HarmonyPatch(typeof(CreateTransformerSequencer))]
         [HarmonyPatch("UpdateModChoices")]
@@ -136,6 +144,35 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 return;
             }
+        }
+
+        [HarmonyPatch(typeof(DeckInfo), nameof(DeckInfo.ModifyCard))]
+        [HarmonyPrefix]
+        internal static bool SplitTransformerMods(DeckInfo __instance, CardInfo card, CardModificationInfo mod)
+        {
+            if (mod.HasAbility(Ability.Transformer))
+            {
+                if (mod.healthAdjustment != 0 || mod.attackAdjustment != 0 || mod.energyCostAdjustment != 0)
+                {
+                    // Split the mod into two mods, where the mod effects that would stack are not copyable
+                    CardModificationInfo newMod = new();
+                    newMod.healthAdjustment = mod.healthAdjustment;
+                    newMod.attackAdjustment = mod.attackAdjustment;
+                    newMod.energyCostAdjustment = mod.energyCostAdjustment;
+                    newMod.nonCopyable = true;
+
+                    mod.healthAdjustment = 0;
+                    mod.attackAdjustment = 0;
+                    mod.energyCostAdjustment = 0;
+
+                    card.Mods.Add(mod);
+                    card.Mods.Add(newMod);
+
+                    __instance.UpdateModDictionary();
+                    return false;
+                }
+            }
+            return true;
         }
 
         [HarmonyPatch(typeof(Transformer))]

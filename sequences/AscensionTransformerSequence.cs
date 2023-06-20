@@ -320,43 +320,43 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return true;
         }
 
-        [HarmonyPatch(typeof(Transformer), nameof(Transformer.GetTransformCardInfo))]
-        [HarmonyPrefix]
-        public static bool GetAndBuildSpecialTransformerCardInfo(ref Transformer __instance, ref CardInfo __result)
-        {
-            CardModificationInfo cardModificationInfo = __instance.Card.Info.Mods.Find(m => !string.IsNullOrEmpty(m.transformerBeastCardId));
-            if (cardModificationInfo != null && cardModificationInfo.transformerBeastCardId[0] == '@')
-            {
-                __result = CustomCards.ConvertCodeToCard(cardModificationInfo.transformerBeastCardId);
+        //[HarmonyPatch(typeof(Transformer), nameof(Transformer.GetTransformCardInfo))]
+        //[HarmonyPrefix]
+        //public static bool GetAndBuildSpecialTransformerCardInfo(ref Transformer __instance, ref CardInfo __result)
+        //{
+        //    CardModificationInfo cardModificationInfo = __instance.Card.Info.Mods.Find(m => !string.IsNullOrEmpty(m.transformerBeastCardId));
+        //    if (cardModificationInfo != null && cardModificationInfo.transformerBeastCardId[0] == '@')
+        //    {
+        //        __result = CustomCards.ConvertCodeToCard(cardModificationInfo.transformerBeastCardId);
 
-                // Beast mod mod
-                CardModificationInfo bMod = Transformer.GetBeastModeStatsMod(__result, __instance.Card.Info);
-                bMod.nameReplacement = __instance.Card.Info.DisplayedNameLocalized;
-                bMod.nonCopyable = true;
-                __result.mods.Add(bMod);
+        //        // Beast mod mod
+        //        CardModificationInfo bMod = Transformer.GetBeastModeStatsMod(__result, __instance.Card.Info);
+        //        bMod.nameReplacement = __instance.Card.Info.DisplayedNameLocalized;
+        //        bMod.nonCopyable = true;
+        //        __result.mods.Add(bMod);
 
-                // Transformer info
-                __result.mods.Add(new(Ability.Transformer));
+        //        // Transformer info
+        //        __result.mods.Add(new(Ability.Transformer));
 
-                // Set Evolve
-                __result.evolveParams = new ();
-                __result.evolveParams.evolution = __instance.Card.Info;
-                __result.evolveParams.turnsToEvolve = 1;
+        //        // Set Evolve
+        //        __result.evolveParams = new ();
+        //        __result.evolveParams.evolution = __instance.Card.Info;
+        //        __result.evolveParams.turnsToEvolve = 1;
 
-                return false;
-            }
+        //        return false;
+        //    }
 
-            if (__instance.Card.Info.evolveParams != null && __instance.Card.Info.evolveParams.evolution != null)
-            {
-                __result = __instance.Card.Info.evolveParams.evolution.Clone() as CardInfo;
-                CardModificationInfo evolutionTargetTransformationMod = __instance.Card.Info.evolveParams.evolution.Mods.Find(m => !string.IsNullOrEmpty(m.transformerBeastCardId));
-                if (evolutionTargetTransformationMod != null)
-                    __result.mods.Add(evolutionTargetTransformationMod);
+        //    if (__instance.Card.Info.evolveParams != null && __instance.Card.Info.evolveParams.evolution != null)
+        //    {
+        //        __result = __instance.Card.Info.evolveParams.evolution.Clone() as CardInfo;
+        //        CardModificationInfo evolutionTargetTransformationMod = __instance.Card.Info.evolveParams.evolution.Mods.Find(m => !string.IsNullOrEmpty(m.transformerBeastCardId));
+        //        if (evolutionTargetTransformationMod != null)
+        //            __result.mods.Add(evolutionTargetTransformationMod);
 
-                return false;
-            }
+        //        return false;
+        //    }
 
-            return true;
-        }
+        //    return true;
+        //}
     }
 }
