@@ -3,6 +3,7 @@ using DiskCardGame;
 using HarmonyLib;
 using System.Collections.Generic;
 using System;
+using System.IO;
 using InscryptionAPI.Guid;
 using System.Linq;
 using Infiniscryption.P03KayceeRun.Cards;
@@ -21,6 +22,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly CardMetaCategory TechRegion = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "TechRegionCards");
         public static readonly CardMetaCategory NatureRegion = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "NatureRegionCards");
         public static readonly CardMetaCategory UndeadRegion = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "UndeadRegionCards");
+
+        public static readonly CardMetaCategory NewBeastTransformers = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "NewBeastTransformers");
 
         public static readonly Trait Unrotateable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "Unrotateable");
 
@@ -63,7 +66,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (P03AscensionSaveData.IsP03Run || ScreenManagement.ScreenState == CardTemple.Tech)
             {
-                //Debug.Log(__result.name);
 
                 string compName = __result.name.ToLowerInvariant();
                 if (compName.StartsWith("sentinel") || __result.name == "TechMoxTriple")
@@ -140,6 +142,92 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     __result.appearanceBehaviour.Add(EnergyConduitAppearnace.ID);
                 }
             }
+        }
+
+        public static void printAllCards()
+        {
+            List<string> cardDataList = new List<string>();
+            List<CardInfo> cardList = new List<CardInfo>();
+            cardList = CardLoader.AllData;
+
+            foreach (CardInfo card in cardList)
+            {
+                if ((card.HasCardMetaCategory(UndeadRegion)) || (card.HasCardMetaCategory(TechRegion)) || (card.HasCardMetaCategory(WizardRegion)) || (card.HasCardMetaCategory(NatureRegion)) || (card.HasCardMetaCategory(NeutralRegion)))
+                {
+                    if ((card.temple == CardTemple.Tech))
+                    {
+                        string cardData = "";
+
+                        cardData += string.Format("\n\nInternal Name: {0}\n", card.name);
+                        cardData += string.Format("Displayed Name: {0}\n", card.displayedName);
+                        cardData += string.Format("Stats: {0}/{1}\n", card.Attack, card.Health);
+                        cardData += string.Format("Energy: {0}\n", card.EnergyCost);
+
+                        bool isRare = card.HasCardMetaCategory(CardMetaCategory.Rare);
+
+                        cardData += string.Format("Rare: {0}\n", isRare);
+
+                        foreach (Ability ab in card.abilities)
+                        {
+                            cardData += string.Format("Sigil: {0}\n", ab);
+                        }
+
+                        if (card.HasCardMetaCategory(NeutralRegion))
+                        {
+                            cardData += "Region: Neutral\n";
+                        }
+
+                        if (card.HasCardMetaCategory(UndeadRegion))
+                        {
+                            cardData += "Region: Undead\n";
+                        }
+
+                        if (card.HasCardMetaCategory(NatureRegion))
+                        {
+                            cardData += "Region: Nature\n";
+                        }
+
+                        if (card.HasCardMetaCategory(WizardRegion))
+                        {
+                            cardData += "Region: Wizard\n";
+                        }
+
+                        if (card.HasCardMetaCategory(TechRegion))
+                        {
+                            cardData += "Region: Tech\n";
+                        }
+
+                        if (card.name.Contains("P03KCM_"))
+                        {
+                            cardData += "Source: New P03 KCM Card\n";
+                        }
+
+                        if (card.name.Contains("P03KCMXP1_"))
+                        {
+                            cardData += "Source: Expansion Pack 1 Card\n";
+                        }
+
+                        if (card.name.Contains("P03KCMXP2_"))
+                        {
+                            cardData += "Source: Expansion Pack 2 Card\n";
+                        }
+
+                        if (!(card.name.Contains("P03KCMXP1_")) && !(card.name.Contains("P03KCMXP2_")) && !(card.name.Contains("P03KCM_")))
+                        {
+                            cardData += "Source: Base Game Card\n";
+                        }
+
+                        // Add the card data to the list
+                        cardDataList.Add(cardData);
+                    }
+                }
+            }
+
+            foreach (string cardData in cardDataList)
+            {
+                Console.WriteLine(cardData);
+            }
+
         }
 
         [HarmonyPatch(typeof(ActivatedRandomPowerEnergy), nameof(ActivatedRandomPowerEnergy.EnergyCost), MethodType.Getter)]
@@ -360,6 +448,26 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             CardManager.New(P03Plugin.CardPrefx, CONTRABAND, "yarr.torrent", 0, 1)
                 .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_captivefile"))
                 .AddAbilities(Ability.PermaDeath)
+                .temple = CardTemple.Tech;
+
+            //NEW BEAST CARDS
+            CardManager.New(P03Plugin.CardPrefx, "RoboRiverSnapper", "R!V3R 5N4PP3R", 1, 6)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_riversnapper.png", typeof(CustomCards).Assembly))
+                .SetCost(energyCost: 5)
+                .AddMetaCategories(NewBeastTransformers)
+                .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, "RoboMole", "M013", 0, 4)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_mole.png", typeof(CustomCards).Assembly))
+                .SetCost(energyCost: 4)
+                .AddAbilities(Ability.WhackAMole)
+                .AddMetaCategories(NewBeastTransformers)
+                .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, "RoboRabbit", "R488!7", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_rabbit.png", typeof(CustomCards).Assembly))
+                .SetCost(energyCost: 0)
+                .AddMetaCategories(NewBeastTransformers)
                 .temple = CardTemple.Tech;
 
             CardInfo radio = CardManager.New(P03Plugin.CardPrefx, RADIO_TOWER, "Radio Tower", 0, 3);

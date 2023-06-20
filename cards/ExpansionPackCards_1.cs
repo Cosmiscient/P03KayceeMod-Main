@@ -270,8 +270,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(RotatingAlarm.AbilityID)
                 .SetExtendedProperty(RotatingAlarm.DEFAULT_STATE_KEY, 3);
 
-            CardManager.New(EXP_1_PREFIX, "RubberDuck", "RU883R DUCK", 3, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_scrapbot.png", typeof(ExpansionPackCards_1).Assembly))
+            CardManager.New(EXP_1_PREFIX, "RubberDuck", "Roboducky", 3, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_roboducky.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRare()
                 .SetRegionalP03Card(CardTemple.Nature)

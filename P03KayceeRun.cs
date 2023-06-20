@@ -72,6 +72,8 @@ namespace Infiniscryption.P03KayceeRun
             AscensionChallengeManagement.UpdateP03Challenges();
             BossManagement.RegisterBosses();
 
+            //CustomCards.printAllCards();
+
             SceneManager.sceneLoaded += this.OnSceneLoaded;
 
             EncounterBlueprintHelper.TestAllKnownEncounterData();
