@@ -1,6 +1,8 @@
 # P03 Kaycee's Mod
 ## Version 3.0: The Challenge Update
 
+**Join our Discord!! [https://discord.gg/PxCHsKtfGc](https://discord.gg/PxCHsKtfGc)**
+
 **Check out this super spicy 720p trailer made in a free video editor**
 
 [![SUPER SPICY 720p TRAILER](https://img.youtube.com/vi/f68rs2rJ_jM/0.jpg)](https://www.youtube.com/watch?v=f68rs2rJ_jM)
@@ -10,19 +12,14 @@ If you enjoyed the energy-based robotic gameplay of Inscryption Act 3 and wished
 Installing this mod will give you the option to play against either Leshy or P03 when you start a new run. Selecting Leshy will give you the standard game you're used to, but selecting P03 will send you to the land of Botopia, where you will draft robotic cards (including all new cards created just for this mod), explore procedurally generated maps, fight off bounty hunters, and purchase upgrades with your hard-earned robobucks. And at the end of it all, P03 is waiting for you in an all-new boss fight.
 
 
-## A Personal Message from DivisionByZ0rro (7/19/2022)
+## A Personal Message from DivisionByZ0rro (6/20/2023)
 
-It's been a while since you've heard from me. Life changes quickly. I got a bad case of Covid, I had family members get seriously injured, and was just generally unavailable for a while. 
+Life really does change quickly. I walked away from this about a year ago, and yet this incredible community of incredibly passionate and creative people have stuck together and kept this thing alive. I'm amazed and humbled.
 
-Working on this and other Inscryption mods has been an amazing collaborative journey over the past months. Ever since I completed Inscryption for the first time in the fall of 2021, I spent all of my spare time (and then some) working on modding this game and being a part of an incredible community. But unfortunately, things change, and I cannot keep this up moving forward. I simply don't have the same amount of spare time that I used to, and it's time for me to move on.
-
-I have nothing but gratitude for everyone who supported me and helped me accomplish what I have been able to accomplish. I know I'm leaving work unfinished, but I know that would be true no matter when I called it quits.
-
-If anybody wants to continue any of my work, I hereby grant unrestricted permission for anyone to fork any of projects and make it their own moving forward. This work was always a passion project for the community, and I would be honored if anyone on the community wanted to continue that work. Please feel free to copy anything I've done and use it for yourself.
+While I have returned to the scene (for at least a little while), I have trasnferred permanent ownership of this over to arcadian.png. I'm sticking around to help with the transition and help sort out (rewrite) some of my crappier code to be more sustainable, but this mod really belongs to the amazing community that has kept the momentum going.
 
 Thanks for everything,
 /0
-
 
 ## How does this mod work?
 
@@ -48,7 +45,6 @@ The runs are still similar to Leshy in significant ways:
 1) You will still start with a draft.
 2) There are a number of starter decks that you can pick from to help guide your selections through the rest of the game.
 3) You must complete four battles against enemies before facing the boss. Once you beat the boss, you're done with that zone and can't go back.
-4) There are now rare cards available to you. You will be given a Rare Token for completing a boss, which you can spend at the draft node to get a rare for your deck.
 
 ### Events
 
@@ -64,6 +60,8 @@ Some events play the same in this mod as they did the first time you played thro
 ### NPCs
 
 New in Version 2.0 - you will now encounter NPcs scattered throughout the map who will give you optional side quests that you can complete for some additional rewards!
+
+New in Version 3.0 - the Quest API is now publicly available for use! See the included QuestAPI.md file for documentation.
 
 ### Challenges
 
@@ -150,6 +148,15 @@ While the full credits will play in-game when you win for the first time, I have
 
 <details>
 <summary>Changelog</summary>
+
+3.0.3
+- Tokens received from the recycler now have an energy cost based on the number of abilities they gain.
+- CellEvolve and CellDeEvolve have proper behaviors for cards that don't have set evolutions.
+- Rare cards are now red instead of gold and have portrait colors to match.
+- There is now an animation for whenever a quest reward involves cards in your deck (to show you what's actually changed).
+- The data cube is now functional during a damage race battle.
+- NFTs should now be unique.
+- The entire quest system was rewritten and now supports adding custom quests via an API (see included QuestAPI.md file for full documentation)
 
 3.0.2
 - Bosses now make you pay double your respawn fee after increasing it

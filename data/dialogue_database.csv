@@ -180,6 +180,8 @@ P03ProspectorReplaceGold,NPC,,Such wonderful [c:G]GOLD[c:]
 ,,,I can make that thing whole again.
 P03ProspectorWantGold,NPC,,Do you know where I could find [c:G]GOLD[c:]?
 ,,,I would so love to make something from some [c:G]gold[c:]
+P03ProspectorNoMoreGold,NPC,,Did...did you lose your [c:G]gold[c:]?
+,,,I would have loved to have made something wonderful from that.
 P03WhiteFlagSetup,NPC,,Are you the one going around here taking care of our robot infestation?
 ,,,Your deck looks really powerful - almost too powerful if you ask me.
 ,,,I wonder - is it possible to convince the robots to [c:bR]give up?[c:]

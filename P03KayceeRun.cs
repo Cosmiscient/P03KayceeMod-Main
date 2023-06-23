@@ -5,6 +5,7 @@ using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03KayceeRun.Quests;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -71,6 +72,7 @@ namespace Infiniscryption.P03KayceeRun
             StarterDecks.RegisterStarterDecks();
             AscensionChallengeManagement.UpdateP03Challenges();
             BossManagement.RegisterBosses();
+            DefaultQuestDefinitions.DefineAllQuests();
 
             //CustomCards.printAllCards();
 

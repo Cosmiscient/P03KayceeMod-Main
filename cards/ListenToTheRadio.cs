@@ -2,6 +2,7 @@ using System.Collections;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03KayceeRun.Quests;
 using InscryptionAPI.Card;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private IEnumerator SayDialogue(string dialogueCode)
         {
-            string faceCode = EventManagement.GetDescriptorForNPC(EventManagement.SpecialEvent.ListenToTheRadio).faceCode;
+            string faceCode = NPCDescriptor.GetDescriptorForNPC(DefaultQuestDefinitions.ListenToTheRadio.EventId).faceCode;
             P03ModularNPCFace.Instance.SetNPCFace(faceCode);
             ViewManager.Instance.SwitchToView(View.P03Face, false, false);
             yield return new WaitForSeconds(0.1f);
@@ -32,19 +33,19 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (!playerUpkeep)
                 yield break;
 
-            if (EventManagement.RadioUpkeepCount >= EventManagement.RADIO_TURNS)
+            if (DefaultQuestDefinitions.ListenToTheRadio.GetQuestCounter() >= DefaultQuestDefinitions.RADIO_TURNS)
                 yield break;
 
-            EventManagement.RadioUpkeepCount += 1;
+            DefaultQuestDefinitions.ListenToTheRadio.IncrementQuestCounter();
 
-            yield return SayDialogue($"P03RadioTower{EventManagement.RadioUpkeepCount}");
+            yield return SayDialogue($"P03RadioTower{DefaultQuestDefinitions.ListenToTheRadio.GetQuestCounter()}");
         }
 
         public override bool RespondsToResolveOnBoard() => true;
 
         public override IEnumerator OnResolveOnBoard()
         {
-            if (EventManagement.RadioUpkeepCount >= EventManagement.RADIO_TURNS)
+            if (DefaultQuestDefinitions.ListenToTheRadio.GetQuestCounter() >= DefaultQuestDefinitions.RADIO_TURNS)
                 yield break;
 
             yield return SayDialogue("P03RadioTowerOnBoard");
@@ -54,13 +55,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
-            if (EventManagement.RadioUpkeepCount >= EventManagement.RADIO_TURNS)
+            if (DefaultQuestDefinitions.ListenToTheRadio.GetQuestCounter() >= DefaultQuestDefinitions.RADIO_TURNS)
                 yield break;
 
             yield return SayDialogue("P03RadioTowerDied");
 
-            if (EventManagement.RadioUpkeepCount > 0)
-                EventManagement.RadioUpkeepCount -= 1;
+            if (DefaultQuestDefinitions.ListenToTheRadio.GetQuestCounter() > 0)
+                DefaultQuestDefinitions.ListenToTheRadio.IncrementQuestCounter(-1);
         }
 
         static ListenToTheRadio()

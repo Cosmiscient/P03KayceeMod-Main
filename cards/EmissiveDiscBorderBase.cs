@@ -6,9 +6,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
 {
     public abstract class EmissiveDiscBorderBase : CardAppearanceBehaviour
     {
-        protected virtual Color EmissionColor { get { return GameColors.Instance.blue; } }
+        public virtual Color EmissionColor { get; set; } = GameColors.Instance.blue;
+        public virtual float Intensity {get; set; } = 0.5f;
 
-        private static readonly string[] GameObjectPaths = new string[]
+        internal static readonly string[] GameObjectPaths = new string[]
         {
             "Anim/CardBase/Rails",
             "Anim/CardBase/Top",
@@ -27,7 +28,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     Material material = renderer.material;
                     material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
                     material.EnableKeyword("_EMISSION");
-                    material.SetColor("_EmissionColor", EmissionColor * 0.5f);
+                    material.SetColor("_EmissionColor", EmissionColor * Intensity);
                 }
             }
         }

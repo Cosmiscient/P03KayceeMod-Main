@@ -8,7 +8,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
     {
         public static CardAppearanceBehaviour.Appearance ID { get; private set; }
 
-        protected override Color EmissionColor { get { return GameColors.Instance.limeGreen; } }
+        public override Color EmissionColor { get { return GameColors.Instance.limeGreen; } }
 
         static GooDiscCardAppearance()
         {

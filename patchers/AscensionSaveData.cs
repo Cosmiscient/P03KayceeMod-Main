@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03KayceeRun.Quests;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -26,7 +27,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                        + 10 * EventManagement.CompletedZones.Count
                        + 100 * EventManagement.VisitedZones.Count
                        + 1000 * EventManagement.NumberOfZoneEnemiesKilled
-                       + 10000 * EventManagement.NumberOfGeneratedNPCs
+                       + 10000 * Part3SaveData.Data.deck.Cards.Select(c => c.Mods.Count).Sum()
                        + Part3SaveData.Data.playerPos.gridX
                        + 100000 * Part3SaveData.Data.playerPos.gridY;
             }
@@ -325,8 +326,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.UNC_TOKEN));
                 // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.UNC_TOKEN));
 
-                
-                // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));
+                if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("rare"))
+                    __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));
 
                 // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));
                 // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));
@@ -357,7 +358,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 {
                     __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.BRAIN));
                     __instance.items[0] = GoobertHuh.ItemData.name;
-                    StoryEventsData.SetEventCompleted(EventManagement.GENERATOR_SUCCESS);
+                    DefaultQuestDefinitions.BrokenGenerator.InitialState.Status = QuestState.QuestStateStatus.Success;
                 }
 
                 if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOUNTY_HUNTER))

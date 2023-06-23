@@ -13,3 +13,5 @@ compiled/
 
 *.dll
 *.pdb
+
+deploy.ps1

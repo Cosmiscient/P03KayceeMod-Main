@@ -4,6 +4,7 @@ using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03KayceeRun.Quests;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
@@ -113,8 +114,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 allowedIntoMycologist = false;
             }
             
-            // Check to see if the player fixed the generator
-            if (StoryEventsData.EventCompleted(EventManagement.GENERATOR_SUCCESS))
+            // Check to see if the player fixed the generator. The generator status is managed in the initial state
+            if (DefaultQuestDefinitions.BrokenGenerator.InitialState.Status == QuestState.QuestStateStatus.Success)
             {
                 yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistPowerSuccess", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             }

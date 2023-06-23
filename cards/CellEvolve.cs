@@ -4,9 +4,12 @@ using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
+using System.Linq;
+using HarmonyLib;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
+    [HarmonyPatch]
 	public class CellEvolve : Evolve
 	{
 		public override Ability Ability => AbilityID;
@@ -37,6 +40,43 @@ namespace Infiniscryption.P03KayceeRun.Cards
 		public override bool RespondsToUpkeep(bool playerUpkeep)
         {
             return base.RespondsToUpkeep(playerUpkeep) && ConduitCircuitManager.Instance.SlotIsWithinCircuit(this.Card.Slot);
+        }
+
+        [HarmonyPatch(typeof(EvolveParams), nameof(EvolveParams.GetDefaultEvolution))]
+        [HarmonyPrefix]
+        internal static bool UpdateDefaultEvolutionWithCellEvolve(CardInfo info, ref CardInfo __result)
+        {
+            if (info.HasAbility(CellEvolve.AbilityID))
+            {
+                CardInfo cardInfo = info.Clone() as CardInfo;
+                CardModificationInfo cardModificationInfo = new CardModificationInfo(0, 0);
+                cardModificationInfo.fromEvolve = true;
+
+                // Make it so the card doesn't copy this mod when it re-evolves
+                cardModificationInfo.nonCopyable = true;
+
+                // If this came from CellEvolve (i.e., the default evolution is de-evolving)
+                // we don't need to change the name or change the attack or anything like that.
+                // The de-evolution will end up remove the evolution mod and the card will revert
+                // back to the original version.
+                //
+                // But if it does not have an evolve mod, we need to add a default de-evolve mod.
+                if (!info.Mods.Any(m => m.fromEvolve))
+                {
+                    cardModificationInfo.nameReplacement = String.Format(Localization.Translate("{0} 2.0"), cardInfo.DisplayedNameLocalized);
+                    cardModificationInfo.attackAdjustment = 1;
+                    cardModificationInfo.healthAdjustment = 2;
+                }
+
+                cardModificationInfo.abilities = new () { CellDeEvolve.AbilityID };
+                cardModificationInfo.negateAbilities = new () { CellEvolve.AbilityID } ;
+
+                cardInfo.Mods.Add(cardModificationInfo);
+                __result = cardInfo;
+
+                return false;
+            }
+            return true;
         }
 	}
 }

@@ -7,6 +7,7 @@ using System;
 using Infiniscryption.P03KayceeRun.Sequences;
 using Infiniscryption.P03KayceeRun.Helpers;
 using UnityEngine.Events;
+using Infiniscryption.P03KayceeRun.Quests;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -392,8 +393,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // Add an 'active only if' flag
             ActiveIfStoryFlag flag = retval.AddComponent<ActiveIfStoryFlag>();
-            flag.storyFlag = EventManagement.GENERATOR_READY;
-            flag.activeIfConditionMet = true;
+            flag.storyFlag = DefaultQuestDefinitions.BrokenGenerator.InitialState.StateCompleteEvent;
+            flag.activeIfConditionMet = false;
 
             nodeData.nodeRenderers = new();
             nodeData.nodeRenderers.Add(instIcon.GetComponentInChildren<Renderer>());
@@ -422,13 +423,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             GameObject.DestroyImmediate(node);
 
+            // Copy the stuff from the node we're cloning
             HoloMapConditionalDialogueNode dialogue = nodeObject.AddComponent<HoloMapConditionalDialogueNode>();
             dialogue.nodeRenderers = renderers;
             dialogue.defaultColor = defaultColor;
             dialogue.nodeType = dataType;
             dialogue.nodeId = nodeId;
 
-            dialogue.SetDialogueForSpecialEvent(blueprint.dialogueEvent);
+            // And now tell the note what dialogue event it needs
+            dialogue.eventId = blueprint.dialogueEvent;
 
             // NPC
             //GameObject npcObject = GameObject.Instantiate(Resources.Load<GameObject>("prefabs/map/holomapscenery/holomapnpc"), parent);
@@ -439,7 +442,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             CompositeFigurine figure = npcObject.GetComponentInChildren<CompositeFigurine>();
             
-            EventManagement.NPCDescriptor descriptor = EventManagement.GetDescriptorForNPC(blueprint.dialogueEvent);
+            NPCDescriptor descriptor = NPCDescriptor.GetDescriptorForNPC(blueprint.dialogueEvent);
 
             figure.definedArms = descriptor.arms;
             figure.definedHead = descriptor.head;
