@@ -10,6 +10,7 @@ using InscryptionAPI.Items;
 using InscryptionAPI.Items.Extensions;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Resource;
+using Infiniscryption.P03KayceeRun.Helpers;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
@@ -19,6 +20,10 @@ namespace Infiniscryption.P03KayceeRun.Items
         public static ConsumableItemData ItemData { get; private set; }
 
         private static readonly Vector3 BASE_POSITION = new(0f, 0.2f, 0f);
+
+        private static readonly float sfxVolume = 0.3f;
+        private GameObject audioObject = new GameObject("StaticAudioObject");
+        public AudioSource audioSource;
 
         public static GameObject GetBaseGameObject(string basePrefabId, string objName)
         {
@@ -104,9 +109,18 @@ namespace Infiniscryption.P03KayceeRun.Items
             Tween.Position(this.CoilTransform, new Vector3(0f, 5.3f, 0f), 0.3f, 0f, completeCallback:() => this.PlayPlacedSound());
             yield return new WaitForSeconds(0.3f);
 
+            //Start custom sound effect
+            audioSource = audioObject.AddComponent<AudioSource>();
+            string path = AudioHelper.FindAudioClip("static");
+            AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
+            audioSource.clip = audioClip;
+            audioSource.loop = false;
+            audioSource.volume = sfxVolume;
+            audioSource.Play();
+
             Renderer renderer = this.gameObject.transform.Find("TeslaCoil(Clone)/Base/Rod/ball_low").gameObject.GetComponent<Renderer>();
             renderer.material.EnableKeyword("_EMISSION");
-            Tween.ShaderColor(renderer.material, "_EmissionColor", GameColors.Instance.blue, 0.1f, 0f, Tween.EaseInOut, Tween.LoopType.None, null, null, true);
+            Tween.ShaderColor(renderer.material, "_EmissionColor", GameColors.Instance.blue, 0.4f, 0f, Tween.EaseInOut, Tween.LoopType.None, null, null, true);
 
             yield return new WaitForSeconds(0.5f);
 
@@ -138,41 +152,55 @@ namespace Infiniscryption.P03KayceeRun.Items
 
             List<GameObject> lightnings = new List<GameObject>() { selfLightning, resourceLightning, lifeLightning };
 
-            for (int i = 0; i < 30; i++)
+            for (int i = 0; i < 8; i++)
             {
                 lightnings[UnityEngine.Random.Range(0, 3)].SetActive(true);
-                AudioController.Instance.PlaySound3D("teslacoil_spark", MixerGroup.TableObjectsSFX, selfLightning.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
+                //AudioController.Instance.PlaySound3D("teslacoil_spark", MixerGroup.TableObjectsSFX, selfLightning.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
+                yield return new WaitForSeconds(0.05f);
+                selfLightning.SetActive(false);
+                resourceLightning.SetActive(false);
+                lifeLightning.SetActive(false);
+            }
+
+            for (int i = 0; i < 8; i++)
+            {
+                lightnings[UnityEngine.Random.Range(0, 3)].SetActive(true);
+                //AudioController.Instance.PlaySound3D("teslacoil_spark", MixerGroup.TableObjectsSFX, selfLightning.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
                 yield return new WaitForSeconds(0.1f);
                 selfLightning.SetActive(false);
                 resourceLightning.SetActive(false);
                 lifeLightning.SetActive(false);
             }
-            
+
             foreach (GameObject obj in lightnings)
                 obj.SetActive(true);
 
-            AudioController.Instance.PlaySound3D("teslacoil_spark", MixerGroup.TableObjectsSFX, selfLightning.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
-
-            yield return ResourcesManager.Instance.AddMaxEnergy(1);
-            //yield return ResourcesManager.Instance.AddEnergy(1);
-
-            yield return new WaitForSeconds(0.2f);
-
-            yield return ResourcesManager.Instance.AddMaxEnergy(1);
-            //yield return ResourcesManager.Instance.AddEnergy(1);
-
-            yield return new WaitForSeconds(0.5f);
+            //AudioController.Instance.PlaySound3D("teslacoil_spark", MixerGroup.TableObjectsSFX, selfLightning.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
 
             foreach (GameObject obj in lightnings)
                 GameObject.Destroy(obj);
 
             GameObject.Destroy(upLightning);
 
+            yield return ResourcesManager.Instance.AddMaxEnergy(1);
+            //yield return ResourcesManager.Instance.AddEnergy(1);
+
+            yield return new WaitForSeconds(0.1f);
+
+            yield return ResourcesManager.Instance.AddMaxEnergy(1);
+            //yield return ResourcesManager.Instance.AddEnergy(1);
+
+            yield return new WaitForSeconds(0.5f);
+
+            //GameObject.Destroy(upLightning);
+
+            Destroy(audioObject);
+
             yield return new WaitForSeconds(0.15f);
 
             target = this.CoilTransform.position + (Vector3.up * 11);
             Tween.Position(this.CoilTransform, target, 1f, 0f);
-            yield return new WaitForSeconds(1.1f);
+            yield return new WaitForSeconds(0.5f);
         }
     }
 }

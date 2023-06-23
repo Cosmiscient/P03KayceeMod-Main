@@ -225,7 +225,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             foreach (string cardData in cardDataList)
             {
-                Console.WriteLine(cardData);
+                //Console.WriteLine(cardData);
             }
 
         }
@@ -467,6 +467,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             CardManager.New(P03Plugin.CardPrefx, "CXformerRabbit", "R488!7", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_rabbit.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 0)
+                .AddMetaCategories(NewBeastTransformers)
+                .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, "CXformerMantis", "M4N7!5", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_mantis.png", typeof(CustomCards).Assembly))
+                .SetCost(energyCost: 0)
+                .AddAbilities(Ability.SplitStrike)
+                .AddMetaCategories(NewBeastTransformers)
+                .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, "CXformerAlpha", "41PH4", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_alpha.png", typeof(CustomCards).Assembly))
+                .SetCost(energyCost: 0)
+                .AddAbilities(Ability.BuffNeighbours)
                 .AddMetaCategories(NewBeastTransformers)
                 .temple = CardTemple.Tech;
 

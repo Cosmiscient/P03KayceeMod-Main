@@ -113,7 +113,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.New(EXP_1_PREFIX, "BeastMaster", "B3A5T M4ST3R", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_beastmaster.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetCost(energyCost:4)
+                .SetCost(energyCost:3)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .SetRare()
                 .AddAbilities(SummonFamiliar.AbilityID);
@@ -270,6 +270,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(RotatingAlarm.AbilityID)
                 .SetExtendedProperty(RotatingAlarm.DEFAULT_STATE_KEY, 3);
 
+            // Robo Ducky
             CardManager.New(EXP_1_PREFIX, "RubberDuck", "Roboducky", 3, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_roboducky.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 4)
@@ -314,10 +315,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetRare()
                 .AddAbilities(EmeraldPower.AbilityID);
 
+            // I'm sorry gem rotator you don't work
             CardManager.New(EXP_1_PREFIX, "GemRotator", "Gem Cycler", 1, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gemcycler.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost:5)
-                .SetRegionalP03Card(CardTemple.Wizard)
+                //.SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(GemRotator.AbilityID);
         }     
 

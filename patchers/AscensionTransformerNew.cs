@@ -112,7 +112,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             //If P03 KCM is active, randomize the beast node
             if (SaveFile.IsAscension)
             {
-                if (__instance.beastMods == null)
+                //if (__instance.beastMods == null)
                 {
                     CardModificationInfo cardModificationInfo = new CardModificationInfo();
                     cardModificationInfo.abilities.Add(Ability.Transformer);
@@ -175,6 +175,18 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return true;
         }
 
+        //[HarmonyPatch(typeof(Transformer), nameof(Transformer.GetBeastModeStatsMod))]
+        //[HarmonyPostfix]
+        //private static void FixModAdjustments(CardInfo beastModeCard, CardInfo botModeCard, CardModificationInfo __result)
+        //{
+        //    // Calculate the energy adjustments and health adjustments specifically from the mods on the botmodecard
+        //    int energyCostAdjustment = botModeCard.Mods.Select(m => m.energyCostAdjustment).Sum();
+        //    int healthAdjustment = botModeCard.Mods.Select(m => m.healthAdjustment).Sum();
+
+        //    __result.healthAdjustment -= healthAdjustment;
+        //    __result.energyCostAdjustment -= energyCostAdjustment;
+        //}
+
         [HarmonyPatch(typeof(Transformer))]
         [HarmonyPatch("GetTransformCardInfo")]
         [HarmonyPrefix]
@@ -235,6 +247,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 case "P03KCM_CXformerRabbit":
                     {
                         cardEnergyChange = -2;
+                        cardHealthChange = 0;
+                        break;
+                    }
+
+                case "P03KCM_CXformerMantis":
+                    {
+                        cardEnergyChange = 0;
+                        cardHealthChange = 0;
+                        break;
+                    }
+
+                case "P03KCM_CXformerAlpha":
+                    {
+                        cardEnergyChange = 1;
                         cardHealthChange = 0;
                         break;
                     }
