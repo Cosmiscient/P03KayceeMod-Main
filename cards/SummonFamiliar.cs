@@ -53,19 +53,23 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 yield break;
             }
 
-            // Figure out the card we're getting
-            int randomSeed = P03AscensionSaveData.RandomSeed + TurnManager.Instance.TurnNumber * 25 + this.Card.Slot.Index;
-            float randomDraw = SeededRandom.Value(randomSeed);
+            //Create list of possible familiars
+            List<CardInfo> beastOptions = new List<CardInfo>();
 
-            string familiarName = ExpansionPackCards_1.EXP_1_PREFIX + "_Salmon";
-            if (randomDraw < 0.3f)
-                familiarName = "CXformerAdder";
-            else if (randomDraw < 0.6f)
-                familiarName = "CXformerRaven";
-            else if (randomDraw < 0.9f)
-                familiarName = "CXformerWolf";
+            //Add baseline familiar options
+            beastOptions.Add(CardLoader.GetCardByName("CXformerWolf"));
+            beastOptions.Add(CardLoader.GetCardByName("CXformerRaven"));
+            beastOptions.Add(CardLoader.GetCardByName("CXformerAdder"));
+            beastOptions.Add(CardLoader.GetCardByName(ExpansionPackCards_1.EXP_1_PREFIX + "_Salmon"));
 
-            CardInfo familiar = CardLoader.GetCardByName(familiarName);
+            //Add any tech card with the NewBeastTransformer metacategory
+            foreach (CardInfo ci in CardLoader.AllData.Where(ci => ci.temple == CardTemple.Tech && ci.metaCategories.Contains(CustomCards.NewBeastTransformers)))
+            {
+                beastOptions.Add(ci);
+            }
+
+            CardInfo familiar = beastOptions[UnityEngine.Random.Range(0, beastOptions.Count)];
+
             if (familiar.HasAbility(Ability.Transformer))
                 familiar.mods.Add(new() { negateAbilities = new() { Ability.Transformer }});
 

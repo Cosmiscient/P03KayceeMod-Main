@@ -19,8 +19,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         static TakeDamageSigil()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
-            info.rulebookName = "Parasite";
-            info.rulebookDescription = "Take 1 damage.";
+            info.rulebookName = "Zip of Death";
+            info.rulebookDescription = "Take 2 damage.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;
@@ -32,7 +32,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 P03Plugin.PluginGuid,
                 info,
                 typeof(TakeDamageSigil),
-                TextureHelper.GetImageAsTexture("ability_parasite.png", typeof(TakeDamageSigil).Assembly)
+                TextureHelper.GetImageAsTexture("ability_activatedzipbomb.png", typeof(TakeDamageSigil).Assembly)
             ).Id;
         }
 

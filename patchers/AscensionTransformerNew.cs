@@ -19,6 +19,75 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static bool allBeastTransformersAssigned = false;
         private static List<CardInfo> allBeastTransformers = new List<CardInfo>();
 
+        public static BeastInfoList beastInfoList = new BeastInfoList();
+
+        public class BeastInfo
+        {
+            public string ID { get; set; }
+            public int HealthChange { get; set; }
+            public int EnergyChange { get; set; }
+            public BeastInfo Next { get; set; }
+
+            public BeastInfo(string id, int healthChange, int energyChange)
+            {
+                ID = id;
+                HealthChange = healthChange;
+                EnergyChange = energyChange;
+                Next = null;
+            }
+        }
+
+        public class BeastInfoList
+        {
+            private BeastInfo head;
+            private BeastInfo tail;
+
+            public void Add(string id, int healthChange, int energyChange)
+            {
+                BeastInfo newNode = new BeastInfo(id, healthChange, energyChange);
+
+                if (head == null)
+                {
+                    head = newNode;
+                    tail = newNode;
+                }
+                else
+                {
+                    tail.Next = newNode;
+                    tail = newNode;
+                }
+            }
+
+            public BeastInfo GetNodeById(string id)
+            {
+                BeastInfo current = head;
+
+                while (current != null)
+                {
+                    if (current.ID == id)
+                    {
+                        return current;
+                    }
+
+                    current = current.Next;
+                }
+
+                return null; // Node with the specified ID not found
+            }
+
+
+            public void Print()
+            {
+                BeastInfo current = head;
+
+                while (current != null)
+                {
+                    Console.WriteLine($"ID: {current.ID}, Health Change: {current.HealthChange}, Energy Change: {current.EnergyChange}");
+                    current = current.Next;
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(CreateTransformerSequencer))]
         [HarmonyPatch("ShowDetailsOnScreen")]
         [HarmonyPrefix]
@@ -201,11 +270,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return true;
         }
 
-
         private static int getCardAdjustment(bool energyChange, string beastCardName)
         {
             int cardEnergyChange = 0;
             int cardHealthChange = 0;
+
+            if (beastInfoList.GetNodeById(beastCardName) != null)
+            {
+                cardEnergyChange = beastInfoList.GetNodeById(beastCardName).EnergyChange;
+                cardHealthChange = beastInfoList.GetNodeById(beastCardName).HealthChange;
+            }
+            else
+            {
+                Debug.Log("BEAST LIST NODE RETURNED NULL");
+            }
 
             switch (beastCardName)
             {
@@ -229,41 +307,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         cardHealthChange = 1;
                         break;
                     }
-
-                case "P03KCM_CXformerRiverSnapper":
-                    {
-                        cardEnergyChange = 1;
-                        cardHealthChange = 4;
-                        break; 
-                    }
-
-                case "P03KCM_CXformerMole":
-                    {
-                        cardEnergyChange = 1;
-                        cardHealthChange = 2;
-                        break;
-                    }
-
-                case "P03KCM_CXformerRabbit":
-                    {
-                        cardEnergyChange = -2;
-                        cardHealthChange = 0;
-                        break;
-                    }
-
-                case "P03KCM_CXformerMantis":
-                    {
-                        cardEnergyChange = 0;
-                        cardHealthChange = 0;
-                        break;
-                    }
-
-                case "P03KCM_CXformerAlpha":
-                    {
-                        cardEnergyChange = 1;
-                        cardHealthChange = 0;
-                        break;
-                    }
             }
 
             if (energyChange)
@@ -271,7 +314,79 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return cardEnergyChange;
             }
             else
-            return cardHealthChange;
+                return cardHealthChange;
         }
+
+        //private static int getCardAdjustment(bool energyChange, string beastCardName)
+        //{
+        //    int cardEnergyChange = 0;
+        //    int cardHealthChange = 0;
+
+        //    switch (beastCardName)
+        //    {
+        //        case "CXformerWolf":
+        //            {
+        //                cardEnergyChange = 1;
+        //                cardHealthChange = 0;
+        //                break;
+        //            }
+
+        //        case "CXformerRaven":
+        //            {
+        //                cardEnergyChange = 0;
+        //                cardHealthChange = 0;
+        //                break;
+        //            }
+
+        //        case "CXformerAdder":
+        //            {
+        //                cardEnergyChange = 0;
+        //                cardHealthChange = 1;
+        //                break;
+        //            }
+
+        //        case "P03KCM_CXformerRiverSnapper":
+        //            {
+        //                cardEnergyChange = 1;
+        //                cardHealthChange = 4;
+        //                break; 
+        //            }
+
+        //        case "P03KCM_CXformerMole":
+        //            {
+        //                cardEnergyChange = 1;
+        //                cardHealthChange = 2;
+        //                break;
+        //            }
+
+        //        case "P03KCM_CXformerRabbit":
+        //            {
+        //                cardEnergyChange = -2;
+        //                cardHealthChange = 0;
+        //                break;
+        //            }
+
+        //        case "P03KCM_CXformerMantis":
+        //            {
+        //                cardEnergyChange = 0;
+        //                cardHealthChange = 0;
+        //                break;
+        //            }
+
+        //        case "P03KCM_CXformerAlpha":
+        //            {
+        //                cardEnergyChange = 1;
+        //                cardHealthChange = 0;
+        //                break;
+        //            }
+        //    }
+
+        //    if (energyChange)
+        //    {
+        //        return cardEnergyChange;
+        //    }
+        //    else
+        //    return cardHealthChange;
+        //}
     }
 }

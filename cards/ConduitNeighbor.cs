@@ -32,7 +32,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 P03Plugin.PluginGuid,
                 info,
                 typeof(ConduitNeighbor),
-                TextureHelper.GetImageAsTexture("ability_overheat.png", typeof(ConduitNeighbor).Assembly)
+                TextureHelper.GetImageAsTexture("ability_staticelectricity.png", typeof(ConduitNeighbor).Assembly)
             ).Id;
         }
 

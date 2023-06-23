@@ -451,38 +451,45 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 .temple = CardTemple.Tech;
 
             //NEW BEAST CARDS
+
+            //CardManager.New(P03Plugin.CardPrefx, "CXformerRiverSnapper", "R!V3R 5N4PP3R", 1, 6)
+            //    .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_riversnapper.png", typeof(CustomCards).Assembly))
+            //    .SetCost(energyCost: 4)
+            //    .AddMetaCategories(NewBeastTransformers)
+            //    .temple = CardTemple.Tech;
+
             CardManager.New(P03Plugin.CardPrefx, "CXformerRiverSnapper", "R!V3R 5N4PP3R", 1, 6)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_riversnapper.png", typeof(CustomCards).Assembly))
-                .SetCost(energyCost: 5)
-                .AddMetaCategories(NewBeastTransformers)
-                .temple = CardTemple.Tech;
+                .SetCost(energyCost: 4)
+                .SetNewBeastTransformer(4, 1);
 
             CardManager.New(P03Plugin.CardPrefx, "CXformerMole", "M013", 0, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_mole.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 4)
                 .AddAbilities(Ability.WhackAMole)
-                .AddMetaCategories(NewBeastTransformers)
-                .temple = CardTemple.Tech;
+                .SetNewBeastTransformer(2, 1);
 
             CardManager.New(P03Plugin.CardPrefx, "CXformerRabbit", "R488!7", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_rabbit.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 0)
-                .AddMetaCategories(NewBeastTransformers)
-                .temple = CardTemple.Tech;
+                .SetNewBeastTransformer(0, -2);
 
             CardManager.New(P03Plugin.CardPrefx, "CXformerMantis", "M4N7!5", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_mantis.png", typeof(CustomCards).Assembly))
-                .SetCost(energyCost: 0)
+                .SetCost(energyCost: 3)
                 .AddAbilities(Ability.SplitStrike)
-                .AddMetaCategories(NewBeastTransformers)
-                .temple = CardTemple.Tech;
+                .SetNewBeastTransformer(0, 0);
 
             CardManager.New(P03Plugin.CardPrefx, "CXformerAlpha", "41PH4", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_alpha.png", typeof(CustomCards).Assembly))
-                .SetCost(energyCost: 0)
+                .SetCost(energyCost: 5)
                 .AddAbilities(Ability.BuffNeighbours)
-                .AddMetaCategories(NewBeastTransformers)
-                .temple = CardTemple.Tech;
+                .SetNewBeastTransformer(0, 1);
+
+            CardManager.New(P03Plugin.CardPrefx, "CXformerOpossum", "Robopossum", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_opossum.png", typeof(CustomCards).Assembly))
+                .SetCost(energyCost: 2)
+                .SetNewBeastTransformer(0, -1);
 
             CardInfo radio = CardManager.New(P03Plugin.CardPrefx, RADIO_TOWER, "Radio Tower", 0, 3);
             radio.AddSpecialAbilities(ListenToTheRadio.AbilityID, RerenderOnBoard.AbilityID);
