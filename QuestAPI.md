@@ -161,3 +161,39 @@ You can also add additional criteria for your quest to be selected, using the `S
 #### "Must Be Generated" Quests
 
 Additionally, some quests *must* be generated. Some of the game's built-in secret quests are like this, but generally this is reserved for quests which are currently active. This could be a single-part quest that never finished, or a multi-part quest where the first part did complete and the second part needs to be generated.
+
+## Another Example
+
+Just to help with understanding the API: here is another example of another quest. 
+If the player takes the quest on, they start each battle by taking one damage until they've won five battles like this.
+The quest itself just tracks when the default counter has reached 5...
+```
+TippedScales = QuestManager.Add(P03Plugin.PluginGuid, "Tipped Scales")
+                    .SetGenerateCondition(() => EventManagement.CompletedZones.Count <= 2);
+TippedScales.AddDialogueState("TOO EASY...", "P03TooEasyQuest")
+            .AddDialogueState("TOO EASY...", "P03TooEasyAccepted")
+            .AddDefaultActiveState("KEEP GOING...", "P03TooEasyInProgress", threshold:5)
+            .AddDialogueState("IMPRESSIVE...", "P03TooEasyComplete")
+            .AddGainAbilitiesReward(1, Ability.DrawCopyOnDeath);
+```
+
+...then we have to write patches for the game to make the rest of the quest work. 
+Not all of those patches are shown here, but here's a simple one to show how we engage with the quest to see if it is active by 
+checking the `IsDefaultActive` helper:
+
+```
+[HarmonyPatch(typeof(TurnManager), nameof(TurnManager.SetupPhase))]
+[HarmonyPostfix]
+private static IEnumerator TippedScalesQuest(IEnumerator sequence)
+{
+    yield return sequence;
+
+    if (SaveFile.IsAscension)
+    {
+        if (MyQuests.TippedScales.IsDefaultActive())
+        {
+            yield return LifeManager.Instance.ShowDamageSequence(1, 1, true, 0.125f, null, 0f, false);
+        }
+    }
+}
+```

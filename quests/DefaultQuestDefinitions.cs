@@ -78,7 +78,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
             // BrokenGeneratorQuest = 10,
 
             // Tipped Scales
-            TippedScales = QuestManager.Add(P03Plugin.PluginGuid, "Tipped Scales");
+            TippedScales = QuestManager.Add(P03Plugin.PluginGuid, "Tipped Scales")
+                                .SetGenerateCondition(() => EventManagement.CompletedZones.Count <= 2);
             TippedScales.AddDialogueState("TOO EASY...", "P03TooEasyQuest")
                         .AddDialogueState("TOO EASY...", "P03TooEasyAccepted")
                         .AddDefaultActiveState("KEEP GOING...", "P03TooEasyInProgress", threshold:5)

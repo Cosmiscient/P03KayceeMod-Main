@@ -6,8 +6,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 {
     public abstract class EmissiveDiscBorderBase : CardAppearanceBehaviour
     {
-        protected virtual Color EmissionColor => GameColors.Instance.blue;
-        protected virtual float Intensity => 0.5f;
+        public virtual Color EmissionColor { get; set; } = GameColors.Instance.blue;
+        public virtual float Intensity {get; set; } = 0.5f;
 
         internal static readonly string[] GameObjectPaths = new string[]
         {

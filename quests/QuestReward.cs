@@ -116,8 +116,10 @@ namespace Infiniscryption.P03KayceeRun.Quests
     {
         protected override IEnumerator DoCardAction(SelectableCard card, CardInfo info)
         {
+            yield return new WaitForSeconds(0.75f);
             Part3SaveData.Data.deck.RemoveCardByName(this.CardName);
             card.Anim.PlayPermaDeathAnimation();
+            yield return new WaitForSeconds(0.75f);
             yield break;
         }
 
