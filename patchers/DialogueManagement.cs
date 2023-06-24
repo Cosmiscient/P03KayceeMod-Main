@@ -209,5 +209,28 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path6);
             //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path7);
         }
+
+        [HarmonyPatch(typeof(TextDisplayer), nameof(TextDisplayer.ShowThenClear))]
+        [HarmonyPrefix]
+        private static void Profanity(ref string message)
+        {
+            // the fuck are you doing here
+            // this is a fucking easter egg
+            // don't be a fucking narc
+            if (SaveFile.IsAscension && P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("fuck"))
+            {
+                string profanity = SeededRandom.Bool(P03AscensionSaveData.RandomSeed) ? "fucking" : "the fuck";
+                List<string> words = message.Split(' ').ToList();
+                words.Insert(SeededRandom.Range(0, words.Count, P03AscensionSaveData.RandomSeed), profanity);
+                message = String.Join(" ", words);
+            }
+        }
+
+        [HarmonyPatch(typeof(TextDisplayer), nameof(TextDisplayer.ShowUntilInput))]
+        [HarmonyPrefix]
+        private static void Profanity2(ref string message)
+        {
+            Profanity(ref message);
+        }
     }
 }

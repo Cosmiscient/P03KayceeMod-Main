@@ -29,6 +29,9 @@
     <Reference Include="InscryptionAPI" Private="false">
       <HintPath>.\lib\InscryptionAPI.dll</HintPath>
     </Reference>
+    <Reference Include="Infiniscryption.PackManagement" Private="false">
+      <HintPath>.\lib\Infiniscryption.PackManager.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
