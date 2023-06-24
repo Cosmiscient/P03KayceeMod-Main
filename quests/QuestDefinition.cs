@@ -165,6 +165,10 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 if (this.EventId == DefaultQuestDefinitions.Prospector.EventId)
                     return Part3SaveData.Data.deck.Cards.Any(c => c.name == CustomCards.BRAIN); // Always generated if you have a bounty hunter brain in your deck
 
+                // Oh duh, this cannot be in a "must be generated" state if it has been completed
+                if (this.IsCompleted)
+                    return false;
+
                 // Does this quest have a prior? Is that prior successfully complete? If so, this must
                 // be generated so the quest can continue
                 if (this.PriorEventId != SpecialEvent.None)
