@@ -38,7 +38,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator Activate()
         {
-            yield return LifeManager.Instance.ShowDamageSequence(1, 1, true, 0f, null, 0f, false);
+            yield return LifeManager.Instance.ShowDamageSequence(2, 2, true, 0f, null, 0f, false);
         }
     }
 }

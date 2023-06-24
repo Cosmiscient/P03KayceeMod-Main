@@ -190,7 +190,7 @@ namespace Infiniscryption.P03KayceeRun.Items
             yield return ResourcesManager.Instance.AddMaxEnergy(1);
             //yield return ResourcesManager.Instance.AddEnergy(1);
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.3f);
 
             //GameObject.Destroy(upLightning);
 

@@ -32,7 +32,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             // Viperbeast
             CardInfo viperBeast = CardManager.New(EXP_1_PREFIX, "ViperBeast", "V1P3R", 3, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_rattler.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_viperbeast.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost:5)
                 .AddAbilities(Ability.Transformer);
 
@@ -47,13 +47,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
             viperBot.SetEvolve(viperBeast, 1);
 
             // Mantisbeast
-            CardInfo mantisBeast = CardManager.New(EXP_1_PREFIX, "MantisBeast", "4S-M4NT-D3US", 1, 1)
+            CardInfo mantisBeast = CardManager.New(EXP_1_PREFIX, "MantisBeast", "Asmanteus", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_mantisbeast.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost:4)
                 .AddAbilities(Ability.Transformer, Ability.TriStrike);
 
             // Mantisbot
-            CardInfo mantisBot = CardManager.New(EXP_1_PREFIX, "MantisBot", "4S-M4NT-D3US", 2, 1)
+            CardInfo mantisBot = CardManager.New(EXP_1_PREFIX, "MantisBot", "Asmanteus", 2, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_mantisbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost:4)
                 .SetRare()

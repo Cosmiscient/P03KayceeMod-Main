@@ -448,6 +448,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             CardManager.New(P03Plugin.CardPrefx, CONTRABAND, "yarr.torrent", 0, 1)
                 .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_captivefile"))
                 .AddAbilities(Ability.PermaDeath)
+                .AddAppearances(QuestCardAppearance.ID)
                 .temple = CardTemple.Tech;
 
             //NEW BEAST CARDS
@@ -496,6 +497,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             radio.SetCost(energyCost: 3);
             radio.SetPortrait(TextureHelper.GetImageAsTexture("portrait_radio.png", typeof(CustomCards).Assembly));
             radio.AddAppearances(OnboardHoloPortrait.ID);
+            radio.AddAppearances(QuestCardAppearance.ID);
             radio.temple = CardTemple.Tech;
             radio.holoPortraitPrefab = Resources.Load<GameObject>("prefabs/cards/hologramportraits/TerrainHologram_AnnoyTower");
 
@@ -509,6 +511,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             powerTower.SetCost(energyCost: 3);
             powerTower.SetPortrait(TextureHelper.GetImageAsTexture("portrait_radio.png", typeof(CustomCards).Assembly));
             powerTower.AddAppearances(OnboardDynamicHoloPortrait.ID);
+            powerTower.AddAppearances(QuestCardAppearance.ID);
             powerTower.SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/specialnodesequences/teslacoil");
             powerTower.SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "0,-.39,0");
             powerTower.SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, ".6,.6,.6");
