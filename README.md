@@ -67,12 +67,14 @@ New in Version 3.0 - the Quest API is now publicly available for use! See the in
 
 Some challenges simply don't work in this context. Any challenge that doesn't work will be 'locked' and you won't be able to select it.
 
-If you've created a new custom challenge and you want it to be compatible with this mod, you need to set a flag named "P03" on the challenge using the Challenge Manager in API 2.4+
+If you've created a new custom challenge and you want it to be compatible with this mod, you need to set a flag named "P03" on the challenge using the Challenge Manager in API 2.4+. 
+You can also set a flag called "noleshy" to prevent your challenge from showing up in a leshy run.
 
 
 ```c#
 ChallengeManager.FullChallenge fch = ChallengeManager.AddSpecific(...)
-fch.SetFlags("P03");
+fch.SetFlags("P03"); // Allows the challenge to appear in a P03 run
+fch.SetFlags("noleshy"); // Keeps the challenge from appearing in a leshy run
 ```
 
 If the challenge does not have this flag set, it will always be locked when the player is setting up a P03 run.
