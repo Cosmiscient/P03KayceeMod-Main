@@ -18,6 +18,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     [HarmonyPatch]
     public static class AscensionChallengeManagement
     {
+        public static string NO_LESHY = "noleshy";
+
         public static AscensionChallenge BOUNTY_HUNTER { get; private set; }
         public static AscensionChallenge ENERGY_HAMMER { get; private set; }
         public static AscensionChallenge TRADITIONAL_LIVES { get; private set; }
@@ -61,7 +63,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             0,
             TextureHelper.GetImageAsTexture("ascensionicon_bomb.png", typeof(AscensionChallengeManagement).Assembly),
             TextureHelper.GetImageAsTexture("ascensionicon_bombactivated.png", typeof(AscensionChallengeManagement).Assembly),
-            0).SetFlags("p03");
+            0).SetFlags("p03", NO_LESHY);
         }
 
         public static AscensionChallengeInfo ALL_CONVEYOR;
@@ -74,7 +76,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             0,
             TextureHelper.GetImageAsTexture("ascensionicon_conveyorbattle.png", typeof(AscensionChallengeManagement).Assembly),
             TextureHelper.GetImageAsTexture("ascensionicon_conveyorbattle_active.png", typeof(AscensionChallengeManagement).Assembly),
-            0).SetFlags("p03");
+            0).SetFlags("p03", NO_LESHY);
         }
 
         public static void UpdateP03Challenges()
@@ -378,6 +380,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         public static void ValidP03Challenges(ref bool __result, AscensionChallenge challenge, int level)
         {
+            var fullChallenge = ChallengeManager.AllChallenges.FirstOrDefault(fc => fc.Challenge.challengeType == challenge);
+            if (fullChallenge == null)
+                return;
+
             if (ScreenManagement.ScreenState == CardTemple.Tech)
             {
                 if (PatchedChallengesReference.Any(kvp => kvp.Value.challengeType == challenge))
@@ -393,21 +399,29 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (ValidChallenges.Contains(challenge))
                     return;
 
-                var fullChallenge = ChallengeManager.AllChallenges.FirstOrDefault(fc => fc.Challenge.challengeType == challenge);
-                if (fullChallenge != null)
+               
+                if (fullChallenge.Flags == null)
                 {
-                    if (fullChallenge.Flags == null)
-                    {
-                        __result = false;
-                        return;
-                    }
+                    __result = false;
+                    return;
+                }
 
-                    if (!fullChallenge.Flags.Any(f => f != null && f.ToString().ToLowerInvariant().Equals("p03")))
+                if (!fullChallenge.Flags.Any(f => f != null && f.ToString().Equals("p03", StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    __result = false;
+                    return;
+                }
+            }
+            else if (ScreenManagement.ScreenState == CardTemple.Nature) // Make sure the noleshy challenges are disabled
+            {
+                if (fullChallenge.Flags != null)
+                {
+                    if (fullChallenge.Flags.Any(f => f != null && f.ToString().Equals(NO_LESHY, StringComparison.InvariantCultureIgnoreCase)))
                     {
                         __result = false;
                         return;
                     }
-                }                
+                }
             }
         }
 

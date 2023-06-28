@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -33,7 +34,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override bool RespondsToOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer)
         {
-            return this.Card.OnBoard && card.OpponentCard == this.Card.OpponentCard && !card.HasAbility(Ability.Brittle) && !card.HasAbility(Ability.IceCube);
+            return fromCombat && this.Card.OnBoard && card.OpponentCard == this.Card.OpponentCard && !card.HasAbility(Ability.Brittle) && !card.HasAbility(Ability.IceCube);
         }
 
         public override IEnumerator OnOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer)
@@ -42,18 +43,25 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return new WaitForSeconds(0.3f);
 
             CardInfo info = null;
-            if (card.Info.iceCubeParams != null)
+            if (card != null && card.Info != null && card.Info.iceCubeParams != null && card.Info.iceCubeParams.creatureWithin != null)
             {
-                info = CardLoader.GetCardByName(Card.Info.iceCubeParams.creatureWithin.name);
+                info = CardLoader.Clone(card.Info.iceCubeParams.creatureWithin);
             }
             else
             {
-                info = CardLoader.GetCardByName("RoboSkeleton");
-                CardModificationInfo mod = new();
-                mod.healthAdjustment = -1;
-                mod.attackAdjustment = -1;
-                mod.energyCostAdjustment = -2;
-                info.Mods.Add(mod);
+                if (P03AscensionSaveData.IsP03Run)
+                {
+                    info = CardLoader.GetCardByName("RoboSkeleton");
+                    CardModificationInfo mod = new();
+                    mod.healthAdjustment = -1;
+                    mod.attackAdjustment = -1;
+                    mod.energyCostAdjustment = -2;
+                    info.Mods.Add(mod);
+                }
+                else
+                {
+                    info = CardLoader.GetCardByName("Skeleton");
+                }
             }
             
             yield return BoardManager.Instance.CreateCardInSlot(info, deathSlot, 0.15f, true);

@@ -223,7 +223,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 string profanity = SeededRandom.Bool(P03AscensionSaveData.RandomSeed + offset++) ? "fucking" : "the fuck";
                 List<string> words = message.Split(' ').ToList();
-                words.Insert(SeededRandom.Range(0, words.Count, P03AscensionSaveData.RandomSeed + offset++), profanity);
+                int findex = SeededRandom.Range(0, words.Count, P03AscensionSaveData.RandomSeed + offset++);
+                if (words[findex].ToLowerInvariant() == "the" || words[findex].ToLowerInvariant() == "a")
+                    profanity = "fucking";
                 message = String.Join(" ", words);
             }
         }
