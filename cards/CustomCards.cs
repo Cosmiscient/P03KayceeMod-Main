@@ -563,7 +563,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         ab.Info.powerLevel += 2;
 
                     if (ab.Id == Ability.ActivatedRandomPowerEnergy && P03AscensionSaveData.IsP03Run)
-                        ab.Info.rulebookDescription = ab.Info.rulebookDescription.Replace("1 Energy", "3 Energy");
+                        ab.Info.rulebookDescription = ab.Info.rulebookDescription.Replace("1", "3");
 
                     if (ab.Id == Ability.DrawCopy && P03AscensionSaveData.IsP03Run)
                         ab.Info.canStack = true;
