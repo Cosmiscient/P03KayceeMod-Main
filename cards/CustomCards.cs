@@ -340,6 +340,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             CardManager.New(P03Plugin.CardPrefx, RARE_DRAFT_TOKEN, "Rare Token", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_drafttoken_plusplus.png", typeof(CustomCards).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixel_drafttoken.png", typeof(CustomCards).Assembly))
+                .AddAppearances(RareDiscCardAppearance.ID)
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, BLOCKCHAIN, "Blockchain", 0, 5)

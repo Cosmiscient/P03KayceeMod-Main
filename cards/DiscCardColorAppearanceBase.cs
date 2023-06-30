@@ -140,13 +140,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 
                 if (keyComponents.Length == 1)
                 {
+                    if (keyComponents[0][0] == '#')
+                    {
+                        Color htmlColor;
+                        if (ColorUtility.TryParseHtmlString(keyComponents[0], out htmlColor))
+                            return htmlColor;
+                        else
+                            return null;
+                    }
                     PopulateGameColorsCache();
                     return GameColorsCache[keyComponents[0].ToLowerInvariant()];
                 }
                 else if (keyComponents.Length == 2)
                 {
-                    PopulateGameColorsCache();
-                    return GameColorsCache[keyComponents[0].ToLowerInvariant()] * float.Parse(keyComponents[1]);
+                    return GetColorFromString(keyComponents[0]) * float.Parse(keyComponents[1]);
                 }
                 else if (keyComponents.Length == 3)
                 {
@@ -246,7 +253,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                     foreach (string textureName in TextureNames)
                         if (CardComponentHasTargetTexture(renderer, textureName))
-                            renderer.material.SetTexture(textureName, currentTexture);
+                            foreach (var material in renderer.materials)
+                                material.SetTexture(textureName, currentTexture);
                 }
                 catch
                 {
@@ -303,11 +311,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             DiscCardColorAppearance appearance = drsl.gameObject.transform.parent.parent.gameObject.GetComponent<DiscCardColorAppearance>();
 
-            if (appearance == null || !appearance.BorderColor.HasValue)
-            {
-                yield return sequence;
-                yield break;
-            }
+            Color myBarColor = drsl.defaultLightColor;
+            if (appearance != null && appearance.BorderColor.HasValue)
+                myBarColor = appearance.BorderColor.Value * 3;
 
             // The only way I can figure out how to do this is to just copy/paste the original method straight from dnSpy.
             // Sorry. I kinda hate doing it this way but I couldn't figure out a better way to do it.
@@ -324,16 +330,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
 			if (__instance.ValidStatsLayer(layer))
 			{
 				__instance.cardDisplayer.DisplayInfo(info, playableCard);
+
+                // Also change the bar color here.
+                GameObject delimiter = __instance.transform.Find("CardsPlane/Base/Delimiter").gameObject;
+                SpriteRenderer renderer = delimiter.GetComponent<SpriteRenderer>();
+                renderer.color = myBarColor;
 				yield return new WaitForEndOfFrame();
 			}
-
-            // Chang the color
-            GameObject delimiter = __instance.transform.Find("CardsPlane/Base/Delimiter").gameObject;
-            SpriteRenderer renderer = delimiter.GetComponent<SpriteRenderer>();
-            Color originalColor = renderer.color;
-            renderer.color = appearance.BorderColor.Value * 3;
-            yield return new WaitForEndOfFrame();
-            P03Plugin.Log.LogDebug("Middle color is changed");
 
 			if (__instance.ValidStatsLayer(layer))
 			{
@@ -347,10 +350,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
 				}
 				CardRenderCamera.renderQueue.Remove(layer);
 			}
-
-            renderer.color = originalColor;
-            yield return new WaitForEndOfFrame();
-            P03Plugin.Log.LogDebug("Middle color is reverted");
 
             yield break;
         }
