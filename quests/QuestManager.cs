@@ -59,6 +59,19 @@ namespace Infiniscryption.P03KayceeRun.Quests
         {
             List<Tuple<SpecialEvent, Predicate<HoloMapBlueprint>>> events = new ();
 
+            // Need to generate all the must adds first. This is because sometimes simply generating
+            // a quest randomly is enough to move it to an active state. And then the "must be generated" flag
+            // is no longer accurate.
+            //
+            // This could also be handled by setting the generated flag inside of the map generator instead of setting it
+            // here, but this is just easier. Always generate the MUST GENERATE quests first, then then RANDOM GENERATE
+            // quests next to make sure you don't double generate.
+            foreach (QuestDefinition quest in AllQuests.Values.Where(q => q.MustBeGenerated))
+            {
+                quest.QuestGenerated = true;
+                events.Add(new (quest.EventId, quest.GenerateRoomFilter()));
+            }
+
             // Randomized special events
             List<SpecialEvent> possibles = AllQuests.Values.Where(q => q.ValidForRandomSelection).Select(q => q.EventId).ToList();
 
@@ -81,19 +94,13 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     P03Plugin.Log.LogWarning($"Could not parse special event from debug string! {ex}");                    
                 }
             }
+
             if (possibles.Count > 0)
             {
                 SpecialEvent randomEvent = possibles[SeededRandom.Range(0, possibles.Count, P03AscensionSaveData.RandomSeed)];
                 QuestDefinition selected = Get(randomEvent);
                 selected.QuestGenerated = true;
                 events.Add(new (randomEvent, selected.GenerateRoomFilter())); 
-            }
-            
-            // Now go through all the must adds
-            foreach (QuestDefinition quest in AllQuests.Values.Where(q => q.MustBeGenerated))
-            {
-                quest.QuestGenerated = true;
-                events.Add(new (quest.EventId, quest.GenerateRoomFilter()));
             }
 
             return events;
