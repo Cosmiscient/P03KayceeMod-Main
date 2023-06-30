@@ -74,7 +74,7 @@ namespace Infiniscryption.P03KayceeRun
             BossManagement.RegisterBosses();
             DefaultQuestDefinitions.DefineAllQuests();
 
-            //CustomCards.printAllCards();
+            CustomCards.printAllCards();
 
             SceneManager.sceneLoaded += this.OnSceneLoaded;
 

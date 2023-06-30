@@ -167,10 +167,23 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                         cardData += string.Format("Rare: {0}\n", isRare);
 
+                        string sigils = "";
+
                         foreach (Ability ab in card.abilities)
                         {
-                            cardData += string.Format("Sigil: {0}\n", ab);
+                            if (!string.IsNullOrEmpty(sigils))
+                            {
+                                sigils += ", ";
+                            }
+                            sigils += ab;
                         }
+
+                        if (string.IsNullOrEmpty(sigils))
+                        {
+                            sigils = "None";
+                        }
+
+                        cardData += string.Format("Sigils: {0}\n", sigils);
 
                         if (card.HasCardMetaCategory(NeutralRegion))
                         {
@@ -225,7 +238,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             foreach (string cardData in cardDataList)
             {
-                //Console.WriteLine(cardData);
+                Console.WriteLine(cardData);
             }
 
         }
