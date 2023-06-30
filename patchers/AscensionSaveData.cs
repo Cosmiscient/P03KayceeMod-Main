@@ -23,13 +23,18 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             get
             {
-                return AscensionSaveData.Data.currentRunSeed
-                       + 10 * EventManagement.CompletedZones.Count
-                       + 100 * EventManagement.VisitedZones.Count
-                       + 1000 * EventManagement.NumberOfZoneEnemiesKilled
-                       + 10000 * Part3SaveData.Data.deck.Cards.Select(c => c.Mods.Count).Sum()
-                       + Part3SaveData.Data.playerPos.gridX
-                       + 100000 * Part3SaveData.Data.playerPos.gridY;
+                // Let's make this super robust
+                int retval = AscensionSaveData.Data == null ? 0 : AscensionSaveData.Data.currentRunSeed;
+                retval += 10 * EventManagement.CompletedZones.Count;
+                retval += 100 * EventManagement.VisitedZones.Count;
+                retval += 1000 * EventManagement.NumberOfZoneEnemiesKilled;
+                if (Part3SaveData.Data != null && Part3SaveData.Data.deck != null && Part3SaveData.Data.deck.Cards != null)
+                    retval += 10000 * Part3SaveData.Data.deck.Cards.Select(c => c != null && c.Mods != null ? c.Mods.Count : 0).Sum();
+
+                retval += Part3SaveData.Data != null && Part3SaveData.Data.playerPos != null ? Part3SaveData.Data.playerPos.gridX : 0;
+                retval += Part3SaveData.Data != null && Part3SaveData.Data.playerPos != null ? 100000 * Part3SaveData.Data.playerPos.gridY : 0;
+                
+                return retval;
             }
         }
 

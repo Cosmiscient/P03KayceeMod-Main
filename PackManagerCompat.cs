@@ -74,6 +74,13 @@ namespace Infiniscryption.PackManagerP03Plugin
             expPack1.ValidFor.Add(PackInfo.PackMetacategory.P03Pack);
             expPack1.SetTexture(TextureHelper.GetImageAsTexture("expansion1.png", typeof(PackPlugin).Assembly));
 
+            PackInfo expPack2 = PackManager.GetPackInfo("P03KCMXP2");
+            expPack2.Title = "Kaycee's P03 Expansion Pack #2 [EARLY ACCESS]";
+            expPack2.Description = "Still in development! The second official expansion pack, with [count] new cards that are zanier than ever.";
+            expPack2.ValidFor.Clear();
+            expPack2.ValidFor.Add(PackInfo.PackMetacategory.P03Pack);
+            expPack2.SetTexture(TextureHelper.GetImageAsTexture("PKCMexpansion2pack.png", typeof(PackPlugin).Assembly));
+
             Logger.LogInfo($"Plugin {PluginName} is loaded!");
         }
     }
