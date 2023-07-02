@@ -32,8 +32,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static Dictionary<Opponent.Type, GameObject> BossPrefabs = new();
         public static Dictionary<HoloMapNode.NodeDataType, GameObject> SpecialNodePrefabs = new();
-        private static Dictionary<int, GameObject[]> SpecialTerrainPrefabs = new();
-        private static Dictionary<int, GameObject> ArrowPrefabs = new();
+        internal static Dictionary<int, GameObject[]> SpecialTerrainPrefabs = new();
+        internal static Dictionary<int, GameObject> ArrowPrefabs = new();
 
         internal static readonly Part3SaveData.WorldPosition MYCOLOGIST_HOME_POSITION = new ("ascension_0_Mycologist", 0, 2);
 

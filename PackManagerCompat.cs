@@ -66,6 +66,9 @@ namespace Infiniscryption.PackManagerP03Plugin
             PackManager.TempleMetacategories[CardTemple.Tech].Add(GuidManager.GetEnumValue<CardMetaCategory>(P03PluginGuid, "NatureRegionCards"));
             PackManager.TempleMetacategories[CardTemple.Tech].Add(GuidManager.GetEnumValue<CardMetaCategory>(P03PluginGuid, "UndeadRegionCards"));
 
+            // Protect the NewBeastTransformer metacategory
+            PackManager.AddProtectedMetacategory(GuidManager.GetEnumValue<CardMetaCategory>(P03PluginGuid, "NewBeastTransformers"));
+
             // Expansion pack
             PackInfo expPack1 = PackManager.GetPackInfo("P03KCMXP1");
             expPack1.Title = "Kaycee's P03 Expansion Pack #1";
