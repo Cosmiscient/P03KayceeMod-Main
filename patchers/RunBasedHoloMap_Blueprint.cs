@@ -42,12 +42,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return retval;
         }
 
-        private static IEnumerable<HoloMapBlueprint> AdjacentToQuadrant(this HoloMapBlueprint[,] map, HoloMapBlueprint node)
+        public static IEnumerable<HoloMapBlueprint> AdjacentToQuadrant(this HoloMapBlueprint[,] map, HoloMapBlueprint node)
         {
             return map.AdjacentToQuadrant(node.x, node.y);
         }
         
-        private static IEnumerable<HoloMapBlueprint> AdjacentTo(this HoloMapBlueprint[,] map, int x, int y)
+        public static IEnumerable<HoloMapBlueprint> AdjacentTo(this HoloMapBlueprint[,] map, int x, int y)
         {
             return NSEW.Where(p => x + p[0] >= 0 &&
                                    y + p[1] >= 0 &&
@@ -56,16 +56,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                        .Select(p => map[x + p[0], y + p[1]]);
         }
 
-        private static Tuple<int, int> GetAdjacentLocation(this HoloMapBlueprint node, int direction)
+        public static Tuple<int, int> GetAdjacentLocation(this HoloMapBlueprint node, int direction)
         {
             int x = direction == WEST ? node.x - 1 : direction == EAST ? node.x + 1 : node.x;
             int y = direction == NORTH ? node.y - 1 : direction == SOUTH ? node.y + 1 : node.y;
-            if (x <= 0 || x >= 6 || y <= 0 || y >= 6)
+            if (x < 0 || x >= 6 || y < 0 || y >= 6)
                 return null;
             return new(x, y);
         }
 
-        private static HoloMapBlueprint GetAdjacentNode(int x, int y, HoloMapBlueprint[,] map, int direction)
+        public static HoloMapBlueprint GetAdjacentNode(int x, int y, HoloMapBlueprint[,] map, int direction)
         {
             x = direction == WEST ? x - 1 : direction == EAST ? x + 1 : x;
             y = direction == NORTH ? y - 1 : direction == SOUTH ? y + 1 : y;
@@ -75,12 +75,29 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return map[x,y];
         }
 
-        private static HoloMapBlueprint GetAdjacentNode(this HoloMapBlueprint node, HoloMapBlueprint[,] map, int direction)
+        public static HoloMapBlueprint[,] ToMap(this List<HoloMapBlueprint> bp)
+        {
+            HoloMapBlueprint[,] retval = new HoloMapBlueprint[6,6];
+            foreach (var hmb in bp)
+                retval[hmb.x, hmb.y] = hmb;
+
+            return retval;
+        }
+
+        public static HoloMapBlueprint GetAdjacentNode(this HoloMapBlueprint node, List<HoloMapBlueprint> map, int direction)
+        {
+            var newLoc = GetAdjacentLocation(node, direction);
+            if (newLoc == null)
+                return null;
+            return map.FirstOrDefault(bp => bp.x == newLoc.Item1 && bp.y == newLoc.Item2);
+        }
+
+        public static HoloMapBlueprint GetAdjacentNode(this HoloMapBlueprint node, HoloMapBlueprint[,] map, int direction)
         {
             return GetAdjacentNode(node.x, node.y, map, direction);
         }
 
-        private static List<HoloMapBlueprint> GetPointOfInterestNodes(this List<HoloMapBlueprint> nodes, Func<HoloMapBlueprint, bool> filter = null)
+        public static List<HoloMapBlueprint> GetPointOfInterestNodes(this List<HoloMapBlueprint> nodes, Func<HoloMapBlueprint, bool> filter = null)
         {
             Func<HoloMapBlueprint, bool> activeFilter = (filter == null) ? ((HoloMapBlueprint i) => true) : filter;
             List<HoloMapBlueprint> deadEndPOI = nodes.Where(activeFilter).Where(bp => bp.IsDeadEnd && bp.EligibleForUpgrade).ToList();
@@ -90,7 +107,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return nodes.Where(activeFilter).Where(bp => bp.EligibleForUpgrade).ToList();
         }
 
-        private static HoloMapBlueprint GetRandomPointOfInterest(this List<HoloMapBlueprint> nodes, Func<HoloMapBlueprint, bool> filter = null, int randomSeed = -1)
+        public static HoloMapBlueprint GetRandomPointOfInterest(this List<HoloMapBlueprint> nodes, Func<HoloMapBlueprint, bool> filter = null, int randomSeed = -1)
         {
             if (randomSeed != -1)
                 UnityEngine.Random.InitState(randomSeed);
@@ -99,12 +116,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return possibles.Count == 0 ? null : possibles[UnityEngine.Random.Range(0, possibles.Count)];
         }
 
-        private static IEnumerable<HoloMapBlueprint> AdjacentTo(this HoloMapBlueprint[,] map, HoloMapBlueprint node)
+        public static IEnumerable<HoloMapBlueprint> AdjacentTo(this HoloMapBlueprint[,] map, HoloMapBlueprint node)
         {
             return map.AdjacentTo(node.x, node.y);
         }
 
-        private static int DirTo(this HoloMapBlueprint start, HoloMapBlueprint end)
+        public static int DirTo(this HoloMapBlueprint start, HoloMapBlueprint end)
         {
             int retval = BLANK;
             retval = retval | (start.x == end.x ? 0 : start.x < end.x ? EAST : WEST);
@@ -618,7 +635,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 SpecialEvent se = storyData.Item1;
                 Predicate<HoloMapBlueprint> pred = storyData.Item2;
 
-                List<HoloMapBlueprint> locations = blueprint.Where(bp => bp.dialogueEvent == SpecialEvent.None && pred(bp)).ToList();
+                List<HoloMapBlueprint> locations = blueprint.Where(bp => bp.dialogueEvent == SpecialEvent.None && (bp.specialTerrain & HoloMapBlueprint.LANDMARKER) == 0 && pred(bp)).ToList();
                 if (locations.Count == 0)
                     locations = blueprint.Where(bp => bp.dialogueEvent == SpecialEvent.None).ToList();
 

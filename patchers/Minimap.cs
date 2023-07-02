@@ -3,6 +3,7 @@ using DiskCardGame;
 using System.Collections.Generic;
 using System.Linq;
 using Infiniscryption.P03KayceeRun.Helpers;
+using System;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -58,7 +59,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return null;
         }
 
-        private static GameObject BuildGameObject(HoloMapBlueprint bp, Transform parent)
+        private static bool AdjacentHasEncounter(List<HoloMapBlueprint> map, HoloMapBlueprint bp, int encounterType)
+        {
+            foreach(var adj in AdjacentTo(map, bp))
+                if (adj.specialDirectionType == encounterType && adj.GetAdjacentNode(map, adj.specialDirection) == bp)
+                    return true;
+
+            return false;
+        }
+
+        private static GameObject BuildGameObject(HoloMapBlueprint bp, List<HoloMapBlueprint> map, Transform parent)
         {
             GameObject mapNode = new GameObject($"minimapnode({bp.KeyCode})");
             mapNode.transform.SetParent(parent, false);
@@ -73,6 +83,38 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 GameObject icon = GameObject.Instantiate(FindRendererParent(RunBasedHoloMap.SpecialNodePrefabs[bp.upgrade]).gameObject, mapNode.transform, false);
                 icon.name = "icon";
                 icon.transform.localScale = new Vector3(3f, 3f, 3f);
+                icon.transform.localEulerAngles = new Vector3(53f, 57.0029f, 57.1122f);
+            }
+
+            if (AdjacentHasEncounter(map, bp, HoloMapBlueprint.BATTLE))
+            {
+                P03Plugin.Log.LogInfo($"Creating skull icon for {bp.KeyCode.ToString()}");
+                GameObject refObject = RunBasedHoloMap.GetGameObject("neutralwestmain_2", "Nodes/MoveArea_W");
+                P03Plugin.Log.LogInfo($"ref object");
+                GameObject skullIcon = refObject.transform.Find("RendererParent/AdditionalIcon").gameObject;
+                P03Plugin.Log.LogInfo($"skull icon");
+                GameObject icon = GameObject.Instantiate(skullIcon, mapNode.transform, false);
+                P03Plugin.Log.LogInfo($"instantiated");
+                icon.name = "skull";
+                icon.transform.localScale = new Vector3(4f, 4f, 4f);
+                icon.transform.localPosition = new Vector3(0f, 0.3f, 0f);
+                icon.transform.localEulerAngles = new Vector3(53f, 57.0029f, 57.1122f);
+            }
+
+            if (AdjacentHasEncounter(map, bp, HoloMapBlueprint.TRADE))
+            {
+                P03Plugin.Log.LogInfo($"Creating trade icon for {bp.KeyCode.ToString()}");
+                GameObject refObject = RunBasedHoloMap.GetGameObject("neutralwestmain_2", "Nodes/MoveArea_W");
+                P03Plugin.Log.LogInfo($"ref object");
+                GameObject skullIcon = refObject.transform.Find("RendererParent/TradeIcon").gameObject;
+                P03Plugin.Log.LogInfo($"icon");
+                GameObject icon = GameObject.Instantiate(skullIcon, mapNode.transform, false);
+                GameObject.Destroy(icon.GetComponent<AutoRotate>());
+                GameObject.Destroy(icon.GetComponent<CleanupInstancedMaterialOnDestroy>());
+                P03Plugin.Log.LogInfo($"instantiated");
+                icon.name = "trade";
+                icon.transform.localScale = new Vector3(3f, 3f, 3f);
+                icon.transform.localPosition = new Vector3(0f, 0f, 0f);
                 icon.transform.localEulerAngles = new Vector3(53f, 57.0029f, 57.1122f);
             }
 
@@ -92,10 +134,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             Minimap map = minimap.AddComponent<Minimap>();
             map.mapPrefix = prefix;
-            map.minimapNodes = blueprint.ToDictionary(bp => bp.KeyCode, bp => BuildGameObject(bp, minimap.transform));
+            map.minimapNodes = blueprint.ToDictionary(bp => bp.KeyCode, bp => BuildGameObject(bp, blueprint, minimap.transform));
             map.bossRooms = blueprint.Where(bp => bp.opponent != Opponent.Type.Default || bp.specialTerrain == HoloMapBlueprint.LOWER_TOWER_ROOM).Select(bp => bp.KeyCode).ToArray();
             map.bossRoomTrigger = blueprint.Where(bp => bp.blockedDirections != 0).Select(bp => bp.KeyCode).ToArray();
             map.nodeKeys = map.minimapNodes.Keys.ToArray();
+
+            // Get all of the special rooms (the battles and trades)
+            List<HoloMapBlueprint> specialTriggers = blueprint.Where(bp => bp.specialDirection != 0).ToList();
+            map.encounterVisibilityRooms = specialTriggers.Select(bp => bp.KeyCode).ToArray();
+            map.encounterRooms = specialTriggers.Select(bp => bp.GetAdjacentNode(blueprint, bp.specialDirection).KeyCode).ToArray();
 
             // Create the lines
             Dictionary<string, bool> connections = new();
@@ -129,14 +176,32 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             MaterialHelper.RecolorAllMaterials(obj, color, _shaderKey, true);
             obj.tag = "HoloMapFixedColor"; // This is used to make sure the colors aren't overwritten.
+
+            foreach (Transform t in obj.transform)
+                t.gameObject.tag = "HoloMapFixedColor";
         }
 
         private bool HasVisitedRoom(string key)
         {
+            if (key == $"{Part3SaveData.Data.playerPos.gridX},{Part3SaveData.Data.playerPos.gridY}")
+                return true;
+
             var areaData = Part3SaveData.Data.areaData;
             var saveData = areaData == null ? null : Part3SaveData.Data.areaData.FirstOrDefault(a => a.id.StartsWith(mapPrefix) && a.id.EndsWith($"({key})"));
 
             return saveData != null && saveData.visited;
+        }
+
+        public bool ShowSpecialIcon(string key)
+        {
+            if (!encounterRooms.Contains(key))
+                return false;
+
+            if (HasVisitedRoom(key))
+                return false;
+            
+            int index = Array.IndexOf(encounterRooms, key);
+            return HasVisitedRoom(encounterVisibilityRooms[index]);
         }
 
         void OnEnable()
@@ -153,22 +218,42 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             foreach (var item in minimapNodes)
             {
                 bool isBossRoom = bossRooms.Contains(item.Key);
-                bool shouldBeActive = item.Key == playerPosId || HasVisitedRoom(item.Key) || (isBossRoom && hasSeenBossRoom);
-                item.Value.SetActive(shouldBeActive);
-                if (shouldBeActive)
-                    Recolor(item.Value, item.Key == playerPosId ? GameColors.Instance.brightGold : isBossRoom ? GameColors.instance.brightRed : GameColors.Instance.brightBlue);
+                bool showSpecialIcon = ShowSpecialIcon(item.Key);
+                bool shouldBeActive = item.Key == playerPosId || HasVisitedRoom(item.Key) || showSpecialIcon || (isBossRoom && hasSeenBossRoom);
+                item.Value.SetActive(shouldBeActive);                
                 
                 Transform iconTransform = item.Value.transform.Find("icon");
                 GameObject iconObject = iconTransform == null ? null : iconTransform.gameObject;
+                Transform skullTransform = item.Value.transform.Find("skull");
+                GameObject skullObject = skullTransform == null ? null : skullTransform.gameObject;
+                Transform tradeTransform = item.Value.transform.Find("trade");
+                GameObject tradeObject = tradeTransform == null ? null : tradeTransform.gameObject;
                 GameObject ballObject = item.Value.transform.Find("ball").gameObject;
                 
                 var areaData = Part3SaveData.Data.areaData;
                 var saveData = areaData == null ? null : Part3SaveData.Data.areaData.FirstOrDefault(a => a.id.StartsWith(mapPrefix) && a.id.EndsWith($"({item.Key})"));
                 bool shouldShowBall = iconObject == null || ((saveData == null && item.Key != playerPosId) || (saveData != null && saveData.completedNodesIds.Where(i => i >= 10).Count() > 0));
+                shouldShowBall = shouldShowBall && !showSpecialIcon;
 
                 ballObject.SetActive(shouldShowBall);
+                if (skullObject != null)
+                    skullObject.SetActive(showSpecialIcon);
+                if (tradeObject != null)
+                    tradeObject.SetActive(showSpecialIcon);
                 if (iconObject != null)
-                    iconObject.SetActive(!shouldShowBall);
+                    iconObject.SetActive(!shouldShowBall && !showSpecialIcon);
+
+                if (shouldBeActive)
+                {
+                    Color color = GameColors.instance.brightBlue;
+                    if (isBossRoom || (showSpecialIcon && skullObject != null))
+                        color = GameColors.instance.brightRed;
+                    else if (showSpecialIcon && tradeObject != null)
+                        color = GameColors.instance.brightSeafoam;
+                    else if (item.Key == playerPosId)
+                        color = GameColors.instance.brightGold;
+                    Recolor(item.Value, color);
+                }
             }
         }
 
@@ -210,6 +295,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [SerializeField]
         private string[] bossRoomTrigger;
+
+        [SerializeField]
+        private string[] encounterRooms;
+
+        [SerializeField]
+        private string[] encounterVisibilityRooms;
 
         private Dictionary<string, GameObject> minimapNodes;
 
