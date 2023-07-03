@@ -8,6 +8,7 @@ using Pixelplacement;
 using HarmonyLib;
 using DigitalRuby.LightningBolt;
 using Infiniscryption.P03KayceeRun.Helpers;
+using Infiniscryption.P03KayceeRun.Encounters;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
 {
@@ -706,7 +707,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield break;
             }
 
-            TurnManager.Instance.Opponent.Blueprint = (new EncounterBlueprintHelper(DataHelper.GetResourceString(blueprintId, "dat"))).AsBlueprint();
+            TurnManager.Instance.Opponent.Blueprint = EncounterDefinitions.P03FinalBoss;
             
             List<List<CardInfo>> plan = EncounterBuilder.BuildOpponentTurnPlan(TurnManager.Instance.Opponent.Blueprint, EventManagement.EncounterDifficulty, removeLockedCards);
             TurnManager.Instance.Opponent.ReplaceAndAppendTurnPlan(plan);

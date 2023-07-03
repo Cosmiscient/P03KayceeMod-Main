@@ -4,6 +4,7 @@ using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Quests;
 using UnityEngine;
@@ -73,12 +74,11 @@ namespace Infiniscryption.P03KayceeRun
             AscensionChallengeManagement.UpdateP03Challenges();
             BossManagement.RegisterBosses();
             DefaultQuestDefinitions.DefineAllQuests();
+            EncounterDefinitions.BuildEncounters();
 
             CustomCards.printAllCards();
 
             SceneManager.sceneLoaded += this.OnSceneLoaded;
-
-            EncounterBlueprintHelper.TestAllKnownEncounterData();
 
             Initialized = true;
 

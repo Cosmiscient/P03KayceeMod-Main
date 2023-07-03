@@ -1,226 +1,286 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using DiskCardGame;
-using Infiniscryption.P03KayceeRun.Helpers;
-using UnityEngine;
+// using System;
+// using System.Collections.Generic;
+// using System.Linq;
+// using System.IO;
+// using DiskCardGame;
+// using Infiniscryption.P03KayceeRun.Helpers;
+// using InscryptionAPI.Encounters;
+// using UnityEngine;
 
-namespace Infiniscryption.P03KayceeRun.Patchers
-{
-    public class EncounterBlueprintHelper
-    {
-        public static readonly string[] ALL_KNOWN_ENCOUNTERS = new string[] {
-            "CanvasBossPX",
-            "nature_battransformers",
-            "nature_beartransformers",
-            "nature_hounds",
-            "nature_wolftransformers",
-            "nature_snaketransformers",
-            "neutral_alarmbots",
-            "neutral_bombsandshields",
-            "neutral_bridgebattle",
-            "neutral_minecarts",
-            "neutral_sentrywall",
-            "neutral_swapbots",
-            "neutral_clockbots",
-            "neutral_spyplanes",
-            "P03FinalBoss",
-            "PhotographerBossP1",
-            "PhotographerBossP2",
-            "tech_attackconduits",
-            "tech_giftcells",
-            "tech_splintercells",
-            "tech_protectconduits",
-            "tech_stinkyconduits",
-            "undead_bomblatchers",
-            "undead_shieldlatchers",
-            "undead_skeleswarm",
-            "undead_winglatchers",
-            "undead_strafelatchers",
-            "wizard_bigripper",
-            "wizard_gemexploder",
-            "wizard_shieldgems"
-        };
+// namespace Infiniscryption.P03KayceeRun.Patchers
+// {
+//     public class EncounterBlueprintHelper
+//     {
+//         public static readonly string[] ALL_KNOWN_ENCOUNTERS = new string[] {
+//             "CanvasBossPX",
+//             "nature_battransformers",
+//             "nature_beartransformers",
+//             "nature_hounds",
+//             "nature_wolftransformers",
+//             "nature_snaketransformers",
+//             "neutral_alarmbots",
+//             "neutral_bombsandshields",
+//             "neutral_bridgebattle",
+//             "neutral_minecarts",
+//             "neutral_sentrywall",
+//             "neutral_swapbots",
+//             "neutral_clockbots",
+//             "neutral_spyplanes",
+//             "P03FinalBoss",
+//             "PhotographerBossP1",
+//             "PhotographerBossP2",
+//             "tech_attackconduits",
+//             "tech_giftcells",
+//             "tech_splintercells",
+//             "tech_protectconduits",
+//             "tech_stinkyconduits",
+//             "undead_bomblatchers",
+//             "undead_shieldlatchers",
+//             "undead_skeleswarm",
+//             "undead_winglatchers",
+//             "undead_strafelatchers",
+//             "wizard_bigripper",
+//             "wizard_gemexploder",
+//             "wizard_shieldgems"
+//         };
 
-        public string name;
-        public List<string> dominantTribes;
-        public int maxDifficulty;
-        public int minDifficulty;
-        public int oldPreviewDifficulty;
-        public List<string> redundantAbilities;
-        public bool regionSpecific;
-        public List<string> unlockedCardPrerequisites;
-        public List<string> randomReplacementCards;
-        public List<List<int>> overclockBlueprint;
-        public int powerLevel;
-        public string powerLevelString;
-        public List<List<string>> turnPlan;
+//         public string name;
+//         public List<string> dominantTribes;
+//         public int maxDifficulty;
+//         public int minDifficulty;
+//         public int oldPreviewDifficulty;
+//         public List<string> redundantAbilities;
+//         public bool regionSpecific;
+//         public List<string> unlockedCardPrerequisites;
+//         public List<string> randomReplacementCards;
+//         public List<List<int>> overclockBlueprint;
+//         public int powerLevel;
+//         public string powerLevelString;
+//         public List<List<string>> turnPlan;
 
-        public override string ToString()
-        {
-            string retval = $"Name: {name}"; //0
-            retval += "\n" + $"maxDifficulty: {maxDifficulty}"; //1
-            retval += "\n" + $"minDifficulty: {minDifficulty}"; //2
-            retval += "\n" + $"powerLevel: {powerLevel}"; //3
-            retval += "\n" + $"powerLevelString: {powerLevelString}"; //4
-            retval += "\n" + $"oldPreviewDifficulty: {oldPreviewDifficulty}"; //5
-            retval += "\n" + $"regionSpecific: {regionSpecific}"; //6
-            retval += "\n" + $"dominantTribes: [{string.Join(",", dominantTribes)}]"; //7
-            retval += "\n" + $"redundantAbilities: [{string.Join(",", redundantAbilities)}]"; //8
-            retval += "\n" + $"unlockedCardPrerequisites: [{string.Join(",", unlockedCardPrerequisites)}]"; //9
-            retval += "\n" + $"randomReplacementCards: [{string.Join(",", randomReplacementCards)}]"; //10
+//         public override string ToString()
+//         {
+//             string retval = $"Name: {name}"; //0
+//             retval += "\n" + $"maxDifficulty: {maxDifficulty}"; //1
+//             retval += "\n" + $"minDifficulty: {minDifficulty}"; //2
+//             retval += "\n" + $"powerLevel: {powerLevel}"; //3
+//             retval += "\n" + $"powerLevelString: {powerLevelString}"; //4
+//             retval += "\n" + $"oldPreviewDifficulty: {oldPreviewDifficulty}"; //5
+//             retval += "\n" + $"regionSpecific: {regionSpecific}"; //6
+//             retval += "\n" + $"dominantTribes: [{string.Join(",", dominantTribes)}]"; //7
+//             retval += "\n" + $"redundantAbilities: [{string.Join(",", redundantAbilities)}]"; //8
+//             retval += "\n" + $"unlockedCardPrerequisites: [{string.Join(",", unlockedCardPrerequisites)}]"; //9
+//             retval += "\n" + $"randomReplacementCards: [{string.Join(",", randomReplacementCards)}]"; //10
 
-            string overclock = string.Join(",", overclockBlueprint.Select(p => $"D:{p[0]}/T:{p[1]}"));
-            retval += "\n" + $"overclockBlueprint: [{overclock}]";
+//             string overclock = string.Join(",", overclockBlueprint.Select(p => $"D:{p[0]}/T:{p[1]}"));
+//             retval += "\n" + $"overclockBlueprint: [{overclock}]";
 
-            foreach (List<string> turn in turnPlan)
-                retval += "\n" + string.Join(",", turn);
+//             foreach (List<string> turn in turnPlan)
+//                 retval += "\n" + string.Join(",", turn);
             
-            return retval;            
-        }
+//             return retval;            
+//         }
 
-        public EncounterBlueprintHelper(string stringVal)
-        {
-            string[] bpArray = stringVal.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            P03Plugin.Log.LogDebug($"Split length {bpArray.Length}");
-            this.name = bpArray[0].Split(':')[1].Trim(); 
-            this.maxDifficulty = int.Parse(bpArray[1].Split(':')[1].Trim()); 
-            this.minDifficulty = int.Parse(bpArray[2].Split(':')[1].Trim()); 
-            this.powerLevel = int.Parse(bpArray[3].Split(':')[1].Trim()); 
-            this.powerLevelString = bpArray[4].Split(':')[1].Trim(); 
-            this.oldPreviewDifficulty = int.Parse(bpArray[5].Split(':')[1].Trim()); 
-            this.regionSpecific = bool.Parse(bpArray[6].Split(':')[1].Trim()); 
-            this.dominantTribes = AsSplitArray(bpArray[7].Split(':')[1].Trim()); 
-            this.redundantAbilities = AsSplitArray(bpArray[8].Split(':')[1].Trim()); 
-            this.unlockedCardPrerequisites = AsSplitArray(bpArray[9].Split(':')[1].Trim()); 
-            this.randomReplacementCards = AsSplitArray(bpArray[10].Split(':')[1].Trim()); 
-            this.overclockBlueprint = AsOverclock(bpArray[11].Replace("overclockBlueprint: ", "")); 
-            this.turnPlan = bpArray.Skip(12).Select(s => String.IsNullOrEmpty(s) ? new List<string>() : s.Split(',').ToList()).ToList(); 
-        }
+//         public EncounterBlueprintHelper(string stringVal)
+//         {
+//             string[] bpArray = stringVal.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+//             P03Plugin.Log.LogDebug($"Split length {bpArray.Length}");
+//             this.name = bpArray[0].Split(':')[1].Trim(); 
+//             this.maxDifficulty = int.Parse(bpArray[1].Split(':')[1].Trim()); 
+//             this.minDifficulty = int.Parse(bpArray[2].Split(':')[1].Trim()); 
+//             this.powerLevel = int.Parse(bpArray[3].Split(':')[1].Trim()); 
+//             this.powerLevelString = bpArray[4].Split(':')[1].Trim(); 
+//             this.oldPreviewDifficulty = int.Parse(bpArray[5].Split(':')[1].Trim()); 
+//             this.regionSpecific = bool.Parse(bpArray[6].Split(':')[1].Trim()); 
+//             this.dominantTribes = AsSplitArray(bpArray[7].Split(':')[1].Trim()); 
+//             this.redundantAbilities = AsSplitArray(bpArray[8].Split(':')[1].Trim()); 
+//             this.unlockedCardPrerequisites = AsSplitArray(bpArray[9].Split(':')[1].Trim()); 
+//             this.randomReplacementCards = AsSplitArray(bpArray[10].Split(':')[1].Trim()); 
+//             this.overclockBlueprint = AsOverclock(bpArray[11].Replace("overclockBlueprint: ", "")); 
+//             this.turnPlan = bpArray.Skip(12).Select(s => String.IsNullOrEmpty(s) ? new List<string>() : s.Split(',').ToList()).ToList(); 
+//         }
 
-        private static List<List<int>> AsOverclock(string ocString)
-        {
-            return ocString.Replace("[", "").Replace("]", "").Split(',').Select(s => s.Split(new char[] { 'D', 'T', ':', '/'}, StringSplitOptions.RemoveEmptyEntries).Select(s => int.Parse(s)).ToList()).ToList();
-        }
+//         private static List<List<int>> AsOverclock(string ocString)
+//         {
+//             return ocString.Replace("[", "").Replace("]", "").Split(',').Select(s => s.Split(new char[] { 'D', 'T', ':', '/'}, StringSplitOptions.RemoveEmptyEntries).Select(s => int.Parse(s)).ToList()).ToList();
+//         }
 
-        private static List<string> AsSplitArray(string csvString)
-        {
-            if (csvString == "[]")
-                return new List<string>();
-            return csvString.Replace("[", "").Replace("]", "").Split(',').Select(s => s.Trim()).ToList();
-        }
+//         private static List<string> AsSplitArray(string csvString)
+//         {
+//             if (csvString == "[]")
+//                 return new List<string>();
+//             return csvString.Replace("[", "").Replace("]", "").Split(',').Select(s => s.Trim()).ToList();
+//         }
 
-        private static string BlueprintToString(EncounterBlueprintData.CardBlueprint bp)
-        {
-            if (bp == default(EncounterBlueprintData.CardBlueprint))
-                return "EMPTY TURN";
+//         private static string BlueprintToString(EncounterBlueprintData.CardBlueprint bp)
+//         {
+//             if (bp == default(EncounterBlueprintData.CardBlueprint))
+//                 return "EMPTY TURN";
 
-            string retval = bp.card == null ? "NONE" : $"{bp.card.name}";
+//             string retval = bp.card == null ? "NONE" : $"{bp.card.name}";
 
-            if (bp.difficultyReplace)
-                retval += $" -> {bp.replacement.name} {bp.difficultyReq}";
-            else if (bp.randomReplaceChance > 0)
-                retval += $" -> RANDOM {bp.randomReplaceChance}%";
+//             if (bp.difficultyReplace)
+//                 retval += $" -> {bp.replacement.name} {bp.difficultyReq}";
+//             else if (bp.randomReplaceChance > 0)
+//                 retval += $" -> RANDOM {bp.randomReplaceChance}%";
 
-            return retval;
-        }
+//             return retval;
+//         }
 
-        private static EncounterBlueprintData.CardBlueprint StringToBlueprint(string bpString, int maxDifficulty)
-        {
-            try
-            {
-                if (bpString.Equals("EMPTY TURN"))
-                    return default(EncounterBlueprintData.CardBlueprint);
+//         private static EncounterBlueprintData.CardBlueprint StringToBlueprint(string bpString, int maxDifficulty)
+//         {
+//             try
+//             {
+//                 if (bpString.Equals("EMPTY TURN"))
+//                     return default(EncounterBlueprintData.CardBlueprint);
 
-                string[] splitString = bpString.Trim().Split(' ');
+//                 string[] splitString = bpString.Trim().Split(' ');
                 
-                EncounterBlueprintData.CardBlueprint retval = new EncounterBlueprintData.CardBlueprint();
-                retval.card = splitString[0] == "NONE" ? null : CardLoader.GetCardByName(splitString[0]);
+//                 EncounterBlueprintData.CardBlueprint retval = new EncounterBlueprintData.CardBlueprint();
+//                 retval.card = splitString[0] == "NONE" ? null : CardLoader.GetCardByName(splitString[0]);
 
-                retval.minDifficulty = 0;
-                retval.maxDifficulty = maxDifficulty == 0 ? 6 : maxDifficulty;
+//                 retval.minDifficulty = 0;
+//                 retval.maxDifficulty = maxDifficulty == 0 ? 6 : maxDifficulty;
 
-                if (splitString.Length > 1)
-                {
-                    if (splitString[3].EndsWith("%"))
-                    {
-                        retval.randomReplaceChance = int.Parse(splitString[3].Replace("%", ""));
-                        P03Plugin.Log.LogInfo($"Card {retval.card} randomly replaced with chance {retval.randomReplaceChance}");
-                    }
-                    else
-                    {
-                        retval.replacement = CardLoader.GetCardByName(splitString[2]);
-                        retval.difficultyReq = int.Parse(splitString[3]);
-                        retval.difficultyReplace = true;
-                        P03Plugin.Log.LogInfo($"Card {retval.card} replaced by {retval.replacement} at difficulty {retval.difficultyReq}");
-                    }
-                }
-                else
-                {
-                    P03Plugin.Log.LogInfo($"Card {retval.card}");
-                }
+//                 if (splitString.Length > 1)
+//                 {
+//                     if (splitString[3].EndsWith("%"))
+//                     {
+//                         retval.randomReplaceChance = int.Parse(splitString[3].Replace("%", ""));
+//                         P03Plugin.Log.LogInfo($"Card {retval.card} randomly replaced with chance {retval.randomReplaceChance}");
+//                     }
+//                     else
+//                     {
+//                         retval.replacement = CardLoader.GetCardByName(splitString[2]);
+//                         retval.difficultyReq = int.Parse(splitString[3]);
+//                         retval.difficultyReplace = true;
+//                         P03Plugin.Log.LogInfo($"Card {retval.card} replaced by {retval.replacement} at difficulty {retval.difficultyReq}");
+//                     }
+//                 }
+//                 else
+//                 {
+//                     P03Plugin.Log.LogInfo($"Card {retval.card}");
+//                 }
 
-                return retval;
-            } catch {
-                P03Plugin.Log.LogError($"ERROR PROCESSING CARD BLUEPRINT: {bpString}");
-                throw;
-            }
-        }
+//                 return retval;
+//             } catch {
+//                 P03Plugin.Log.LogError($"ERROR PROCESSING CARD BLUEPRINT: {bpString}");
+//                 throw;
+//             }
+//         }
 
-        public EncounterBlueprintHelper(EncounterBlueprintData data)
-        {
-            name = data.name;
-            dominantTribes = data.dominantTribes.Select(t => t.ToString()).ToList();
-            maxDifficulty = data.maxDifficulty;
-            minDifficulty = data.minDifficulty;
-            oldPreviewDifficulty = data.oldPreviewDifficulty;
-            redundantAbilities = data.redundantAbilities.Select(t => t.ToString()).ToList();
-            regionSpecific = data.regionSpecific;
-            unlockedCardPrerequisites = data.unlockedCardPrerequisites.Select(t => t.name).ToList();
-            randomReplacementCards = data.randomReplacementCards.Select(t => t.name).ToList();
-            overclockBlueprint = data.turnMods.Where(bp => bp.overlockCards).Select(bp => new List<int> { bp.applyAtDifficulty, bp.turn }).ToList();
-            powerLevel = data.PowerLevel;
-            powerLevelString = data.PowerLevelString;
+//         public EncounterBlueprintHelper(EncounterBlueprintData data)
+//         {
+//             name = data.name;
+//             dominantTribes = data.dominantTribes.Select(t => t.ToString()).ToList();
+//             maxDifficulty = data.maxDifficulty;
+//             minDifficulty = data.minDifficulty;
+//             oldPreviewDifficulty = data.oldPreviewDifficulty;
+//             redundantAbilities = data.redundantAbilities.Select(t => t.ToString()).ToList();
+//             regionSpecific = data.regionSpecific;
+//             unlockedCardPrerequisites = data.unlockedCardPrerequisites.Select(t => t.name).ToList();
+//             randomReplacementCards = data.randomReplacementCards.Select(t => t.name).ToList();
+//             overclockBlueprint = data.turnMods.Where(bp => bp.overlockCards).Select(bp => new List<int> { bp.applyAtDifficulty, bp.turn }).ToList();
+//             powerLevel = data.PowerLevel;
+//             powerLevelString = data.PowerLevelString;
 
-            turnPlan = data.turns.Select(turn => turn.Select(BlueprintToString).ToList()).ToList();
-        }
+//             turnPlan = data.turns.Select(turn => turn.Select(BlueprintToString).ToList()).ToList();
+//         }
 
-        public EncounterBlueprintData AsBlueprint()
-        {
-            EncounterBlueprintData data = ScriptableObject.CreateInstance<EncounterBlueprintData>();
-            data.name = this.name;
-            data.dominantTribes = this.dominantTribes.Select(s => (Tribe)Enum.Parse(typeof(Tribe), s)).ToList();
-            data.maxDifficulty = this.maxDifficulty;
-            data.minDifficulty = this.minDifficulty;
-            data.oldPreviewDifficulty = this.oldPreviewDifficulty;
-            data.redundantAbilities = this.redundantAbilities.Select(s => (Ability)Enum.Parse(typeof(Ability), s)).ToList();
-            data.regionSpecific = this.regionSpecific;
-            data.unlockedCardPrerequisites = this.unlockedCardPrerequisites.Select(n => CardLoader.GetCardByName(n)).ToList();
-            data.randomReplacementCards = this.randomReplacementCards.Select(n => CardLoader.GetCardByName(n)).ToList();
-            data.turnMods = this.overclockBlueprint.Where(ar => ar != null && ar.Count == 2).Select(ar => new EncounterBlueprintData.TurnModBlueprint() { overlockCards = true, applyAtDifficulty = ar[0], turn = ar[1]}).ToList();
-            data.PowerLevel = this.powerLevel;
-            data.PowerLevelString = this.powerLevelString;
+//         public EncounterBlueprintData AsBlueprint()
+//         {
+//             EncounterBlueprintData data = ScriptableObject.CreateInstance<EncounterBlueprintData>();
+//             data.name = this.name;
+//             data.dominantTribes = this.dominantTribes.Select(s => (Tribe)Enum.Parse(typeof(Tribe), s)).ToList();
+//             data.maxDifficulty = this.maxDifficulty;
+//             data.minDifficulty = this.minDifficulty;
+//             data.oldPreviewDifficulty = this.oldPreviewDifficulty;
+//             data.redundantAbilities = this.redundantAbilities.Select(s => (Ability)Enum.Parse(typeof(Ability), s)).ToList();
+//             data.regionSpecific = this.regionSpecific;
+//             data.unlockedCardPrerequisites = this.unlockedCardPrerequisites.Select(n => CardLoader.GetCardByName(n)).ToList();
+//             data.randomReplacementCards = this.randomReplacementCards.Select(n => CardLoader.GetCardByName(n)).ToList();
+//             data.turnMods = this.overclockBlueprint.Where(ar => ar != null && ar.Count == 2).Select(ar => new EncounterBlueprintData.TurnModBlueprint() { overlockCards = true, applyAtDifficulty = ar[0], turn = ar[1]}).ToList();
+//             data.PowerLevel = this.powerLevel;
+//             data.PowerLevelString = this.powerLevelString;
 
-            data.turns = turnPlan.Select(turn => turn.Select(s => StringToBlueprint(s, data.maxDifficulty)).Where(bp => bp != null).ToList()).ToList();
+//             data.turns = turnPlan.Select(turn => turn.Select(s => StringToBlueprint(s, data.maxDifficulty)).Where(bp => bp != null).ToList()).ToList();
 
 
-            return data;
-        }
+//             return data;
+//         }
 
-        public static void TestAllKnownEncounterData()
-        {
-            foreach (string encounterName in ALL_KNOWN_ENCOUNTERS)
-            {
-                try
-                {
-                    (new EncounterBlueprintHelper(DataHelper.GetResourceString(encounterName, "dat"))).AsBlueprint();
-                }
-                catch (Exception ex)
-                {
-                    P03Plugin.Log.LogError($"ERROR PARSING {encounterName}");
-                    P03Plugin.Log.LogError(ex);
-                }
-            }
-        }
-    }
-}
+//         public static void TestAllKnownEncounterData()
+//         {
+//             string prefix = "            ";
+//             List<string> allCodeGens = new ();
+//             foreach (string encounterName in ALL_KNOWN_ENCOUNTERS)
+//             {
+//                 try
+//                 {
+//                     EncounterBlueprintData blueprint = (new EncounterBlueprintHelper(DataHelper.GetResourceString(encounterName, "dat"))).AsBlueprint();
+                    
+//                     string varname = blueprint.name.Split(new [] {"_"}, StringSplitOptions.RemoveEmptyEntries).Select(s => char.ToUpperInvariant(s[0]) + s.Substring(1, s.Length - 1)).Aggregate(string.Empty, (s1, s2) => s1 + s2);
+//                     varname = char.ToLowerInvariant(varname[0]) + varname.Substring(1, varname.Length - 1);
+//                     string planvarname = $"{varname}.turns";
+
+//                     string codeGen = $"{prefix}// Encounter: {blueprint.name}\n";
+//                     codeGen += $"{prefix}EncounterBlueprintData {varname} = EncounterManager.New(\"{blueprint.name}\", addToPool: false);\n";
+//                     codeGen += $"{prefix}{varname}.SetDifficulty({blueprint.minDifficulty}, {blueprint.maxDifficulty});\n";
+
+//                     if (blueprint.randomReplacementCards.Count > 0)
+//                         codeGen += $"{prefix}{varname}.AddRandomReplacementCards(" + String.Join(", ", blueprint.randomReplacementCards.Select(ci => $"\"{ci.name}\"")) + ");\n";
+                    
+//                     codeGen += $"{prefix}{planvarname} = new();\n";
+
+//                     int turnNumber = 0;
+//                     foreach (var turn in blueprint.turns)
+//                     {
+//                         turnNumber += 1;
+//                         codeGen += $"\n{prefix}// TURN {turnNumber}\n";
+//                         codeGen += $"{prefix}{planvarname}.Add(new () " + "{\n";
+
+//                         bool first = true;
+//                         foreach (var cardBp in turn)
+//                         {
+//                             string buildParams = cardBp.card != null ? $"\"{cardBp.card.name}\"" : "null";
+                            
+//                             if (cardBp.replacement != null)
+//                             {
+//                                 buildParams += $", replacement: \"{cardBp.replacement.name}\"";
+//                                 if (cardBp.difficultyReq > 0)
+//                                     buildParams += $", difficulty: {cardBp.difficultyReq}";
+//                                 else
+//                                     buildParams += $", random: {cardBp.randomReplaceChance}";                                
+//                             }
+
+//                             if (first)
+//                                 first = false;
+//                             else
+//                                 codeGen += ",\n";
+//                             codeGen += $"{prefix}    Enemy({buildParams})";
+//                         }
+//                         codeGen += "\n" + prefix + "});\n";
+//                     }
+//                     codeGen += $"\n{prefix}{varname}.SyncTurnDifficulties({blueprint.minDifficulty}, {blueprint.maxDifficulty});\n\n";
+
+//                     allCodeGens.Add(codeGen);
+//                 }
+//                 catch (Exception ex)
+//                 {
+//                     P03Plugin.Log.LogError($"ERROR PARSING {encounterName}");
+//                     P03Plugin.Log.LogError(ex);
+//                 }
+//             }
+
+//             prefix = "        ";
+//             string finalMethod = $"{prefix}internal static void BuildEncounters()\n{prefix}" + "{\n";
+//             finalMethod += String.Join("\n\n", allCodeGens);
+//             finalMethod += prefix + "}\n";
+
+//             using (StreamWriter outputFile = new StreamWriter("autogen.cs"))
+//             {
+//                 outputFile.WriteLine(finalMethod);
+//             }
+//         }
+//     }
+// }
