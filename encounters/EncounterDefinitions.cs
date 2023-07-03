@@ -11,17 +11,80 @@ using HarmonyLib;
 namespace Infiniscryption.P03KayceeRun.Encounters
 {
     [HarmonyPatch]
-    internal static class EncounterDefinitions
+    public static class EncounterHelper
     {
-        private static EncounterBlueprintData.CardBlueprint Enemy(string cardName, string replacement = null, int difficulty = 0, int random = 0)
+        /// <summary>
+        /// The maximum difficulty level that an an encounter can go to
+        /// </summary>
+        public const int MAX_DIFFICULTY = 6;
+
+        /// <summary>
+        /// Creates a series of card blueprints that satisfy the given behavior
+        /// </summary>
+        /// <param name="cardName">The default card for the blueprint</param>
+        /// <param name="replacement">The card that should replace the default when the condition is met</param>
+        /// <param name="difficulty">The default card is replaced with the replacement at this difficulty level or higher.</param>
+        /// <param name="random">Gives a random chance for the default card to be replaced with one of the blueprint's random replacement cards. Does not apply to the difficulty replacement.</param>
+        /// <param name="overclock">At this difficulty level or higher, the card is overclocked.</param>
+        public static List<EncounterBlueprintData.CardBlueprint> Enemy(string cardName, string replacement = null, int difficulty = 0, int random = 0, int overclock = 0)
         {
-            return EncounterManager.NewCardBlueprint(
-                cardName,
-                randomReplaceChance: random,
-                difficultyReplace: difficulty > 0,
-                difficultyReplaceReq: difficulty,
-                replacement: replacement
-            );
+            List<EncounterBlueprintData.CardBlueprint> retval = new();
+
+            EncounterBlueprintData.CardBlueprint baseBp = new();
+            baseBp.card = CardManager.AllCardsCopy.CardByName(cardName);
+
+            if (overclock == 0 && difficulty == 0)
+                baseBp.maxDifficulty = MAX_DIFFICULTY;
+            else if (overclock == 0 && difficulty > 0)
+                baseBp.maxDifficulty = difficulty - 1;
+            else if (overclock > 0 && difficulty == 0)
+                baseBp.maxDifficulty = overclock - 1;
+            else
+                baseBp.maxDifficulty = Math.Min(overclock, difficulty) - 1;
+            
+            if (random > 0)
+                baseBp.randomReplaceChance = random;
+            
+            retval.Add(baseBp);
+
+            if (difficulty > 0 && replacement != null)
+            {
+                EncounterBlueprintData.CardBlueprint diff = new();
+                diff.card = CardManager.AllCardsCopy.CardByName(replacement);
+                diff.minDifficulty = difficulty;
+                if (overclock > difficulty)
+                    diff.maxDifficulty = overclock - 1;
+                else
+                    diff.maxDifficulty = MAX_DIFFICULTY;
+
+                if (difficulty > overclock && overclock > 0)
+                    diff.card.Mods.Add(new (1, 0) { fromOverclock = true });
+                    
+                retval.Add(baseBp);
+            }
+
+            if (overclock > 0)
+            {
+                EncounterBlueprintData.CardBlueprint ov = new();
+                ov.minDifficulty = overclock;
+                if (overclock > difficulty && difficulty > 0)
+                {
+                    ov.card = CardManager.AllCardsCopy.CardByName(replacement);
+                    ov.maxDifficulty = MAX_DIFFICULTY;
+                }
+                else
+                {
+                    ov.card = CardManager.AllCardsCopy.CardByName(cardName);
+                    if (difficulty > overclock)
+                        ov.maxDifficulty = difficulty - 1;
+                    else
+                        ov.maxDifficulty = MAX_DIFFICULTY;
+                }
+                ov.card.Mods.Add(new (1, 0) { fromOverclock = true });
+                retval.Add(baseBp);
+            }
+
+            return retval;
         }
 
         // These blueprints are special; they're for bosses and aren't in the normal pool
@@ -40,50 +103,47 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             CanvasBossPX.turns = new();
 
             // TURN 1
-            CanvasBossPX.turns.Add(new () {
+            CanvasBossPX.turns.AddTurn(
                 Enemy(null, replacement: "SwapBot", difficulty: 2),
                 Enemy("Automaton")
-            });
+            );
 
             // TURN 2
-            CanvasBossPX.turns.Add(new () {
+            CanvasBossPX.turns.AddTurn(
                 Enemy(null, replacement: "Insectodrone", difficulty: 1)
-            });
+            );
 
             // TURN 3
-            CanvasBossPX.turns.Add(new () {
+            CanvasBossPX.turns.AddTurn(
                 Enemy("Automaton")
-            });
+            );
 
             // TURN 4
-            CanvasBossPX.turns.Add(new () {
+            CanvasBossPX.turns.AddTurn(
                 Enemy("Automaton"),
                 Enemy(null, replacement: "Automaton", difficulty: 3)
-            });
+            );
 
             // TURN 5
-            CanvasBossPX.turns.Add(new () {
+            CanvasBossPX.turns.AddTurn(
                 Enemy(null, replacement: "SwapBot", difficulty: 4)
-            });
+            );
 
             // TURN 6
-            CanvasBossPX.turns.Add(new () {
+            CanvasBossPX.turns.AddTurn(
                 Enemy(null, replacement: "GemRipper", difficulty: 6)
-            });
+            );
 
             // TURN 7
-            CanvasBossPX.turns.Add(new () {
+            CanvasBossPX.turns.AddTurn(
                 Enemy("LeapBot")
-            });
+            );
 
             // TURN 8
-            CanvasBossPX.turns.Add(new () {
+            CanvasBossPX.turns.AddTurn(
                 Enemy("Automaton"),
                 Enemy(null, replacement: "MineCart", difficulty: 3)
-            });
-
-            CanvasBossPX.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Nature_BatTransformers
@@ -92,54 +152,51 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             natureBatTransformers.turns = new();
 
             // TURN 1
-            natureBatTransformers.turns.Add(new () {
+            natureBatTransformers.turns.AddTurn(
                 Enemy("XformerBatBot", replacement: "XformerBatBeast", difficulty: 2),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            natureBatTransformers.turns.Add(new () {
+            natureBatTransformers.turns.AddTurn(
                 Enemy("XformerBatBot", replacement: "XformerBatBeast", difficulty: 4),
                 Enemy(null, replacement: "CXformerAdder", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            natureBatTransformers.turns.Add(new () {
+            natureBatTransformers.turns.AddTurn(
                 Enemy(null, replacement: "XformerBatBeast", difficulty: 4),
                 Enemy(null, replacement: "Bombbot", difficulty: 6),
                 Enemy(null, replacement: "CXformerAdder", difficulty: 4)
-            });
+            );
 
             // TURN 4
-            natureBatTransformers.turns.Add(new () {
+            natureBatTransformers.turns.AddTurn(
                 Enemy("XformerBatBot", replacement: "XformerBatBeast", difficulty: 2),
                 Enemy(null, replacement: "Bombbot", difficulty: 4),
                 Enemy(null, replacement: "CXformerAdder", difficulty: 3)
-            });
+            );
 
             // TURN 5
-            natureBatTransformers.turns.Add(new () {
+            natureBatTransformers.turns.AddTurn(
                 Enemy("Bombbot", replacement: "XformerPorcupineBeast", difficulty: 2),
                 Enemy("Shieldbot", replacement: "XformerGrizzlyBot", difficulty: 6)
-            });
+            );
 
             // TURN 6
-            natureBatTransformers.turns.Add(new () {
+            natureBatTransformers.turns.AddTurn(
                 Enemy(null, replacement: "XformerPorcupineBeast", difficulty: 4)
-            });
+            );
 
             // TURN 7
-            natureBatTransformers.turns.Add(new () {
+            natureBatTransformers.turns.AddTurn(
                 Enemy("Bombbot", replacement: "BoltHound", difficulty: 6)
-            });
+            );
 
             // TURN 8
-            natureBatTransformers.turns.Add(new () {
+            natureBatTransformers.turns.AddTurn(
                 Enemy("XformerBatBeast", replacement: "XformerGrizzlyBot", difficulty: 6)
-            });
-
-            natureBatTransformers.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Nature_BearTransformers
@@ -148,54 +205,51 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             natureBearTransformers.turns = new();
 
             // TURN 1
-            natureBearTransformers.turns.Add(new () {
+            natureBearTransformers.turns.AddTurn(
                 Enemy("XformerGrizzlyBot"),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            natureBearTransformers.turns.Add(new () {
+            natureBearTransformers.turns.AddTurn(
                 Enemy("XformerPorcupineBot", replacement: "XformerBatBeast", difficulty: 4)
-            });
+            );
 
             // TURN 3
-            natureBearTransformers.turns.Add(new () {
+            natureBearTransformers.turns.AddTurn(
                 Enemy(null, replacement: "Bombbot", difficulty: 2),
                 Enemy(null, replacement: "Bombbot", difficulty: 4),
                 Enemy(null, replacement: "CXformerAdder", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            natureBearTransformers.turns.Add(new () {
+            natureBearTransformers.turns.AddTurn(
                 Enemy(null, replacement: "Bombbot", difficulty: 4)
-            });
+            );
 
             // TURN 5
-            natureBearTransformers.turns.Add(new () {
+            natureBearTransformers.turns.AddTurn(
                 Enemy("XformerGrizzlyBot", replacement: "XformerGrizzlyBeast", difficulty: 4),
                 Enemy("Shieldbot", replacement: "XformerGrizzlyBot", difficulty: 6),
                 Enemy(null, replacement: "CXformerAdder", difficulty: 4)
-            });
+            );
 
             // TURN 6
-            natureBearTransformers.turns.Add(new () {
+            natureBearTransformers.turns.AddTurn(
                 Enemy(null, replacement: "XformerGrizzlyBot", difficulty: 6),
                 Enemy(null, replacement: "Shieldbot", difficulty: 2),
                 Enemy(null, replacement: "CXformerAdder", difficulty: 3)
-            });
+            );
 
             // TURN 7
-            natureBearTransformers.turns.Add(new () {
+            natureBearTransformers.turns.AddTurn(
                 Enemy("Bombbot", replacement: "BoltHound", difficulty: 4)
-            });
+            );
 
             // TURN 8
-            natureBearTransformers.turns.Add(new () {
+            natureBearTransformers.turns.AddTurn(
                 Enemy("XformerBatBeast", replacement: "XformerGrizzlyBeast", difficulty: 6)
-            });
-
-            natureBearTransformers.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Nature_Hounds
@@ -204,55 +258,52 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             natureHounds.turns = new();
 
             // TURN 1
-            natureHounds.turns.Add(new () {
+            natureHounds.turns.AddTurn(
                 Enemy("XformerPorcupineBeast", replacement: "XformerPorcupineBot", difficulty: 2),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            natureHounds.turns.Add(new () {
+            natureHounds.turns.AddTurn(
                 Enemy("BoltHound"),
                 Enemy(null, replacement: "AlarmBot", difficulty: 4)
-            });
+            );
 
             // TURN 3
-            natureHounds.turns.Add(new () {
+            natureHounds.turns.AddTurn(
                 Enemy(null, replacement: "XformerBatBot", difficulty: 2),
                 Enemy(null, replacement: "Bombbot", difficulty: 4),
                 Enemy(null, replacement: "CXformerAdder", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            natureHounds.turns.Add(new () {
+            natureHounds.turns.AddTurn(
                 Enemy("XformerPorcupineBeast", replacement: "XformerPorcupineBot", difficulty: 2),
                 Enemy(null, replacement: "Bombbot", difficulty: 4),
                 Enemy(null, replacement: "CXformerAdder", difficulty: 4)
-            });
+            );
 
             // TURN 5
-            natureHounds.turns.Add(new () {
+            natureHounds.turns.AddTurn(
                 Enemy("Bombbot", replacement: "XformerPorcupineBeast", random: 0),
                 Enemy("Shieldbot", replacement: "XformerGrizzlyBot", difficulty: 4)
-            });
+            );
 
             // TURN 6
-            natureHounds.turns.Add(new () {
+            natureHounds.turns.AddTurn(
                 Enemy(null, replacement: "XformerPorcupineBeast", difficulty: 6)
-            });
+            );
 
             // TURN 7
-            natureHounds.turns.Add(new () {
+            natureHounds.turns.AddTurn(
                 Enemy("Bombbot", replacement: "BoltHound", difficulty: 4),
                 Enemy(null, replacement: "CXformerAdder", difficulty: 3)
-            });
+            );
 
             // TURN 8
-            natureHounds.turns.Add(new () {
+            natureHounds.turns.AddTurn(
                 Enemy("XformerPorcupineBeast", replacement: "XformerGrizzlyBot", difficulty: 6)
-            });
-
-            natureHounds.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Nature_WolfTransformers
@@ -261,47 +312,44 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             natureWolfTransformers.turns = new();
 
             // TURN 1
-            natureWolfTransformers.turns.Add(new () {
+            natureWolfTransformers.turns.AddTurn(
                 Enemy("P03KCMXP1_SeedBot"),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            natureWolfTransformers.turns.Add(new () {
+            natureWolfTransformers.turns.AddTurn(
                 Enemy("P03KCMXP1_WolfBot"),
                 Enemy(null, replacement: "CXformerAdder", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            natureWolfTransformers.turns.Add(new () {
+            natureWolfTransformers.turns.AddTurn(
                 Enemy(null, replacement: "XformerPorcupineBot", difficulty: 2)
-            });
+            );
 
             // TURN 4
-            natureWolfTransformers.turns.Add(new () {
+            natureWolfTransformers.turns.AddTurn(
                 Enemy(null, replacement: "P03KCMXP1_WolfBot", difficulty: 1),
                 Enemy(null, replacement: "Shieldbot", difficulty: 2),
                 Enemy(null, replacement: "CXformerAdder", difficulty: 4)
-            });
+            );
 
             // TURN 5
-            natureWolfTransformers.turns.Add(new () {
+            natureWolfTransformers.turns.AddTurn(
                 Enemy(null, replacement: "P03KCMXP1_WolfBot", difficulty: 4),
                 Enemy(null, replacement: "CXformerAdder", difficulty: 3)
-            });
+            );
 
             // TURN 6
-            natureWolfTransformers.turns.Add(new () {
+            natureWolfTransformers.turns.AddTurn(
                 Enemy("XformerBatBeast")
-            });
+            );
 
             // TURN 7
-            natureWolfTransformers.turns.Add(new () {
+            natureWolfTransformers.turns.AddTurn(
                 Enemy(null, replacement: "P03KCMXP1_WolfBeast", difficulty: 6)
-            });
-
-            natureWolfTransformers.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Nature_SnakeTransformers
@@ -310,62 +358,59 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             natureSnakeTransformers.turns = new();
 
             // TURN 1
-            natureSnakeTransformers.turns.Add(new () {
+            natureSnakeTransformers.turns.AddTurn(
                 Enemy("P03KCMXP1_ViperBot"),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            natureSnakeTransformers.turns.Add(new () {
+            natureSnakeTransformers.turns.AddTurn(
                 Enemy(null, replacement: "Shieldbot", difficulty: 2)
-            });
+            );
 
             // TURN 3
-            natureSnakeTransformers.turns.Add(new () {
+            natureSnakeTransformers.turns.AddTurn(
                 Enemy("CXformerAdder"),
                 Enemy("CXformerAdder", replacement: "P03KCMXP1_ViperBeast", difficulty: 2)
-            });
+            );
 
             // TURN 4
-            natureSnakeTransformers.turns.Add(new () {
+            natureSnakeTransformers.turns.AddTurn(
                 Enemy(null, replacement: "Shieldbot", difficulty: 1)
-            });
+            );
 
             // TURN 5
-            natureSnakeTransformers.turns.Add(new () {
+            natureSnakeTransformers.turns.AddTurn(
                 Enemy("CXformerAdder"),
                 Enemy(null, replacement: "Shieldbot", difficulty: 2)
-            });
+            );
 
             // TURN 6
-            natureSnakeTransformers.turns.Add(new () {
+            natureSnakeTransformers.turns.AddTurn(
                 Enemy("CXformerAdder"),
                 Enemy("CXformerAdder", replacement: "P03KCMXP1_ViperBeast", difficulty: 4)
-            });
+            );
 
             // TURN 7
-            natureSnakeTransformers.turns.Add(new () {
+            natureSnakeTransformers.turns.AddTurn(
                 Enemy("P03KCMXP1_ViperBot", replacement: "P03KCMXP1_ViperBeast", difficulty: 5)
-            });
+            );
 
             // TURN 8
-            natureSnakeTransformers.turns.Add(new () {
+            natureSnakeTransformers.turns.AddTurn(
                 Enemy("P03KCMXP1_ViperBot"),
                 Enemy("P03KCMXP1_ViperBot", replacement: "P03KCMXP1_ViperBeast", difficulty: 6)
-            });
+            );
 
             // TURN 9
-            natureSnakeTransformers.turns.Add(new () {
+            natureSnakeTransformers.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 4)
-            });
+            );
 
             // TURN 10
-            natureSnakeTransformers.turns.Add(new () {
+            natureSnakeTransformers.turns.AddTurn(
                 Enemy(null, replacement: "Shieldbot", difficulty: 2)
-            });
-
-            natureSnakeTransformers.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Neutral_Alarmbots
@@ -374,73 +419,70 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             neutralAlarmbots.turns = new();
 
             // TURN 1
-            neutralAlarmbots.turns.Add(new () {
+            neutralAlarmbots.turns.AddTurn(
                 Enemy("AlarmBot", replacement: "Shieldbot", difficulty: 6),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            neutralAlarmbots.turns.Add(new () {
+            neutralAlarmbots.turns.AddTurn(
                 Enemy(null, replacement: "AlarmBot", difficulty: 6),
                 Enemy(null, replacement: "AlarmBot", difficulty: 4)
-            });
+            );
 
             // TURN 3
-            neutralAlarmbots.turns.Add(new () {
+            neutralAlarmbots.turns.AddTurn(
                 Enemy("AlarmBot", replacement: "SwapBot", difficulty: 5),
                 Enemy(null, replacement: "Bombbot", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            neutralAlarmbots.turns.Add(new () {
+            neutralAlarmbots.turns.AddTurn(
                 Enemy("Bombbot"),
                 Enemy(null, replacement: "Bombbot", difficulty: 6),
                 Enemy(null, replacement: "Bombbot", difficulty: 3),
                 Enemy(null, replacement: "Bombbot", difficulty: 4)
-            });
+            );
 
             // TURN 5
-            neutralAlarmbots.turns.Add(new () {
+            neutralAlarmbots.turns.AddTurn(
                 Enemy(null, replacement: "AlarmBot", difficulty: 2),
                 Enemy(null, replacement: "CloserBot", difficulty: 4),
                 Enemy(null, replacement: "Bombbot", difficulty: 3),
                 Enemy(null, replacement: "Bombbot", difficulty: 4)
-            });
+            );
 
             // TURN 6
-            neutralAlarmbots.turns.Add(new () {
+            neutralAlarmbots.turns.AddTurn(
                 Enemy("MineCart"),
                 Enemy(null, replacement: "Bombbot", difficulty: 2),
                 Enemy(null, replacement: "Insectodrone", difficulty: 4)
-            });
+            );
 
             // TURN 7
-            neutralAlarmbots.turns.Add(new () {
+            neutralAlarmbots.turns.AddTurn(
                 Enemy(null, replacement: "Bombbot", difficulty: 2),
                 Enemy(null, replacement: "AlarmBot", difficulty: 3),
                 Enemy(null, replacement: "AlarmBot", difficulty: 4)
-            });
+            );
 
             // TURN 8
-            neutralAlarmbots.turns.Add(new () {
+            neutralAlarmbots.turns.AddTurn(
                 Enemy(null, replacement: "Automaton", difficulty: 4),
                 Enemy(null, replacement: "AlarmBot", difficulty: 6),
                 Enemy(null, replacement: "CloserBot", difficulty: 4)
-            });
+            );
 
             // TURN 9
-            neutralAlarmbots.turns.Add(new () {
+            neutralAlarmbots.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 6),
                 Enemy(null, replacement: "CloserBot", difficulty: 3)
-            });
+            );
 
             // TURN 10
-            neutralAlarmbots.turns.Add(new () {
+            neutralAlarmbots.turns.AddTurn(
                 Enemy("Automaton", replacement: "AlarmBot", difficulty: 4)
-            });
-
-            neutralAlarmbots.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Neutral_BombsAndShields
@@ -450,57 +492,54 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             neutralBombsAndShields.turns = new();
 
             // TURN 1
-            neutralBombsAndShields.turns.Add(new () {
+            neutralBombsAndShields.turns.AddTurn(
                 Enemy("Shieldbot"),
                 Enemy(null, replacement: "SentryBot", difficulty: 4),
                 Enemy(null, replacement: "Bombbot", difficulty: 6),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            neutralBombsAndShields.turns.Add(new () {
+            neutralBombsAndShields.turns.AddTurn(
                 Enemy("Automaton", replacement: "Shieldbot", difficulty: 6),
                 Enemy("Bombbot"),
                 Enemy(null, replacement: "Shieldbot", difficulty: 2)
-            });
+            );
 
             // TURN 3
-            neutralBombsAndShields.turns.Add(new () {
+            neutralBombsAndShields.turns.AddTurn(
                 Enemy("Bombbot", replacement: "CloserBot", difficulty: 6),
                 Enemy(null, replacement: "Bombbot", difficulty: 1)
-            });
+            );
 
             // TURN 4
-            neutralBombsAndShields.turns.Add(new () {
+            neutralBombsAndShields.turns.AddTurn(
                 Enemy(null, replacement: "Bombbot", difficulty: 2),
                 Enemy(null, replacement: "Bombbot", difficulty: 4),
                 Enemy(null, replacement: "Bombbot", difficulty: 3)
-            });
+            );
 
             // TURN 5
-            neutralBombsAndShields.turns.Add(new () {
+            neutralBombsAndShields.turns.AddTurn(
                 Enemy("Shieldbot", replacement: "CloserBot", difficulty: 4),
                 Enemy(null, replacement: "Shieldbot", difficulty: 3)
-            });
+            );
 
             // TURN 6
-            neutralBombsAndShields.turns.Add(new () {
+            neutralBombsAndShields.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 2),
                 Enemy("Shieldbot")
-            });
+            );
 
             // TURN 7
-            neutralBombsAndShields.turns.Add(new () {
+            neutralBombsAndShields.turns.AddTurn(
 
-            });
+            );
 
             // TURN 8
-            neutralBombsAndShields.turns.Add(new () {
+            neutralBombsAndShields.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 6)
-            });
-
-            neutralBombsAndShields.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Neutral_BridgeBattle
@@ -510,52 +549,49 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             neutralBridgeBattle.turns = new();
 
             // TURN 1
-            neutralBridgeBattle.turns.Add(new () {
+            neutralBridgeBattle.turns.AddTurn(
                 Enemy("AlarmBot", replacement: "Shieldbot", difficulty: 4),
                 Enemy(null, replacement: "SentryBot", difficulty: 3),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            neutralBridgeBattle.turns.Add(new () {
+            neutralBridgeBattle.turns.AddTurn(
                 Enemy(null, replacement: "Bombbot", difficulty: 2),
                 Enemy(null, replacement: "SentryBot", difficulty: 4)
-            });
+            );
 
             // TURN 3
-            neutralBridgeBattle.turns.Add(new () {
+            neutralBridgeBattle.turns.AddTurn(
                 Enemy("Automaton", replacement: "CloserBot", difficulty: 4),
                 Enemy(null, replacement: "SentryBot", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            neutralBridgeBattle.turns.Add(new () {
+            neutralBridgeBattle.turns.AddTurn(
                 Enemy(null, replacement: "Bombbot", difficulty: 2),
                 Enemy(null, replacement: "SentryBot", difficulty: 3)
-            });
+            );
 
             // TURN 5
-            neutralBridgeBattle.turns.Add(new () {
+            neutralBridgeBattle.turns.AddTurn(
                 Enemy("SwapBot", replacement: "CloserBot", difficulty: 2)
-            });
+            );
 
             // TURN 6
-            neutralBridgeBattle.turns.Add(new () {
+            neutralBridgeBattle.turns.AddTurn(
                 Enemy(null)
-            });
+            );
 
             // TURN 7
-            neutralBridgeBattle.turns.Add(new () {
+            neutralBridgeBattle.turns.AddTurn(
                 Enemy("SwapBot", replacement: "CloserBot", difficulty: 4)
-            });
+            );
 
             // TURN 8
-            neutralBridgeBattle.turns.Add(new () {
+            neutralBridgeBattle.turns.AddTurn(
                 Enemy("SwapBot", replacement: "CloserBot", difficulty: 6)
-            });
-
-            neutralBridgeBattle.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Neutral_Minecarts
@@ -564,62 +600,59 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             neutralMinecarts.turns = new();
 
             // TURN 1
-            neutralMinecarts.turns.Add(new () {
+            neutralMinecarts.turns.AddTurn(
                 Enemy("MineCart", replacement: "Shieldbot", difficulty: 6),
                 Enemy(null, replacement: "Automaton", difficulty: 2),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            neutralMinecarts.turns.Add(new () {
+            neutralMinecarts.turns.AddTurn(
                 Enemy("LeapBot", replacement: "Automaton", difficulty: 2),
                 Enemy("Bombbot", replacement: "MineCart", difficulty: 2)
-            });
+            );
 
             // TURN 3
-            neutralMinecarts.turns.Add(new () {
+            neutralMinecarts.turns.AddTurn(
                 Enemy("Insectodrone", replacement: "CloserBot", difficulty: 4),
                 Enemy(null, replacement: "MineCart", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            neutralMinecarts.turns.Add(new () {
+            neutralMinecarts.turns.AddTurn(
                 Enemy("LeapBot", replacement: "Automaton", difficulty: 2),
                 Enemy(null, replacement: "Bombbot", difficulty: 6)
-            });
+            );
 
             // TURN 5
-            neutralMinecarts.turns.Add(new () {
+            neutralMinecarts.turns.AddTurn(
                 Enemy(null, replacement: "Bombbot", difficulty: 1),
                 Enemy(null, replacement: "MineCart", difficulty: 4)
-            });
+            );
 
             // TURN 6
-            neutralMinecarts.turns.Add(new () {
+            neutralMinecarts.turns.AddTurn(
                 Enemy(null, replacement: "MineCart", difficulty: 2),
                 Enemy(null, replacement: "Bombbot", difficulty: 4),
                 Enemy(null, replacement: "Insectodrone", difficulty: 6)
-            });
+            );
 
             // TURN 7
-            neutralMinecarts.turns.Add(new () {
+            neutralMinecarts.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 2),
                 Enemy(null, replacement: "MineCart", difficulty: 3)
-            });
+            );
 
             // TURN 8
-            neutralMinecarts.turns.Add(new () {
+            neutralMinecarts.turns.AddTurn(
                 Enemy(null, replacement: "Automaton", difficulty: 4),
                 Enemy(null, replacement: "MineCart", difficulty: 4)
-            });
+            );
 
             // TURN 9
-            neutralMinecarts.turns.Add(new () {
+            neutralMinecarts.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 6)
-            });
-
-            neutralMinecarts.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Neutral_SentryWall
@@ -629,71 +662,68 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             neutralSentryWall.turns = new();
 
             // TURN 1
-            neutralSentryWall.turns.Add(new () {
+            neutralSentryWall.turns.AddTurn(
                 Enemy("SentryBot"),
                 Enemy("SentryBot", replacement: "RoboSkeleton", difficulty: 6),
                 Enemy("SentryBot", replacement: "RoboSkeleton", difficulty: 4),
                 Enemy("SentryBot"),
                 Enemy(null, replacement: "SentryBot", difficulty: 4),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            neutralSentryWall.turns.Add(new () {
+            neutralSentryWall.turns.AddTurn(
                 Enemy("RoboSkeleton", replacement: "Shieldbot", difficulty: 1),
                 Enemy(null, replacement: "RoboSkeleton", difficulty: 4),
                 Enemy(null, replacement: "SentryBot", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            neutralSentryWall.turns.Add(new () {
+            neutralSentryWall.turns.AddTurn(
                 Enemy(null, replacement: "RoboSkeleton", difficulty: 3),
                 Enemy(null, replacement: "RoboSkeleton", difficulty: 6),
                 Enemy(null, replacement: "SentryBot", difficulty: 4)
-            });
+            );
 
             // TURN 4
-            neutralSentryWall.turns.Add(new () {
+            neutralSentryWall.turns.AddTurn(
                 Enemy(null, replacement: "RoboSkeleton", difficulty: 2),
                 Enemy(null, replacement: "RoboSkeleton", difficulty: 5),
                 Enemy(null, replacement: "SentryBot", difficulty: 3)
-            });
+            );
 
             // TURN 5
-            neutralSentryWall.turns.Add(new () {
+            neutralSentryWall.turns.AddTurn(
                 Enemy("SentryBot"),
                 Enemy(null, replacement: "SentryBot", difficulty: 2),
                 Enemy(null, replacement: "SentryBot", difficulty: 4),
                 Enemy(null, replacement: "SentryBot", difficulty: 6),
                 Enemy(null, replacement: "SentryBot", difficulty: 3)
-            });
+            );
 
             // TURN 6
-            neutralSentryWall.turns.Add(new () {
+            neutralSentryWall.turns.AddTurn(
                 Enemy(null, replacement: "Insectodrone", difficulty: 5),
                 Enemy(null, replacement: "SentryBot", difficulty: 4)
-            });
+            );
 
             // TURN 7
-            neutralSentryWall.turns.Add(new () {
+            neutralSentryWall.turns.AddTurn(
                 Enemy(null),
                 Enemy(null, replacement: "SentryBot", difficulty: 3)
-            });
+            );
 
             // TURN 8
-            neutralSentryWall.turns.Add(new () {
+            neutralSentryWall.turns.AddTurn(
                 Enemy(null, replacement: "Insectodrone", difficulty: 2),
                 Enemy(null, replacement: "Insectodrone", difficulty: 4),
                 Enemy(null, replacement: "SentryBot", difficulty: 4)
-            });
+            );
 
             // TURN 9
-            neutralSentryWall.turns.Add(new () {
+            neutralSentryWall.turns.AddTurn(
                 Enemy("CloserBot")
-            });
-
-            neutralSentryWall.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Neutral_Swapbots
@@ -703,59 +733,56 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             neutralSwapbots.turns = new();
 
             // TURN 1
-            neutralSwapbots.turns.Add(new () {
+            neutralSwapbots.turns.AddTurn(
                 Enemy("SentryBot"),
                 Enemy(null, replacement: "SwapBot", difficulty: 4),
                 Enemy(null, replacement: "SentryBot", difficulty: 1),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            neutralSwapbots.turns.Add(new () {
+            neutralSwapbots.turns.AddTurn(
                 Enemy("SwapBot", replacement: "CloserBot", difficulty: 6),
                 Enemy(null, replacement: "Bombbot", difficulty: 4),
                 Enemy(null, replacement: "SentryBot", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            neutralSwapbots.turns.Add(new () {
+            neutralSwapbots.turns.AddTurn(
                 Enemy("Automaton"),
                 Enemy("LeapBot", replacement: "Automaton", difficulty: 2),
                 Enemy("Automaton", replacement: "SwapBot", difficulty: 4)
-            });
+            );
 
             // TURN 4
-            neutralSwapbots.turns.Add(new () {
+            neutralSwapbots.turns.AddTurn(
                 Enemy(null, replacement: "Automaton", difficulty: 2),
                 Enemy(null, replacement: "SentryBot", difficulty: 3)
-            });
+            );
 
             // TURN 5
-            neutralSwapbots.turns.Add(new () {
+            neutralSwapbots.turns.AddTurn(
                 Enemy("SwapBot"),
                 Enemy(null, replacement: "SwapBot", difficulty: 6),
                 Enemy(null, replacement: "SentryBot", difficulty: 4)
-            });
+            );
 
             // TURN 6
-            neutralSwapbots.turns.Add(new () {
+            neutralSwapbots.turns.AddTurn(
                 Enemy(null, replacement: "Automaton", difficulty: 2),
                 Enemy(null, replacement: "Insectodrone", difficulty: 6)
-            });
+            );
 
             // TURN 7
-            neutralSwapbots.turns.Add(new () {
+            neutralSwapbots.turns.AddTurn(
                 Enemy(null, replacement: "Automaton", difficulty: 6)
-            });
+            );
 
             // TURN 8
-            neutralSwapbots.turns.Add(new () {
+            neutralSwapbots.turns.AddTurn(
                 Enemy(null, replacement: "Automaton", difficulty: 4),
                 Enemy(null, replacement: "Automaton", difficulty: 6)
-            });
-
-            neutralSwapbots.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Neutral_Clockbots
@@ -764,60 +791,57 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             neutralClockbots.turns = new();
 
             // TURN 1
-            neutralClockbots.turns.Add(new () {
+            neutralClockbots.turns.AddTurn(
                 Enemy("P03KCMXP1_Clockbot", replacement: "P03KCMXP1_Clockbot_Down", difficulty: 4),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            neutralClockbots.turns.Add(new () {
+            neutralClockbots.turns.AddTurn(
                 Enemy(null, replacement: "P03KCMXP1_Clockbot_Right", difficulty: 2),
                 Enemy("P03KCMXP1_Clockbot", replacement: "P03KCMXP1_Clockbot_Left", difficulty: 1)
-            });
+            );
 
             // TURN 3
-            neutralClockbots.turns.Add(new () {
+            neutralClockbots.turns.AddTurn(
                 Enemy("P03KCMXP1_Clockbot"),
                 Enemy(null, replacement: "P03KCMXP1_Clockbot", difficulty: 5),
                 Enemy(null, replacement: "P03KCMXP1_Clockbot", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            neutralClockbots.turns.Add(new () {
+            neutralClockbots.turns.AddTurn(
                 Enemy(null, replacement: "P03KCMXP1_Clockbot_Down", difficulty: 4),
                 Enemy(null, replacement: "P03KCMXP1_Clockbot_Right", difficulty: 5)
-            });
+            );
 
             // TURN 5
-            neutralClockbots.turns.Add(new () {
+            neutralClockbots.turns.AddTurn(
                 Enemy(null, replacement: "P03KCMXP1_Clockbot", difficulty: 3),
                 Enemy("P03KCMXP1_Clockbot", replacement: "P03KCMXP1_Clockbot_Left", difficulty: 2)
-            });
+            );
 
             // TURN 6
-            neutralClockbots.turns.Add(new () {
+            neutralClockbots.turns.AddTurn(
                 Enemy("P03KCMXP1_Clockbot_Down")
-            });
+            );
 
             // TURN 7
-            neutralClockbots.turns.Add(new () {
+            neutralClockbots.turns.AddTurn(
                 Enemy("P03KCMXP1_Clockbot"),
                 Enemy(null, replacement: "P03KCMXP1_Clockbot_Right", difficulty: 3)
-            });
+            );
 
             // TURN 8
-            neutralClockbots.turns.Add(new () {
+            neutralClockbots.turns.AddTurn(
                 Enemy("P03KCMXP1_Clockbot"),
                 Enemy(null, replacement: "P03KCMXP1_Clockbot_Down", difficulty: 6)
-            });
+            );
 
             // TURN 9
-            neutralClockbots.turns.Add(new () {
+            neutralClockbots.turns.AddTurn(
                 Enemy("P03KCMXP1_Clockbot")
-            });
-
-            neutralClockbots.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Neutral_SpyPlanes
@@ -826,60 +850,57 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             neutralSpyPlanes.turns = new();
 
             // TURN 1
-            neutralSpyPlanes.turns.Add(new () {
+            neutralSpyPlanes.turns.AddTurn(
                 Enemy("LeapBot"),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6),
                 Enemy(null, replacement: "Insectodrone", difficulty: 2)
-            });
+            );
 
             // TURN 2
-            neutralSpyPlanes.turns.Add(new () {
+            neutralSpyPlanes.turns.AddTurn(
                 Enemy("Insectodrone"),
                 Enemy(null, replacement: "Insectodrone", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            neutralSpyPlanes.turns.Add(new () {
+            neutralSpyPlanes.turns.AddTurn(
                 Enemy("LeapBot"),
                 Enemy(null, replacement: "LeapBot", difficulty: 1)
-            });
+            );
 
             // TURN 4
-            neutralSpyPlanes.turns.Add(new () {
+            neutralSpyPlanes.turns.AddTurn(
                 Enemy("Insectodrone", replacement: "P03KCMXP1_Spyplane", difficulty: 1),
                 Enemy(null, replacement: "Insectodrone", difficulty: 6)
-            });
+            );
 
             // TURN 5
-            neutralSpyPlanes.turns.Add(new () {
+            neutralSpyPlanes.turns.AddTurn(
                 Enemy("P03KCMXP1_Spyplane", replacement: "Insectodrone", difficulty: 1)
-            });
+            );
 
             // TURN 6
-            neutralSpyPlanes.turns.Add(new () {
+            neutralSpyPlanes.turns.AddTurn(
                 Enemy(null, replacement: "Insectodrone", difficulty: 1),
                 Enemy(null, replacement: "P03KCMXP1_Spyplane", difficulty: 3),
                 Enemy(null, replacement: "Insectodrone", difficulty: 4)
-            });
+            );
 
             // TURN 7
-            neutralSpyPlanes.turns.Add(new () {
+            neutralSpyPlanes.turns.AddTurn(
                 Enemy("P03KCMXP1_Spyplane"),
                 Enemy(null, replacement: "Insectodrone", difficulty: 3)
-            });
+            );
 
             // TURN 8
-            neutralSpyPlanes.turns.Add(new () {
+            neutralSpyPlanes.turns.AddTurn(
                 Enemy(null, replacement: "P03KCMXP1_Spyplane", difficulty: 6)
-            });
+            );
 
             // TURN 9
-            neutralSpyPlanes.turns.Add(new () {
+            neutralSpyPlanes.turns.AddTurn(
                 Enemy("P03KCMXP1_Spyplane")
-            });
-
-            neutralSpyPlanes.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: P03FinalBoss
@@ -889,257 +910,254 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             P03FinalBoss.turns = new();
 
             // TURN 1
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("SentryBot"),
                 Enemy("RoboSkeleton"),
                 Enemy("SentryBot"),
                 Enemy("RoboSkeleton")
-            });
+            );
 
             // TURN 2
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("LatcherBrittle"),
                 Enemy("Thickbot"),
                 Enemy("Steambot")
-            });
+            );
 
             // TURN 3
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("RoboSkeleton"),
                 Enemy("RoboSkeleton")
-            });
+            );
 
             // TURN 4
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("Steambot"),
                 Enemy("Thickbot")
-            });
+            );
 
             // TURN 5
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("Automaton")
-            });
+            );
 
             // TURN 6
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("Automaton"),
                 Enemy("Automaton")
-            });
+            );
 
             // TURN 7
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("GemRipper")
-            });
+            );
 
             // TURN 8
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 9
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("RoboSkeleton"),
                 Enemy("RoboSkeleton")
-            });
+            );
 
             // TURN 10
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("Automaton")
-            });
+            );
 
             // TURN 11
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("Automaton"),
                 Enemy("Automaton")
-            });
+            );
 
             // TURN 12
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("GemRipper")
-            });
+            );
 
             // TURN 13
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 14
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("RoboSkeleton"),
                 Enemy("RoboSkeleton")
-            });
+            );
 
             // TURN 15
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("Automaton")
-            });
+            );
 
             // TURN 16
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("Automaton"),
                 Enemy("Automaton")
-            });
+            );
 
             // TURN 17
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("GemRipper")
-            });
+            );
 
             // TURN 18
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 19
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("RoboSkeleton"),
                 Enemy("RoboSkeleton")
-            });
+            );
 
             // TURN 20
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("Automaton")
-            });
+            );
 
             // TURN 21
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("Automaton"),
                 Enemy("Automaton")
-            });
+            );
 
             // TURN 22
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("GemRipper")
-            });
+            );
 
             // TURN 23
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 24
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("RoboSkeleton"),
                 Enemy("RoboSkeleton")
-            });
+            );
 
             // TURN 25
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("Automaton")
-            });
+            );
 
             // TURN 26
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("Automaton"),
                 Enemy("Automaton")
-            });
+            );
 
             // TURN 27
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("GemRipper")
-            });
+            );
 
             // TURN 28
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 29
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot"),
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 30
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 31
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 32
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 33
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 34
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 35
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 36
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 37
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot")
-            });
+            );
 
             // TURN 38
-            P03FinalBoss.turns.Add(new () {
+            P03FinalBoss.turns.AddTurn(
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot"),
                 Enemy("CloserBot")
-            });
-
-            P03FinalBoss.SyncTurnDifficulties(0, 10);
-
+            );
 
 
             // Encounter: PhotographerBossP1
@@ -1148,58 +1166,55 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             PhotographerBossP1.turns = new();
 
             // TURN 1
-            PhotographerBossP1.turns.Add(new () {
+            PhotographerBossP1.turns.AddTurn(
                 Enemy("Shutterbug"),
                 Enemy("Shutterbug"),
                 Enemy("Shutterbug"),
                 Enemy("Shutterbug"),
                 Enemy("Shutterbug")
-            });
+            );
 
             // TURN 2
-            PhotographerBossP1.turns.Add(new () {
+            PhotographerBossP1.turns.AddTurn(
                 Enemy(null, replacement: "Shutterbug", difficulty: 5),
                 Enemy(null, replacement: "Shutterbug", difficulty: 4)
-            });
+            );
 
             // TURN 3
-            PhotographerBossP1.turns.Add(new () {
+            PhotographerBossP1.turns.AddTurn(
                 Enemy("BoltHound"),
                 Enemy(null, replacement: "AlarmBot", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            PhotographerBossP1.turns.Add(new () {
+            PhotographerBossP1.turns.AddTurn(
                 Enemy("XformerBatBot", replacement: "XformerBatBeast", difficulty: 1),
                 Enemy("XformerBatBeast"),
                 Enemy(null, replacement: "Shutterbug", difficulty: 3)
-            });
+            );
 
             // TURN 5
-            PhotographerBossP1.turns.Add(new () {
+            PhotographerBossP1.turns.AddTurn(
                 Enemy("XformerPorcupineBeast"),
                 Enemy("XformerPorcupineBot", replacement: "XformerPorcupineBeast", difficulty: 1)
-            });
+            );
 
             // TURN 6
-            PhotographerBossP1.turns.Add(new () {
+            PhotographerBossP1.turns.AddTurn(
                 Enemy(null, replacement: "Shutterbug", difficulty: 4)
-            });
+            );
 
             // TURN 7
-            PhotographerBossP1.turns.Add(new () {
+            PhotographerBossP1.turns.AddTurn(
                 Enemy("Shutterbug"),
                 Enemy("Shutterbug"),
                 Enemy(null, replacement: "Shutterbug", difficulty: 3)
-            });
+            );
 
             // TURN 8
-            PhotographerBossP1.turns.Add(new () {
+            PhotographerBossP1.turns.AddTurn(
                 Enemy("BoltHound", replacement: "CloserBot", difficulty: 6)
-            });
-
-            PhotographerBossP1.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: PhotographerBossP2
@@ -1208,47 +1223,44 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             PhotographerBossP2.turns = new();
 
             // TURN 1
-            PhotographerBossP2.turns.Add(new () {
+            PhotographerBossP2.turns.AddTurn(
                 Enemy("XformerGrizzlyBot", replacement: "XformerGrizzlyBeast", difficulty: 2),
                 Enemy("XformerGrizzlyBot")
-            });
+            );
 
             // TURN 2
-            PhotographerBossP2.turns.Add(new () {
+            PhotographerBossP2.turns.AddTurn(
                 Enemy(null, replacement: "XformerPorcupineBot", difficulty: 6)
-            });
+            );
 
             // TURN 3
-            PhotographerBossP2.turns.Add(new () {
+            PhotographerBossP2.turns.AddTurn(
                 Enemy("Shutterbug"),
                 Enemy(null, replacement: "Shutterbug", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            PhotographerBossP2.turns.Add(new () {
+            PhotographerBossP2.turns.AddTurn(
                 Enemy("Shutterbug"),
                 Enemy(null, replacement: "Shutterbug", difficulty: 2)
-            });
+            );
 
             // TURN 5
-            PhotographerBossP2.turns.Add(new () {
+            PhotographerBossP2.turns.AddTurn(
                 Enemy("Shutterbug"),
                 Enemy(null, replacement: "Shutterbug", difficulty: 5)
-            });
+            );
 
             // TURN 6
-            PhotographerBossP2.turns.Add(new () {
+            PhotographerBossP2.turns.AddTurn(
                 Enemy(null, replacement: "Shutterbug", difficulty: 4)
-            });
+            );
 
             // TURN 7
-            PhotographerBossP2.turns.Add(new () {
+            PhotographerBossP2.turns.AddTurn(
                 Enemy("XformerGrizzlyBot", replacement: "XformerGrizzlyBeast", difficulty: 1),
                 Enemy("XformerGrizzlyBot")
-            });
-
-            PhotographerBossP2.SyncTurnDifficulties(10, 10);
-
+            );
 
 
             // Encounter: Tech_AttackConduits
@@ -1257,71 +1269,68 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             techAttackConduits.turns = new();
 
             // TURN 1
-            techAttackConduits.turns.Add(new () {
+            techAttackConduits.turns.AddTurn(
                 Enemy("AttackConduit"),
                 Enemy("NullConduit", replacement: "AttackConduit", difficulty: 5),
                 Enemy("Automaton", replacement: "Insectodrone", difficulty: 5),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            techAttackConduits.turns.Add(new () {
+            techAttackConduits.turns.AddTurn(
                 Enemy("LeapBot", replacement: "Shieldbot", difficulty: 6),
                 Enemy("LeapBot", replacement: "Automaton", difficulty: 2)
-            });
+            );
 
             // TURN 3
-            techAttackConduits.turns.Add(new () {
+            techAttackConduits.turns.AddTurn(
                 Enemy("Insectodrone", replacement: "Shieldbot", difficulty: 4),
                 Enemy(null, replacement: "AttackConduit", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            techAttackConduits.turns.Add(new () {
+            techAttackConduits.turns.AddTurn(
                 Enemy("LeapBot", replacement: "Automaton", difficulty: 2),
                 Enemy(null, replacement: "Bombbot", difficulty: 4),
                 Enemy(null, replacement: "LeapBot", difficulty: 3)
-            });
+            );
 
             // TURN 5
-            techAttackConduits.turns.Add(new () {
+            techAttackConduits.turns.AddTurn(
                 Enemy(null, replacement: "AttackConduit", difficulty: 2),
                 Enemy(null, replacement: "AttackConduit", difficulty: 6),
                 Enemy(null, replacement: "LeapBot", difficulty: 4)
-            });
+            );
 
             // TURN 6
-            techAttackConduits.turns.Add(new () {
+            techAttackConduits.turns.AddTurn(
                 Enemy(null, replacement: "Insectodrone", difficulty: 5),
                 Enemy(null, replacement: "LeapBot", difficulty: 3)
-            });
+            );
 
             // TURN 7
-            techAttackConduits.turns.Add(new () {
+            techAttackConduits.turns.AddTurn(
                 Enemy(null, replacement: "AttackConduit", difficulty: 6),
                 Enemy("NullConduit"),
                 Enemy(null, replacement: "Insectodrone", difficulty: 4)
-            });
+            );
 
             // TURN 8
-            techAttackConduits.turns.Add(new () {
+            techAttackConduits.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 4),
                 Enemy(null, replacement: "LeapBot", difficulty: 3)
-            });
+            );
 
             // TURN 9
-            techAttackConduits.turns.Add(new () {
+            techAttackConduits.turns.AddTurn(
                 Enemy("LeapBot", replacement: "Automaton", difficulty: 4),
                 Enemy("LeapBot", replacement: "MineCart", difficulty: 2)
-            });
+            );
 
             // TURN 10
-            techAttackConduits.turns.Add(new () {
+            techAttackConduits.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 6)
-            });
-
-            techAttackConduits.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Tech_GiftCells
@@ -1330,67 +1339,64 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             techGiftCells.turns = new();
 
             // TURN 1
-            techGiftCells.turns.Add(new () {
+            techGiftCells.turns.AddTurn(
                 Enemy("AttackConduit"),
                 Enemy("NullConduit", replacement: "AttackConduit", difficulty: 3),
                 Enemy("CellGift"),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            techGiftCells.turns.Add(new () {
+            techGiftCells.turns.AddTurn(
                 Enemy("CellGift", replacement: "Shieldbot", difficulty: 6),
                 Enemy(null, replacement: "NullConduit", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            techGiftCells.turns.Add(new () {
+            techGiftCells.turns.AddTurn(
                 Enemy("NullConduit"),
                 Enemy(null, replacement: "CellGift", difficulty: 2),
                 Enemy(null, replacement: "FactoryConduit", difficulty: 3),
                 Enemy(null, replacement: "AttackConduit", difficulty: 5)
-            });
+            );
 
             // TURN 4
-            techGiftCells.turns.Add(new () {
+            techGiftCells.turns.AddTurn(
                 Enemy("CellGift", replacement: "Automaton", difficulty: 1),
                 Enemy(null, replacement: "Bombbot", difficulty: 6),
                 Enemy(null, replacement: "NullConduit", difficulty: 4)
-            });
+            );
 
             // TURN 5
-            techGiftCells.turns.Add(new () {
+            techGiftCells.turns.AddTurn(
                 Enemy(null, replacement: "Insectodrone", difficulty: 5),
                 Enemy("CellGift")
-            });
+            );
 
             // TURN 6
-            techGiftCells.turns.Add(new () {
+            techGiftCells.turns.AddTurn(
                 Enemy(null, replacement: "AttackConduit", difficulty: 4),
                 Enemy("AttackConduit"),
                 Enemy(null, replacement: "Insectodrone", difficulty: 2),
                 Enemy(null, replacement: "NullConduit", difficulty: 3)
-            });
+            );
 
             // TURN 7
-            techGiftCells.turns.Add(new () {
+            techGiftCells.turns.AddTurn(
                 Enemy("CellGift", replacement: "CellBuff", difficulty: 4)
-            });
+            );
 
             // TURN 8
-            techGiftCells.turns.Add(new () {
+            techGiftCells.turns.AddTurn(
                 Enemy("GiftBot", replacement: "CellGift", difficulty: 2),
                 Enemy("LeapBot", replacement: "MineCart", difficulty: 4),
                 Enemy(null, replacement: "AttackConduit", difficulty: 3)
-            });
+            );
 
             // TURN 9
-            techGiftCells.turns.Add(new () {
+            techGiftCells.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 6)
-            });
-
-            techGiftCells.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Tech_SplinterCells
@@ -1399,61 +1405,58 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             techSplinterCells.turns = new();
 
             // TURN 1
-            techSplinterCells.turns.Add(new () {
+            techSplinterCells.turns.AddTurn(
                 Enemy("CellTri"),
                 Enemy(null, replacement: "Automaton", difficulty: 6),
                 Enemy(null, replacement: "NullConduit", difficulty: 3),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            techSplinterCells.turns.Add(new () {
+            techSplinterCells.turns.AddTurn(
                 Enemy("NullConduit", replacement: "AttackConduit", difficulty: 4),
                 Enemy("NullConduit")
-            });
+            );
 
             // TURN 3
-            techSplinterCells.turns.Add(new () {
+            techSplinterCells.turns.AddTurn(
                 Enemy("Automaton", replacement: "CellBuff", difficulty: 2),
                 Enemy(null, replacement: "Bombbot", difficulty: 3),
                 Enemy(null, replacement: "NullConduit", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            techSplinterCells.turns.Add(new () {
+            techSplinterCells.turns.AddTurn(
                 Enemy("NullConduit", replacement: "AttackConduit", difficulty: 1),
                 Enemy(null, replacement: "CellBuff", difficulty: 4),
                 Enemy(null, replacement: "AttackConduit", difficulty: 3)
-            });
+            );
 
             // TURN 5
-            techSplinterCells.turns.Add(new () {
+            techSplinterCells.turns.AddTurn(
                 Enemy(null, replacement: "CellTri", difficulty: 5)
-            });
+            );
 
             // TURN 6
-            techSplinterCells.turns.Add(new () {
+            techSplinterCells.turns.AddTurn(
                 Enemy("NullConduit")
-            });
+            );
 
             // TURN 7
-            techSplinterCells.turns.Add(new () {
+            techSplinterCells.turns.AddTurn(
                 Enemy(null, replacement: "CellBuff", difficulty: 3)
-            });
+            );
 
             // TURN 8
-            techSplinterCells.turns.Add(new () {
+            techSplinterCells.turns.AddTurn(
                 Enemy("Automaton", replacement: "CellBuff", difficulty: 3),
                 Enemy("LeapBot", replacement: "Shieldbot", difficulty: 2)
-            });
+            );
 
             // TURN 9
-            techSplinterCells.turns.Add(new () {
+            techSplinterCells.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 6)
-            });
-
-            techSplinterCells.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Tech_ProtectConduits
@@ -1462,35 +1465,32 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             techProtectConduits.turns = new();
 
             // TURN 1
-            techProtectConduits.turns.Add(new () {
+            techProtectConduits.turns.AddTurn(
                 Enemy("P03KCMXP1_ConduitProtector")
-            });
+            );
 
             // TURN 2
-            techProtectConduits.turns.Add(new () {
+            techProtectConduits.turns.AddTurn(
                 Enemy("NullConduit", replacement: "HealerConduit", difficulty: 1),
                 Enemy("HealerConduit")
-            });
+            );
 
             // TURN 3
-            techProtectConduits.turns.Add(new () {
+            techProtectConduits.turns.AddTurn(
                 Enemy("Thickbot"),
                 Enemy("Thickbot", replacement: "SwapBot", difficulty: 5)
-            });
+            );
 
             // TURN 4
-            techProtectConduits.turns.Add(new () {
+            techProtectConduits.turns.AddTurn(
                 Enemy("HealerConduit", replacement: "AttackConduit", difficulty: 4),
                 Enemy(null, replacement: "P03KCMXP1_ConduitProtector", difficulty: 2)
-            });
+            );
 
             // TURN 5
-            techProtectConduits.turns.Add(new () {
+            techProtectConduits.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 6)
-            });
-
-            techProtectConduits.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Tech_StinkyConduits
@@ -1499,71 +1499,68 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             techStinkyConduits.turns = new();
 
             // TURN 1
-            techStinkyConduits.turns.Add(new () {
+            techStinkyConduits.turns.AddTurn(
                 Enemy("P03KCMXP1_ConduitDebuffEnemy"),
                 Enemy("NullConduit", replacement: "P03KCMXP1_ConduitDebuffEnemy", difficulty: 5),
                 Enemy("Automaton", replacement: "Insectodrone", difficulty: 5),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            techStinkyConduits.turns.Add(new () {
+            techStinkyConduits.turns.AddTurn(
                 Enemy("LeapBot", replacement: "Shieldbot", difficulty: 6),
                 Enemy("LeapBot", replacement: "Automaton", difficulty: 2)
-            });
+            );
 
             // TURN 3
-            techStinkyConduits.turns.Add(new () {
+            techStinkyConduits.turns.AddTurn(
                 Enemy("Insectodrone", replacement: "Shieldbot", difficulty: 4),
                 Enemy(null, replacement: "P03KCMXP1_ConduitDebuffEnemy", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            techStinkyConduits.turns.Add(new () {
+            techStinkyConduits.turns.AddTurn(
                 Enemy("LeapBot", replacement: "Automaton", difficulty: 2),
                 Enemy(null, replacement: "Bombbot", difficulty: 4),
                 Enemy(null, replacement: "LeapBot", difficulty: 3)
-            });
+            );
 
             // TURN 5
-            techStinkyConduits.turns.Add(new () {
+            techStinkyConduits.turns.AddTurn(
                 Enemy(null, replacement: "P03KCMXP1_ConduitDebuffEnemy", difficulty: 2),
                 Enemy(null, replacement: "P03KCMXP1_ConduitDebuffEnemy", difficulty: 6),
                 Enemy(null, replacement: "LeapBot", difficulty: 4)
-            });
+            );
 
             // TURN 6
-            techStinkyConduits.turns.Add(new () {
+            techStinkyConduits.turns.AddTurn(
                 Enemy(null, replacement: "Insectodrone", difficulty: 5),
                 Enemy(null, replacement: "LeapBot", difficulty: 3)
-            });
+            );
 
             // TURN 7
-            techStinkyConduits.turns.Add(new () {
+            techStinkyConduits.turns.AddTurn(
                 Enemy(null, replacement: "P03KCMXP1_ConduitDebuffEnemy", difficulty: 6),
                 Enemy("NullConduit"),
                 Enemy(null, replacement: "Insectodrone", difficulty: 4)
-            });
+            );
 
             // TURN 8
-            techStinkyConduits.turns.Add(new () {
+            techStinkyConduits.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 4),
                 Enemy(null, replacement: "LeapBot", difficulty: 3)
-            });
+            );
 
             // TURN 9
-            techStinkyConduits.turns.Add(new () {
+            techStinkyConduits.turns.AddTurn(
                 Enemy("LeapBot", replacement: "Automaton", difficulty: 4),
                 Enemy("LeapBot", replacement: "MineCart", difficulty: 2)
-            });
+            );
 
             // TURN 10
-            techStinkyConduits.turns.Add(new () {
+            techStinkyConduits.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 6)
-            });
-
-            techStinkyConduits.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Undead_BombLatchers
@@ -1572,61 +1569,58 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             undeadBombLatchers.turns = new();
 
             // TURN 1
-            undeadBombLatchers.turns.Add(new () {
+            undeadBombLatchers.turns.AddTurn(
                 Enemy("LatcherBomb"),
                 Enemy("LeapBot", replacement: "Automaton", difficulty: 1),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            undeadBombLatchers.turns.Add(new () {
+            undeadBombLatchers.turns.AddTurn(
                 Enemy(null, replacement: "Bombbot", difficulty: 2),
                 Enemy(null, replacement: "Automaton", difficulty: 5),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            undeadBombLatchers.turns.Add(new () {
+            undeadBombLatchers.turns.AddTurn(
                 Enemy("LatcherBomb"),
                 Enemy("Bombbot", replacement: "Insectodrone", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            undeadBombLatchers.turns.Add(new () {
+            undeadBombLatchers.turns.AddTurn(
                 Enemy("BoltHound", replacement: "CloserBot", difficulty: 5),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 4)
-            });
+            );
 
             // TURN 5
-            undeadBombLatchers.turns.Add(new () {
+            undeadBombLatchers.turns.AddTurn(
                 Enemy(null, replacement: "Shieldbot", difficulty: 6),
                 Enemy(null, replacement: "LatcherBomb", difficulty: 4),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 3)
-            });
+            );
 
             // TURN 6
-            undeadBombLatchers.turns.Add(new () {
+            undeadBombLatchers.turns.AddTurn(
                 Enemy(null, replacement: "LatcherBomb", difficulty: 2),
                 Enemy(null, replacement: "Shieldbot", difficulty: 4)
-            });
+            );
 
             // TURN 7
-            undeadBombLatchers.turns.Add(new () {
+            undeadBombLatchers.turns.AddTurn(
                 Enemy("LatcherBomb")
-            });
+            );
 
             // TURN 8
-            undeadBombLatchers.turns.Add(new () {
+            undeadBombLatchers.turns.AddTurn(
                 Enemy(null, replacement: "Shieldbot", difficulty: 4)
-            });
+            );
 
             // TURN 9
-            undeadBombLatchers.turns.Add(new () {
+            undeadBombLatchers.turns.AddTurn(
                 Enemy("LeapBot", replacement: "CloserBot", difficulty: 6)
-            });
-
-            undeadBombLatchers.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Undead_ShieldLatchers
@@ -1635,60 +1629,57 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             undeadShieldLatchers.turns = new();
 
             // TURN 1
-            undeadShieldLatchers.turns.Add(new () {
+            undeadShieldLatchers.turns.AddTurn(
                 Enemy("LatcherShield"),
                 Enemy("LeapBot", replacement: "Automaton", difficulty: 1),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            undeadShieldLatchers.turns.Add(new () {
+            undeadShieldLatchers.turns.AddTurn(
                 Enemy("MineCart"),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            undeadShieldLatchers.turns.Add(new () {
+            undeadShieldLatchers.turns.AddTurn(
                 Enemy("LatcherShield", replacement: "Shieldbot", difficulty: 5),
                 Enemy("Bombbot", replacement: "Insectodrone", difficulty: 4)
-            });
+            );
 
             // TURN 4
-            undeadShieldLatchers.turns.Add(new () {
+            undeadShieldLatchers.turns.AddTurn(
                 Enemy("CloserBot"),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 4)
-            });
+            );
 
             // TURN 5
-            undeadShieldLatchers.turns.Add(new () {
+            undeadShieldLatchers.turns.AddTurn(
                 Enemy(null, replacement: "Insectodrone", difficulty: 6),
                 Enemy(null, replacement: "LatcherShield", difficulty: 4),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 3)
-            });
+            );
 
             // TURN 6
-            undeadShieldLatchers.turns.Add(new () {
+            undeadShieldLatchers.turns.AddTurn(
                 Enemy(null, replacement: "LatcherShield", difficulty: 2),
                 Enemy(null, replacement: "Insectodrone", difficulty: 4)
-            });
+            );
 
             // TURN 7
-            undeadShieldLatchers.turns.Add(new () {
+            undeadShieldLatchers.turns.AddTurn(
                 Enemy("LatcherShield", replacement: "CloserBot", difficulty: 4)
-            });
+            );
 
             // TURN 8
-            undeadShieldLatchers.turns.Add(new () {
+            undeadShieldLatchers.turns.AddTurn(
                 Enemy(null, replacement: "Insectodrone", difficulty: 2)
-            });
+            );
 
             // TURN 9
-            undeadShieldLatchers.turns.Add(new () {
+            undeadShieldLatchers.turns.AddTurn(
                 Enemy("LeapBot", replacement: "CloserBot", difficulty: 6)
-            });
-
-            undeadShieldLatchers.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Undead_SkeleSwarm
@@ -1697,63 +1688,60 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             undeadSkeleSwarm.turns = new();
 
             // TURN 1
-            undeadSkeleSwarm.turns.Add(new () {
+            undeadSkeleSwarm.turns.AddTurn(
                 Enemy("RoboSkeleton"),
                 Enemy("RoboSkeleton"),
                 Enemy(null, replacement: "SentryBot", difficulty: 1),
                 Enemy(null, replacement: "SentryBot", difficulty: 3),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            undeadSkeleSwarm.turns.Add(new () {
+            undeadSkeleSwarm.turns.AddTurn(
                 Enemy(null, replacement: "RoboSkeleton", difficulty: 5),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            undeadSkeleSwarm.turns.Add(new () {
+            undeadSkeleSwarm.turns.AddTurn(
                 Enemy("RoboSkeleton"),
                 Enemy("RoboSkeleton", replacement: "Insectodrone", difficulty: 3)
-            });
+            );
 
             // TURN 4
-            undeadSkeleSwarm.turns.Add(new () {
+            undeadSkeleSwarm.turns.AddTurn(
                 Enemy(null, replacement: "RoboSkeleton", difficulty: 5),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 4)
-            });
+            );
 
             // TURN 5
-            undeadSkeleSwarm.turns.Add(new () {
+            undeadSkeleSwarm.turns.AddTurn(
                 Enemy("RoboSkeleton"),
                 Enemy("RoboSkeleton", replacement: "Insectodrone", difficulty: 6),
                 Enemy(null, replacement: "RoboSkeleton", difficulty: 2)
-            });
+            );
 
             // TURN 6
-            undeadSkeleSwarm.turns.Add(new () {
+            undeadSkeleSwarm.turns.AddTurn(
                 Enemy("Insectodrone"),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 3)
-            });
+            );
 
             // TURN 7
-            undeadSkeleSwarm.turns.Add(new () {
+            undeadSkeleSwarm.turns.AddTurn(
                 Enemy("RoboSkeleton", replacement: "Insectodrone", difficulty: 4),
                 Enemy("RoboSkeleton", replacement: "Insectodrone", difficulty: 6)
-            });
+            );
 
             // TURN 8
-            undeadSkeleSwarm.turns.Add(new () {
+            undeadSkeleSwarm.turns.AddTurn(
                 Enemy(null, replacement: "RoboSkeleton", difficulty: 4)
-            });
+            );
 
             // TURN 9
-            undeadSkeleSwarm.turns.Add(new () {
+            undeadSkeleSwarm.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 6)
-            });
-
-            undeadSkeleSwarm.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Undead_WingLatchers
@@ -1762,53 +1750,50 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             undeadWingLatchers.turns = new();
 
             // TURN 1
-            undeadWingLatchers.turns.Add(new () {
+            undeadWingLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_FlyingLatcher"),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6),
                 Enemy(null, replacement: "Bombbot", difficulty: 2)
-            });
+            );
 
             // TURN 2
-            undeadWingLatchers.turns.Add(new () {
+            undeadWingLatchers.turns.AddTurn(
                 Enemy("Automaton"),
                 Enemy(null, replacement: "P03KCMXP1_FlyingLatcher", difficulty: 1),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            undeadWingLatchers.turns.Add(new () {
+            undeadWingLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_FlyingLatcher"),
                 Enemy("Automaton", replacement: "Thickbot", difficulty: 2),
                 Enemy("Bombbot")
-            });
+            );
 
             // TURN 4
-            undeadWingLatchers.turns.Add(new () {
+            undeadWingLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_Executor"),
                 Enemy(null, replacement: "P03KCMXP1_FlyingLatcher", difficulty: 5),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 4)
-            });
+            );
 
             // TURN 5
-            undeadWingLatchers.turns.Add(new () {
+            undeadWingLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_FlyingLatcher"),
                 Enemy("Thickbot")
-            });
+            );
 
             // TURN 6
-            undeadWingLatchers.turns.Add(new () {
+            undeadWingLatchers.turns.AddTurn(
                 Enemy("Thickbot", replacement: "CloserBot", difficulty: 3),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 4)
-            });
+            );
 
             // TURN 7
-            undeadWingLatchers.turns.Add(new () {
+            undeadWingLatchers.turns.AddTurn(
                 Enemy("Thickbot", replacement: "CloserBot", difficulty: 6),
                 Enemy("MineCart")
-            });
-
-            undeadWingLatchers.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Undead_StrafeLatchers
@@ -1817,57 +1802,54 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             undeadStrafeLatchers.turns = new();
 
             // TURN 1
-            undeadStrafeLatchers.turns.Add(new () {
+            undeadStrafeLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_ConveyorLatcher"),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6),
                 Enemy(null, replacement: "Bombbot", difficulty: 2)
-            });
+            );
 
             // TURN 2
-            undeadStrafeLatchers.turns.Add(new () {
+            undeadStrafeLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_ConveyorLatcher"),
                 Enemy(null, replacement: "P03KCMXP1_ConveyorLatcher", difficulty: 1),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            undeadStrafeLatchers.turns.Add(new () {
+            undeadStrafeLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_ConveyorLatcher"),
                 Enemy("Automaton", replacement: "Shieldbot", difficulty: 2),
                 Enemy(null, replacement: "Insectodrone", difficulty: 1),
                 Enemy("Bombbot")
-            });
+            );
 
             // TURN 4
-            undeadStrafeLatchers.turns.Add(new () {
+            undeadStrafeLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_ConveyorLatcher"),
                 Enemy("MineCart"),
                 Enemy(null, replacement: "MineCart", difficulty: 2),
                 Enemy(null, replacement: "Insectodrone", difficulty: 5),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 4)
-            });
+            );
 
             // TURN 5
-            undeadStrafeLatchers.turns.Add(new () {
+            undeadStrafeLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_ConveyorLatcher"),
                 Enemy("MineCart"),
                 Enemy(null, replacement: "P03KCMXP1_ConveyorLatcher", difficulty: 1)
-            });
+            );
 
             // TURN 6
-            undeadStrafeLatchers.turns.Add(new () {
+            undeadStrafeLatchers.turns.AddTurn(
                 Enemy("MineCart", replacement: "CloserBot", difficulty: 3),
                 Enemy(null, replacement: "LatcherBrittle", difficulty: 4)
-            });
+            );
 
             // TURN 7
-            undeadStrafeLatchers.turns.Add(new () {
+            undeadStrafeLatchers.turns.AddTurn(
                 Enemy("MineCart", replacement: "CloserBot", difficulty: 6),
                 Enemy("MineCart")
-            });
-
-            undeadStrafeLatchers.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Wizard_BigRipper
@@ -1876,63 +1858,60 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             wizardBigRipper.turns = new();
 
             // TURN 1
-            wizardBigRipper.turns.Add(new () {
+            wizardBigRipper.turns.AddTurn(
                 Enemy("EmptyVessel_BlueGem", replacement: "EmptyVessel_OrangeGem", difficulty: 2),
                 Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 4),
                 Enemy("GemRipper"),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            wizardBigRipper.turns.Add(new () {
+            wizardBigRipper.turns.AddTurn(
                 Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 5),
                 Enemy(null, replacement: "SentinelBlue", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            wizardBigRipper.turns.Add(new () {
+            wizardBigRipper.turns.AddTurn(
                 Enemy("Bombbot", replacement: "Automaton", difficulty: 4),
                 Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 3),
                 Enemy(null, replacement: "SentinelGreen", difficulty: 1)
-            });
+            );
 
             // TURN 4
-            wizardBigRipper.turns.Add(new () {
+            wizardBigRipper.turns.AddTurn(
                 Enemy(null, replacement: "AlarmBot", difficulty: 2),
                 Enemy(null, replacement: "GemRipper", difficulty: 4)
-            });
+            );
 
             // TURN 5
-            wizardBigRipper.turns.Add(new () {
+            wizardBigRipper.turns.AddTurn(
                 Enemy("SwapBot"),
                 Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 1),
                 Enemy(null, replacement: "SentinelBlue", difficulty: 4)
-            });
+            );
 
             // TURN 6
-            wizardBigRipper.turns.Add(new () {
+            wizardBigRipper.turns.AddTurn(
                 Enemy(null, replacement: "Automaton", difficulty: 2),
                 Enemy(null, replacement: "SentinelGreen", difficulty: 3)
-            });
+            );
 
             // TURN 7
-            wizardBigRipper.turns.Add(new () {
+            wizardBigRipper.turns.AddTurn(
                 Enemy(null, replacement: "GemRipper", difficulty: 5)
-            });
+            );
 
             // TURN 8
-            wizardBigRipper.turns.Add(new () {
+            wizardBigRipper.turns.AddTurn(
                 Enemy(null, replacement: "AlarmBot", difficulty: 3),
                 Enemy(null, replacement: "SentinelGreen", difficulty: 3)
-            });
+            );
 
             // TURN 9
-            wizardBigRipper.turns.Add(new () {
+            wizardBigRipper.turns.AddTurn(
                 Enemy(null, replacement: "GemRipper", difficulty: 6)
-            });
-
-            wizardBigRipper.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Wizard_GemExploder
@@ -1941,64 +1920,61 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             wizardGemExploder.turns = new();
 
             // TURN 1
-            wizardGemExploder.turns.Add(new () {
+            wizardGemExploder.turns.AddTurn(
                 Enemy("Automaton", replacement: "Shieldbot", difficulty: 6),
                 Enemy(null, replacement: "EmptyVessel_OrangeGem", difficulty: 1),
                 Enemy(null, replacement: "EmptyVessel_OrangeGem", difficulty: 3),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            wizardGemExploder.turns.Add(new () {
+            wizardGemExploder.turns.AddTurn(
                 Enemy("EmptyVessel_OrangeGem"),
                 Enemy("GemExploder")
-            });
+            );
 
             // TURN 3
-            wizardGemExploder.turns.Add(new () {
+            wizardGemExploder.turns.AddTurn(
                 Enemy("EmptyVessel_OrangeGem"),
                 Enemy("Bombbot", replacement: "GemExploder", difficulty: 2)
-            });
+            );
 
             // TURN 4
-            wizardGemExploder.turns.Add(new () {
+            wizardGemExploder.turns.AddTurn(
                 Enemy("Shieldbot", replacement: "GemRipper", difficulty: 4),
                 Enemy(null, replacement: "EmptyVessel_OrangeGem", difficulty: 3),
                 Enemy(null, replacement: "GemExploder", difficulty: 3)
-            });
+            );
 
             // TURN 5
-            wizardGemExploder.turns.Add(new () {
+            wizardGemExploder.turns.AddTurn(
                 Enemy("EmptyVessel_OrangeGem", replacement: "Bombbot", difficulty: 2)
-            });
+            );
 
             // TURN 6
-            wizardGemExploder.turns.Add(new () {
+            wizardGemExploder.turns.AddTurn(
                 Enemy(null, replacement: "Automaton", difficulty: 2),
                 Enemy(null, replacement: "EmptyVessel_OrangeGem", difficulty: 3),
                 Enemy(null, replacement: "GemExploder", difficulty: 3)
-            });
+            );
 
             // TURN 7
-            wizardGemExploder.turns.Add(new () {
+            wizardGemExploder.turns.AddTurn(
                 Enemy(null, replacement: "GemRipper", difficulty: 2)
-            });
+            );
 
             // TURN 8
-            wizardGemExploder.turns.Add(new () {
+            wizardGemExploder.turns.AddTurn(
                 Enemy(null, replacement: "Insectodrone", difficulty: 4),
                 Enemy(null, replacement: "GemExploder", difficulty: 4)
-            });
+            );
 
             // TURN 9
-            wizardGemExploder.turns.Add(new () {
+            wizardGemExploder.turns.AddTurn(
                 Enemy(null, replacement: "GemRipper", difficulty: 6),
                 Enemy(null, replacement: "GemExploder", difficulty: 6),
                 Enemy(null, replacement: "EmptyVessel_OrangeGem", difficulty: 6)
-            });
-
-            wizardGemExploder.SyncTurnDifficulties(0, 6);
-
+            );
 
 
             // Encounter: Wizard_ShieldGems
@@ -2007,74 +1983,71 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             wizardShieldGems.turns = new();
 
             // TURN 1
-            wizardShieldGems.turns.Add(new () {
+            wizardShieldGems.turns.AddTurn(
                 Enemy("EmptyVessel_BlueGem"),
                 Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 3),
                 Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
-            });
+            );
 
             // TURN 2
-            wizardShieldGems.turns.Add(new () {
+            wizardShieldGems.turns.AddTurn(
                 Enemy("EmptyVessel_BlueGem"),
                 Enemy("Bombbot"),
                 Enemy(null, replacement: "GemShielder", difficulty: 3),
                 Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 3)
-            });
+            );
 
             // TURN 3
-            wizardShieldGems.turns.Add(new () {
+            wizardShieldGems.turns.AddTurn(
                 Enemy("GemShielder"),
                 Enemy(null, replacement: "GemShielder", difficulty: 4),
                 Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 4)
-            });
+            );
 
             // TURN 4
-            wizardShieldGems.turns.Add(new () {
+            wizardShieldGems.turns.AddTurn(
                 Enemy("Shieldbot", replacement: "GemRipper", difficulty: 4)
-            });
+            );
 
             // TURN 5
-            wizardShieldGems.turns.Add(new () {
+            wizardShieldGems.turns.AddTurn(
                 Enemy("EmptyVessel_OrangeGem", replacement: "Bombbot", difficulty: 2),
                 Enemy(null, replacement: "GemShielder", difficulty: 3)
-            });
+            );
 
             // TURN 6
-            wizardShieldGems.turns.Add(new () {
+            wizardShieldGems.turns.AddTurn(
                 Enemy(null, replacement: "Automaton", difficulty: 2),
                 Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 3)
-            });
+            );
 
             // TURN 7
-            wizardShieldGems.turns.Add(new () {
+            wizardShieldGems.turns.AddTurn(
                 Enemy(null, replacement: "GemRipper", difficulty: 4),
                 Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 4)
-            });
+            );
 
             // TURN 8
-            wizardShieldGems.turns.Add(new () {
+            wizardShieldGems.turns.AddTurn(
                 Enemy(null, replacement: "Insectodrone", difficulty: 6),
                 Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 4),
                 Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 4)
-            });
+            );
 
             // TURN 9
-            wizardShieldGems.turns.Add(new () {
+            wizardShieldGems.turns.AddTurn(
                 Enemy(null, replacement: "GemRipper", difficulty: 6),
                 Enemy(null, replacement: "GemShielder", difficulty: 4),
                 Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 3)
-            });
-
-            wizardShieldGems.SyncTurnDifficulties(0, 6);
+            );
 
             // Damage Race
             GeneratorDamageRace = EncounterManager.New("GeneratorDamageRace", addToPool: false);
             GeneratorDamageRace.SetDifficulty(0, 6);
             GeneratorDamageRace.turns = new();
-            GeneratorDamageRace.turns.Add(new () {
+            GeneratorDamageRace.turns.AddTurn(
                 Enemy("SentryBot")
-            });
-            GeneratorDamageRace.SyncTurnDifficulties(0, 6);
+            );
         }
     }
 }

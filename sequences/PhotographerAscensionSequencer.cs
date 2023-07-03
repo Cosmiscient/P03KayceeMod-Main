@@ -17,7 +17,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 return base.BuildCustomEncounter(nodeData);
 
             EncounterData encounterData = base.BuildCustomEncounter(nodeData);
-            EncounterBlueprintData blueprint = EncounterDefinitions.PhotographerBossP1;
+            EncounterBlueprintData blueprint = EncounterHelper.PhotographerBossP1;
             encounterData.opponentTurnPlan = EncounterBuilder.BuildOpponentTurnPlan(blueprint, EventManagement.EncounterDifficulty, false);
             return encounterData;
         }
@@ -33,7 +33,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield break;
             }
 
-            TurnManager.Instance.Opponent.Blueprint = EncounterDefinitions.PhotographerBossP2;
+            TurnManager.Instance.Opponent.Blueprint = EncounterHelper.PhotographerBossP2;
             
             List<List<CardInfo>> plan = EncounterBuilder.BuildOpponentTurnPlan(TurnManager.Instance.Opponent.Blueprint, EventManagement.EncounterDifficulty, removeLockedCards);
             TurnManager.Instance.Opponent.ReplaceAndAppendTurnPlan(plan);

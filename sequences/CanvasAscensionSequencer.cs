@@ -37,7 +37,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public override EncounterData BuildCustomEncounter(CardBattleNodeData nodeData)
         {
             EncounterData encounterData = base.BuildCustomEncounter(nodeData);
-            EncounterBlueprintData blueprint = EncounterDefinitions.CanvasBossPX;
+            EncounterBlueprintData blueprint = EncounterHelper.CanvasBossPX;
             P03Plugin.Log.LogInfo($"Building Canvas turn plan with difficulty {EventManagement.EncounterDifficulty}");
             encounterData.opponentTurnPlan = EncounterBuilder.BuildOpponentTurnPlan(blueprint, EventManagement.EncounterDifficulty, false);
             foreach (List<CardInfo> turn in encounterData.opponentTurnPlan)

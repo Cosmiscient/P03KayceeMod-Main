@@ -36,6 +36,47 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 RegionGeneratorData.EncountersForZone[zone].Add(encounterId);
         }
 
+        public static List<List<EncounterBlueprintData.CardBlueprint>> AddTurn(this List<List<EncounterBlueprintData.CardBlueprint>> blueprint, params IEnumerable<EncounterBlueprintData.CardBlueprint>[] input)
+        {
+            List<EncounterBlueprintData.CardBlueprint> newTurn = new();
+            foreach (var subset in input)
+                newTurn.AddRange(subset);
+            blueprint.Add(newTurn);
+            return blueprint;
+        }
+
+        public static List<List<EncounterBlueprintData.CardBlueprint>> AddTurn(this List<List<EncounterBlueprintData.CardBlueprint>> blueprint, IEnumerable<IEnumerable<EncounterBlueprintData.CardBlueprint>> input)
+        {
+            List<EncounterBlueprintData.CardBlueprint> newTurn = new();
+            foreach (var subset in input)
+                newTurn.AddRange(subset);
+            blueprint.Add(newTurn);
+            return blueprint;
+        }
+
+        public static List<List<EncounterBlueprintData.CardBlueprint>> AddTurn(this List<List<EncounterBlueprintData.CardBlueprint>> blueprint, IEnumerable<List<EncounterBlueprintData.CardBlueprint>> input)
+        {
+            List<EncounterBlueprintData.CardBlueprint> newTurn = new();
+            foreach (var subset in input)
+                newTurn.AddRange(subset);
+            blueprint.Add(newTurn);
+            return blueprint;
+        }
+
+        public static EncounterBlueprintData AddTurn(this EncounterBlueprintData blueprint, IEnumerable<IEnumerable<EncounterBlueprintData.CardBlueprint>> input)
+        {
+            blueprint.turns ??= new();
+            blueprint.turns.AddTurn(input);
+            return blueprint;
+        }
+
+        public static EncounterBlueprintData AddTurn(this EncounterBlueprintData blueprint, IEnumerable<List<EncounterBlueprintData.CardBlueprint>> input)
+        {
+            blueprint.turns ??= new();
+            blueprint.turns.AddTurn(input);
+            return blueprint;
+        }
+
         /// <summary>
         /// Marks an encounter as being valid SPECIFICALLY for the P03 KCM Mod.
         /// </summary>
@@ -61,6 +102,14 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 return false;
             }
             return true;
+        }
+
+        [HarmonyPatch(typeof(Part3Opponent), nameof(Part3Opponent.ModifyQueuedCard))]
+        [HarmonyPostfix]
+        private static void EnsureOverclocked(ref PlayableCard card)
+        {
+            if (card.Info != null && card.Info.Mods != null && card.Info.Mods.Any(m => m.fromOverclock))
+                card.Anim.SetOverclocked(true);
         }
     }
 }

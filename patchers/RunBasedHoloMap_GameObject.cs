@@ -373,7 +373,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             nodeData.nodeType = HoloMapSpecialNode.NodeDataType.CardBattle;
             nodeData.specialEncounterId = MoveHoloMapAreaNode.DAMAGE_RACE_SEQUENCER_NAME;
             nodeData.Data = null;
-            nodeData.blueprintData = EncounterDefinitions.GeneratorDamageRace;
+            nodeData.blueprintData = EncounterHelper.GeneratorDamageRace;
             nodeData.opponentTerrain = new CardInfo[] {
                 CardLoader.GetCardByName(CustomCards.GENERATOR_TOWER),
                 CardLoader.GetCardByName(CustomCards.FIREWALL_NORMAL),

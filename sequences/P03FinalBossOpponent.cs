@@ -707,7 +707,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield break;
             }
 
-            TurnManager.Instance.Opponent.Blueprint = EncounterDefinitions.P03FinalBoss;
+            TurnManager.Instance.Opponent.Blueprint = EncounterHelper.P03FinalBoss;
             
             List<List<CardInfo>> plan = EncounterBuilder.BuildOpponentTurnPlan(TurnManager.Instance.Opponent.Blueprint, EventManagement.EncounterDifficulty, removeLockedCards);
             TurnManager.Instance.Opponent.ReplaceAndAppendTurnPlan(plan);

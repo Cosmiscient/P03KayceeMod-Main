@@ -74,7 +74,7 @@ namespace Infiniscryption.P03KayceeRun
             AscensionChallengeManagement.UpdateP03Challenges();
             BossManagement.RegisterBosses();
             DefaultQuestDefinitions.DefineAllQuests();
-            EncounterDefinitions.BuildEncounters();
+            EncounterHelper.BuildEncounters();
 
             CustomCards.printAllCards();
 
