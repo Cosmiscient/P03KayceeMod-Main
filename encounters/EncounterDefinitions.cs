@@ -31,7 +31,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             List<EncounterBlueprintData.CardBlueprint> retval = new();
 
             EncounterBlueprintData.CardBlueprint baseBp = new();
-            baseBp.card = CardLoader.Clone(CardManager.AllCardsCopy.CardByName(cardName));
+            baseBp.card = String.IsNullOrEmpty(cardName) ? null : CardLoader.Clone(CardManager.AllCardsCopy.CardByName(cardName));
 
             if (overclock == 0 && difficulty == 0)
                 baseBp.maxDifficulty = MAX_DIFFICULTY;
@@ -50,7 +50,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             if (difficulty > 0 && replacement != null)
             {
                 EncounterBlueprintData.CardBlueprint diff = new();
-                diff.card = CardLoader.Clone(CardManager.AllCardsCopy.CardByName(replacement));
+                diff.card = String.IsNullOrEmpty(replacement) ? null : CardLoader.Clone(CardManager.AllCardsCopy.CardByName(replacement));
                 diff.minDifficulty = difficulty;
                 if (overclock > difficulty)
                     diff.maxDifficulty = overclock - 1;
@@ -69,12 +69,12 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 ov.minDifficulty = overclock;
                 if (overclock > difficulty && difficulty > 0)
                 {
-                    ov.card = CardLoader.Clone(CardManager.AllCardsCopy.CardByName(replacement));
+                    ov.card = String.IsNullOrEmpty(replacement) ? null : CardLoader.Clone(CardManager.AllCardsCopy.CardByName(replacement));
                     ov.maxDifficulty = MAX_DIFFICULTY;
                 }
                 else
                 {
-                    ov.card = CardLoader.Clone(CardManager.AllCardsCopy.CardByName(cardName));
+                    ov.card = String.IsNullOrEmpty(cardName) ? null : CardLoader.Clone(CardManager.AllCardsCopy.CardByName(cardName));
                     if (difficulty > overclock)
                         ov.maxDifficulty = difficulty - 1;
                     else
