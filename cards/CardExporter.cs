@@ -40,7 +40,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         [SerializeField]
         private PlayableCard dummyCard;
-        
+
         private static RenderStatsLayer statsLayer = null;
 
         private bool IsTalkingCard(CardInfo info)
@@ -62,7 +62,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override void ManagedUpdate()
         {
-            if (!inRender && Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.X))
+            if (!inRender && 
+                (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && 
+                (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && 
+                Input.GetKey(KeyCode.X))
                 StartCardExport();
         }
 
@@ -116,56 +119,75 @@ namespace Infiniscryption.P03KayceeRun.Cards
             screenshot.filterMode = FilterMode.Trilinear;
             Texture2D finalTexture = null;
 
-            foreach (CardInfo info in CardManager.AllCardsCopy.Where(ci => ci.temple == CardTemple.Tech && ci.name[0] != '!' && !IsTalkingCard(ci)))
+            List<CardInfo> cardsToRender = CardManager.AllCardsCopy.Where(ci => ci.temple == CardTemple.Tech && ci.name[0] != '!').ToList();
+
+            while (cardsToRender.Count > 0)
             {
-                dummyCard = CardSpawner.SpawnPlayableCard(info);
-                dummyCard.gameObject.transform.localPosition = new Vector3(dummyCard.gameObject.transform.localPosition.x + xOffset, dummyCard.gameObject.transform.localPosition.y, dummyCard.gameObject.transform.localPosition.z);
-                statsLayer = dummyCard.StatsLayer;
+                List<PlayableCard> currentBatch = new ();
 
-                yield return new WaitForSeconds(.8f);
-
-                string filename = $"cardexports/{info.name}.png";
-
-                yield return new WaitForEndOfFrame();
-
-                try
+                Vector3 renderPosition = new(0f,0f,0f);
+                while (cardsToRender.Count > 0 && currentBatch.Count < 20)
                 {
-                    screenshot.ReadPixels(new (0, 0, Screen.currentResolution.width, Screen.currentResolution.height), 0, 0, false);
-                    screenshot.Apply();
+                    CardInfo info = cardsToRender[0];
+                    cardsToRender.RemoveAt(0);
+                    
+                    PlayableCard card = CardSpawner.SpawnPlayableCard(info);
+                    card.gameObject.transform.localPosition = new Vector3(card.gameObject.transform.localPosition.x + xOffset, card.gameObject.transform.localPosition.y, card.gameObject.transform.localPosition.z);
+                    renderPosition = card.gameObject.transform.localPosition;
+                    card.gameObject.transform.localPosition = card.gameObject.transform.localPosition + new Vector3(0, 10, 0);
+                    currentBatch.Add(card);
+                    yield return new WaitForEndOfFrame();
+                }
 
-                    Bounds cardBounds = GetMaxBounds(dummyCard.gameObject);
-                    Vector2 lower = camera.WorldToScreenPoint(cardBounds.min);
-                    Vector2 upper = camera.WorldToScreenPoint(cardBounds.max);
-                    int width = Mathf.RoundToInt(Mathf.Abs(lower.x - upper.x));
-                    int height = Mathf.RoundToInt(Mathf.Abs(lower.y - upper.y));
-                    int xMin = Mathf.RoundToInt(Mathf.Min(lower.x, upper.x));
-                    int yMin = Mathf.RoundToInt(Mathf.Min(lower.y, upper.y));
+                yield return new WaitForSeconds(.5f);
 
-                    if (finalTexture == null)
+                for (int i = 0; i < currentBatch.Count; i++)
+                {
+                    PlayableCard card = currentBatch[i];
+                    string filename = $"cardexports/{card.Info.name}.png";
+
+                    card.gameObject.transform.localPosition = renderPosition;
+                    yield return new WaitForSeconds(0.1f);
+                    yield return new WaitForEndOfFrame();
+
+                    try
                     {
-                        finalTexture = new (width, height);
-                        finalTexture.filterMode = FilterMode.Trilinear;
+                        screenshot.ReadPixels(new (0, 0, Screen.currentResolution.width, Screen.currentResolution.height), 0, 0, false);
+                        screenshot.Apply();
+
+                        Bounds cardBounds = GetMaxBounds(card.gameObject);
+                        Vector2 lower = camera.WorldToScreenPoint(cardBounds.min);
+                        Vector2 upper = camera.WorldToScreenPoint(cardBounds.max);
+                        int width = Mathf.RoundToInt(Mathf.Abs(lower.x - upper.x));
+                        int height = Mathf.RoundToInt(Mathf.Abs(lower.y - upper.y));
+                        int xMin = Mathf.RoundToInt(Mathf.Min(lower.x, upper.x));
+                        int yMin = Mathf.RoundToInt(Mathf.Min(lower.y, upper.y));
+
+                        if (finalTexture == null)
+                        {
+                            finalTexture = new (width, height);
+                            finalTexture.filterMode = FilterMode.Trilinear;
+                        }
+
+                        for (int x = 0; x < width; x++)
+                            for (int y = 0; y < height; y++)
+                                finalTexture.SetPixel(x, y, screenshot.GetPixel(x + xMin, y + yMin));
+
+
+                        P03Plugin.Log.LogDebug("Writing file");
+                        File.WriteAllBytes(filename, ImageConversion.EncodeToPNG(finalTexture));
+                    }
+                    catch (Exception ex)
+                    {
+                        P03Plugin.Log.LogError(ex);
                     }
 
-                    for (int x = 0; x < width; x++)
-                        for (int y = 0; y < height; y++)
-                            finalTexture.SetPixel(x, y, screenshot.GetPixel(x + xMin, y + yMin));
-
-
-                    P03Plugin.Log.LogDebug("Writing file");
-                    File.WriteAllBytes(filename, ImageConversion.EncodeToPNG(finalTexture));
-                }
-                catch (Exception ex)
-                {
-                    P03Plugin.Log.LogError(ex);
-                }
-
-                if (dummyCard != null)
-                {
-                    GameObject.Destroy(dummyCard.gameObject);
-                }
-
-                yield return new WaitForEndOfFrame();    
+                    card.transform.localPosition = card.transform.localPosition + new Vector3(0, 10, 0);
+                    yield return new WaitForEndOfFrame();
+                    if (card != null)
+                        GameObject.DestroyImmediate(card.gameObject);
+                    yield return new WaitForEndOfFrame();
+                }                
             }
 
             GameObject.Destroy(finalTexture);
