@@ -60,7 +60,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 if (difficulty > overclock && overclock > 0)
                     diff.card.Mods.Add(new (1, 0) { fromOverclock = true });
                     
-                retval.Add(baseBp);
+                retval.Add(diff);
             }
 
             if (overclock > 0)
@@ -81,7 +81,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                         ov.maxDifficulty = MAX_DIFFICULTY;
                 }
                 ov.card.Mods.Add(new (1, 0) { fromOverclock = true });
-                retval.Add(baseBp);
+                retval.Add(ov);
             }
 
             return retval;
@@ -663,12 +663,11 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 1
             neutralSentryWall.turns.AddTurn(
-                Enemy("SentryBot"),
+                Enemy("SentryBot", replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6),
                 Enemy("SentryBot", replacement: "RoboSkeleton", difficulty: 6),
                 Enemy("SentryBot", replacement: "RoboSkeleton", difficulty: 4),
                 Enemy("SentryBot"),
-                Enemy(null, replacement: "SentryBot", difficulty: 4),
-                Enemy(null, replacement: "P03KCM_FIREWALL_BATTLE", difficulty: 6)
+                Enemy(null, replacement: "SentryBot", difficulty: 4)
             );
 
             // TURN 2

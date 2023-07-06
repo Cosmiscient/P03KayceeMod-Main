@@ -12,7 +12,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
     [HarmonyPatch]
     public static class EncounterExtensions
     {
-        private static List<string> P03OnlyEncounters = new();
+        internal static List<string> P03OnlyEncounters = new();
 
         private static RunBasedHoloMap.Zone TempleToZone(this CardTemple? temple)
         {
