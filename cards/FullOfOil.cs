@@ -48,6 +48,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (targets.Count == 0)
                 yield break;
 
+            var originalView = ViewManager.Instance.CurrentView;
             ViewManager.Instance.SwitchToView(View.Board, false, false);
             yield return new WaitForSeconds(0.15f);
 
@@ -60,7 +61,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 yield return new WaitForSeconds(0.25f);
             }
 
-            ViewManager.Instance.SwitchToView(View.Default, false, false);
+            ViewManager.Instance.SwitchToView(originalView, false, false);
 
             yield break;
         }

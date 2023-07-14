@@ -44,6 +44,14 @@ namespace Infiniscryption.P03KayceeRun
             }
         }
 
+        internal bool TurboMode
+        {
+            get
+            {
+                return DebugCode.ToLowerInvariant().Contains("turbomode");
+            }
+        }
+
         private void Awake()
         {
             Instance = this;

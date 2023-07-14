@@ -151,6 +151,22 @@ While the full credits will play in-game when you win for the first time, I have
 <details>
 <summary>Changelog</summary>
 
+3.0.4
+- All encounters have been reworked again.
+- We are now capturing metrics every time you lose a battle. Those metrics are: name of encounter, turn you lost, and difficulty level. All metrics are captured anonymously.
+- Copypasta has new art.
+- Copypasta and Angelbot can now be used by opponents.
+- \[redacted\] should no longer throw an error when trying to remove \[redacted\]
+- Transformer and Skeleclock should no longer spin out of control.
+- Full of Oil will revert the camera view to its previous view instead of to View.Default at the conclusion of the animation.
+- Save scumming the Skeleclock event should no longer be possible.
+- Quitting during the Recycler event should no longer break the game.
+- The Transformer event should no longer allow you to set a card's energy cost higher than 6.
+- Shovester now costs 1 Energy to activate (down from 2)
+- ScrapBot nows costs 4 Energy (up from 3)
+- R4M's default power is now 2 (up from 1)
+
+
 3.0.3
 - Tokens received from the recycler now have an energy cost based on the number of abilities they gain.
 - CellEvolve and CellDeEvolve have proper behaviors for cards that don't have set evolutions.

@@ -51,6 +51,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public const string FAILED_EXPERIMENT_BASE = "P03KCM_FAILED_EXPERIMENT";
         public const string MYCO_HEALING_CONDUIT = "P03KCM_MYCO_HEALING_CONDUIT";
         public const string MYCO_CONSTRUCT_BASE = "P03KCM_MYCO_CONSTRUCT_BASE";
+        
+        public const string TURBO_MINECART = "P03KCM_TURBO_MINECART";
 
         public const string TURBO_VESSEL = "P03KCM_TURBO_VESSEL";
         public const string TURBO_VESSEL_BLUEGEM = "P03KCM_TURBO_VESSEL_BLUEGEM";
@@ -556,7 +558,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_skeleton_lord.png", typeof(CustomCards).Assembly))
                 .AddAbilities(BrittleGainsUndying.AbilityID, DrawBrittle.AbilityID)
                 .SetCost(energyCost: 2)
-                .SetRare()
+                .AddAppearances(RareDiscCardAppearance.ID)
                 .temple = CardTemple.Tech;
 
             // CardManager.New(P03Plugin.CardPrefx, MYCO_CONSTRUCT_PONTOON, "PONTOON", 0, 1)

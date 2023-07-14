@@ -339,6 +339,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 __instance.sideDeckAbilities.Add(Ability.ConduitNull);
 
+                if (P03Plugin.Instance.TurboMode)
+                    __instance.currency = 250;
+
                 if (IsP03Run)
                 {
 

@@ -21,7 +21,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Static Electricity";
-            info.rulebookDescription = "A card bearing this sigil will provide null conduit power to adjacent cards as long as it’s alive..";
+            info.rulebookDescription = "[creature] will provide cause adjacent cards to behave as if they are part of a completed conduit.";
             info.canStack = false;
             info.powerLevel = 2;
             info.opponentUsable = true;

@@ -4,8 +4,10 @@ using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
+using InscryptionAPI.Card;
 using UnityEngine;
 using HarmonyLib;
+using InscryptionAPI.Encounters;
 
 namespace Infiniscryption.P03KayceeRun.Encounters
 {
@@ -13,6 +15,55 @@ namespace Infiniscryption.P03KayceeRun.Encounters
     public static class EncounterExtensions
     {
         internal static List<string> P03OnlyEncounters = new();
+
+        internal static Dictionary<string, EncounterBlueprintData> HolyHackerole = new ();
+
+        private static void MatchMods(CardInfo orig, CardInfo copy)
+        {
+            if (orig == null || copy == null || orig.mods == null || orig.mods.Count == 0)
+                return;
+
+            copy.mods = new ();
+            foreach (var m in orig.mods)
+                copy.mods.Add((CardModificationInfo)m.Clone());
+        }
+
+        static EncounterExtensions()
+        {
+            // Screw your stupid copying of stuff killing my card mods.
+            // I'll fix it myself. The hard way.
+            EncounterManager.ModifyEncountersList += delegate(List<EncounterBlueprintData> allEncounters)
+            {
+                foreach (var ebd in allEncounters)
+                {
+                    if (!HolyHackerole.Keys.Contains(ebd.name))
+                        continue;
+
+                    var originalTurns = HolyHackerole[ebd.name].turns;
+
+                    try
+                    {
+                        for (int t = 0; t < ebd.turns.Count; t++)
+                        {
+                            for (int c = 0; c < ebd.turns[t].Count; c++)
+                            {
+                                if (originalTurns[t][c].card != null)
+                                    ebd.turns[t][c].card = CardLoader.Clone(originalTurns[t][c].card);
+                                if (originalTurns[t][c].replacement != null)
+                                    ebd.turns[t][c].replacement = CardLoader.Clone(originalTurns[t][c].replacement);
+                                MatchMods(originalTurns[t][c].card, ebd.turns[t][c].card);
+                                MatchMods(originalTurns[t][c].replacement, ebd.turns[t][c].replacement);
+                            }
+                        }
+                    } catch (Exception ex)
+                    {
+                        P03Plugin.Log.LogError($"Failed to repair encounter {ebd.name}");
+                        P03Plugin.Log.LogError(ex);
+                    }
+                }
+                return allEncounters;
+            };
+        }
 
         private static RunBasedHoloMap.Zone TempleToZone(this CardTemple? temple)
         {
@@ -86,6 +137,8 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         {
             SetEncounterRegion(region.TempleToZone(), data.name);
 
+            HolyHackerole[data.name] = data;
+
             if (!P03OnlyEncounters.Contains(data.name))
                 P03OnlyEncounters.Add(data.name);
 
@@ -110,6 +163,6 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         {
             if (card.Info != null && card.Info.Mods != null && card.Info.Mods.Any(m => m.fromOverclock))
                 card.Anim.SetOverclocked(true);
-        }
+        }        
     }
 }

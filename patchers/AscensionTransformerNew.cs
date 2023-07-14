@@ -176,7 +176,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPatch(typeof(CreateTransformerSequencer))]
         [HarmonyPatch("UpdateModChoices")]
         [HarmonyPrefix]
-        private static void PrefixUpdateModChoices(CreateTransformerSequencer __instance)
+        private static void PrefixUpdateModChoices(CreateTransformerSequencer __instance, CardInfo selectedCard)
         {
             //If P03 KCM is active, randomize the beast node
             if (SaveFile.IsAscension)
@@ -210,6 +210,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     __instance.beastMods = new List<CardModificationInfo> { cardModificationInfo, cardModificationInfo2, cardModificationInfo3 };
                 }
                 __instance.currentValidModChoices = new List<CardModificationInfo>(__instance.beastMods);
+                __instance.currentValidModChoices.RemoveAll(m => m.energyCostAdjustment + selectedCard.EnergyCost > 6);
 
                 return;
             }
@@ -256,8 +257,32 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         //    __result.energyCostAdjustment -= energyCostAdjustment;
         //}
 
-        [HarmonyPatch(typeof(Transformer))]
-        [HarmonyPatch("GetTransformCardInfo")]
+        [HarmonyPatch(typeof(Transformer), nameof(Transformer.GetTransformCardInfo))]
+        [HarmonyPostfix]
+        private static void ReverseStatsFromCopyableMods(ref Transformer __instance, ref CardInfo __result)
+        {
+            CardModificationInfo statReversingMod = null;
+            foreach (var myMod in __instance.Card.Info.Mods.Where(m => m != null && !m.nonCopyable))
+            {
+                foreach (var targetMod in __result.Mods.Where(m => m != null && !m.nonCopyable))
+                {
+                    if (myMod.attackAdjustment == targetMod.attackAdjustment
+                        && myMod.healthAdjustment == targetMod.healthAdjustment
+                        && myMod.energyCostAdjustment == targetMod.energyCostAdjustment)
+                    {
+                        statReversingMod ??= new();
+                        statReversingMod.attackAdjustment -= targetMod.attackAdjustment;
+                        statReversingMod.healthAdjustment -= targetMod.healthAdjustment;
+                        statReversingMod.energyCostAdjustment -= targetMod.energyCostAdjustment;
+                    }
+                }
+            }
+
+            if (statReversingMod != null)
+                __result.Mods.Add(statReversingMod);
+        }
+
+        [HarmonyPatch(typeof(Transformer), nameof(Transformer.GetTransformCardInfo))]
         [HarmonyPrefix]
         private static bool FixCXFormer(ref Transformer __instance, ref CardInfo __result)
         {

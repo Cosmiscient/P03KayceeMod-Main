@@ -706,10 +706,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return retval;
         }
 
-        private static EncounterBlueprintData GetBlueprintForRegion(Zone regionId, int color, int encounterIndex)
+        private static EncounterBlueprintData GetBlueprintForRegion(Zone regionId, int color, int encounterIndex, bool useDefaultRegionSelection)
         {
             string encounterName = default(string);
-            RunBasedHoloMap.Zone regionZone = color == 1 ? RunBasedHoloMap.Zone.Neutral : regionId;
+            RunBasedHoloMap.Zone regionZone = color == 1 || !useDefaultRegionSelection ? RunBasedHoloMap.Zone.Neutral : regionId;
 
             // This is just a failsafe. The index should always match UNLESS you uninstalled a mod partway through a run.
             // I could just let this fail because you're a dumbass, but I'm a nice guy.
@@ -794,7 +794,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     GameObject arrowToReplace = area.transform.Find($"Nodes/MoveArea_{DIR_LOOKUP[bp.specialDirection]}").gameObject;
                     arrowToReplace.GetComponent<HoloMapNode>().nodeType = HoloMapNode.NodeDataType.MoveAreaTrade;
                 }
-                if (bp.specialDirectionType == HoloMapBlueprint.BATTLE)
+                if (bp.specialDirectionType == HoloMapBlueprint.BATTLE || bp.specialDirectionType == HoloMapBlueprint.NEUTRAL_BATTLE)
                 {
                     P03Plugin.Log.LogInfo($"Finding arrow to destroy");
                     GameObject arrowToReplace = area.transform.Find($"Nodes/MoveArea_{DIR_LOOKUP[bp.specialDirection]}").gameObject;
@@ -806,7 +806,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     newArrow.name = $"MoveArea_{DIR_LOOKUP[bp.specialDirection]}";
                     HoloMapNode node = newArrow.GetComponent<HoloMapNode>();
                     Traverse nodeTraverse = Traverse.Create(node);
-                    nodeTraverse.Field("blueprintData").SetValue(GetBlueprintForRegion(regionId, bp.color, bp.encounterIndex));
+                    nodeTraverse.Field("blueprintData").SetValue(GetBlueprintForRegion(regionId, bp.color, bp.encounterIndex, bp.specialDirectionType == HoloMapBlueprint.BATTLE));
                     nodeTraverse.Field("encounterDifficulty").SetValue(bp.encounterDifficulty);
                     if ((bp.specialTerrain & HoloMapBlueprint.FULL_BRIDGE) != 0)
                         nodeTraverse.Field("bridgeBattle").SetValue(true);

@@ -60,8 +60,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             "Anim/CardBase/Bottom"
         };
 
-        private bool inRender = false;
-        private bool skipBulkRender = false;
+        private static bool inRender = false;
+        private static bool skipBulkRender = false;
 
         public override void ManagedUpdate()
         {
@@ -123,9 +123,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return rgx.Replace(CustomCards.ConvertCardToCompleteCode(info), "");
         }
 
+        private static HashSet<string> GeneratedThisRun = new ();
         private static bool Generated(CardInfo info)
         {
-            return File.Exists($"cardexports/{GetRepr(info)}.png");
+            if (info.mods == null || info.mods.Count == 0)
+                return File.Exists($"cardexports/{GetRepr(info)}.png");
+
+            if (GeneratedThisRun.Contains(GetRepr(info)))
+                return true;
+
+            GeneratedThisRun.Add(GetRepr(info));
+            return false;
         }
 
         private IEnumerator GenerateCard(PlayableCard card, Vector3 renderPosition, Texture2D screenshot, Camera camera)
@@ -185,6 +193,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             Color originalHangingLightColor = ExplorableAreaManager.Instance.hangingLight.color;
             Color originalHangingLightCardColor = ExplorableAreaManager.Instance.hangingCardsLight.color;
+            ExplorableAreaManager.Instance.SetHangingLightColors(originalHangingLightColor, originalHangingLightCardColor);
 
             bool noiseEnabled = GameOptions.optionsData.noiseEnabled;
             GameOptions.optionsData.noiseEnabled = false;
@@ -241,12 +250,53 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 }                
             }
 
+            List<EncounterBlueprintData> encountersToExport = EncounterManager.AllEncountersCopy.Where(ebd => Infiniscryption.P03KayceeRun.Encounters.EncounterExtensions.P03OnlyEncounters.Contains(ebd.name)).ToList();
+
+            // We also want to export all the base game encounters for act 3
+            foreach (var encounter in EncounterManager.BaseGameEncounters)
+            {
+                if (encounter.randomReplacementCards != null && encounter.randomReplacementCards.Any(ci => ci.temple != CardTemple.Tech))
+                    continue;
+
+                bool valid = true;
+                bool doneSearching = false;
+
+                foreach (var turn in encounter.turns)
+                {
+                    foreach (var ci in turn)
+                    {
+                        if (ci.card == null)
+                            continue;
+
+                        if (ci.card.temple != CardTemple.Tech)
+                        {
+                            valid = false;
+                            doneSearching = true;
+                            break;
+                        }
+
+                        if (!Generated(ci.card))
+                        {
+                            valid = false;
+                            doneSearching = true;
+                            break;
+                        }
+                    }
+
+                    if (doneSearching)
+                        break;
+                }
+
+                if (valid)
+                    encountersToExport.Add(encounter);
+            }
+
             // Now we export all of the encounters
-            foreach (var encounter in EncounterManager.AllEncountersCopy.Where(ebd => Infiniscryption.P03KayceeRun.Encounters.EncounterExtensions.P03OnlyEncounters.Contains(ebd.name)))
+            foreach (var encounter in encountersToExport)
             {
                 P03Plugin.Log.LogDebug($"Generating encounter {encounter.name}");
                 string export = $"<body><h2 class=\"title\">{encounter.name}</h2><table cellpadding=\"0\" cellspacing=\"0\"><tr><td/>";
-                for (int i = 0; i <= 6; i++)
+                for (int i = encounter.minDifficulty; i <= encounter.maxDifficulty; i++)
                     export += $"<td colspan=5 class=\"levelheader\">Level {i}</td><td><div class=\"levelspacer\"/></td>";
                 export += "</tr>";
 
@@ -254,18 +304,24 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     { "queue", GetImageEmbedded("queue") }
                 };
 
+                Dictionary<int, float> runningPowerLevelTotals = new ();
+                for (int i = encounter.minDifficulty; i <= encounter.maxDifficulty; i++)
+                    runningPowerLevelTotals[i] = 0f;
+
                 for (int turnNumber = 0; turnNumber < encounter.turns.Count; turnNumber++)
                 {
                     P03Plugin.Log.LogDebug($"Generating turn {turnNumber+1}");
                     var turn = encounter.turns[turnNumber];
                     export += $"<tr><td class=\"turnlabel\">Turn {turnNumber+1}</td>";
-                    for (int i = 0; i <= 6; i++)
+                    for (int i = encounter.minDifficulty; i <= encounter.maxDifficulty; i++)
                     {
                         P03Plugin.Log.LogDebug($"Generating difficulty {i}");
                         List<CardInfo> turnEncounterCards = new();
                         foreach (var cardBp in turn)
                         {
-                            P03Plugin.Log.LogDebug($"Generating cardBp card={cardBp.card}, replacement={cardBp.replacement} ({cardBp.difficultyReplace})");
+                            int modCount = cardBp.card != null && cardBp.card.mods != null ? cardBp.card.mods.Count : 0;
+                            string cardName = cardBp.card != null ? cardBp.card.name : "EMPTY";
+                            P03Plugin.Log.LogDebug($"Checking cardBp [{cardBp.minDifficulty}, {cardBp.maxDifficulty}] card={cardName} with {modCount} mods, replacement={cardBp.replacement} ({cardBp.difficultyReplace})");
 
                             if (cardBp.minDifficulty > i || cardBp.maxDifficulty < i)
                                 continue;
@@ -291,18 +347,22 @@ namespace Infiniscryption.P03KayceeRun.Cards
                                 P03Plugin.Log.LogDebug($"Adding card {currentCard.name} to turn");
                                 turnEncounterCards.Add(currentCard);
 
-                                if (!styleSet.Keys.Contains(GetRepr(currentCard)))
-                                    styleSet[GetRepr(currentCard)] = GetImageEmbedded(GetRepr(currentCard));
-
                                 if (!Generated(currentCard))
                                 {
                                     PlayableCard tempCard = CardSpawner.SpawnPlayableCard(currentCard);
                                     Vector3 newPositon = new Vector3(tempCard.gameObject.transform.localPosition.x + xOffset, tempCard.gameObject.transform.localPosition.y, tempCard.gameObject.transform.localPosition.z);
-                                    yield return new WaitForSeconds(0.2f);
+                                    yield return new WaitForSeconds(1.0f);
                                     yield return GenerateCard(tempCard, newPositon, screenshot, camera);
                                 }
+
+                                if (!styleSet.Keys.Contains(GetRepr(currentCard)))
+                                    styleSet[GetRepr(currentCard)] = GetImageEmbedded(GetRepr(currentCard));
                             }
                         }
+
+                        float turnPowerLevel = turnEncounterCards.Select(c => c.PowerLevel).Sum();
+                        runningPowerLevelTotals[i] += turnPowerLevel;
+                        //export += $"<td class=\"powerlevellabel\">{turnPowerLevel:#,0.00} ({runningPowerLevelTotals[i]:#,0.00})</td>";
 
                         // We kinda try to think about how we assign cards to slots; a little bit anyway
                         // I just want this to look visually appealing - the game's AI will reassign them during the game
@@ -373,6 +433,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 finalExport += "	white-space: nowrap;\n";
                 finalExport += "	background-color: #cccccc;\n";
                 finalExport += "}\n";
+                finalExport += "td.powerlevellabel {\n";
+                finalExport += "	font-family: Daggersquare, Consolas, \"Comic Sans\";\n";
+                finalExport += "	font-size: 9pt; \n";
+                finalExport += "	white-space: nowrap;\n";
+                finalExport += "	background-color: #cccccc;\n";
+                finalExport += "}\n";
                 finalExport += "div.levelspacer {\n";
                 finalExport += "	width: 45px;\n";
                 finalExport += "}\n";
@@ -400,6 +466,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
             inRender = false;
 
             yield break;
+        }
+
+        [HarmonyPatch(typeof(CardSpawner), nameof(CardSpawner.SpawnPlayableCard))]
+        [HarmonyPostfix]
+        private static void EnsureOverclocked(ref PlayableCard __result)
+        {
+            if (!inRender)
+                return; 
+
+            if (__result.Info != null && __result.Info.Mods != null && __result.Info.Mods.Any(m => m.fromOverclock))
+                __result.Anim.SetOverclocked(true);
         }
     }
 }

@@ -78,13 +78,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistWellIntro", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
             // Check to see if the player has the organic material
-            if (Part3SaveData.Data.items.Contains(GoobertHuh.ItemData.name, StringComparer.OrdinalIgnoreCase))
+            ItemSlot slot = ItemsManager.Instance.Slots.FirstOrDefault(s => s.Item != null && s.Item.name.Equals(GoobertHuh.ItemData.name, StringComparison.OrdinalIgnoreCase));
+            if (slot != null)
             {
                 ViewManager.Instance.SwitchToView(View.ConsumablesOnly, false, true);
                 yield return new WaitForSeconds(0.5f);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistOrganicSuccess", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistOrganicFear", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
-                ItemSlot slot = ItemsManager.Instance.Slots.First(s => s.Item != null && s.Item.name.Equals(GoobertHuh.ItemData.name));
                 slot.Item.PlayExitAnimation();
                 yield return new WaitForSeconds(1f);
                 ItemsManager.Instance.RemoveItemFromSaveData(GoobertHuh.ItemData.name);
