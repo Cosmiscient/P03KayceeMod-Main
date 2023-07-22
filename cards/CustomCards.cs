@@ -93,6 +93,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 else if (compName.Equals("bolthound"))
                     __result.baseHealth = 3;
 
+                else if (compName.Equals("energyroller"))
+                    __result.abilities = new () { ExpensiveActivatedRandomPowerEnergy.AbilityID };
+
                 else if (compName.Equals("amoebot"))
                     __result.energyCost = 3;
 
@@ -243,14 +246,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 Console.WriteLine(cardData);
             }
 
-        }
-
-        [HarmonyPatch(typeof(ActivatedRandomPowerEnergy), nameof(ActivatedRandomPowerEnergy.EnergyCost), MethodType.Getter)]
-        [HarmonyPostfix]
-        private static void MoreExpensiveOnAscension(ref int __result)
-        {
-            if (SaveFile.IsAscension)
-                __result = 3;
         }
 
         [HarmonyPatch(typeof(Ouroboros), nameof(Ouroboros.OnDie))]
@@ -582,7 +577,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         ab.Info.powerLevel += 2;
 
                     if (ab.Id == Ability.ActivatedRandomPowerEnergy && P03AscensionSaveData.IsP03Run)
-                        ab.Info.rulebookDescription = ab.Info.rulebookDescription.Replace("1", "3");
+                        ab.Info.metaCategories = new ();
 
                     if (ab.Id == Ability.DrawCopy && P03AscensionSaveData.IsP03Run)
                         ab.Info.canStack = true;
