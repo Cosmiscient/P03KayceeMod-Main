@@ -154,6 +154,7 @@ While the full credits will play in-game when you win for the first time, I have
 3.0.4
 - All encounters have been reworked again.
 - We are now capturing metrics every time you lose a battle. Those metrics are: name of encounter, turn you lost, and difficulty level. All metrics are captured anonymously.
+- The Gamblobot sigil has updated art and rulebook text.
 - Copypasta has new art.
 - Copypasta and Angelbot can now be used by opponents.
 - \[redacted\] should no longer throw an error when trying to remove \[redacted\]
