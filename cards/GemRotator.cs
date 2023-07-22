@@ -48,13 +48,22 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (this.Card.InHand)
             {
 			    yield return base.Card.FlipInHand(new Action(this.AddMod));
-                yield return new WaitForSeconds(0.3f);
+                yield return new WaitForSeconds(0.1f);
             }
             else
             {
                 base.Card.SetFaceDown(true, false);
                 yield return new WaitForSeconds(0.3f);
                 this.AddMod();
+
+                // How about a buffer
+                yield return new WaitForEndOfFrame();
+
+                // Make sure the gems actually update in the resources manager.
+                ResourcesManager manager = ResourcesManager.Instance;
+                if (manager != null)
+                    manager.ForceGemsUpdate();
+
                 base.Card.SetFaceDown(false, false);
                 yield return new WaitForSeconds(0.3f);
             }
@@ -89,11 +98,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
             
             base.Card.AddTemporaryMod(mod);
-
-            // Make sure the gems actually update in the resources manager.
-            ResourcesManager manager = ResourcesManager.Instance;
-            if (manager != null)
-                manager.ForceGemsUpdate();
 		}
 
         public override bool RespondsToUpkeep(bool playerUpkeep) => playerUpkeep;

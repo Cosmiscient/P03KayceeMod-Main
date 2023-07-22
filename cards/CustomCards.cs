@@ -575,6 +575,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     if (allP3Abs.Contains(ab.Id))
                         ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook);
 
+                    if (P03AscensionSaveData.IsP03Run && (ab.Id == Ability.GainGemBlue || ab.Id == Ability.GainGemOrange || ab.Id == Ability.GainGemGreen))
+                        ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Modular);
+
                     if (ab.Id == Ability.CellBuffSelf || ab.Id == Ability.CellTriStrike)
                         ab.Info.powerLevel += 2;
 

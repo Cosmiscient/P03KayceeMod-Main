@@ -45,7 +45,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(TakeDamageSigil.AbilityID);
 
             // Robot Ram
-            CardManager.New(EXP_2_PREFIX, "RobotRam", "R4M", 2, 2)
+            CardManager.New(EXP_2_PREFIX, "RobotRam", "R4M", 2, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ram.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Nature)

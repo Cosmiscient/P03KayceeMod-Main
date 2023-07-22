@@ -24,8 +24,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (!__instance.SFX.Any(ac => ac.name.Equals(clipName, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     AudioClip expl = SoundManager.LoadAudioClip(P03Plugin.PluginGuid, $"{clipName}.wav");
-                    expl.name = clipName;
-                    __instance.SFX.Add(expl);
+                    if (expl != null)
+                    {
+                        expl.name = clipName;
+                        __instance.SFX.Add(expl);
+                    }
                 }
             }
         }

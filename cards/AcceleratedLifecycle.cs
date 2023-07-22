@@ -47,54 +47,61 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private int OpponentRecyclePriority(CardSlot slot)
         {
-            if (!slot.Card)
-                return 0;
-
-            if (slot.Card == this.Card)
-                return 0;
-            
-            if (slot.Card.AllAbilities().Any(ab => AbilityManager.AllAbilities.AbilityByID(ab).AbilityBehavior.IsSubclassOf(typeof(Latch))))
+            try
             {
-                if (slot.Card.HasAbility(LatchDeathLatch.AbilityID))
-                    return 20;
+                if (!slot.Card)
+                    return 0;
 
-                if (slot.Card.HasAbility(Ability.LatchBrittle))
-                    return 15;
-
-                return 10;
-            }
-
-            if (slot.Card.HasAbility(Ability.ExplodeOnDeath))
-            {
-                // If the bomb is adjacent to the angel, no
-                int powerLevelCount = 0;
-                foreach (CardSlot adj in BoardManager.Instance.GetAdjacentSlots(slot))
+                if (slot.Card == this.Card)
+                    return 0;
+                
+                if (slot.Card.AllAbilities().Any(ab => AbilityManager.AllAbilities.AbilityByID(ab).AbilityBehavior.IsSubclassOf(typeof(Latch))))
                 {
-                    if (adj == this.Card.slot)
-                        return 0;
+                    if (slot.Card.HasAbility(LatchDeathLatch.AbilityID))
+                        return 20;
 
-                    if (adj.Card != null)
-                        powerLevelCount -= adj.Card.PowerLevel;
+                    if (slot.Card.HasAbility(Ability.LatchBrittle))
+                        return 15;
+
+                    return 10;
                 }
 
-                CardSlot op = slot.Card.OpposingSlot();
-                if (op.Card != null)
-                    powerLevelCount += op.Card.PowerLevel;
+                if (slot.Card.HasAbility(Ability.ExplodeOnDeath))
+                {
+                    // If the bomb is adjacent to the angel, no
+                    int powerLevelCount = 0;
+                    foreach (CardSlot adj in BoardManager.Instance.GetAdjacentSlots(slot))
+                    {
+                        if (adj == this.Card.slot)
+                            return 0;
 
-                return powerLevelCount;
+                        if (adj.Card != null)
+                            powerLevelCount -= adj.Card.PowerLevel;
+                    }
+
+                    CardSlot op = slot.Card.OpposingSlot();
+                    if (op.Card != null)
+                        powerLevelCount += op.Card.PowerLevel;
+
+                    return powerLevelCount;
+                }
+
+                return 0;
             }
-
-            return 0;
+            catch
+            {
+                return 0;
+            }
         }
 
         public override IEnumerator OnUpkeep(bool playerUpkeep)
         {
-            if (playerUpkeep)
+            if (playerUpkeep && !this.Card.OpponentCard)
             {
                 ActivatedThisTurn = false;
                 yield break;
             }
-            else
+            else if (!playerUpkeep && this.Card.OpponentCard)
             {
                 // If we have a latch card, we want to kill it:
                 List<CardSlot> possibles = BoardManager.Instance.OpponentSlotsCopy;
