@@ -15,6 +15,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public static bool ShouldOverrideCardDisplayer { get; private set; }
 
+        [HarmonyPatch(typeof(MenuController), nameof(MenuController.TransitionToAscensionMenu))]
+        [HarmonyPrefix]
+        private static void EnsureOverrideDisplayerResets() => ShouldOverrideCardDisplayer = false;
+
         public AscensionRecycleCardSequence()
         {
             this.cardArray = SpecialNodeHandler.Instance.recycleCardSequencer.cardArray;

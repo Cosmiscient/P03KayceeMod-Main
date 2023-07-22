@@ -6,8 +6,9 @@ using System.Linq;
 using System;
 using Infiniscryption.P03KayceeRun.Sequences;
 using Infiniscryption.P03KayceeRun.Helpers;
-using UnityEngine.Events;
+using InscryptionAPI.Encounters;
 using Infiniscryption.P03KayceeRun.Quests;
+using Infiniscryption.P03KayceeRun.Encounters;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -372,7 +373,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             nodeData.nodeType = HoloMapSpecialNode.NodeDataType.CardBattle;
             nodeData.specialEncounterId = MoveHoloMapAreaNode.DAMAGE_RACE_SEQUENCER_NAME;
             nodeData.Data = null;
-            nodeData.blueprintData = (new EncounterBlueprintHelper(DataHelper.GetResourceString("damage_race", "dat"))).AsBlueprint();
+            nodeData.blueprintData = EncounterHelper.GeneratorDamageRace;
             nodeData.opponentTerrain = new CardInfo[] {
                 CardLoader.GetCardByName(CustomCards.GENERATOR_TOWER),
                 CardLoader.GetCardByName(CustomCards.FIREWALL_NORMAL),
@@ -705,32 +706,25 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return retval;
         }
 
-        private static EncounterBlueprintData GetBlueprintForRegion(Zone regionId, int color, int encounterIndex)
+        private static EncounterBlueprintData GetBlueprintForRegion(Zone regionId, int color, int encounterIndex, bool useDefaultRegionSelection)
         {
             string encounterName = default(string);
-            if (color == 1) // The first encounter pulls from neutral
+            RunBasedHoloMap.Zone regionZone = color == 1 || !useDefaultRegionSelection ? RunBasedHoloMap.Zone.Neutral : regionId;
+
+            // This is just a failsafe. The index should always match UNLESS you uninstalled a mod partway through a run.
+            // I could just let this fail because you're a dumbass, but I'm a nice guy.
+            if (encounterIndex == -1 || encounterIndex >= REGION_DATA[regionZone].encounters.Length)
             {
-                if (encounterIndex == -1)
-                {
-                    string[] encounters = REGION_DATA[Zone.Neutral].encounters;
-                    encounterName = encounters[UnityEngine.Random.Range(0, encounters.Length)];
-                }
-                else
-                {
-                    encounterName = REGION_DATA[Zone.Neutral].encounters[encounterIndex];
-                }
+                string[] encounters = REGION_DATA[regionZone].encounters;
+                encounterName = encounters[UnityEngine.Random.Range(0, encounters.Length)];
             }
             else
             {
-                if (encounterIndex == -1)
-                    encounterName = REGION_DATA[regionId].encounters[color - 2];
-                else
-                    encounterName = REGION_DATA[regionId].encounters[encounterIndex];
+                encounterName = REGION_DATA[regionZone].encounters[encounterIndex];
             }
 
-            // Use EncounterBlueprintHelper to get our custom representation of the encounter blueprint
-            // and convert that to a blueprint the game understands
-            return (new EncounterBlueprintHelper(DataHelper.GetResourceString(encounterName, "dat"))).AsBlueprint();
+            // Get the encounter from the manager based on the name
+            return EncounterManager.AllEncountersCopy.First(bp => bp.name == encounterName);
         }
 
         private static GameObject BuildMapAreaPrefab(Zone regionId, HoloMapBlueprint bp)
@@ -800,7 +794,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     GameObject arrowToReplace = area.transform.Find($"Nodes/MoveArea_{DIR_LOOKUP[bp.specialDirection]}").gameObject;
                     arrowToReplace.GetComponent<HoloMapNode>().nodeType = HoloMapNode.NodeDataType.MoveAreaTrade;
                 }
-                if (bp.specialDirectionType == HoloMapBlueprint.BATTLE)
+                if (bp.specialDirectionType == HoloMapBlueprint.BATTLE || bp.specialDirectionType == HoloMapBlueprint.NEUTRAL_BATTLE)
                 {
                     P03Plugin.Log.LogInfo($"Finding arrow to destroy");
                     GameObject arrowToReplace = area.transform.Find($"Nodes/MoveArea_{DIR_LOOKUP[bp.specialDirection]}").gameObject;
@@ -812,7 +806,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     newArrow.name = $"MoveArea_{DIR_LOOKUP[bp.specialDirection]}";
                     HoloMapNode node = newArrow.GetComponent<HoloMapNode>();
                     Traverse nodeTraverse = Traverse.Create(node);
-                    nodeTraverse.Field("blueprintData").SetValue(GetBlueprintForRegion(regionId, bp.color, bp.encounterIndex));
+                    nodeTraverse.Field("blueprintData").SetValue(GetBlueprintForRegion(regionId, bp.color, bp.encounterIndex, bp.specialDirectionType == HoloMapBlueprint.BATTLE));
                     nodeTraverse.Field("encounterDifficulty").SetValue(bp.encounterDifficulty);
                     if ((bp.specialTerrain & HoloMapBlueprint.FULL_BRIDGE) != 0)
                         nodeTraverse.Field("bridgeBattle").SetValue(true);

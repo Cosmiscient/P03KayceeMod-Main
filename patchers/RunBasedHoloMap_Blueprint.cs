@@ -603,6 +603,114 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return retval;
         }
 
+        private static Tuple<int, int> BuildTurboRoom(List<HoloMapBlueprint> map, int seed, Tuple<int, int> loc, HoloMapNode.NodeDataType? reward = null, int? encounterIndex = null, int specialType = HoloMapBlueprint.BATTLE)
+        {
+            int x = loc.Item1;
+            int y = loc.Item2;
+            HoloMapBlueprint bp = new(seed) { x = x, y = y };
+
+            // The only guaranteed direction is backwards
+            if (x == 0 && y != 2)
+                bp.arrowDirections |= y % 2 == 0 ? NORTH : EAST;
+            else if (x == 5)
+                bp.arrowDirections |= y % 2 == 0 ? WEST : NORTH;
+            else if (y % 2 == 0 && !(x == 0 && y == 2))
+                bp.arrowDirections |= WEST;
+            else if (y % 2 == 1)
+                bp.arrowDirections |= EAST;
+
+            if (encounterIndex.HasValue)
+            {
+                if (y % 2 == 0)
+                    bp.specialDirection = x == 5 ? SOUTH : EAST;
+                if (y % 2 == 1)
+                    bp.specialDirection = x == 0 ? SOUTH : WEST;
+                bp.arrowDirections |= bp.specialDirection;
+                bp.specialDirectionType = specialType;
+                bp.encounterIndex = encounterIndex.Value;
+                bp.encounterDifficulty = EventManagement.EncounterDifficulty;
+
+                if (encounterIndex.Value == 0 && !(x == 0 && y == 2))
+                    bp.specialTerrain |= HoloMapBlueprint.FAST_TRAVEL_NODE;
+            }
+            if (reward.HasValue)
+            {
+                bp.upgrade = reward.Value;
+            }
+
+            if (!reward.HasValue && !encounterIndex.HasValue)
+                bp.specialTerrain |= HoloMapBlueprint.FAST_TRAVEL_NODE;
+
+            map.Add(bp);
+            P03Plugin.Log.LogDebug($"Turbo Room [{x}, {y}] DIR={bp.arrowDirections} S={bp.specialDirection}");
+
+            if (x == 0)
+            {
+                if (y % 2 == 0)
+                    return new (x + 1, y);
+                else
+                    return new (x, y + 1);
+            }
+
+            if (x == 5)
+            {
+                if (y % 2 == 0)
+                    return new (x, y + 1);
+                else
+                    return new (x - 1, y);
+            }
+
+            if (y % 2 == 0)
+                return new (x + 1, y);
+            
+            return new (x - 1, y);
+        }
+
+        // Builds one room for each regional encounter, then gives you fast travel to leave
+        // then gives you one room for each neutral encounter, then gives you fast travel to leave again
+        private static List<HoloMapBlueprint> BuildTurboBlueprint(int seed, Zone zone)
+        {
+            List<HoloMapBlueprint> retval = new ();
+
+            Tuple<int, int> roomPos = new(0, 2);
+            RegionGeneratorData data = REGION_DATA[zone];
+            List<HoloMapNode.NodeDataType> rewards = new () {
+                HoloMapNode.NodeDataType.CardChoice,
+                HoloMapNode.NodeDataType.AddCardAbility,
+                data.defaultReward,
+                HoloMapNode.NodeDataType.AddCardAbility,
+                data.defaultReward
+            };
+            for (int i = 0; i < data.encounters.Length; i++)
+            {
+                HoloMapNode.NodeDataType? reward = null;
+                if (rewards.Count > 0)
+                {
+                    reward = rewards[0];
+                    rewards.RemoveAt(0);
+                }
+
+                roomPos = BuildTurboRoom(retval, seed++, roomPos, reward, i);
+            }
+
+            RegionGeneratorData neutral = REGION_DATA[Zone.Neutral];
+            for (int i = 0; i < neutral.encounters.Length; i++)
+            {
+                HoloMapNode.NodeDataType? reward = null;
+                if (rewards.Count > 0)
+                {
+                    reward = rewards[0];
+                    rewards.RemoveAt(0);
+                }
+
+                roomPos = BuildTurboRoom(retval, seed++, roomPos, reward, i);
+            }
+
+            BuildTurboRoom(retval, seed++, roomPos);        
+
+            return retval;
+        }
+
         private static List<HoloMapBlueprint> BuildMycologistBlueprint(int seed)
         {
             List<HoloMapBlueprint> retval = new();
@@ -784,6 +892,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (region == Zone.Mycologist)
                 return BuildMycologistBlueprint(seed);
+
+            if (P03Plugin.Instance.TurboMode)
+                return BuildTurboBlueprint(seed, region);
 
             UnityEngine.Random.InitState(seed);
 

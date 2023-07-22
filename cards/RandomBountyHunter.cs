@@ -31,7 +31,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 		{
             LastTriggeredCard = base.Card;
 			base.Card.Status.hiddenAbilities.Add(this.Ability);
-			CardModificationInfo mod = BountyHunterGenerator.GenerateMod(Math.Min(TurnManager.Instance.TurnNumber, 3), 10);
+			CardModificationInfo mod = BountyHunterGenerator.GenerateMod(Math.Min(TurnManager.Instance.TurnNumber, 3), 20);
 			base.Card.AddTemporaryMod(mod);
             base.Card.RenderCard();
 		}

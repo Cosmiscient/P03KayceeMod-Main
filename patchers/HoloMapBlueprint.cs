@@ -6,21 +6,22 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 {
     public class HoloMapBlueprint
     {
-        public static readonly int NO_SPECIAL = 0;
-        public static readonly int LEFT_BRIDGE = 1;
-        public static readonly int RIGHT_BRIDGE = 2;
-        public static readonly int FULL_BRIDGE = 4;
-        public static readonly int NORTH_BUILDING_ENTRANCE = 8;
-        public static readonly int NORTH_GATEWAY = 16;
-        public static readonly int NORTH_CABIN = 32;
-        public static readonly int LOWER_TOWER_ROOM = 64;
-        public static readonly int LANDMARKER = 128;
-        public static readonly int BROKEN_GENERATOR = 256;
-        public static readonly int MYCOLOGIST_WELL = 512;
-        public static readonly int FAST_TRAVEL_NODE = 1024;
+        public const int NO_SPECIAL = 0;
+        public const int LEFT_BRIDGE = 1;
+        public const int RIGHT_BRIDGE = 2;
+        public const int FULL_BRIDGE = 4;
+        public const int NORTH_BUILDING_ENTRANCE = 8;
+        public const int NORTH_GATEWAY = 16;
+        public const int NORTH_CABIN = 32;
+        public const int LOWER_TOWER_ROOM = 64;
+        public const int LANDMARKER = 128;
+        public const int BROKEN_GENERATOR = 256;
+        public const int MYCOLOGIST_WELL = 512;
+        public const int FAST_TRAVEL_NODE = 1024;
 
-        public static readonly int BATTLE = 0;
-        public static readonly int TRADE = 1;
+        public const int BATTLE = 0;
+        public const int TRADE = 1;
+        public const int NEUTRAL_BATTLE = 2;
 
         public int randomSeed;
         public int x;

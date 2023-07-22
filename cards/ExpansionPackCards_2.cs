@@ -32,7 +32,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Scrap Bot
             CardManager.New(EXP_2_PREFIX, "ScrapBot", "Scrap Bot", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_scrapbot.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 3)
+                .SetCost(energyCost: 4)
                 .SetNeutralP03Card()
                 .AddAbilities(ScrapDumper.AbilityID);
 
@@ -45,7 +45,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(TakeDamageSigil.AbilityID);
 
             // Robot Ram
-            CardManager.New(EXP_2_PREFIX, "RobotRam", "R4M", 1, 2)
+            CardManager.New(EXP_2_PREFIX, "RobotRam", "R4M", 2, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ram.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Nature)

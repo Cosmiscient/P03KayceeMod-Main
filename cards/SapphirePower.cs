@@ -24,7 +24,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookDescription = "[creature] reduces the cost of all cards in your hand by 1.";
             info.canStack = false;
             info.powerLevel = 5;
-            info.opponentUsable = true;
+            info.opponentUsable = false;
             info.passive = false;
             info.hasColorOverride = true;
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.GainGemBlue).Info.colorOverride;

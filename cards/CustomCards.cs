@@ -51,6 +51,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public const string FAILED_EXPERIMENT_BASE = "P03KCM_FAILED_EXPERIMENT";
         public const string MYCO_HEALING_CONDUIT = "P03KCM_MYCO_HEALING_CONDUIT";
         public const string MYCO_CONSTRUCT_BASE = "P03KCM_MYCO_CONSTRUCT_BASE";
+        
+        public const string TURBO_MINECART = "P03KCM_TURBO_MINECART";
 
         public const string TURBO_VESSEL = "P03KCM_TURBO_VESSEL";
         public const string TURBO_VESSEL_BLUEGEM = "P03KCM_TURBO_VESSEL_BLUEGEM";
@@ -90,6 +92,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 else if (compName.Equals("bolthound"))
                     __result.baseHealth = 3;
+
+                else if (compName.Equals("energyroller"))
+                    __result.abilities = new () { ExpensiveActivatedRandomPowerEnergy.AbilityID };
 
                 else if (compName.Equals("amoebot"))
                     __result.energyCost = 3;
@@ -241,14 +246,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 Console.WriteLine(cardData);
             }
 
-        }
-
-        [HarmonyPatch(typeof(ActivatedRandomPowerEnergy), nameof(ActivatedRandomPowerEnergy.EnergyCost), MethodType.Getter)]
-        [HarmonyPostfix]
-        private static void MoreExpensiveOnAscension(ref int __result)
-        {
-            if (SaveFile.IsAscension)
-                __result = 3;
         }
 
         [HarmonyPatch(typeof(Ouroboros), nameof(Ouroboros.OnDie))]
@@ -556,7 +553,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_skeleton_lord.png", typeof(CustomCards).Assembly))
                 .AddAbilities(BrittleGainsUndying.AbilityID, DrawBrittle.AbilityID)
                 .SetCost(energyCost: 2)
-                .SetRare()
+                .AddAppearances(RareDiscCardAppearance.ID)
                 .temple = CardTemple.Tech;
 
             // CardManager.New(P03Plugin.CardPrefx, MYCO_CONSTRUCT_PONTOON, "PONTOON", 0, 1)
@@ -573,11 +570,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     if (allP3Abs.Contains(ab.Id))
                         ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook);
 
+                    if (P03AscensionSaveData.IsP03Run && (ab.Id == Ability.GainGemBlue || ab.Id == Ability.GainGemOrange || ab.Id == Ability.GainGemGreen))
+                        ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Modular);
+
                     if (ab.Id == Ability.CellBuffSelf || ab.Id == Ability.CellTriStrike)
                         ab.Info.powerLevel += 2;
 
                     if (ab.Id == Ability.ActivatedRandomPowerEnergy && P03AscensionSaveData.IsP03Run)
-                        ab.Info.rulebookDescription = ab.Info.rulebookDescription.Replace("1", "3");
+                        ab.Info.metaCategories = new ();
 
                     if (ab.Id == Ability.DrawCopy && P03AscensionSaveData.IsP03Run)
                         ab.Info.canStack = true;

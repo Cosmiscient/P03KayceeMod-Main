@@ -20,7 +20,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookDescription = "Whenever you play [creature], it becomes a copy of another creature of your choosing. If this creature has other abilities, those abilities will be transferred (up to the maximum of 4).";
             info.canStack = false;
             info.powerLevel = 2;
-            info.opponentUsable = false;
+            info.opponentUsable = true;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
@@ -42,14 +42,46 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return possibles;
         }
 
-        public override bool RespondsToPlayFromHand() => GetCopyableSlots().Count > 0;
+        public override bool RespondsToPlayFromHand() => !this.Card.OpponentCard && GetCopyableSlots().Count > 0;
+
+        public override bool RespondsToResolveOnBoard() => this.Card.OpponentCard;
+
+        public override IEnumerator OnResolveOnBoard()
+        {
+            List<CardSlot> possibles = GetCopyableSlots();
+            if (possibles.Count == 0)
+                yield break;
+
+            possibles.Sort((a, b) => b.Card.PowerLevel - a.Card.PowerLevel);
+
+            View currentview = ViewManager.Instance.CurrentView;
+            ViewManager.Instance.SwitchToView(View.Board, false, false);
+            yield return new WaitForSeconds(0.2f);
+
+            yield return base.PreSuccessfulTriggerSequence();
+            yield return this.Card.TransformIntoCard(CloneForRubberstamp(possibles[0].Card.Info));
+            yield return new WaitForSeconds(0.8f);
+
+            ViewManager.Instance.SwitchToView(currentview, false, false);
+        }
+
+        private CardInfo CloneForRubberstamp(CardInfo target)
+        {
+            CardInfo clone = CardLoader.Clone(target);
+            foreach (CardModificationInfo mod in target.mods)
+                clone.mods.Add(mod.Clone() as CardModificationInfo);
+
+            foreach (CardModificationInfo mod in this.Card.Info.mods)
+                if (clone.Abilities.Count < 4)
+                    clone.mods.Add(mod.Clone() as CardModificationInfo);
+
+            return clone;
+        }
 
         public override IEnumerator OnPlayFromHand()
         {
             ViewManager.Instance.SwitchToView(View.Board, false, false);
             yield return new WaitForSeconds(0.2f);
-
-            
 
             CardSlot target = null;
             List<CardSlot> copyableSlots = GetCopyableSlots();
@@ -72,13 +104,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 CursorType.Target
             );
 
-            CardInfo clone = CardLoader.Clone(target.Card.Info);
-            foreach (CardModificationInfo mod in target.Card.Info.mods)
-                clone.mods.Add(mod.Clone() as CardModificationInfo);
-
-            foreach (CardModificationInfo mod in this.Card.Info.mods)
-                if (clone.Abilities.Count < 4)
-                    clone.mods.Add(mod.Clone() as CardModificationInfo);
+            CardInfo clone = CloneForRubberstamp(target.Card.Info);
 
             this.Card.SetInfo(clone);
             yield return new WaitForSeconds(0.2f);

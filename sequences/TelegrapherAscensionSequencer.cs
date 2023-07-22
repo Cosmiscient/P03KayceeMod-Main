@@ -95,7 +95,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                         slot.Card.ExitBoard(0.4f, Vector3.zero);
 
                 // Spawn a random ape
-                int statPoints = Mathf.RoundToInt((float)Mathf.Min(6, (apesCreated + 3) * 2.5f));
+                int statPoints = Mathf.RoundToInt((float)Mathf.Min(8, (apesCreated + 3) * 2.5f));
                 CardInfo ape = GenerateStupidAssApe(statPoints);
                 apesCreated += 1;
 

@@ -1,4 +1,5 @@
 using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Patchers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
@@ -12,6 +13,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             this.gameObject.transform.Find("Anim/BottomParticles").gameObject.SetActive(false);
             foreach (string piece in COMPONENTS)
             {
+                // In turbo mode, you automatically beat the boss just by seeing this guy! Sweet!
+                if (P03Plugin.Instance.TurboMode)
+                {
+                    StoryEventsData.SetEventCompleted(StoryFlag);
+                    EventManagement.AddCompletedZone(StoryFlag);
+                }
+
                 GameObject obj = this.gameObject.transform.Find($"Anim/{piece}").gameObject;
                 obj.SetActive(StoryEventsData.EventCompleted(StoryFlag));
                 AutoRotate rotator = obj.GetComponent<AutoRotate>();

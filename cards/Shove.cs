@@ -21,15 +21,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
 		private bool didPush;
 		protected bool movingLeft;
 
-		public override int EnergyCost => 2;
+		public override int EnergyCost => 1;
 
         static Shove()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Bulldoze";
-            info.rulebookDescription = "Pay 2 Energy to cause this card to move in the direction inscribed in the sigil. Creatures that are in the way will be pushed in the same direction..";
+            info.rulebookDescription = "Pay 1 Energy to cause this card to move in the direction inscribed in the sigil. Creatures that are in the way will be pushed in the same direction..";
             info.canStack = false;
-            info.powerLevel = 3;
+            info.powerLevel = 2;
             info.opponentUsable = false;
             info.activated = true;
             info.passive = false;

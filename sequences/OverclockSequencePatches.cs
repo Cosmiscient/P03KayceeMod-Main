@@ -13,6 +13,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     {
         private static bool ChangeOverclockAbility = false;
 
+        [HarmonyPatch(typeof(MenuController), nameof(MenuController.TransitionToAscensionMenu))]
+        [HarmonyPrefix]
+        private static void EnsureOverclockResets() => ChangeOverclockAbility = false;
+
         [HarmonyPatch(typeof(OverclockCardSequencer), nameof(OverclockCardSequencer.GetValidCards))]
         [HarmonyPostfix]
         public static void CannotDoubleSkeleclock(ref List<CardInfo> __result)

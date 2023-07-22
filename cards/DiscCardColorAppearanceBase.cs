@@ -5,6 +5,7 @@ using InscryptionAPI.Helpers;
 using System.Collections.Generic;
 using HarmonyLib;
 using System.Collections;
+using Infiniscryption.P03KayceeRun.Helpers;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -222,45 +223,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         }
 
-        private static Dictionary<string, Dictionary<string, bool>> _rendererCache = new ();
-
-        private static bool CardComponentHasTargetTexture(Renderer renderer, string textureName)
-        {
-            if (!_rendererCache.ContainsKey(renderer.gameObject.name))
-                _rendererCache[renderer.gameObject.name] = new ();
-
-            if (_rendererCache[renderer.gameObject.name].ContainsKey(textureName))
-                return _rendererCache[renderer.gameObject.name][textureName];
-
-            Texture tex = renderer.material.GetTexture(textureName);
-            if (tex != null && tex.name.ToLowerInvariant().Contains("floppydisc"))
-                _rendererCache[renderer.gameObject.name][textureName] = true;
-            else
-                _rendererCache[renderer.gameObject.name][textureName] = false;
-
-            return _rendererCache[renderer.gameObject.name][textureName];
-        }
-
         public override void ApplyAppearance()
         {
             // Swap out textures as appropriate
-            foreach (Renderer renderer in this.gameObject.GetComponentsInChildren<Renderer>())
-            {
-                try
-                {
-                    if (currentTexture == null)
-                        CalcRareTexture();
+            if (currentTexture == null)
+                CalcRareTexture();
 
-                    foreach (string textureName in TextureNames)
-                        if (CardComponentHasTargetTexture(renderer, textureName))
-                            foreach (var material in renderer.materials)
-                                material.SetTexture(textureName, currentTexture);
-                }
-                catch
-                {
-                    // Do nothing
-                }
-            }
+            MaterialHelper.RetextureAllRenderers(this.gameObject, currentTexture, originalTextureKey: "floppydisc");
 
             // Apply the color to the border
             if (this.BorderColor.HasValue)

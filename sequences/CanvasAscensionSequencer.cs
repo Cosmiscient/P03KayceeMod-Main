@@ -8,6 +8,7 @@ using DiskCardGame.CompositeRules;
 using HarmonyLib;
 using System;
 using Infiniscryption.P03KayceeRun.Helpers;
+using Infiniscryption.P03KayceeRun.Encounters;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
 {
@@ -36,7 +37,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public override EncounterData BuildCustomEncounter(CardBattleNodeData nodeData)
         {
             EncounterData encounterData = base.BuildCustomEncounter(nodeData);
-            EncounterBlueprintData blueprint = (new EncounterBlueprintHelper(DataHelper.GetResourceString("CanvasBossPX", "dat"))).AsBlueprint();
+            EncounterBlueprintData blueprint = EncounterHelper.CanvasBossPX;
             P03Plugin.Log.LogInfo($"Building Canvas turn plan with difficulty {EventManagement.EncounterDifficulty}");
             encounterData.opponentTurnPlan = EncounterBuilder.BuildOpponentTurnPlan(blueprint, EventManagement.EncounterDifficulty, false);
             foreach (List<CardInfo> turn in encounterData.opponentTurnPlan)
