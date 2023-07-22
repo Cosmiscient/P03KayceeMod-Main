@@ -70,11 +70,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetRegionalP03Card(CardTemple.Nature)
                 .AddAbilities(TreeStrafe.AbilityID);
 
-            CardManager.New(EXP_1_PREFIX, "SeedBot_Gems", "SeedBot", 0, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_seedbot.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetCost(bonesCost: 6, bloodCost: 2, gemsCost: new() { GemType.Green}, energyCost: 2)
-                .AddAbilities(TreeStrafe.AbilityID)
-                .temple = CardTemple.Tech;
+            // CardManager.New(EXP_1_PREFIX, "SeedBot_Gems", "SeedBot", 0, 1)
+            //     .SetPortrait(TextureHelper.GetImageAsTexture("portrait_seedbot.png", typeof(ExpansionPackCards_1).Assembly))
+            //     .SetCost(bonesCost: 6, bloodCost: 2, gemsCost: new() { GemType.Green}, energyCost: 2)
+            //     .AddAbilities(TreeStrafe.AbilityID)
+            //     .temple = CardTemple.Tech;
 
 
             // Rampager Latcher
