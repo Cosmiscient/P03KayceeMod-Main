@@ -46,13 +46,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator DoStrafe(CardSlot toLeft, CardSlot toRight)
 		{
-            CardSlot destination = null;
-
-            CardSlot firstOpen = FirstEmptySlot(this.movingLeft);
-            if (firstOpen == null)
+            CardSlot destination = FirstEmptySlot(this.movingLeft);
+            if (destination == null)
             {
                 this.movingLeft = !this.movingLeft;
-                firstOpen = FirstEmptySlot(this.movingLeft);
+                destination = FirstEmptySlot(this.movingLeft);
             }
 			yield return this.MoveToSlot(destination, destination != null);
 			if (destination != null)
