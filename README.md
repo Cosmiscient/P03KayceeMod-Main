@@ -157,7 +157,8 @@ While the full credits will play in-game when you win for the first time, I have
 - Fixed issue with the Seed Sprinter ability
 - Fixed a defect with the map generator that sometimes caused battles to be set to difficulty level zero regardless of map location.
 - Statistics count the correct number of bosses
-- Forced trade nodes will no longer be generated in the initial quadrant of a map
+- Trade nodes will no longer be generated in the initial quadrant of a map
+- Fixed defect with Phase Through
 
 3.1.2
 - All encounters have been reworked again.
