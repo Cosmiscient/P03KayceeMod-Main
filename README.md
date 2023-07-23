@@ -159,6 +159,7 @@ While the full credits will play in-game when you win for the first time, I have
 - Statistics count the correct number of bosses
 - Trade nodes will no longer be generated in the initial quadrant of a map
 - Fixed defect with Phase Through
+- Full of Oil sigil now flips on the opponent side
 
 3.1.2
 - All encounters have been reworked again.
