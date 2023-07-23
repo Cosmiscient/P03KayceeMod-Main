@@ -11,6 +11,7 @@ using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Quests;
 using System.Net.Http;
+using Infiniscryption.P03KayceeRun.Encounters;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -23,6 +24,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static void SendFailedEncounterEvent(EncounterBlueprintData blueprint, int difficulty, int turnNumber)
         {
+            if (!EncounterExtensions.P03OnlyEncounters.Contains(blueprint.name))
+                return;
+
             // This sends encounter failure data to a Google Form
             Dictionary<string, string> values = new ()
             {
