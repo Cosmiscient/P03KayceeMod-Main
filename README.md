@@ -151,7 +151,15 @@ While the full credits will play in-game when you win for the first time, I have
 <details>
 <summary>Changelog</summary>
 
-3.0.4
+3.1.3
+- Fixed softlock in phase 2 of G0lly
+- Properly fixed the issue with the transformer event
+- Fixed issue with the Seed Sprinter ability
+- Fixed a defect with the map generator that sometimes caused battles to be set to difficulty level zero regardless of map location.
+- Statistics count the correct number of bosses
+- Forced trade nodes will no longer be generated in the initial quadrant of a map
+
+3.1.2
 - All encounters have been reworked again.
 - We are now capturing metrics every time you lose a battle. Those metrics are: name of encounter, turn you lost, and difficulty level. All metrics are captured anonymously.
 - The Gamblobot sigil has updated art and rulebook text.

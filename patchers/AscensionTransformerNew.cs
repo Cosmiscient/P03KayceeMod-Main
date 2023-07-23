@@ -176,7 +176,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPatch(typeof(CreateTransformerSequencer))]
         [HarmonyPatch("UpdateModChoices")]
         [HarmonyPrefix]
-        private static void PrefixUpdateModChoices(CreateTransformerSequencer __instance, CardInfo selectedCard)
+        private static bool PrefixUpdateModChoices(CreateTransformerSequencer __instance, CardInfo selectedCard)
         {
             //If P03 KCM is active, randomize the beast node
             if (SaveFile.IsAscension)
@@ -212,8 +212,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 __instance.currentValidModChoices = new List<CardModificationInfo>(__instance.beastMods);
                 __instance.currentValidModChoices.RemoveAll(m => m.energyCostAdjustment + selectedCard.EnergyCost > 6);
 
-                return;
+                return false;
             }
+
+            return true;
         }
 
         [HarmonyPatch(typeof(DeckInfo), nameof(DeckInfo.ModifyCard))]

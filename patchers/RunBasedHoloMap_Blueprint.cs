@@ -294,7 +294,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // So again: the room must have a 'special' arrow, the type must be enemy, and there can be only two arrows
             // One would be the special direction, and one would be the path backward
-            List<HoloMapBlueprint> possibles = nodes.Where(bp => bp.specialDirection != 0 && bp.specialDirectionType == 0 && bp.NumberOfArrows == 2).ToList();
+            List<HoloMapBlueprint> possibles = nodes.Where(bp => bp.color != 1 && bp.specialDirection != 0 && bp.specialDirectionType == HoloMapBlueprint.BATTLE && bp.NumberOfArrows == 2).ToList();
 
             if (possibles.Count == 0)
                 return false; // This means we couldn't find a spot for the
@@ -354,6 +354,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         brandNewNode.arrowDirections = brandNewNode.DirTo(newBattleNode);
                         newBattleNode.arrowDirections |= newBattleNode.DirTo(brandNewNode);
                         newBattleNode.specialDirection = newBattleNode.DirTo(brandNewNode);
+
+                        // Make the new battle have the right info
+                        newBattleNode.encounterDifficulty = oldBattleNode.encounterDifficulty;
+                        newBattleNode.encounterIndex = oldBattleNode.encounterIndex;
 
                         // Make the old battle node into trade node
                         oldBattleNode.specialDirectionType = HoloMapBlueprint.TRADE;
@@ -925,8 +929,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // Make sure that every room sees at least one other room 
             FixDisconnectedRooms(bpBlueprint, retval);
 
-            // Make sure that the tech zone adds the conduit to the side deck
-            //if (region == TECH)
             startSpace.upgrade = TradeChipsNodeData.TradeChipsForCards;
             
             // Do some special sequencing

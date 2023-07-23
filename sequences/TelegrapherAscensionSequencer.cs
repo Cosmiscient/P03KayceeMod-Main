@@ -29,14 +29,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         private static CardInfo GenerateStupidAssApe(int statPoints)
         {
             // Sort out the name
-            if (apeAdjectivesRemaining.Count == 0)
+            if (apeAdjectivesRemaining == null || apeAdjectivesRemaining.Count == 0)
                 apeAdjectivesRemaining = new (APE_ADJECTIVES);
 
             CardInfo cardByName = CardLoader.GetCardByName(CustomCards.NFT);
 
             int seed = P03AscensionSaveData.RandomSeed + 100 * TurnManager.Instance.TurnNumber;
 
-            int apeNameIndex = SeededRandom.Range(0, APE_ADJECTIVES.Length, seed++);
+            int apeNameIndex = SeededRandom.Range(0, apeAdjectivesRemaining.Count, seed++);
             string apeName = apeAdjectivesRemaining[apeNameIndex];
             apeAdjectivesRemaining.RemoveAt(apeNameIndex);
             
