@@ -54,6 +54,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     if (extraAbilities.abilities.Contains(NewPermaDeath.AbilityID))
                         extraAbilities.abilities.Remove(NewPermaDeath.AbilityID);
 
+                    if (extraAbilities.abilities.Contains(TreeStrafe.AbilityID))
+                        extraAbilities.abilities.Remove(TreeStrafe.AbilityID);
+
                     treeCard.mods.Add(extraAbilities);
                 }
 

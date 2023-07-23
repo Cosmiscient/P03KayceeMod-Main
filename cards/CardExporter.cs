@@ -304,9 +304,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     { "queue", GetImageEmbedded("queue") }
                 };
 
+                Dictionary<int, List<List<CardInfo>>> turnPlanDictionary = new();
                 Dictionary<int, float> runningPowerLevelTotals = new ();
                 for (int i = encounter.minDifficulty; i <= encounter.maxDifficulty; i++)
+                {
                     runningPowerLevelTotals[i] = 0f;
+                    turnPlanDictionary[i] = DiskCardGame.EncounterBuilder.BuildOpponentTurnPlan(encounter, i);
+                }
 
                 for (int turnNumber = 0; turnNumber < encounter.turns.Count; turnNumber++)
                 {
@@ -316,49 +320,62 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     for (int i = encounter.minDifficulty; i <= encounter.maxDifficulty; i++)
                     {
                         P03Plugin.Log.LogDebug($"Generating difficulty {i}");
-                        List<CardInfo> turnEncounterCards = new();
-                        foreach (var cardBp in turn)
+                        List<CardInfo> turnEncounterCards = turnPlanDictionary[i].Count > turnNumber ? turnPlanDictionary[i][turnNumber] : new();
+                        foreach (var currentCard in turnEncounterCards)
                         {
-                            int modCount = cardBp.card != null && cardBp.card.mods != null ? cardBp.card.mods.Count : 0;
-                            string cardName = cardBp.card != null ? cardBp.card.name : "EMPTY";
-                            P03Plugin.Log.LogDebug($"Checking cardBp [{cardBp.minDifficulty}, {cardBp.maxDifficulty}] card={cardName} with {modCount} mods, replacement={cardBp.replacement} ({cardBp.difficultyReplace})");
-
-                            if (cardBp.minDifficulty > i || cardBp.maxDifficulty < i)
-                                continue;
-
-                            CardInfo currentCard = cardBp.card;
-                            if (cardBp.difficultyReplace && cardBp.difficultyReq <= i)
-                                currentCard = cardBp.replacement;
-
-                            if (currentCard != null &&
-                                encounter.turnMods != null &&
-                                encounter.turnMods.Any(
-                                    tm => tm.applyAtDifficulty <= i &&
-                                          tm.overlockCards &&
-                                          tm.turn == turnNumber
-                                ))
+                            if (!Generated(currentCard))
                             {
-                                currentCard.mods ??= new();
-                                currentCard.mods.Add(new (1, 0) { fromOverclock = true });
+                                PlayableCard tempCard = CardSpawner.SpawnPlayableCard(currentCard);
+                                Vector3 newPositon = new Vector3(tempCard.gameObject.transform.localPosition.x + xOffset, tempCard.gameObject.transform.localPosition.y, tempCard.gameObject.transform.localPosition.z);
+                                yield return new WaitForSeconds(1.0f);
+                                yield return GenerateCard(tempCard, newPositon, screenshot, camera);
                             }
-                            
-                            if (currentCard != null)
-                            {
-                                P03Plugin.Log.LogDebug($"Adding card {currentCard.name} to turn");
-                                turnEncounterCards.Add(currentCard);
 
-                                if (!Generated(currentCard))
-                                {
-                                    PlayableCard tempCard = CardSpawner.SpawnPlayableCard(currentCard);
-                                    Vector3 newPositon = new Vector3(tempCard.gameObject.transform.localPosition.x + xOffset, tempCard.gameObject.transform.localPosition.y, tempCard.gameObject.transform.localPosition.z);
-                                    yield return new WaitForSeconds(1.0f);
-                                    yield return GenerateCard(tempCard, newPositon, screenshot, camera);
-                                }
-
-                                if (!styleSet.Keys.Contains(GetRepr(currentCard)))
-                                    styleSet[GetRepr(currentCard)] = GetImageEmbedded(GetRepr(currentCard));
-                            }
+                            if (!styleSet.Keys.Contains(GetRepr(currentCard)))
+                                styleSet[GetRepr(currentCard)] = GetImageEmbedded(GetRepr(currentCard));
                         }
+                        // foreach (var cardBp in turn)
+                        // {
+                        //     int modCount = cardBp.card != null && cardBp.card.mods != null ? cardBp.card.mods.Count : 0;
+                        //     string cardName = cardBp.card != null ? cardBp.card.name : "EMPTY";
+                        //     P03Plugin.Log.LogDebug($"Checking cardBp [{cardBp.minDifficulty}, {cardBp.maxDifficulty}] card={cardName} with {modCount} mods, replacement={cardBp.replacement} ({cardBp.difficultyReplace})");
+
+                        //     if (cardBp.minDifficulty > i || cardBp.maxDifficulty < i)
+                        //         continue;
+
+                        //     CardInfo currentCard = cardBp.card;
+                        //     if (cardBp.difficultyReplace && cardBp.difficultyReq <= i)
+                        //         currentCard = cardBp.replacement;
+
+                        //     if (currentCard != null &&
+                        //         encounter.turnMods != null &&
+                        //         encounter.turnMods.Any(
+                        //             tm => tm.applyAtDifficulty <= i &&
+                        //                   tm.overlockCards &&
+                        //                   tm.turn == turnNumber
+                        //         ))
+                        //     {
+                        //         currentCard.mods ??= new();
+                        //         currentCard.mods.Add(new (1, 0) { fromOverclock = true });
+                        //     }
+                            
+                        //     if (currentCard != null)
+                        //     {
+                        //         P03Plugin.Log.LogDebug($"Adding card {currentCard.name} to turn");
+                        //         turnEncounterCards.Add(currentCard);
+
+                        //         if (!Generated(currentCard))
+                        //         {
+                        //             PlayableCard tempCard = CardSpawner.SpawnPlayableCard(currentCard);
+                        //             Vector3 newPositon = new Vector3(tempCard.gameObject.transform.localPosition.x + xOffset, tempCard.gameObject.transform.localPosition.y, tempCard.gameObject.transform.localPosition.z);
+                        //             yield return new WaitForSeconds(1.0f);
+                        //             yield return GenerateCard(tempCard, newPositon, screenshot, camera);
+                        //         }
+
+                        //         if (!styleSet.Keys.Contains(GetRepr(currentCard)))
+                        //             styleSet[GetRepr(currentCard)] = GetImageEmbedded(GetRepr(currentCard));
+                        //     }
+                        // }
 
                         float turnPowerLevel = turnEncounterCards.Select(c => c.PowerLevel).Sum();
                         runningPowerLevelTotals[i] += turnPowerLevel;

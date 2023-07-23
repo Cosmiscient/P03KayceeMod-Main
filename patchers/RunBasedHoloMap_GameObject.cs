@@ -345,11 +345,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             third.transform.localPosition = new(0f, -0.01f, -0.3f);
             nodeData.nodeRenderers.Add(third.GetComponent<Renderer>());
 
-            // Add an 'active only if' flag
-            // ActiveIfStoryFlag flag = retval.AddComponent<ActiveIfStoryFlag>();
-            // Traverse.Create(flag).Field("storyFlag").SetValue(EventManagement.HAS_DRAFT_TOKEN);
-            // Traverse.Create(flag).Field("activeIfConditionMet").SetValue(true);
-
             retval.SetActive(false);
 
             P03Plugin.Log.LogInfo($"Build draft node {retval}");
@@ -493,18 +488,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (shopNode != null)
             {
                 // This is a shop node but we want it to behave differently than the in-game shop nodes
-                Traverse shopTraverse = Traverse.Create(shopNode);
-                shopTraverse.Field("cost").SetValue(EventManagement.UpgradePrice(dataType));
-                shopTraverse.Field("repeatable").SetValue(false);
-                shopTraverse.Field("increasingCost").SetValue(false);
+                
+                shopNode.cost = EventManagement.UpgradePrice(dataType);
+                shopNode.repeatable = false;
+                shopNode.increasingCost = false;
             }
 
             if (dataType == HoloMapSpecialNode.NodeDataType.GainCurrency)
             {
                 newNode.transform.localPosition = new Vector3(x, newNode.transform.localPosition.y, z);
                 HoloMapGainCurrencyNode nodeData = newNode.GetComponent<HoloMapGainCurrencyNode>();
-                Traverse nodeTraverse = Traverse.Create(nodeData);
-                nodeTraverse.Field("amount").SetValue(UnityEngine.Random.Range(EventManagement.CurrencyGainRange.Item1, EventManagement.CurrencyGainRange.Item2));
+                nodeData.amount = UnityEngine.Random.Range(EventManagement.CurrencyGainRange.Item1, EventManagement.CurrencyGainRange.Item2);
             }
             else
             {
@@ -537,7 +531,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             //newSequencer.enabled = true;
 
             HoloMapArea area = retval.GetComponent<HoloMapArea>();
-            //Traverse.Create(area).Field("specialSequencer").SetValue(newSequencer);
             area.firstEnterDialogueId = "P03AscensionPreIntro";
 
             P03Plugin.Log.LogInfo("Building boss node");
@@ -610,9 +603,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             GameObject southArrow = room.transform.Find($"Nodes/MoveArea_{direction}").gameObject;
             MoveHoloMapAreaNode southNode = southArrow.GetComponent<MoveHoloMapAreaNode>();
-            Traverse southTraverse = Traverse.Create(southNode);
-            southTraverse.Field("nodeType").SetValue(HoloMapNode.NodeDataType.MoveArea);
-            southTraverse.Field("blueprintData").SetValue(null);
+            
+            southNode.nodeType = HoloMapNode.NodeDataType.MoveArea;
+            southNode.blueprintData = null;
         }
 
         private static void BuildFastTravelNode(Transform sceneryParent, Transform nodesParent, float x, float z, Zone currentZone)
@@ -685,7 +678,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // No dialogue
             HoloMapArea area = retval.GetComponent<HoloMapArea>();
-            Traverse.Create(area).Field("firstEnterDialogueId").SetValue(null);
+            area.firstEnterDialogueId = null;
 
             // Kill the shop node:
             retval.transform.Find("Nodes/MoveArea_E").gameObject.SetActive(false);
@@ -805,22 +798,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     GameObject newArrow = GameObject.Instantiate(ArrowPrefabs[bp.specialDirection | ENEMY], nodes.transform);
                     newArrow.name = $"MoveArea_{DIR_LOOKUP[bp.specialDirection]}";
                     HoloMapNode node = newArrow.GetComponent<HoloMapNode>();
-                    Traverse nodeTraverse = Traverse.Create(node);
-                    nodeTraverse.Field("blueprintData").SetValue(GetBlueprintForRegion(regionId, bp.color, bp.encounterIndex, bp.specialDirectionType == HoloMapBlueprint.BATTLE));
-                    nodeTraverse.Field("encounterDifficulty").SetValue(bp.encounterDifficulty);
-                    if ((bp.specialTerrain & HoloMapBlueprint.FULL_BRIDGE) != 0)
-                        nodeTraverse.Field("bridgeBattle").SetValue(true);
+                    
+                    node.blueprintData = GetBlueprintForRegion(regionId, bp.color, bp.encounterIndex, bp.specialDirectionType == HoloMapBlueprint.BATTLE);
+                    node.encounterDifficulty = bp.encounterDifficulty;
+                    node.bridgeBattle = ((bp.specialTerrain & HoloMapBlueprint.FULL_BRIDGE) != 0);
                     
                     if (bp.battleTerrainIndex > 0 && (bp.specialTerrain & HoloMapBlueprint.FULL_BRIDGE) == 0)
                     {
                         string[] terrain = genData.terrain[bp.battleTerrainIndex - 1];
-                        nodeTraverse.Field("playerTerrain").SetValue(terrain.Take(5).Select(s => s == default(string) ? null : CardLoader.GetCardByName(s)).ToArray());
-                        nodeTraverse.Field("opponentTerrain").SetValue(terrain.Skip(5).Select(s => s == default(string) ? null : CardLoader.GetCardByName(s)).ToArray());
+                        node.playerTerrain = terrain.Take(5).Select(s => s == default(string) ? null : CardLoader.GetCardByName(s)).ToArray();
+                        node.opponentTerrain = terrain.Skip(5).Select(s => s == default(string) ? null : CardLoader.GetCardByName(s)).ToArray();
                     }
                     else
                     {
-                        nodeTraverse.Field("playerTerrain").SetValue(new CardInfo[5]);
-                        nodeTraverse.Field("opponentTerrain").SetValue(new CardInfo[5]);
+                        node.playerTerrain = new CardInfo[5];
+                        node.opponentTerrain = new CardInfo[5];
                     }
                 }
             }

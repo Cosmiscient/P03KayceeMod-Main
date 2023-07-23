@@ -107,6 +107,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield return TextDisplayer.Instance.PlayDialogueEvent("LeshyFinalBossDialogue", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield return new WaitForSeconds(0.5f);
                 StoryEventsData.SetEventCompleted(EventManagement.HAS_DEFEATED_P03);
+                AscensionStatsData.TryIncrementStat(AscensionStat.Type.BossesDefeated);
                 EventManagement.FinishAscension(true);
             }
             else
