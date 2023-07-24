@@ -16,7 +16,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly string P03FinalBossAI = AIManager.Add(P03Plugin.PluginGuid, "P03FinalBossAI", typeof(P03FinalBossOpponentAI)).Id;
         public static Opponent.Type P03FinalBossOpponent { get; private set; }
 
-        private static int bossMoneyReward = 10;
+        private const int BOSS_MONEY_REWARD = 5;
 
         //10 was way too quiet... 0.15?
         public static float bossMusicVolume = 0.15f;
@@ -268,8 +268,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     yield return TextDisplayer.Instance.PlayDialogueEvent(finalDialogue, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                     yield return new WaitForSeconds(0.4f);
 
-                    yield return P03AnimationController.Instance.ShowChangeCurrency(bossMoneyReward, true);
-                    Part3SaveData.Data.currency += bossMoneyReward;
+                    yield return P03AnimationController.Instance.ShowChangeCurrency(BOSS_MONEY_REWARD, true);
+                    Part3SaveData.Data.currency += BOSS_MONEY_REWARD;
 
                     yield return new WaitForSeconds(0.2f);
                     P03AnimationController.Instance.SwitchToFace(currentFace);

@@ -162,6 +162,7 @@ While the full credits will play in-game when you win for the first time, I have
 - Full of Oil sigil now flips on the opponent side
 - *Really* fixed \[redacted\] this time. At least, I hope so.
 - Added the Electric sigil to the rulebook.
+- Reduced coin reward for bosses from 10 to 5.
 
 3.1.2
 - All encounters have been reworked again.
