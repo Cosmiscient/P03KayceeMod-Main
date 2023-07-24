@@ -250,6 +250,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             frankenBot.SetEvolve(frankenBeast, 1);
             frankenBeast.SetEvolve(frankenBot, 1);
+            frankenBeast.temple = CardTemple.Tech;
+            frankenBeast.metaCategories = new();
 
             // Clock man
             CardManager.New(EXP_1_PREFIX, "Clockbot", "Mr:Clock", 0, 3)

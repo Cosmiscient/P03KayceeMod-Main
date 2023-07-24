@@ -78,7 +78,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistWellIntro", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
             // Check to see if the player has the organic material
-            ItemSlot slot = ItemsManager.Instance.Slots.FirstOrDefault(s => s.Item != null && s.Item.name.Equals(GoobertHuh.ItemData.name, StringComparison.OrdinalIgnoreCase));
+            ItemSlot slot = ItemsManager.Instance.Slots.FirstOrDefault(s => s.Item != null && s.Item.Data.name.Equals(GoobertHuh.ItemData.name, StringComparison.OrdinalIgnoreCase));
             if (slot != null)
             {
                 ViewManager.Instance.SwitchToView(View.ConsumablesOnly, false, true);
