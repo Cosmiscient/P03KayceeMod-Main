@@ -28,10 +28,29 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static AscensionChallenge TURBO_VESSELS { get; private set; }
         public static AscensionChallenge PAINTING_CHALLENGE { get; private set; }
 
-        public static bool turboVesselsUIPlayed = false;
-        public static bool LeapingSidedeckUIPlayed = false;
-        public static bool tradLivesUIPlayed = false;
-        public static bool expensiveRespawnUIPlayed = false;
+        internal static bool TurboVesselsUIPlayed
+        {
+            get { return ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "TurboVesselsUIPlayed"); }
+            set { ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "TurboVesselsUIPlayed", value); }
+        }
+
+        internal static bool LeapingSidedeckUIPlayed
+        {
+            get { return ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "LeapingSidedeckUIPlayed"); }
+            set { ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "LeapingSidedeckUIPlayed", value); }
+        }
+
+        internal static bool TradLivesUIPlayed
+        {
+            get { return ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "TradLivesUIPlayed"); }
+            set { ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "TradLivesUIPlayed", value); }
+        }
+
+        internal static bool ExpensiveRespawnUIPlayed
+        {
+            get { return ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "ExpensiveRespawnUIPlayed"); }
+            set { ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "ExpensiveRespawnUIPlayed", value); }
+        }
 
         private static CanvasBossOpponent CanvasBoss => Singleton<TurnManager>.Instance.Opponent as CanvasBossOpponent;
         private static CompositeRuleTriggerHandler rulesHandler;
@@ -425,193 +444,79 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
-        [HarmonyPatch(typeof(Part3DeckReviewSequencer), nameof(Part3DeckReviewSequencer.BuildSideDeck))]
-        [HarmonyPostfix]
-        private static void PostfixBuildSideDeck(Part3DeckReviewSequencer __instance)
-        {
-            // Access the variables from the original method using the __instance parameter
-            List<CardInfo> sideDeck = __instance.sideDeck;
-
-            // Clear the side deck
-            sideDeck.Clear();
-
-            // Modify the side deck building code as needed
-            for (int i = 0; i < Part3SaveData.Data.deckGemsDistribution[0]; i++)
-            {
-                sideDeck.Add(__instance.GetGemCard("EmptyVessel_GreenGem"));
-            }
-            for (int j = 0; j < Part3SaveData.Data.deckGemsDistribution[1]; j++)
-            {
-                sideDeck.Add(__instance.GetGemCard("EmptyVessel_OrangeGem"));
-            }
-            for (int k = 0; k < Part3SaveData.Data.deckGemsDistribution[2]; k++)
-            {
-                sideDeck.Add(__instance.GetGemCard("EmptyVessel_BlueGem"));
-            }
-
-            for (int i = 0; i < 10; i++)
-            {
-                sideDeck[i].RemoveAbilities(DoubleSprint.AbilityID);
-            }
-
-            if (SaveFile.IsAscension)
-            {
-
-
-                //If the turbo vessels challenge is enabled, turn the sidedeck into turbo vessels.
-                if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TURBO_VESSELS))
-                {
-                    for (int i = 0; i < 10; i++)
-                    {
-                        //Debug.Log("VESSELS MODIFIED");
-                        sideDeck[i].SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly));
-                        sideDeck[i].SetDisplayedName("Turbo Vessel");
-                        sideDeck[i].AddAbilities(DoubleSprint.AbilityID);
-                    }
-                }
-
-                //If the leapbot challenge is enabled, turn the sidedeck into leapbots.
-                if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.LEEPBOT_SIDEDECK))
-                {
-                    // Clear the side deck
-                    sideDeck.Clear();
-
-                    for (int i = 0; i < 10; i++)
-                    {
-                        sideDeck.Add(CardLoader.GetCardByName("LeapBot"));
-                    }
-                }
-
-                //If turbo vessels are enabled as well, set the text to turbo leapbots instead.
-                if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TURBO_VESSELS) && (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.LEEPBOT_SIDEDECK)))
-                {
-                    // Clear the side deck
-                    sideDeck.Clear();
-
-                    for (int i = 0; i < 10; i++)
-                    {
-                        sideDeck.Add(CardLoader.GetCardByName("P03KCM_TURBO_LEAPBOT"));
-                    }
-                }
-            }
-        }
-
-        //[HarmonyPatch(typeof(Part3DeckReviewSequencer), nameof(Part3DeckReviewSequencer.GetGemCard))]
-        //[HarmonyPostfix]
-        //private static void PostfixGetGemCard(string cardId, ref CardInfo __result)
-        //{
-        //    CardInfo cardByName = __result;
-
-        //    // Don't apply side deck abilities only if turbo vessels is on
-        //    if (!((SaveFile.IsAscension) && (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TURBO_VESSELS))))
-        //    {
-        //        ApplySideDeckAbilitiesToCard(cardByName);
-        //    }
-        //}
-
-        //private static void ApplySideDeckAbilitiesToCard(CardInfo cardInfo)
-        //{
-        //    CardModificationInfo cardModificationInfo = new CardModificationInfo();
-        //    cardModificationInfo.abilities.AddRange(Part3SaveData.Data.sideDeckAbilities);
-        //    cardModificationInfo.sideDeckMod = true;
-        //    cardInfo.Mods.Add(cardModificationInfo);
-        //}
-
-
-
-        [HarmonyPatch(typeof(Part3CardDrawPiles), nameof(Part3CardDrawPiles.CreateVesselDeck))]
-        [HarmonyPostfix]
-        private static List<CardInfo> CreateVesselDeck(List<CardInfo> originalList)
-        {
-            List<CardInfo> list = new List<CardInfo>();
-            for (int i = 0; i < 10; i++)
-            {
-                string text = "EmptyVessel";
-                if (StoryEventsData.EventCompleted(StoryEvent.GemsModuleFetched))
-                {
-                    text = ((i >= Part3SaveData.Data.deckGemsDistribution[0]) ? ((i >= Part3SaveData.Data.deckGemsDistribution[0] + Part3SaveData.Data.deckGemsDistribution[1]) ? "EmptyVessel_BlueGem" : "EmptyVessel_OrangeGem") : "EmptyVessel_GreenGem");
-                }
-
-                if (SaveFile.IsAscension)
-                {
-                    //If the leapbot challenge is enabled, turn the sidedeck into leapbots.
-                    if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.LEEPBOT_SIDEDECK))
-                    {
-                        text = "LeapBot";
-
-                        //If turbo vessels are enabled as well, set the text to turbo leapbots instead.
-                        if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TURBO_VESSELS))
-                        {
-                            text = "P03KCM_TURBO_LEAPBOT";
-                        }
-                    }
-                }
-
-                CardInfo cardByName = CardLoader.GetCardByName(text);
-                AddSideDeckAbilitiesWithoutMesh(cardByName);
-                list.Add(cardByName);
-            }
-            return list;
-        }
-
+        private static readonly Texture2D TURBO_SPRINTER_TEXTURE = TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(AscensionChallengeManagement).Assembly);
         [HarmonyPatch(typeof(Part3CardDrawPiles), nameof(Part3CardDrawPiles.AddModsToVessel))]
         [HarmonyPostfix]
-        private static void AddSideDeckAbilitiesWithoutMesh(CardInfo info)
+        private static void UpdateSidedeckMod(CardInfo info)
         {
-            if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.SubmergeSquirrels))
-            {
-                if (info != null && !info.HasAbility(Ability.Submerge))
-                {
-                    CardModificationInfo abMod = new(Ability.Submerge);
-                    abMod.sideDeckMod = true;
-                    info.mods.Add(abMod);
-                }
-            }
+            if (info == null)
+                return;
 
-            if ((info != null) && (SaveFile.IsAscension) && (!AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.LEEPBOT_SIDEDECK)))
-            {
-                foreach (Ability ab in info.Abilities)
-                {
-                    CardModificationInfo abMod = new(ab);
-                    abMod.sideDeckMod = true;
+            if (!AscensionSaveData.Data.ChallengeIsActive(TURBO_VESSELS))
+                return;
 
-                    //Add the conduit
-                    abMod.abilities.Add(Ability.ConduitNull);
+            if (!info.name.StartsWith("EmptyVessel"))
+                return;
 
-                    info.mods.Add(abMod);
-                }
-            }
-
-            //If turbo vessels are enabled but not leepbot sidedeck, change the side deck to be turbo vessels
-            if ((SaveFile.IsAscension) && (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TURBO_VESSELS)) && (!AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.LEEPBOT_SIDEDECK)))
-            {
-                if (info != null)
-                {
-                    //If one side deck card doesn't have double sprint sigil, play challenge activation
-                    //This method makes sure it only triggers once per run
-                    if (!(turboVesselsUIPlayed))
-                    {
-                        ChallengeActivationUI.Instance.ShowActivation(TURBO_VESSELS);
-                        turboVesselsUIPlayed = true;
-                    }
-
-                    CardModificationInfo abMod = new CardModificationInfo();
-                    abMod.sideDeckMod = true;
-                    abMod.nameReplacement = "Turbo Vessel";
-                    abMod.abilities.Add(DoubleSprint.AbilityID);
-                    info.SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly));
-                    info.mods.Add(abMod);
-                }
-            }
+            CardModificationInfo mod = new();
+            mod.abilities = new() { DoubleSprint.AbilityID };
+            mod.nameReplacement = "Turbo Vessel";
+            info.mods.Add(mod);
+            info.SetPortrait(TURBO_SPRINTER_TEXTURE);
         }
 
-        //Resets both variables so the challenge UI can activate again
-        public static void ResetChallengeActivationUI()
+        [HarmonyPatch(typeof(Part3CardDrawPiles), nameof(Part3CardDrawPiles.CreateVesselDeck))]
+        private static bool BuildPart3SideDeck(ref List<CardInfo> __result)
         {
-            turboVesselsUIPlayed = false;
-            LeapingSidedeckUIPlayed = false;
-            tradLivesUIPlayed = false;
-            expensiveRespawnUIPlayed = false;
+            // Start by getting all of the card names
+            IEnumerable<string> cardNames = Enumerable.Empty<string>();
+            if (AscensionSaveData.Data.ChallengeIsActive(LEEPBOT_SIDEDECK))
+            {
+                if (AscensionSaveData.Data.ChallengeIsActive(TURBO_VESSELS))
+                    cardNames.Concat(Enumerable.Repeat("P03KCM_TURBO_LEAPBOT", 10));
+                else
+                    cardNames.Concat(Enumerable.Repeat("LeapBot", 10));
+            }
+            else if (StoryEventsData.EventCompleted(StoryEvent.GemsModuleFetched))
+            {
+                foreach (GemType gem in Enum.GetValues(typeof(GemType))) // TODO: Consider support for custom gems?
+                {
+                    int gemCount = Part3SaveData.Data.deckGemsDistribution[(int)gem];
+                    string gemCardName = $"EmptyVessel_{gem}Gem";
+                    
+                    cardNames.Concat(Enumerable.Repeat(gemCardName, gemCount));
+                }
+            }
+            else
+            {
+                cardNames.Concat(Enumerable.Repeat("EmptyVessel", 10));
+            }
+
+            // And now get each card
+            __result = cardNames.Select(CardLoader.GetCardByName).ToList();
+            __result.ForEach(Part3CardDrawPiles.AddModsToVessel);
+            return false;
+        }
+
+        [HarmonyPatch(typeof(Part3DeckReviewSequencer), nameof(Part3DeckReviewSequencer.BuildSideDeck))]
+        [HarmonyPrefix]
+        private static bool ReplaceBuildSideDeck(Part3DeckReviewSequencer __instance)
+        {
+            __instance.sideDeck.Clear();
+            __instance.sideDeck.AddRange(Part3CardDrawPiles.CreateVesselDeck());
+            return false;
+        }
+
+        [HarmonyPatch(typeof(Part3DeckReviewSequencer), nameof(Part3DeckReviewSequencer.ApplySideDeckAbilitiesToCard))]
+        [HarmonyPrefix]
+        private static bool ReplaceAddSideDeck(CardInfo cardInfo)
+        {
+            string currentAbilityString = String.Join(", ", cardInfo.Abilities);
+            P03Plugin.Log.LogDebug($"Before applying side deck abilities card {cardInfo.DisplayedNameEnglish} has {currentAbilityString}");
+            Part3CardDrawPiles.AddModsToVessel(cardInfo);
+            currentAbilityString = String.Join(", ", cardInfo.Abilities);
+            P03Plugin.Log.LogDebug($"After applying side deck abilities card {cardInfo.DisplayedNameEnglish} has {currentAbilityString}");
+            return false;
         }
 
         private static bool CardShouldExplode(this PlayableCard card)

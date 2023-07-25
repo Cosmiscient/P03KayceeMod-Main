@@ -73,10 +73,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 //This method makes sure it only triggers once per run,
                 //And only when the respawn increase kicks in after the freebie
-                if (!(AscensionChallengeManagement.expensiveRespawnUIPlayed) && (respawnCostIncrease == respawnCostExpensive))
+                if (!(AscensionChallengeManagement.ExpensiveRespawnUIPlayed) && (respawnCostIncrease == respawnCostExpensive))
                 {
                     ChallengeActivationUI.Instance.ShowActivation(AscensionChallenge.LessLives);
-                    AscensionChallengeManagement.expensiveRespawnUIPlayed = true;
+                    AscensionChallengeManagement.ExpensiveRespawnUIPlayed = true;
                 }
 
                 respawnCostIncrease = respawnCostExpensive;
@@ -238,10 +238,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             //This method makes sure it only triggers once per run
-            if (!(AscensionChallengeManagement.tradLivesUIPlayed))
+            if (!(AscensionChallengeManagement.TradLivesUIPlayed))
             {
                 ChallengeActivationUI.Instance.ShowActivation(AscensionChallengeManagement.TRADITIONAL_LIVES);
-                AscensionChallengeManagement.tradLivesUIPlayed = true;
+                AscensionChallengeManagement.TradLivesUIPlayed = true;
             }
 
             Debug.Log("SHOW LIVES TRIGGERED");
