@@ -151,6 +151,9 @@ While the full credits will play in-game when you win for the first time, I have
 <details>
 <summary>Changelog</summary>
 
+3.1.4
+- Fixed compatibility with the Side Deck Selector mod
+
 3.1.3
 - Fixed softlock in phase 2 of G0lly
 - Properly fixed the issue with the transformer event

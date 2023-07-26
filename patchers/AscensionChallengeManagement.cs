@@ -466,16 +466,27 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         }
 
         [HarmonyPatch(typeof(Part3CardDrawPiles), nameof(Part3CardDrawPiles.CreateVesselDeck))]
+        [HarmonyPrefix]
+        [HarmonyPriority(Priority.High)]
         private static bool BuildPart3SideDeck(ref List<CardInfo> __result)
         {
+            if (SaveFile.IsAscension)
+            {
+                if (AscensionSaveData.Data.ChallengeIsActive(LEEPBOT_SIDEDECK))
+                    ChallengeActivationUI.Instance.ShowActivation(LEEPBOT_SIDEDECK);
+
+                if (AscensionSaveData.Data.ChallengeIsActive(TURBO_VESSELS))
+                    ChallengeActivationUI.Instance.ShowActivation(TURBO_VESSELS);
+            }
+
             // Start by getting all of the card names
             IEnumerable<string> cardNames = Enumerable.Empty<string>();
             if (AscensionSaveData.Data.ChallengeIsActive(LEEPBOT_SIDEDECK))
             {
                 if (AscensionSaveData.Data.ChallengeIsActive(TURBO_VESSELS))
-                    cardNames.Concat(Enumerable.Repeat("P03KCM_TURBO_LEAPBOT", 10));
+                    cardNames = cardNames.Concat(Enumerable.Repeat("P03KCM_TURBO_LEAPBOT", 10));
                 else
-                    cardNames.Concat(Enumerable.Repeat("LeapBot", 10));
+                    cardNames = cardNames.Concat(Enumerable.Repeat("LeapBot", 10));
             }
             else if (StoryEventsData.EventCompleted(StoryEvent.GemsModuleFetched))
             {
@@ -484,12 +495,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     int gemCount = Part3SaveData.Data.deckGemsDistribution[(int)gem];
                     string gemCardName = $"EmptyVessel_{gem}Gem";
                     
-                    cardNames.Concat(Enumerable.Repeat(gemCardName, gemCount));
+                    cardNames = cardNames.Concat(Enumerable.Repeat(gemCardName, gemCount));
                 }
             }
             else
             {
-                cardNames.Concat(Enumerable.Repeat("EmptyVessel", 10));
+                cardNames = cardNames.Concat(Enumerable.Repeat("EmptyVessel", 10));
             }
 
             // And now get each card
