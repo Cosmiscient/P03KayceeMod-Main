@@ -298,9 +298,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 EventManagement.NumberOfZoneEnemiesKilled = 0;
 
-                //Reset challenge activation UI variables
-                AscensionChallengeManagement.ResetChallengeActivationUI();
-
                 __instance.deck = new DeckInfo();
                 __instance.deck.Cards.Clear();
 
