@@ -72,6 +72,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.SwitchToView(View.Default);
             yield return quest.GrantAllUngrantedRewards();
 
+            if (quest.IsCompleted && quest.CurrentState.Status == QuestState.QuestStateStatus.Success)
+                AscensionStatsData.TryIncrementStat(StatManagement.QUESTS_COMPLETED);
+
             // Reset back to normal game state
             ViewManager.Instance.SwitchToView(View.MapDefault, false, false);
             yield return new WaitForSeconds(0.15f);

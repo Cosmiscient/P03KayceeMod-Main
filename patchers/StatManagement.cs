@@ -15,6 +15,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         internal static AscensionStat.Type ENERGY_SPENT = GuidManager.GetEnumValue<AscensionStat.Type>(P03Plugin.PluginGuid, "EnergySpent");
         internal static AscensionStat.Type HAMMER_USES = GuidManager.GetEnumValue<AscensionStat.Type>(P03Plugin.PluginGuid, "HammerUses");
         internal static AscensionStat.Type EXPERIMENTS_CREATED = GuidManager.GetEnumValue<AscensionStat.Type>(P03Plugin.PluginGuid, "ExperimentsCreated");
+        internal static AscensionStat.Type QUESTS_COMPLETED = GuidManager.GetEnumValue<AscensionStat.Type>(P03Plugin.PluginGuid, "QuestsCompletd");
 
         private static readonly Sprite WIN_BACKGROUND = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascension_endscreen_victory.png", typeof(StatManagement).Assembly));
         private static readonly Sprite LOSE_BACKGROUND = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascension_endscreen_defeat.png", typeof(StatManagement).Assembly));
@@ -41,6 +42,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (__instance.type == EXPERIMENTS_CREATED)
                 __result = "Abominations Created";
+
+            if (__instance.type == QUESTS_COMPLETED)
+                __result = "Quests Completed";
         }
 
         [HarmonyPatch(typeof(ResourcesManager), nameof(ResourcesManager.SpendEnergy))]
@@ -86,7 +90,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             float yGap = statScreen.statsText[1].gameObject.transform.parent.position.y - statScreen.statsText[0].gameObject.transform.parent.position.y;
 
             GameObject template = statScreen.statsText[0].gameObject.transform.parent.gameObject;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 4; i++)
             {
                 GameObject newItem = GameObject.Instantiate(template, template.transform.parent);
                 float newY = statScreen.statsText.Last().gameObject.transform.parent.localPosition.y + yGap;
@@ -102,6 +106,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (!statScreen.displayedStatTypes.Contains(EXPERIMENTS_CREATED))
                 statScreen.displayedStatTypes.Add(EXPERIMENTS_CREATED);
+
+            if (!statScreen.displayedStatTypes.Contains(QUESTS_COMPLETED))
+                statScreen.displayedStatTypes.Add(QUESTS_COMPLETED);
 
         }
 
