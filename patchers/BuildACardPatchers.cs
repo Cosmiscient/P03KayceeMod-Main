@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -20,7 +21,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             Ability.RandomAbility,
             Ability.ConduitFactory,
             Ability.ConduitSpawnGems,
-            Ability.DrawVesselOnHit
+            Ability.DrawVesselOnHit,
+            FullOfOil.AbilityID,
+            FullyLoaded.AbilityID,
+            Ability.GainGemBlue,
+            Ability.GainGemGreen,
+            Ability.GainGemOrange,
+            TreeStrafe.AbilityID,
+            Ability.ExplodeGems,
+            LatchRampage.AbilityID,
+            LatchSwapper.AbilityID,
+            Ability.GemDependant,
+            VesselHeart.AbilityID,
+            SnakeStrafe.AbilityID,
+            Ability.DrawCopy
         };
 
         [HarmonyPatch(typeof(BuildACardInfo), nameof(BuildACardInfo.GetValidAbilities))]
@@ -31,12 +45,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 __result.Remove(Ability.DrawCopyOnDeath);
                 __result.Remove(Ability.GainBattery);
-                foreach(Ability ab in AscensionAbilities)
+                foreach (Ability ab in AscensionAbilities)
                     if (!__result.Contains(ab))
                         __result.Add(ab);
 
                 __result = __result.Distinct().Randomize().Take(8).ToList();
-            }        
+            }
         }
 
         [HarmonyPatch(typeof(AbilityScreenButton), nameof(AbilityScreenButton.OnAddPressed))]

@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 using System.Reflection;
 using System;
 using UnityEngine;
+using System.Collections;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -73,6 +74,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     }
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(LifeManager), nameof(LifeManager.ShowDamageSequence))]
+        [HarmonyPostfix]
+        private static IEnumerator ShowDamageSequenceSkipIfLifeLossConditionMet(IEnumerator sequence)
+        {
+            if (TurnManager.Instance.LifeLossConditionsMet())
+                yield break;
+
+            yield return sequence;
         }
     }
 }

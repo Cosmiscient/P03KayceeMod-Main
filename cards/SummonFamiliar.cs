@@ -12,7 +12,7 @@ using UnityEngine;
 namespace Infiniscryption.P03KayceeRun.Cards
 {
     public class SummonFamiliar : AbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -22,7 +22,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Summon Familiar";
-            info.rulebookDescription = "When [creature] enters play, it summons a familiar bot in the slot adjacent to the right. If that slot is full, it will summon it in the slot to the left. If both are full, nothing will be summoned.";
+            info.rulebookDescription = "When [creature] is played, it plays a techbeast in an empty adjacent slot.";
             info.canStack = false;
             info.powerLevel = 3;
             info.opponentUsable = false;
@@ -71,13 +71,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo familiar = beastOptions[UnityEngine.Random.Range(0, beastOptions.Count)];
 
             if (familiar.HasAbility(Ability.Transformer))
-                familiar.mods.Add(new() { negateAbilities = new() { Ability.Transformer }});
+                familiar.mods.Add(new() { negateAbilities = new() { Ability.Transformer } });
 
             yield return BoardManager.Instance.CreateCardInSlot(familiar, target);
             yield return new WaitForSeconds(0.25f);
 
         }
 
-        
+
     }
 }

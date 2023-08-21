@@ -51,7 +51,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public const string FAILED_EXPERIMENT_BASE = "P03KCM_FAILED_EXPERIMENT";
         public const string MYCO_HEALING_CONDUIT = "P03KCM_MYCO_HEALING_CONDUIT";
         public const string MYCO_CONSTRUCT_BASE = "P03KCM_MYCO_CONSTRUCT_BASE";
-        
+
         public const string TURBO_MINECART = "P03KCM_TURBO_MINECART";
 
         public const string TURBO_VESSEL = "P03KCM_TURBO_VESSEL";
@@ -81,6 +81,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         __result.mods.Add(new() { gemify = true });
                 }
 
+                else if (compName.Equals("abovecurve"))
+                    __result.energyCost = 3;
+
                 else if (compName.Equals("automaton"))
                     __result.energyCost = 2;
 
@@ -94,7 +97,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     __result.baseHealth = 3;
 
                 else if (compName.Equals("energyroller"))
-                    __result.abilities = new () { ExpensiveActivatedRandomPowerEnergy.AbilityID };
+                    __result.abilities = new() { ExpensiveActivatedRandomPowerEnergy.AbilityID };
 
                 else if (compName.Equals("amoebot"))
                     __result.energyCost = 3;
@@ -137,12 +140,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
 
                 else if (compName.Equals("robomice"))
-                    __result.abilities = new () { Ability.DrawCopy, Ability.DrawCopy };
+                    __result.abilities = new() { Ability.DrawCopy, Ability.DrawCopy };
 
                 else if (compName.Equals("energyconduit"))
                 {
                     __result.baseAttack = 0;
-                    __result.abilities = new () { NewConduitEnergy.AbilityID };
+                    __result.abilities = new() { NewConduitEnergy.AbilityID };
                     __result.appearanceBehaviour = new(__result.appearanceBehaviour);
                     __result.appearanceBehaviour.Add(EnergyConduitAppearnace.ID);
                 }
@@ -325,7 +328,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // Update the librarian to display its size
             CardManager.BaseGameCards.CardByName("Librarian").AddAppearances(LibrarianSizeTitle.ID);
 
-            CardManager.ModifyCardList += delegate(List<CardInfo> cards)
+            CardManager.ModifyCardList += delegate (List<CardInfo> cards)
             {
                 if (P03AscensionSaveData.IsP03Run)
                 {
@@ -408,30 +411,35 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.ConduitNull)
+                    .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_BLUEGEM, "Turbo Vessel", 0, 2)
                     .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemBlue)
+                    .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_REDGEM, "Turbo Vessel", 0, 2)
                     .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemOrange)
+                    .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_GREENGEM, "Turbo Vessel", 0, 2)
                     .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemGreen)
+                    .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_LEAPBOT, "Turbo L33pb0t", 0, 2)
                     .SetPortrait(TextureHelper.GetImageAsTexture("portrait_TurboL33pBot.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(Ability.Reach, DoubleSprint.AbilityID)
+                    .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, FIREWALL, "Firewall", 0, 3)
@@ -541,7 +549,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             mycoHealConduit.temple = CardTemple.Tech;
 
             CardInfo goobertCardBase = CardManager.New(P03Plugin.CardPrefx, MYCO_CONSTRUCT_BASE, "Experiment #1", 0, 5);
-            goobertCardBase.SetCost(energyCost:6);
+            goobertCardBase.SetCost(energyCost: 6);
             goobertCardBase.SetPortrait(TextureHelper.GetImageAsTexture("portrait_goobot.png", typeof(CustomCards).Assembly));
             goobertCardBase.AddAppearances(GooDiscCardAppearance.ID);
             goobertCardBase.AddSpecialAbilities(GoobertCenterCardBehaviour.AbilityID);
@@ -561,7 +569,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             //     .temple = CardTemple.Tech;
 
             // This should patch the rulebook. Also fixes a little bit of the game balance
-            AbilityManager.ModifyAbilityList += delegate(List<AbilityManager.FullAbility> abilities)
+            AbilityManager.ModifyAbilityList += delegate (List<AbilityManager.FullAbility> abilities)
             {
                 List<Ability> allP3Abs = CardManager.AllCardsCopy.Where(c => c.temple == CardTemple.Tech).SelectMany(c => c.abilities).Distinct().ToList();
 
@@ -577,7 +585,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         ab.Info.powerLevel += 2;
 
                     if (ab.Id == Ability.ActivatedRandomPowerEnergy && P03AscensionSaveData.IsP03Run)
-                        ab.Info.metaCategories = new ();
+                        ab.Info.metaCategories = new();
 
                     if (ab.Id == Ability.DrawCopy && P03AscensionSaveData.IsP03Run)
                         ab.Info.canStack = true;
@@ -592,13 +600,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return abilities;
             };
 
-            CardManager.ModifyCardList += delegate(List<CardInfo> cards)
+            CardManager.ModifyCardList += delegate (List<CardInfo> cards)
             {
                 foreach (CardInfo ci in cards.Where(ci => ci.temple == CardTemple.Tech && ci.metaCategories.Contains(CardMetaCategory.Rare)))
                     ci.AddAppearances(RareDiscCardAppearance.ID);
 
                 return cards;
             };
+        }
+
+        public static CardInfo SetFlippedPortrait(this CardInfo info)
+        {
+            info.flipPortraitForStrafe = true;
+            return info;
         }
 
         public static CardInfo SetNeutralP03Card(this CardInfo info)
@@ -633,7 +647,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         public static CardInfo RemoveAbility(this CardInfo info, Ability ability)
         {
-            (info.mods ??= new()).Add(new() { negateAbilities = new() { ability }});
+            (info.mods ??= new()).Add(new() { negateAbilities = new() { ability } });
             return info;
         }
 
@@ -680,7 +694,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (modCode.StartsWith("!"))
             {
-                string[] pieces = modCode.Replace("!", "").Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                string[] pieces = modCode.Replace("!", "").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 retval.attackAdjustment = int.Parse(pieces[0]);
                 retval.healthAdjustment = int.Parse(pieces[1]);
                 return retval;

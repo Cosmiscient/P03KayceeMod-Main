@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Infiniscryption.P03KayceeRun.Cards
 {
     public class MirrorImage : AbilityBehaviour
-	{
+    {
         public static Ability AbilityID { get; private set; }
         public override Ability Ability => AbilityID;
 
@@ -38,7 +38,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             foreach (var slot in BoardManager.Instance.playerSlots.Concat(BoardManager.Instance.opponentSlots))
                 if (slot.Card != null)
                     possibles.Add(slot);
-            
+
             return possibles;
         }
 
@@ -68,8 +68,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private CardInfo CloneForRubberstamp(CardInfo target)
         {
             CardInfo clone = CardLoader.Clone(target);
-            foreach (CardModificationInfo mod in target.mods)
-                clone.mods.Add(mod.Clone() as CardModificationInfo);
+            if (clone.mods.Count == 0)
+                foreach (CardModificationInfo mod in target.mods)
+                    clone.mods.Add(mod.Clone() as CardModificationInfo);
 
             foreach (CardModificationInfo mod in this.Card.Info.mods)
                 if (clone.Abilities.Count < 4)
@@ -90,7 +91,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 yield return TextDisplayer.Instance.PlayDialogueEvent("MirrorImageFail", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield break;
-            }                
+            }
 
             yield return TextDisplayer.Instance.PlayDialogueEvent("MirrorImage", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
@@ -109,5 +110,5 @@ namespace Infiniscryption.P03KayceeRun.Cards
             this.Card.SetInfo(clone);
             yield return new WaitForSeconds(0.2f);
         }
-	}
+    }
 }
