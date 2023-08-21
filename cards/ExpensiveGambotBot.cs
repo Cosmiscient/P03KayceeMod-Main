@@ -20,10 +20,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = original.rulebookName;
             info.rulebookDescription = original.rulebookDescription.Replace("1 Energy", "3 Energy");
-            info.canStack = false;
+            info.canStack = original.canStack;
             info.powerLevel = original.powerLevel - 1;
+            info.activated = original.activated;
             info.opponentUsable = original.opponentUsable;
-            info.passive = false;
+            info.passive = original.passive;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
             ExpensiveActivatedRandomPowerEnergy.AbilityID = AbilityManager.Add(

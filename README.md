@@ -151,6 +151,20 @@ While the full credits will play in-game when you win for the first time, I have
 <details>
 <summary>Changelog</summary>
 
+3.1.5
+- Fixed a defect where Gamblobot's ability did not work
+- Fixed a defect where Copypasta would get double impact from Build-A-Card cards
+- Fixed a defect where L33pb0t side deck cards still had the null conduit ability
+- Fixed a defect where effects could cause the scales to change after they had already tipped all the way to one side.
+- Added a number of new abilities to the Build-A-Card pool
+- Curve Hopper now costs 3 energy
+- The text description for Summon Familiar is more concise
+- Turbo Vessels now flip their portraits when switching direction
+- Zip Bomb is now a neutral rare instead of an Undead rare
+- Box Bot now costs 1 energy instead of 2
+- The following battles have been turned down slightly: Bombs & Shields (Neutral), Bat Transformers (Foul Backwater), Gem Exploder (Gaudy Gem Land), Big Gem Ripper (Gaudy Gem Land), Spy Planes (Neutral)
+- The following battles have been turned up slightly: Snake Transformers (Foul Backwater), Conduit Protectors (Resplendent Bastion), Shield Latchers (Filthy Corpse World), Final Boss
+
 3.1.4
 - Fixed compatibility with the Side Deck Selector mod
 
