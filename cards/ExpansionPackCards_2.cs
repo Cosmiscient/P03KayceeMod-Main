@@ -25,7 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Box Bot
             CardManager.New(EXP_2_PREFIX, "BoxBot", "Box Bot", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_boxbot.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 2)
+                .SetCost(energyCost: 1)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(Ability.Brittle, VesselHeart.AbilityID);
 
@@ -41,7 +41,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_zipbomb.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 1)
                 .SetRare()
-                .SetRegionalP03Card(CardTemple.Undead)
+                .SetNeutralP03Card()
                 .AddAbilities(TakeDamageSigil.AbilityID);
 
             // Robot Ram

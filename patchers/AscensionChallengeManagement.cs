@@ -61,7 +61,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static string CompatibleChallengeList
         {
-            get 
+            get
             {
                 return ModdedSaveManager.SaveData.GetValue(P03Plugin.PluginGuid, "P03CompatibleChallenges");
             }
@@ -382,15 +382,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static void DynamicSwapSize(ChallengeIconGrid __instance)
         {
             if (!AscensionUnlockSchedule.ChallengeIsUnlockedForLevel(AscensionChallenge.FinalBoss, AscensionSaveData.Data.challengeLevel))
-			{
-				__instance.finalBossIcon.SetActive(false);
-				float xStart = -1.65f;
-				for (int i = 0; i < __instance.topRowIcons.Count; i++)
-					__instance.topRowIcons[i].localPosition = new Vector2(xStart + (float)i * 0.55f, __instance.topRowIcons[i].localPosition.y);
+            {
+                __instance.finalBossIcon.SetActive(false);
+                float xStart = -1.65f;
+                for (int i = 0; i < __instance.topRowIcons.Count; i++)
+                    __instance.topRowIcons[i].localPosition = new Vector2(xStart + (float)i * 0.55f, __instance.topRowIcons[i].localPosition.y);
 
-				for (int j = 0; j < __instance.bottomRowIcons.Count; j++)
-					__instance.bottomRowIcons[j].localPosition = new Vector2(xStart + (float)j * 0.55f, __instance.bottomRowIcons[j].localPosition.y);
-			}
+                for (int j = 0; j < __instance.bottomRowIcons.Count; j++)
+                    __instance.bottomRowIcons[j].localPosition = new Vector2(xStart + (float)j * 0.55f, __instance.bottomRowIcons[j].localPosition.y);
+            }
         }
 
 
@@ -418,7 +418,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (ValidChallenges.Contains(challenge))
                     return;
 
-               
+
                 if (fullChallenge.Flags == null)
                 {
                     __result = false;
@@ -452,17 +452,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (info == null)
                 return;
 
-            if (!AscensionSaveData.Data.ChallengeIsActive(TURBO_VESSELS))
-                return;
+            if (AscensionSaveData.Data.ChallengeIsActive(TURBO_VESSELS) && info.name.StartsWith("EmptyVessel"))
+            {
+                CardModificationInfo mod = new();
+                mod.abilities = new() { DoubleSprint.AbilityID };
+                mod.nameReplacement = "Turbo Vessel";
+                info.mods.Add(mod);
+                info.SetPortrait(TURBO_SPRINTER_TEXTURE);
+            }
 
-            if (!info.name.StartsWith("EmptyVessel"))
-                return;
-
-            CardModificationInfo mod = new();
-            mod.abilities = new() { DoubleSprint.AbilityID };
-            mod.nameReplacement = "Turbo Vessel";
-            info.mods.Add(mod);
-            info.SetPortrait(TURBO_SPRINTER_TEXTURE);
+            if (AscensionSaveData.Data.ChallengeIsActive(LEEPBOT_SIDEDECK))
+            {
+                CardModificationInfo antiMod = new();
+                antiMod.negateAbilities = new() { Ability.ConduitNull };
+                info.mods.Add(antiMod);
+            }
         }
 
         [HarmonyPatch(typeof(Part3CardDrawPiles), nameof(Part3CardDrawPiles.CreateVesselDeck))]
@@ -494,7 +498,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 {
                     int gemCount = Part3SaveData.Data.deckGemsDistribution[(int)gem];
                     string gemCardName = $"EmptyVessel_{gem}Gem";
-                    
+
                     cardNames = cardNames.Concat(Enumerable.Repeat(gemCardName, gemCount));
                 }
             }
@@ -646,7 +650,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 // We need to rotate the board
                 var anchorCard = board.playerSlots[0].card;
                 for (int i = 1; i < board.playerSlots.Count; i++)
-                    board.playerSlots[i-1].card = board.playerSlots[i].card;
+                    board.playerSlots[i - 1].card = board.playerSlots[i].card;
                 board.playerSlots[board.playerSlots.Count - 1].card = board.opponentSlots[board.opponentSlots.Count - 1].card;
                 for (int i = board.opponentSlots.Count - 1; i > 0; i--)
                     board.opponentSlots[i].card = board.opponentSlots[i - 1].card;
