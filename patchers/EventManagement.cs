@@ -34,22 +34,23 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly StoryEvent ALL_ZONE_ENEMIES_KILLED = NewStory("AllZoneEnemiesKilled");
         public static readonly StoryEvent ALL_BOSSES_KILLED = NewStory("AllBossesKilled");
         public static readonly StoryEvent HAS_DRAFT_TOKEN = NewStory("HasDraftToken");
-        public static readonly StoryEvent SAW_P03_INTRODUCTION = NewStory("SawP03Introduction", save:true);
+        public static readonly StoryEvent SAW_P03_INTRODUCTION = NewStory("SawP03Introduction", save: true);
         public static readonly StoryEvent SAW_P03_PAIDRESPAWN_EXPLAIN = NewStory("SawP03PaidRespawnExplain", save: true);
         public static readonly StoryEvent SAW_P03_BOSSPAIDRESPAWN_EXPLAIN = NewStory("SawP03PaidRespawnExplain", save: true);
-        public static readonly StoryEvent GOLLY_NFT = NewStory("GollyNFTIntro", save:true);
-        public static readonly StoryEvent DEFEATED_P03 = NewStory("DefeatedP03");    
-        public static readonly StoryEvent ONLY_ONE_BOSS_LIFE = NewStory("P03AscensionOneBossLife", save:true);    
-        public static readonly StoryEvent OVERCLOCK_CHANGES = NewStory("P03AscensionOverclock", save:true);   
-        public static readonly StoryEvent TRANSFORMER_CHANGES = NewStory("P03AscensionTransformer", save:true);   
-        public static readonly StoryEvent HAS_DEFEATED_P03 = NewStory("HasDefeatedP03", save:true);   
-        public static readonly StoryEvent USED_LIFE_ITEM = NewStory("HasUsedLifeItem", save:true);  
-        public static readonly StoryEvent SAW_NEW_ORB = NewStory("P03HammerOrb", save:true);  
+        public static readonly StoryEvent GOLLY_NFT = NewStory("GollyNFTIntro", save: true);
+        public static readonly StoryEvent DEFEATED_P03 = NewStory("DefeatedP03");
+        public static readonly StoryEvent ONLY_ONE_BOSS_LIFE = NewStory("P03AscensionOneBossLife", save: true);
+        public static readonly StoryEvent OVERCLOCK_CHANGES = NewStory("P03AscensionOverclock", save: true);
+        public static readonly StoryEvent TRANSFORMER_CHANGES = NewStory("P03AscensionTransformer", save: true);
+        public static readonly StoryEvent HAS_DEFEATED_P03 = NewStory("HasDefeatedP03", save: true);
+        public static readonly StoryEvent USED_LIFE_ITEM = NewStory("HasUsedLifeItem", save: true);
+        public static readonly StoryEvent SAW_NEW_ORB = NewStory("P03HammerOrb", save: true);
+        public static readonly StoryEvent GOT_STICKER_INTRODUCTION = NewStory("P03GotStickerIntro", save: true);
 
         public const string GAME_OVER = "GameOverZone";
 
-        internal static readonly StoryEvent SAW_BOUNTY_HUNTER_MEDAL = NewStory("SawBountyHunterMedal", run:true);
-        internal static readonly StoryEvent FLUSHED_GOOBERT = NewStory("SpecialEvent06", run:true);
+        internal static readonly StoryEvent SAW_BOUNTY_HUNTER_MEDAL = NewStory("SawBountyHunterMedal", run: true);
+        internal static readonly StoryEvent FLUSHED_GOOBERT = NewStory("SpecialEvent06", run: true);
         internal static readonly StoryEvent MYCO_ENTRY_APPROVED = NewStory("MycoEntryApproved", run: true);
         internal static readonly StoryEvent MYCO_ENTRY_DENIED = NewStory("MycoEntryDenied", run: true);
         internal static readonly StoryEvent MYCO_DEFEATED = NewStory("MycoDefeated", run: true);
@@ -69,7 +70,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     throw new InvalidOperationException("Trying to get the mycologist return position when it has never been set!");
 
                 string[] pieces = key.Split('|');
-                return new (pieces[0], int.Parse(pieces[1]), int.Parse(pieces[2]));
+                return new(pieces[0], int.Parse(pieces[1]), int.Parse(pieces[2]));
             }
             set
             {
@@ -110,7 +111,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         public static RunBasedHoloMap.Zone CurrentZone
         {
-            get  
+            get
             {
                 try
                 {
@@ -165,7 +166,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             StoryEvent.LukeVOPart3CloseWin
         };
 
-        private static readonly Dictionary<HoloMapNode.NodeDataType, float> CostAdjustments = new ()
+        private static readonly Dictionary<HoloMapNode.NodeDataType, float> CostAdjustments = new()
         {
             { HoloMapNode.NodeDataType.AddCardAbility, 0f },
             { HoloMapNode.NodeDataType.BuildACard, 1f },
@@ -219,13 +220,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         public static int UpgradePrice(HoloMapNode.NodeDataType nodeType)
         {
-            float baseCost = 7 + (AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.ExpensivePelts) ? 3f + 2f * CompletedZones.Count: 1f * CompletedZones.Count);
+            float baseCost = 7 + (AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.ExpensivePelts) ? 3f + 2f * CompletedZones.Count : 1f * CompletedZones.Count);
 
             if (CostAdjustments.ContainsKey(nodeType))
             {
                 float adj = CostAdjustments[nodeType];
                 if (adj != 0 && Math.Abs(adj) < 1)
-                    baseCost *= adj; 
+                    baseCost *= adj;
                 else
                     baseCost += CostAdjustments[nodeType];
             }
@@ -303,15 +304,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public const int ENEMIES_TO_UNLOCK_BOSS = 4;
         public static int NumberOfZoneEnemiesKilled
         {
-            get 
-            { 
-                string key = $"{CurrentZone}_EnemiesKilled";
-                return ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, key); 
-            }
-            set 
+            get
             {
                 string key = $"{CurrentZone}_EnemiesKilled";
-                ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, key, value); 
+                return ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, key);
+            }
+            set
+            {
+                string key = $"{CurrentZone}_EnemiesKilled";
+                ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, key, value);
             }
         }
 
@@ -340,7 +341,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             List<string> zones = CompletedZones;
             if (!zones.Contains(id))
                 zones.Add(id);
-            
+
             ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "CompletedZones", string.Join(",", zones));
         }
 
@@ -360,7 +361,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             List<string> zones = VisitedZones;
             if (!zones.Contains(id))
                 zones.Add(id);
-            
+
             ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "VisitedZones", string.Join(",", zones));
         }
 
@@ -425,7 +426,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     return false;
                 }
 
-                if (storyEvent == StoryEvent.CanvasDefeated) 
+                if (storyEvent == StoryEvent.CanvasDefeated)
                 {
                     __result = CompletedZones.Contains("FastTravelMapNode_Wizard");
                     return false;
@@ -583,10 +584,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             LifeManagement.respawnCost = 0;
         }
 
-        public static void FinishAscension(bool success=true)
-		{
+        public static void FinishAscension(bool success = true)
+        {
             P03Plugin.Log.LogInfo("Starting finale sequence");
-			AscensionMenuScreens.ReturningFromSuccessfulRun = success;
+            AscensionMenuScreens.ReturningFromSuccessfulRun = success;
             AscensionMenuScreens.ReturningFromFailedRun = !success;
             AscensionStatsData.TryIncrementStat(success ? AscensionStat.Type.Victories : AscensionStat.Type.Losses);
 
@@ -601,7 +602,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             // Delete the ascension save; the run is over            
-            ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, P03AscensionSaveData.ASCENSION_SAVE_KEY, default(string)); 
+            ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, P03AscensionSaveData.ASCENSION_SAVE_KEY, default(string));
 
             // Also delete the normal ascension current run just in case
             //AscensionSaveData.Data.currentRun = null;
@@ -624,6 +625,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 SceneLoader.Load("Ascension_Configure");
             else
                 SceneLoader.Load("Ascension_Credits");
-		}
+        }
     }
 }

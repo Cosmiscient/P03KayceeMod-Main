@@ -7,27 +7,27 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Quests;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Infiniscryption.P03KayceeRun
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency("cyantist.inscryption.api")]
+    [BepInDependency("zorro.inscryption.infiniscryption.achievements")]
     public class P03Plugin : BaseUnityPlugin
     {
 
         public const string PluginGuid = "zorro.inscryption.infiniscryption.p03kayceerun";
-		public const string PluginName = "Infiniscryption P03 in Kaycee's Mod";
-		public const string PluginVersion = "2.3";   
-        public const string CardPrefx = "P03KCM"; 
+        public const string PluginName = "Infiniscryption P03 in Kaycee's Mod";
+        public const string PluginVersion = "2.3";
+        public const string CardPrefx = "P03KCM";
 
-        internal static P03Plugin Instance;  
+        internal static P03Plugin Instance;
 
-        internal static ManualLogSource Log; 
+        internal static ManualLogSource Log;
 
         internal static bool Initialized = false;
-        
+
         internal string DebugCode
         {
             get
@@ -70,13 +70,14 @@ namespace Infiniscryption.P03KayceeRun
                 try
                 {
                     System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(t.TypeHandle);
-                } catch (TypeLoadException ex)
+                }
+                catch (TypeLoadException ex)
                 {
                     Log.LogWarning("Failed to force load static constructor!");
                     Log.LogWarning(ex);
                 }
             }
-            
+
             CustomCards.RegisterCustomCards(harmony);
             StarterDecks.RegisterStarterDecks();
             AscensionChallengeManagement.UpdateP03Challenges();

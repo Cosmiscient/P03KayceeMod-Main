@@ -1,16 +1,7 @@
-using HarmonyLib;
-using DiskCardGame;
-using InscryptionAPI.Saves;
-using System.Text;
-using System.IO;
-using System.IO.Compression;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using Infiniscryption.P03KayceeRun.Items;
-using Infiniscryption.P03KayceeRun.Cards;
-using Infiniscryption.P03KayceeRun.Quests;
 using System.Net.Http;
+using DiskCardGame;
+using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Encounters;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
@@ -28,7 +19,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return;
 
             // This sends encounter failure data to a Google Form
-            Dictionary<string, string> values = new ()
+            Dictionary<string, string> values = new()
             {
                 { "entry.1934213090", blueprint.name },
                 { "entry.176058667", turnNumber.ToString() },
