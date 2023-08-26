@@ -28,6 +28,18 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static AscensionChallenge TURBO_VESSELS { get; private set; }
         public static AscensionChallenge PAINTING_CHALLENGE { get; private set; }
 
+        public static bool SKULL_STORM_ACTIVE =>
+            AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.LessConsumables) >= 2
+            && AscensionSaveData.Data.GetNumChallengesOfTypeActive(TURBO_VESSELS) > 0
+            && AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.ExpensivePelts) > 0
+            && AscensionSaveData.Data.GetNumChallengesOfTypeActive(PAINTING_CHALLENGE) > 0
+            && AscensionSaveData.Data.GetNumChallengesOfTypeActive(ENERGY_HAMMER) > 0
+            && AscensionSaveData.Data.GetNumChallengesOfTypeActive(LEEPBOT_SIDEDECK) > 0
+            && AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.BaseDifficulty) >= 2
+            && AscensionSaveData.Data.GetNumChallengesOfTypeActive(TRADITIONAL_LIVES) > 0
+            && AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.LessLives) > 0
+            && AscensionSaveData.Data.GetNumChallengesOfTypeActive(BOUNTY_HUNTER) >= 2;
+
         internal static bool TurboVesselsUIPlayed
         {
             get { return ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "TurboVesselsUIPlayed"); }

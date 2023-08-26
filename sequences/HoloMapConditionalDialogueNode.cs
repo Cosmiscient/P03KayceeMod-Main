@@ -67,7 +67,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             // Now we advance the quest if necessary (if this is an autocomplete quest state)
             if (quest.CurrentState.AutoComplete)
                 quest.CurrentState.Status = QuestState.QuestStateStatus.Success;
-            
+
             // Now we play all quest rewards that haven't yet been granted
             ViewManager.Instance.SwitchToView(View.Default);
             yield return quest.GrantAllUngrantedRewards();
@@ -84,12 +84,26 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
 
             P03Plugin.Log.LogDebug($"After dialogue, the current state of the quest is {quest.CurrentState.StateName} with a status of {quest.CurrentState.Status}. Is the quest completed? {quest.IsCompleted}");
-            
+
             if (quest.IsCompleted)
             {
                 this.SetCompleted();
-                if (this.npc != null)
-                    this.npc.SetActive(false);
+                this.npc?.SetActive(false);
+
+                // Check to see if we should unlock the "every quest" achievement
+                // This happens if you've completed four full quests and you're in the final zone
+                if (EventManagement.CompletedZones.Count == 3)
+                {
+                    if (QuestManager.AllQuestDefinitions
+                                    .Where(q => !q.IsSpecialQuest
+                                           && q.IsCompleted
+                                           && q.CurrentState.Status == QuestState.QuestStateStatus.Success
+                                           && q.IsEndOfQuest)
+                                    .Count() == 4)
+                    {
+                        AchievementManager.Unlock(P03AchievementManagement.ALL_QUESTS_COMPLETED);
+                    }
+                }
             }
             else
                 this.SetHidden(false, false);

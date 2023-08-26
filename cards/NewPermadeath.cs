@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -10,8 +11,8 @@ using UnityEngine;
 namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
-	public class NewPermaDeath : AbilityBehaviour
-	{
+    public class NewPermaDeath : AbilityBehaviour
+    {
         public static readonly Ability[] NOT_COPYABLE_ABILITIES = new Ability[] {
             Ability.QuadrupleBones,
             Ability.Evolve,
@@ -42,18 +43,21 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-		public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer)
-		{
-			return true;
-		}
+        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer)
+        {
+            return true;
+        }
 
-		public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
-		{
+        public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
+        {
             if (this.Card.HasAbility(Ability.DrawCopy) || this.Card.HasAbility(Ability.DrawCopyOnDeath))
                 yield break;
 
             if (this.Card.Slot != null && this.Card.HasAbility(CellUndying.AbilityID) && ConduitCircuitManager.Instance.SlotIsWithinCircuit(this.Card.Slot))
                 yield break;
+
+            if (this.Card.HasTrait(CustomCards.QuestCard))
+                AchievementManager.Unlock(P03AchievementManagement.KILL_QUEST_CARD);
 
             // Create an exeskeleton
             DeckInfo deck = SaveManager.SaveFile.CurrentDeck;
@@ -71,15 +75,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 yield break;
 
             CardInfo replacement = CardLoader.GetCardByName("RoboSkeleton");
-            CardModificationInfo mod = new ();
-            mod.abilities = new (card.Abilities.Where(ab => ab != NewPermaDeath.AbilityID && !NOT_COPYABLE_ABILITIES.Contains(ab)).Take(3));
+            CardModificationInfo mod = new();
+            mod.abilities = new(card.Abilities.Where(ab => ab != NewPermaDeath.AbilityID && !NOT_COPYABLE_ABILITIES.Contains(ab)).Take(3));
             replacement.mods.Add(mod);
             deck.AddCard(replacement);
 
-			deck.RemoveCard(card);
-			yield return base.LearnAbility(0.5f);
-			yield break;
-		}
+            deck.RemoveCard(card);
+            yield return base.LearnAbility(0.5f);
+            yield break;
+        }
 
         [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.HasAbility))]
         [HarmonyPrefix]
@@ -91,6 +95,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 return false;
             }
             return true;
+        }
+
+        [HarmonyPatch(typeof(PermaDeath), nameof(PermaDeath.OnDie))]
+        [HarmonyPrefix]
+        private static void CheckForAchievement(PermaDeath __instance)
+        {
+            if (__instance.Card.HasTrait(CustomCards.QuestCard))
+                AchievementManager.Unlock(P03AchievementManagement.KILL_QUEST_CARD);
         }
     }
 }
