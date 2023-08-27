@@ -73,7 +73,19 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetRegionalP03Card(CardTemple.Undead)
                 .AddAbilities(Ability.Reach, DeadByte.AbilityID);
 
+            // Ruby Guardian
+            CardManager.New(EXP_2_PREFIX, "RubyGuardian", "Ruby Guardian", 2, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ruby_guardian.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 6)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(RubyWarrior.AbilityID);
 
+            // Emerald Guardian
+            CardManager.New(EXP_2_PREFIX, "EmeraldGuardian", "Emerald Guardian", 2, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_emerald_guardian.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 5)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(EmeraldExtraction.AbilityID, EmeraldExtraction.AbilityID, EmeraldExtraction.AbilityID);
         }
     }
 }
