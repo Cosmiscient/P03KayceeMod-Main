@@ -26,15 +26,15 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             base.OnSetActive(active);
             this.ShowHandleDown(this.handleDown, true);
             HoloMapGenericInteractable clicker = this.gameObject.GetComponentInChildren<HoloMapGenericInteractable>();
-            clicker.selectedEvent = new ();
+            clicker.selectedEvent = new();
             clicker.selectedEvent.AddListener(this.OnCursorSelectEnd);
         }
 
         public override void OnCursorSelectEnd()
         {
             this.handleDown = !this.handleDown;
-	        this.ShowHandleDown(this.handleDown, false);
-        	AudioController.Instance.PlaySound2D("holomap_node_selected", MixerGroup.TableObjectsSFX, 0.5f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.VerySmall), null, new AudioParams.Randomization(true), null, false);
+            this.ShowHandleDown(this.handleDown, false);
+            AudioController.Instance.PlaySound2D("holomap_node_selected", MixerGroup.TableObjectsSFX, 0.5f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.VerySmall), null, new AudioParams.Randomization(true), null, false);
 
             if (this.handleDown)
             {
@@ -104,18 +104,20 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistBrainSuccess", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 Part3SaveData.Data.deck.RemoveCardByName(CustomCards.BRAIN);
-            } else if (Part3SaveData.Data.deck.Cards.Any(ci => ci.name.Equals(CustomCards.BOUNTY_HUNTER_SPAWNER)))
+            }
+            else if (Part3SaveData.Data.deck.Cards.Any(ci => ci.name.Equals(CustomCards.BOUNTY_HUNTER_SPAWNER)))
             {
                 yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistBrainModified", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 allowedIntoMycologist = false;
-            } else
+            }
+            else
             {
                 yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistBrainMissing", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 allowedIntoMycologist = false;
             }
-            
+
             // Check to see if the player fixed the generator. The generator status is managed in the initial state
-            if (DefaultQuestDefinitions.BrokenGenerator.InitialState.Status == QuestState.QuestStateStatus.Success)
+            if (DefaultQuestDefinitions.BrokenGenerator.InitialState.Status == QuestState.QuestStateStatus.Success || P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("goobert"))
             {
                 yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistPowerSuccess", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             }

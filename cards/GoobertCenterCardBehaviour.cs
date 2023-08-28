@@ -56,9 +56,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private CardModificationInfo GetExperimentModInfo()
         {
-            CardModificationInfo info = new ();
+            CardModificationInfo info = new();
             int randomAbilityCount = 0;
-            foreach(CardInfo card in EventManagement.MycologistTestSubjects)
+            foreach (CardInfo card in EventManagement.MycologistTestSubjects)
             {
                 info.healthAdjustment += card.Health;
                 info.attackAdjustment += card.Attack;
@@ -119,16 +119,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
             GameObject.Destroy(itemcontroller);
             GameObject.Destroy(goobert.GetComponentInChildren<GooWizardAnimationController>());
             GameObject.Destroy(goobert.GetComponentInChildren<Animator>());
-            goobert.transform.Find("GooWizardBottle/GooWizard/Bottle").gameObject.SetActive(false);
-            goobert.transform.Find("GooWizardBottle/GooWizard/Cork").gameObject.SetActive(false);
+            goobert.transform.Find("GooBottleItem(Clone)/GooWizardBottle/GooWizard/Bottle").gameObject.SetActive(false);
+            goobert.transform.Find("GooBottleItem(Clone)/GooWizardBottle/GooWizard/Cork").gameObject.SetActive(false);
             OnboardDynamicHoloPortrait.HolofyGameObject(goobert, GameColors.Instance.brightLimeGreen);
 
-            Transform gooWizard = goobert.transform.Find("GooWizardBottle/GooWizard");
+            Transform gooWizard = goobert.transform.Find("GooBottleItem(Clone)/GooWizardBottle/GooWizard");
             gooWizard.localEulerAngles = new(90f, 0f, 0f);
 
-            Vector3 target = new (-.1f, -.7f, .6f);
+            Vector3 target = new(-.1f, -.7f, .6f);
             goobert.transform.localPosition = target + Vector3.down;
-            goobert.transform.localEulerAngles = new (46.2497f, 121.8733f, 222.0276f);
+            goobert.transform.localEulerAngles = new(46.2497f, 121.8733f, 222.0276f);
             Tween.LocalPosition(goobert.transform, target, GetGoobertEntrySpeed(), 0f);
 
             if (IsInMycoBoss)
@@ -148,7 +148,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Make room for the left and right halves of the card
             List<CardSlot> friendlySlots = BoardManager.Instance.GetSlots(!this.PlayableCard.OpponentCard);
             int mySlot = this.PlayableCard.Slot.Index;
-            
+
             int leftSlot = mySlot - 1;
             yield return MakeSlotEmpty(friendlySlots[leftSlot], true);
             int rightSlot = mySlot + 1;
@@ -159,10 +159,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
             GameObject leftArm = GameObject.Instantiate(Resources.Load<GameObject>("prefabs/map/holomapscenery/HoloClaw"), dcac.holoPortraitParent);
             OnboardDynamicHoloPortrait.HolofyGameObject(rightArm, GameColors.Instance.brightLimeGreen);
             OnboardDynamicHoloPortrait.HolofyGameObject(leftArm, GameColors.Instance.brightLimeGreen);
-            rightArm.transform.localPosition = new (-0.5f, -1f, 0f);
-            leftArm.transform.localPosition = new (0.5f, -1f, 0f);
-            rightArm.transform.localEulerAngles = new (0f, 0f, 270f);
-            leftArm.transform.localEulerAngles = new (0f, 180f, 270f);
+            rightArm.transform.localPosition = new(-0.5f, -1f, 0f);
+            leftArm.transform.localPosition = new(0.5f, -1f, 0f);
+            rightArm.transform.localEulerAngles = new(0f, 0f, 270f);
+            leftArm.transform.localEulerAngles = new(0f, 180f, 270f);
             Tween.LocalPosition(rightArm.transform, new Vector3(-0.5f, 0f, 0f), GetArmEntrySpeed(), 0f);
             Tween.LocalPosition(leftArm.transform, new Vector3(0.5f, 0f, 0f), GetArmEntrySpeed(), 0f);
             yield return new WaitForSeconds(GetArmEntrySpeed());
@@ -207,7 +207,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             GameObject mushroom = GameObject.Instantiate(Resources.Load<GameObject>("prefabs/map/holomapscenery/HoloMushroom_1"), parent);
             OnboardDynamicHoloPortrait.HolofyGameObject(mushroom, GameColors.Instance.brightLimeGreen);
-            Vector3 target = new (x, -.7f, z);
+            Vector3 target = new(x, -.7f, z);
             mushroom.transform.localPosition = target + Vector3.down;
             Tween.LocalPosition(mushroom.transform, target, 1f, 0f);
         }
@@ -227,7 +227,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             UpdateAllStretchers(abilityParent, card);
 
             Transform liveAbilityParent = card.gameObject.transform.Find("Anim/CardBase/Bottom/CardAbilityIcons_Part3_Invisible");
-            UpdateAllStretchers(liveAbilityParent, card);            
+            UpdateAllStretchers(liveAbilityParent, card);
         }
 
         private static void UpdateAllStretchers(Transform abilityParent, PlayableCard card)
@@ -242,7 +242,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         }
 
-        private IEnumerator MakeSlotEmpty(CardSlot slot, bool left=true)
+        private IEnumerator MakeSlotEmpty(CardSlot slot, bool left = true)
         {
             if (slot.Card == null)
                 yield break;
@@ -296,7 +296,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 return true;
 
             List<CardSlot> slotsToCheck = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
-			
+
             if (slotsToCheck.Any(s => s.SlotHasTripleCard()))
             {
                 __result = new();
@@ -311,7 +311,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                     return false;
                 }
-                
+
                 // Okay - what if someone is asking about the "wasted" slots underneath the triple card?
                 // Remember - the triple card is considered to be in the middle of its space
                 // In this case, we return the answer as if you asked for that card
@@ -351,7 +351,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                             __result.Add(slotsToCheck[sidx + 1]);
                         }
                     }
-                }  
+                }
 
                 // Check the left side:
                 if (sidx > 0)
@@ -361,7 +361,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         __result.Add(slotsToCheck[sidx - 1]);
                     }
                     else
-                    {;
+                    {
+                        ;
                         // okay, there's not a card there - what if there's a triple card one more slot over:
                         if (sidx > 1)
                         {
@@ -376,8 +377,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                             __result.Add(slotsToCheck[sidx - 1]);
                         }
                     }
-                }    
-                
+                }
+
                 return false;
             }
 
@@ -396,7 +397,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // table. So if the game is essentially over, we can just leave the list of slots alone
 
             if (TurnManager.Instance != null && TurnManager.Instance.GameIsOver())
-                return;             
+                return;
 
             __result.RemoveAll(cs => cs.SlotCoveredByTripleCard());
         }
@@ -485,10 +486,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static IEnumerator EnsureSlotsOnCombat(IEnumerator sequence)
         {
             IsInsideCombatPhase = true;
-            ResolveOpposingSlotsForTripleCard(reset:true);
+            ResolveOpposingSlotsForTripleCard(reset: true);
             yield return sequence;
             IsInsideCombatPhase = false;
-            ResolveOpposingSlotsForTripleCard(reset:false);
+            ResolveOpposingSlotsForTripleCard(reset: false);
         }
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
@@ -498,7 +499,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (!SaveManager.SaveFile.IsPart3)
                 return;
 
-            ResolveOpposingSlotsForTripleCard(reset:true);
+            ResolveOpposingSlotsForTripleCard(reset: true);
         }
 
         [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.AssignCardToSlot))]
@@ -535,7 +536,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         yield return BoardManager.Instance.AssignCardToSlot(card, card.Slot, transitionDuration, tweenCompleteCallback, resolveTriggers);
 
                     yield break;
-                }   
+                }
 
                 // If you're trying to move into a slot covered by a triple card, let's see if we can't move you somewhere else
                 if (slot.SlotCoveredByTripleCard() && card.Slot != null)
@@ -560,7 +561,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         startIndex += step;
                     }
                     yield break;
-                    
+
                 }
             }
 
@@ -696,7 +697,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 yield return sequence;
                 yield break;
             }
-                
+
             PlayableCard card = __instance.gameObject.GetComponent<PlayableCard>();
             if (!card.Info.specialAbilities.Contains(GoobertCenterCardBehaviour.AbilityID))
             {
@@ -705,11 +706,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
 
             foreach (TriggerReceiver receiver in __instance.GetAllReceivers())
-			{
+            {
                 if (ReceiverRespondsToTriggerInAnyOfThreeSlots(card, trigger, receiver, otherArgs))
-                	yield return GlobalTriggerHandler.Instance.TriggerSequence(trigger, receiver, otherArgs);
-			}
-			
+                    yield return GlobalTriggerHandler.Instance.TriggerSequence(trigger, receiver, otherArgs);
+            }
+
             yield break;
         }
     }

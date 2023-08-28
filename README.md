@@ -151,6 +151,9 @@ While the full credits will play in-game when you win for the first time, I have
 <details>
 <summary>Changelog</summary>
 
+3.1.6
+- Fixed some defects with the \[redacted\] boss.
+
 3.1.5
 - Fixed a defect where Gamblobot's ability did not work
 - Fixed a defect where Copypasta would get double impact from Build-A-Card cards
