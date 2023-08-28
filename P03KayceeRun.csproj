@@ -32,6 +32,9 @@
     <Reference Include="Infiniscryption.PackManagement" Private="false">
       <HintPath>.\lib\Infiniscryption.PackManager.dll</HintPath>
     </Reference>
+    <Reference Include="Infiniscryption.Achievements" Private="false">
+      <HintPath>.\lib\Infiniscryption.Achievements.dll</HintPath>
+    </Reference>
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">

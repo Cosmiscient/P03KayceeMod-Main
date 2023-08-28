@@ -26,6 +26,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly CardMetaCategory NewBeastTransformers = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "NewBeastTransformers");
 
         public static readonly Trait Unrotateable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "Unrotateable");
+        public static readonly Trait QuestCard = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "QuestCard");
 
         public const string DRAFT_TOKEN = "P03KCM_Draft_Token";
         public const string UNC_TOKEN = "P03KCM_Draft_Token_Uncommon";
@@ -374,6 +375,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             CardManager.New(P03Plugin.CardPrefx, OLD_DATA, "UNSAFE.DAT", 0, 1)
                 .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_captivefile"))
                 .AddAbilities(LoseOnDeath.AbilityID)
+                .AddTraits(QuestCard)
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, CODE_BLOCK, "Code Snippet", 1, 2)
@@ -468,6 +470,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_captivefile"))
                 .AddAbilities(Ability.PermaDeath)
                 .AddAppearances(QuestCardAppearance.ID)
+                .AddTraits(QuestCard)
                 .temple = CardTemple.Tech;
 
             //NEW BEAST CARDS
@@ -517,6 +520,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             radio.SetPortrait(TextureHelper.GetImageAsTexture("portrait_radio.png", typeof(CustomCards).Assembly));
             radio.AddAppearances(OnboardHoloPortrait.ID);
             radio.AddAppearances(QuestCardAppearance.ID);
+            radio.AddTraits(QuestCard);
             radio.temple = CardTemple.Tech;
             radio.holoPortraitPrefab = Resources.Load<GameObject>("prefabs/cards/hologramportraits/TerrainHologram_AnnoyTower");
 
@@ -531,6 +535,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             powerTower.SetPortrait(TextureHelper.GetImageAsTexture("portrait_radio.png", typeof(CustomCards).Assembly));
             powerTower.AddAppearances(OnboardDynamicHoloPortrait.ID);
             powerTower.AddAppearances(QuestCardAppearance.ID);
+            powerTower.AddTraits(QuestCard);
             powerTower.SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/specialnodesequences/teslacoil");
             powerTower.SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "0,-.39,0");
             powerTower.SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, ".6,.6,.6");

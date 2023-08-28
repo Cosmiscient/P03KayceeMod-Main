@@ -241,6 +241,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.SwitchToView(View.Default, false, true);
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistCompleteSuccess", TextDisplayer.MessageAdvanceMode.Auto, TextDisplayer.EventIntersectMode.Wait, null, null);
             Part3SaveData.Data.deck.AddCard(CardLoader.GetCardByName(CustomCards.MYCO_CONSTRUCT_BASE));
+            AchievementManager.Unlock(P03AchievementManagement.MYCOLOGISTS_COMPLETED);
             StoryEventsData.SetEventCompleted(EventManagement.MYCO_DEFEATED);
             yield return this.UnInfectP03();
             ResetConduitBorder();

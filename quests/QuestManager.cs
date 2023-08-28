@@ -20,6 +20,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
     {
         private static Dictionary<SpecialEvent, QuestDefinition> AllQuests = new();
 
+        public static IEnumerable<QuestDefinition> AllQuestDefinitions = AllQuests.Values;
+
         internal static int CalculateQuestSize(SpecialEvent eventId)
         {
             QuestDefinition nextQuest = AllQuests.Values.FirstOrDefault(q => q.PriorEventId == eventId);
@@ -50,14 +52,14 @@ namespace Infiniscryption.P03KayceeRun.Quests
             if (AllQuests.ContainsKey(eventId))
                 throw new InvalidOperationException(String.Format("A quest with the name {0} in mod {1} was defined twice!", questName, modGuid));
 
-            QuestDefinition defn = new (modGuid, questName);
+            QuestDefinition defn = new(modGuid, questName);
             AllQuests.Add(eventId, defn);
             return defn;
         }
 
         internal static List<Tuple<SpecialEvent, Predicate<HoloMapBlueprint>>> GetSpecialEventForZone(RunBasedHoloMap.Zone zone)
         {
-            List<Tuple<SpecialEvent, Predicate<HoloMapBlueprint>>> events = new ();
+            List<Tuple<SpecialEvent, Predicate<HoloMapBlueprint>>> events = new();
 
             // Need to generate all the must adds first. This is because sometimes simply generating
             // a quest randomly is enough to move it to an active state. And then the "must be generated" flag
@@ -69,7 +71,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             foreach (QuestDefinition quest in AllQuests.Values.Where(q => q.MustBeGenerated))
             {
                 quest.QuestGenerated = true;
-                events.Add(new (quest.EventId, quest.GenerateRoomFilter()));
+                events.Add(new(quest.EventId, quest.GenerateRoomFilter()));
             }
 
             // Randomized special events
@@ -82,16 +84,16 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     int idx = P03Plugin.Instance.DebugCode.ToLowerInvariant().IndexOf("event[");
                     int eidx = P03Plugin.Instance.DebugCode.ToUpperInvariant().IndexOf("]");
                     string substr = P03Plugin.Instance.DebugCode.Substring(idx + 6, eidx - idx - 6);
-                    P03Plugin.Log.LogWarning($"Parsing override debug event! {substr}");     
+                    P03Plugin.Log.LogWarning($"Parsing override debug event! {substr}");
                     string[] guidParts = substr.Split('_');
                     SpecialEvent dEvent = GuidManager.GetEnumValue<SpecialEvent>(guidParts[0], guidParts[1]);
 
-                    events.Add(new (dEvent, Get(dEvent).GenerateRoomFilter())); // randomly selected events should appear in the first color
+                    events.Add(new(dEvent, Get(dEvent).GenerateRoomFilter())); // randomly selected events should appear in the first color
                     possibles.Clear();
-                } 
+                }
                 catch (Exception ex)
                 {
-                    P03Plugin.Log.LogWarning($"Could not parse special event from debug string! {ex}");                    
+                    P03Plugin.Log.LogWarning($"Could not parse special event from debug string! {ex}");
                 }
             }
 
@@ -100,7 +102,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 SpecialEvent randomEvent = possibles[SeededRandom.Range(0, possibles.Count, P03AscensionSaveData.RandomSeed)];
                 QuestDefinition selected = Get(randomEvent);
                 selected.QuestGenerated = true;
-                events.Add(new (randomEvent, selected.GenerateRoomFilter())); 
+                events.Add(new(randomEvent, selected.GenerateRoomFilter()));
             }
 
             return events;

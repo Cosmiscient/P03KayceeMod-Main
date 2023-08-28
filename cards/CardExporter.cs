@@ -5,11 +5,9 @@ using System.IO;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using Pixelplacement;
 using UnityEngine;
@@ -37,7 +35,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             base.StartCoroutine(ExportAllCards());
         }
 
-        [SerializeField]        
+        [SerializeField]
         private GameObject temporaryHolding;
 
         [SerializeField]
@@ -65,8 +63,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override void ManagedUpdate()
         {
-            if (!inRender && 
-                (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && 
+            if (!inRender &&
+                (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) &&
                 (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
             {
                 if (Input.GetKey(KeyCode.X))
@@ -81,9 +79,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         }
 
-        private static Bounds GetMaxBounds(GameObject g) {
-
-            List<Renderer> renderers = new ();
+        internal static Bounds GetMaxBounds(GameObject g)
+        {
+            List<Renderer> renderers = new();
             foreach (string p in GameObjectPaths)
             {
                 Transform t = g.transform.Find(p);
@@ -93,13 +91,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             if (renderers.Count == 0) return new Bounds(g.transform.position, Vector3.zero);
             var b = renderers[0].bounds;
-            foreach (Renderer r in renderers) {
+            foreach (Renderer r in renderers)
+            {
                 b.Encapsulate(r.bounds);
             }
             return b;
         }
 
-        private static Dictionary<string, string> imageCache = new ();
+        private static Dictionary<string, string> imageCache = new();
         private static string GetImageEmbedded(string cardName)
         {
             if (imageCache.Keys.Contains(cardName))
@@ -123,7 +122,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return rgx.Replace(CustomCards.ConvertCardToCompleteCode(info), "");
         }
 
-        private static HashSet<string> GeneratedThisRun = new ();
+        private static HashSet<string> GeneratedThisRun = new();
         private static bool Generated(CardInfo info)
         {
             if (info.mods == null || info.mods.Count == 0)
@@ -148,7 +147,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             try
             {
-                screenshot.ReadPixels(new (0, 0, Screen.currentResolution.width, Screen.currentResolution.height), 0, 0, false);
+                screenshot.ReadPixels(new(0, 0, Screen.currentResolution.width, Screen.currentResolution.height), 0, 0, false);
                 screenshot.Apply();
 
                 Bounds cardBounds = GetMaxBounds(card.gameObject);
@@ -159,7 +158,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 int xMin = Mathf.RoundToInt(Mathf.Min(lower.x, upper.x));
                 int yMin = Mathf.RoundToInt(Mathf.Min(lower.y, upper.y));
 
-                finalTexture = new (width, height);
+                finalTexture = new(width, height);
                 finalTexture.filterMode = FilterMode.Trilinear;
 
                 for (int x = 0; x < width; x++)
@@ -212,7 +211,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 Directory.CreateDirectory("cardexports");
 
             Camera camera = ViewManager.Instance.CameraParent.gameObject.GetComponentInChildren<Camera>();
-            Vector3 renderPosition = new(0f,0f,0f);
+            Vector3 renderPosition = new(0f, 0f, 0f);
 
             Texture2D screenshot = new Texture2D(Screen.currentResolution.width, Screen.currentResolution.height);
             screenshot.filterMode = FilterMode.Trilinear;
@@ -226,13 +225,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             while (cardsToRender.Count > 0)
             {
-                List<PlayableCard> currentBatch = new ();
+                List<PlayableCard> currentBatch = new();
 
                 while (cardsToRender.Count > 0 && currentBatch.Count < 20)
                 {
                     CardInfo info = cardsToRender[0];
                     cardsToRender.RemoveAt(0);
-                    
+
                     PlayableCard card = CardSpawner.SpawnPlayableCard(info);
                     card.gameObject.transform.localPosition = new Vector3(card.gameObject.transform.localPosition.x + xOffset, card.gameObject.transform.localPosition.y, card.gameObject.transform.localPosition.z);
                     renderPosition = card.gameObject.transform.localPosition;
@@ -247,7 +246,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     PlayableCard card = currentBatch[i];
                     yield return GenerateCard(card, renderPosition, screenshot, camera);
-                }                
+                }
             }
 
             List<EncounterBlueprintData> encountersToExport = EncounterManager.AllEncountersCopy.Where(ebd => Infiniscryption.P03KayceeRun.Encounters.EncounterExtensions.P03OnlyEncounters.Contains(ebd.name)).ToList();
@@ -305,7 +304,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 };
 
                 Dictionary<int, List<List<CardInfo>>> turnPlanDictionary = new();
-                Dictionary<int, float> runningPowerLevelTotals = new ();
+                Dictionary<int, float> runningPowerLevelTotals = new();
                 for (int i = encounter.minDifficulty; i <= encounter.maxDifficulty; i++)
                 {
                     runningPowerLevelTotals[i] = 0f;
@@ -314,9 +313,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                 for (int turnNumber = 0; turnNumber < encounter.turns.Count; turnNumber++)
                 {
-                    P03Plugin.Log.LogDebug($"Generating turn {turnNumber+1}");
+                    P03Plugin.Log.LogDebug($"Generating turn {turnNumber + 1}");
                     var turn = encounter.turns[turnNumber];
-                    export += $"<tr><td class=\"turnlabel\">Turn {turnNumber+1}</td>";
+                    export += $"<tr><td class=\"turnlabel\">Turn {turnNumber + 1}</td>";
                     for (int i = encounter.minDifficulty; i <= encounter.maxDifficulty; i++)
                     {
                         P03Plugin.Log.LogDebug($"Generating difficulty {i}");
@@ -358,7 +357,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         //         currentCard.mods ??= new();
                         //         currentCard.mods.Add(new (1, 0) { fromOverclock = true });
                         //     }
-                            
+
                         //     if (currentCard != null)
                         //     {
                         //         P03Plugin.Log.LogDebug($"Adding card {currentCard.name} to turn");
@@ -389,7 +388,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         {
                             turnSlots[turnNumber % 2 == 0 ? 0 : 4] = GetRepr(conduitsInTurn[0]);
                             turnEncounterCards.Remove(conduitsInTurn[0]);
-                        } else if (conduitsInTurn.Count == 2)
+                        }
+                        else if (conduitsInTurn.Count == 2)
                         {
                             turnSlots[0] = GetRepr(conduitsInTurn[0]);
                             turnSlots[4] = GetRepr(conduitsInTurn[1]);
@@ -402,7 +402,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         {
                             for (int s = 0; s < turnEncounterCards.Count; s++)
                                 turnSlots[s] = GetRepr(turnEncounterCards[s]);
-                        } else if (turnEncounterCards.Count == 3)
+                        }
+                        else if (turnEncounterCards.Count == 3)
                         {
                             turnSlots[1] = GetRepr(turnEncounterCards[0]);
                             turnSlots[2] = GetRepr(turnEncounterCards[1]);
@@ -490,7 +491,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static void EnsureOverclocked(ref PlayableCard __result)
         {
             if (!inRender)
-                return; 
+                return;
 
             if (__result.Info != null && __result.Info.Mods != null && __result.Info.Mods.Any(m => m.fromOverclock))
                 __result.Anim.SetOverclocked(true);

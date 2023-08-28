@@ -85,5 +85,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             yield return sequence;
         }
+
+        [HarmonyPatch(typeof(CardAbilityIcons), nameof(CardAbilityIcons.SetIconFlipped))]
+        [HarmonyPostfix]
+        private static void FlipLatchedAbility(ref CardAbilityIcons __instance, Ability ability, bool flipped)
+        {
+            if (__instance.latchIcon.Ability == ability)
+                __instance.latchIcon.SetFlippedX(flipped);
+        }
     }
 }

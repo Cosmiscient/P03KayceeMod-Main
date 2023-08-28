@@ -112,6 +112,17 @@ namespace Infiniscryption.P03KayceeRun.Quests
         }
 
         /// <summary>
+        /// Indicates if this is the end of a quest line (i.e., if there are no other quests that depend on it)
+        /// </summary>
+        public bool IsEndOfQuest
+        {
+            get
+            {
+                return QuestManager.AllQuestDefinitions.Where(q => q.PriorEventId == this.EventId).Count() == 0;
+            }
+        }
+
+        /// <summary>
         /// Indicates if this quest is allowed to be selected as the random quest on the current map
         /// </summary>
         public bool ValidForRandomSelection
@@ -221,10 +232,10 @@ namespace Infiniscryption.P03KayceeRun.Quests
             {
                 while (this.CurrentState.Status != status)
                     this.CurrentState.Status = status;
-                
+
                 return;
-            } 
-            else 
+            }
+            else
             {
                 // Some quests force you through a 'success' state
                 // before getting to a fail state.
@@ -239,7 +250,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     else if (this.CurrentState.GetNextState(QuestState.QuestStateStatus.Failure) != null)
                         this.CurrentState.Status = QuestState.QuestStateStatus.Failure;
                     else
-                        this.CurrentState.Status = QuestState.QuestStateStatus.Success;            
+                        this.CurrentState.Status = QuestState.QuestStateStatus.Success;
                 }
             }
         }
@@ -253,7 +264,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             yield return currentState.GrantRewards(); // note that this only happens if it needs to
 
             while (currentState.GetNextState() != null)
-            {    
+            {
                 currentState = currentState.GetNextState();
                 yield return currentState.GrantRewards(); // note that this only happens if it needs to
             }
