@@ -13,11 +13,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
     public class FullyLoaded : AbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
-        internal static List<CardSlot> BuffedSlots = new();
+        public static readonly SlotModificationManager.ModificationType SlotModID = SlotModificationManager.New(P03Plugin.PluginGuid, "FullyLoaded", TextureHelper.GetImageAsTexture("cardslot_fully_loaded.png", typeof(FullyLoaded).Assembly));
 
         static FullyLoaded()
         {
@@ -40,7 +40,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
-            PowerUpSlot(this.Card.Slot);
+            this.Card.Slot.SetSlotModification(SlotModID);
             yield break;
         }
 
@@ -50,42 +50,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void AddBuffForCardSlot(PlayableCard __instance, ref int __result)
         {
-            if (BuffedSlots.Contains(__instance.Slot))
+            if (__instance.Slot.GetSlotModification() == SlotModID)
                 __result += 1;
-        }
-
-        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.SetupPhase))]
-        [HarmonyPostfix]
-        private static void ResetBuffedSlots()
-        {
-            BuffedSlots.Clear();
-        }
-
-        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
-        [HarmonyPostfix]
-        private static void CleanUpBuffedSlots()
-        {
-            foreach (CardSlot slot in BuffedSlots)
-                DepowerSlot(slot);
-            BuffedSlots.Clear();
-        }
-
-        private static void PowerUpSlot(CardSlot slot)
-        {
-            BuffedSlots.Add(slot);
-            slot.SetTexture(TextureHelper.GetImageAsTexture("cardslot_fully_loaded.png", typeof(FullyLoaded).Assembly));
-        }
-
-        private static void DepowerSlot(CardSlot slot)
-        {
-            if (SaveManager.SaveFile.IsPart1)
-                slot.SetTexture(ResourceBank.Get<Texture>("Art/Cards/card_slot"));
-            if (SaveManager.SaveFile.IsPart3)
-                slot.SetTexture(ResourceBank.Get<Texture>("Art/Cards/card_slot_tech"));
-            if (SaveManager.SaveFile.IsGrimora)
-                slot.SetTexture(ResourceBank.Get<Texture>("Art/Cards/card_slot_undead"));
-            if (SaveManager.SaveFile.IsMagnificus)
-                slot.SetTexture(ResourceBank.Get<Texture>("Art/Cards/card_slot_wizard"));
         }
     }
 }
