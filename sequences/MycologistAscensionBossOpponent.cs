@@ -87,22 +87,22 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistPowerOnline", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
             CardInfo leftConduit = CardLoader.GetCardByName(CustomCards.MYCO_HEALING_CONDUIT);
-            yield return BoardManager.Instance.CreateCardInSlot(leftConduit, BoardManager.Instance.opponentSlots[0], resolveTriggers:false);
+            yield return BoardManager.Instance.CreateCardInSlot(leftConduit, BoardManager.Instance.opponentSlots[0], resolveTriggers: false);
             yield return new WaitForSeconds(0.3f);
             CardInfo rightConduit = CardLoader.GetCardByName(CustomCards.MYCO_HEALING_CONDUIT);
-            yield return BoardManager.Instance.CreateCardInSlot(rightConduit, BoardManager.Instance.opponentSlots[4], resolveTriggers:false);
+            yield return BoardManager.Instance.CreateCardInSlot(rightConduit, BoardManager.Instance.opponentSlots[4], resolveTriggers: false);
             yield return new WaitForSeconds(0.9f);
 
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistBrainOnline", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             CardInfo brain = CardLoader.GetCardByName(CustomCards.BRAIN);
-            yield return BoardManager.Instance.CreateCardInSlot(brain, BoardManager.Instance.opponentSlots[2], resolveTriggers:false);
+            yield return BoardManager.Instance.CreateCardInSlot(brain, BoardManager.Instance.opponentSlots[2], resolveTriggers: false);
             yield return new WaitForSeconds(0.9f);
 
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistTestSubjects", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             List<CardInfo> cards = EventManagement.MycologistTestSubjects;
-            yield return BoardManager.Instance.CreateCardInSlot(cards[0], BoardManager.Instance.opponentSlots[1], resolveTriggers:false);
+            yield return BoardManager.Instance.CreateCardInSlot(cards[0], BoardManager.Instance.opponentSlots[1], resolveTriggers: false);
             yield return new WaitForSeconds(0.3f);
-            yield return BoardManager.Instance.CreateCardInSlot(cards[1], BoardManager.Instance.opponentSlots[3], resolveTriggers:false);
+            yield return BoardManager.Instance.CreateCardInSlot(cards[1], BoardManager.Instance.opponentSlots[3], resolveTriggers: false);
             yield return new WaitForSeconds(1f);
 
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistsBossCombine", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
@@ -134,25 +134,26 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return new WaitForSeconds(1f);
 
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistSummonGoo", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
-            
+
             GameObject goobert = GoobertHuh.GetGameObject();
             goobert.transform.SetParent(centerSlot.gameObject.transform);
+            Transform gooTransform = goobert.transform.Find("GooBottleItem(Clone)/GooWizardBottle");
             ConsumableItem itemcontroller = goobert.GetComponentInChildren<ConsumableItem>();
             GameObject.Destroy(itemcontroller);
-            
+
             //GameObject.Destroy(goobert.GetComponentInChildren<GooWizardAnimationController>());
             //GameObject.Destroy(goobert.GetComponentInChildren<Animator>());
             Vector3 target = new Vector3(0f, .6f, 0f);
             goobert.transform.localPosition = target + (Vector3.up * 3f);
-            goobert.transform.Find("GooWizardBottle").localEulerAngles = new (0f, 276f, 0f);
+            gooTransform.localEulerAngles = new(0f, 276f, 0f);
             Tween.LocalPosition(goobert.transform, target, 3f, 0f);
-            
+
             yield return new WaitForSeconds(1f);
 
             yield return TextDisplayer.Instance.PlayDialogueEvent("GooScaredMycoBoss", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistHereWeGo", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
-            goobert.transform.Find("GooWizardBottle/GooWizard/Cork").gameObject.SetActive(false);
+            gooTransform.Find("GooWizard/Cork").gameObject.SetActive(false);
 
             GameObject gooLightning = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), this.gameObject.transform.parent);
             gooLightning.GetComponent<LightningBoltScript>().StartObject = BoardManager.Instance.opponentSlots[0].gameObject;
@@ -162,12 +163,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             base.StartCoroutine(ConstantStatic(centerSlot.gameObject, 4f));
             yield return new WaitForSeconds(1f);
-            goobert.transform.Find("GooWizardBottle/GooWizard/Bottle").gameObject.SetActive(false);
+            gooTransform.Find("GooWizard/Bottle").gameObject.SetActive(false);
             AudioController.Instance.PlaySound3D("bottle_break", MixerGroup.TableObjectsSFX, centerSlot.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
 
             base.StartCoroutine(this.GooSpeakBackground());
 
-            Transform gooTransform = goobert.transform.Find("GooWizardBottle");
             Tween.LocalScale(gooTransform, new Vector3(0.3f, 3f, 0.3f), 3f, 0f);
             //Tween.LocalPosition(goobert.transform.Find("GooWizardBottle"), new Vector3(0f, -1.5f, 0f), 3f, 0f);
 
@@ -197,7 +197,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             AscensionStatsData.TryIncrementStat(StatManagement.EXPERIMENTS_CREATED);
 
             CardInfo bossCard = CardLoader.GetCardByName(CustomCards.MYCO_CONSTRUCT_BASE);
-            yield return BoardManager.Instance.CreateCardInSlot(bossCard, BoardManager.Instance.opponentSlots[2], resolveTriggers:false);
+            yield return BoardManager.Instance.CreateCardInSlot(bossCard, BoardManager.Instance.opponentSlots[2], resolveTriggers: false);
             yield return BoardManager.Instance.opponentSlots[2].Card.TriggerHandler.OnTrigger(Trigger.ResolveOnBoard);
             yield return new WaitForSeconds(0.3f);
 
@@ -218,13 +218,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private void AddStaticPortrait(Card card)
         {
-	        card.StatsLayer.Material = ResourceBank.Get<Material>("Art/Materials/Static_Card");
-	        AnimatingSprite animatingSprite = card.StatsLayer.Renderer.gameObject.AddComponent<AnimatingSprite>();
-	        for (int i = 1; i <= 4; i++)
-	        {
-		        animatingSprite.textureFrames.Add(ResourceBank.Get<Texture2D>("Art/Cards/Special/Static_Card_" + i));
-	        }
-	        animatingSprite.StartAnimating();
+            card.StatsLayer.Material = ResourceBank.Get<Material>("Art/Materials/Static_Card");
+            AnimatingSprite animatingSprite = card.StatsLayer.Renderer.gameObject.AddComponent<AnimatingSprite>();
+            for (int i = 1; i <= 4; i++)
+            {
+                animatingSprite.textureFrames.Add(ResourceBank.Get<Texture2D>("Art/Cards/Special/Static_Card_" + i));
+            }
+            animatingSprite.StartAnimating();
             card.renderInfo.nameOverride = "Experiment";
             card.RenderCard();
         }
@@ -247,6 +247,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield break;
         }
 
-        public override string PostDefeatedDialogueId => "P03WTFDidYouDo"; 
+        public override string PostDefeatedDialogueId => "P03WTFDidYouDo";
     }
 }
