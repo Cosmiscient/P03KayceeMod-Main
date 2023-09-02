@@ -45,13 +45,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
             string offset = this.Card.Info.GetExtendedProperty(key);
             if (string.IsNullOrEmpty(offset))
                 return zeroDefault ? Vector3.zero : Vector3.one;
-            
+
             string[] offsetSplit = offset.Split(',');
             if (offsetSplit.Length != 3)
                 return zeroDefault ? Vector3.zero : Vector3.one;
 
-            return new Vector3(float.Parse(offsetSplit[0], CultureInfo.InvariantCulture), 
-                               float.Parse(offsetSplit[1], CultureInfo.InvariantCulture), 
+            return new Vector3(float.Parse(offsetSplit[0], CultureInfo.InvariantCulture),
+                               float.Parse(offsetSplit[1], CultureInfo.InvariantCulture),
                                float.Parse(offsetSplit[2], CultureInfo.InvariantCulture));
         }
 
@@ -61,12 +61,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             compsToDestroy.AddRange(obj.GetComponentsInChildren<Rigidbody>());
             compsToDestroy.AddRange(obj.GetComponentsInChildren<AutoRotate>());
             compsToDestroy.AddRange(obj.GetComponentsInChildren<Animator>());
-            
-            foreach (Component c in compsToDestroy)
+
+            foreach (Component c in compsToDestroy.Where(c => c != null))
                 GameObject.Destroy(c);
 
-            Color halfMain = new Color(color.r, color.g, color.b);
-            halfMain.a = 0.5f;
+            Color halfMain = new(color.r, color.g, color.b, 0.5f);
 
             // Get reference material
             Material refMat = CardLoader.GetCardByName("BridgeRailing").holoPortraitPrefab.GetComponentInChildren<Renderer>().material;
@@ -115,37 +114,37 @@ namespace Infiniscryption.P03KayceeRun.Cards
         }
 
         private void SpawnHoloPortrait(DiskCardAnimationController dcac)
-		{
+        {
             GameObject prefab = GetPrefab();
 
             if (prefab == null)
                 return;
 
-			GameObject gameObject = GameObject.Instantiate<GameObject>(prefab, dcac.holoPortraitParent);
+            GameObject gameObject = GameObject.Instantiate<GameObject>(prefab, dcac.holoPortraitParent);
             CleanGameObject(gameObject);
-			gameObject.transform.localPosition = GetVector3(OFFSET_KEY);
-			gameObject.transform.localEulerAngles = GetVector3(ROTATION_KEY);
+            gameObject.transform.localPosition = GetVector3(OFFSET_KEY);
+            gameObject.transform.localEulerAngles = GetVector3(ROTATION_KEY);
             gameObject.transform.localScale = GetVector3(SCALE_KEY, false);
-			gameObject.SetActive(true);
-			CustomCoroutine.FlickerSequence(delegate
-			{
-				dcac.holoPortraitParent.gameObject.SetActive(true);
-			}, delegate
-			{
-				dcac.holoPortraitParent.gameObject.SetActive(false);
-			}, false, true, 0.1f, 3, null);
+            gameObject.SetActive(true);
+            CustomCoroutine.FlickerSequence(delegate
+            {
+                dcac.holoPortraitParent.gameObject.SetActive(true);
+            }, delegate
+            {
+                dcac.holoPortraitParent.gameObject.SetActive(false);
+            }, false, true, 0.1f, 3, null);
 
             portraitSpawned = true;
-		}
+        }
 
         public override void ApplyAppearance()
-		{
-			if (base.Card.Anim is DiskCardAnimationController dcac && this.Card is PlayableCard pCard && pCard.OnBoard && !portraitSpawned)
-			{
-				SpawnHoloPortrait(dcac);
+        {
+            if (base.Card.Anim is DiskCardAnimationController dcac && this.Card is PlayableCard pCard && pCard.OnBoard && !portraitSpawned)
+            {
+                SpawnHoloPortrait(dcac);
                 this.Card.renderInfo.hidePortrait = portraitSpawned;
-			}
-		}
+            }
+        }
 
         public override void OnPreRenderCard()
         {

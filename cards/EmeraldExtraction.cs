@@ -30,7 +30,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 P03Plugin.PluginGuid,
                 info,
                 typeof(EmeraldExtraction),
-                TextureHelper.GetImageAsTexture("ability_emerald_power.png", typeof(EmeraldExtraction).Assembly)
+                TextureHelper.GetImageAsTexture("ability_emerald_extraction.png", typeof(EmeraldExtraction).Assembly)
             ).Id;
         }
 

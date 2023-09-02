@@ -1,6 +1,7 @@
 using System.Collections;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Patchers;
 using UnityEngine;
 
@@ -41,12 +42,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.SwitchToView(View.Board);
 
             // Clear out the queue and the board
-            yield return this.ClearQueue();
-            yield return this.ClearBoard();
+            yield return ClearQueue();
+            yield return ClearBoard();
 
             // No more blueprints
-            this.Blueprint = null;
-            this.TurnPlan = new();
+            Blueprint = null;
+            TurnPlan = new();
 
             yield return BoardManager.Instance.CreateCardInSlot(GetBlockchain(), BoardManager.Instance.OpponentSlotsCopy[0]);
             yield return new WaitForSeconds(0.15f);
@@ -60,11 +61,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             for (int i = 1; i < 4; i++)
             {
-                yield return BoardManager.Instance.CreateCardInSlot( CardLoader.GetCardByName(CustomCards.GOLLYCOIN), BoardManager.Instance.OpponentSlotsCopy[i]);
+                yield return BoardManager.Instance.CreateCardInSlot(CardLoader.GetCardByName(CustomCards.GOLLYCOIN), BoardManager.Instance.OpponentSlotsCopy[i]);
                 yield return new WaitForSeconds(0.15f);
             }
             yield return new WaitForSeconds(0.75f);
-            
+
             ViewManager.Instance.SwitchToView(View.Default);
             ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
         }
@@ -77,7 +78,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield break;
             }
 
-            if (this.NumLives == this.StartingLives)
+            if (NumLives == StartingLives)
             {
                 yield return base.QueueNewCards(doTween, changeView);
                 yield break;
@@ -96,7 +97,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 int zoneCount = EventManagement.CompletedZones.Count;
                 statPoints = statPoints - 3 + EventManagement.CompletedZones.Count;
                 if (zoneCount == 0 && statPoints > 3)
-                    statPoints = statPoints - 1;
+                    statPoints--;
             }
         }
     }

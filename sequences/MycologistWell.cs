@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Quests;
@@ -11,38 +12,30 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 {
     public class MycologistWell : HoloMapNode
     {
-        private void ShowHandleDown(bool down, bool immediate = false)
-        {
-            this.anim.Play(down ? "down" : "up", 0, immediate ? 1f : 0f);
-        }
-
-        private void Start()
-        {
-            this.ShowHandleDown(this.handleDown, true);
-        }
+        private void ShowHandleDown(bool down, bool immediate = false) => anim.Play(down ? "down" : "up", 0, immediate ? 1f : 0f);
 
         public override void OnSetActive(bool active)
         {
             base.OnSetActive(active);
-            this.ShowHandleDown(this.handleDown, true);
-            HoloMapGenericInteractable clicker = this.gameObject.GetComponentInChildren<HoloMapGenericInteractable>();
+            ShowHandleDown(handleDown, true);
+            HoloMapGenericInteractable clicker = gameObject.GetComponentInChildren<HoloMapGenericInteractable>();
             clicker.selectedEvent = new();
-            clicker.selectedEvent.AddListener(this.OnCursorSelectEnd);
+            clicker.selectedEvent.AddListener(OnCursorSelectEnd);
         }
 
         public override void OnCursorSelectEnd()
         {
-            this.handleDown = !this.handleDown;
-            this.ShowHandleDown(this.handleDown, false);
+            handleDown = !handleDown;
+            ShowHandleDown(handleDown, false);
             AudioController.Instance.PlaySound2D("holomap_node_selected", MixerGroup.TableObjectsSFX, 0.5f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.VerySmall), null, new AudioParams.Randomization(true), null, false);
 
-            if (this.handleDown)
+            if (handleDown)
             {
-                this.SetHoveringEffectsShown(false);
-                this.OnSelected();
+                SetHoveringEffectsShown(false);
+                OnSelected();
 
                 if (!StoryEventsData.EventCompleted(EventManagement.MYCO_ENTRY_APPROVED) && !StoryEventsData.EventCompleted(EventManagement.MYCO_ENTRY_DENIED))
-                    base.StartCoroutine(this.MycologistSequence());
+                    StartCoroutine(MycologistSequence());
                 else if (StoryEventsData.EventCompleted(EventManagement.MYCO_ENTRY_APPROVED) && !StoryEventsData.EventCompleted(EventManagement.MYCO_DEFEATED))
                     base.OnCursorSelectEnd();
             }

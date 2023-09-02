@@ -10,6 +10,8 @@ namespace Infiniscryption.P03KayceeRun.Helpers
     {
         internal static List<Shader> Shaders;
 
+        internal static Dictionary<string, GameObject> Prefabs = new();
+
         static AssetBundleManager()
         {
             string[] files = Directory.GetFiles(Paths.PluginPath, "p03assetbundle", SearchOption.AllDirectories);
@@ -17,8 +19,8 @@ namespace Infiniscryption.P03KayceeRun.Helpers
             var bundle = AssetBundle.LoadFromFile(pathToAssetBundle);
 
             Shaders = new(bundle.LoadAllAssets<Shader>());
-            foreach (var sh in Shaders)
-                P03Plugin.Log.LogInfo($"Loaded Shader {sh.name} from Asset Bundle");
+
+            Prefabs = bundle.LoadAllAssets<GameObject>().ToDictionary(o => o.name);
 
             bundle.Unload(false);
         }

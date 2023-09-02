@@ -13,7 +13,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
     public class ConduitProtector : AbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -62,7 +62,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     continue;
 
                 List<PlayableCard> conduits = ConduitCircuitManager.Instance.GetConduitsForSlot(slot);
-                
+
                 if (conduits.Count > 0 && conduits.Any(pc => pc.Slot == opposingSlot))
                 {
                     yield return __instance.SlotAttackSlot(attackingSlot, slot, waitAfter);

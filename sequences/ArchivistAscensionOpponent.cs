@@ -1,6 +1,7 @@
 using System.Collections;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Patchers;
 using UnityEngine;
 
@@ -10,29 +11,29 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     public class ArchivistAscensionOpponent : ArchivistBossOpponent
     {
         public static readonly string[] filetypes = new string[] { "GB", "MB", "KB", "B" };
-        public static readonly int[] damages = new int[] { 4,3,2,1 };
+        public static readonly int[] damages = new int[] { 4, 3, 2, 1 };
 
-        [HarmonyPatch(typeof(ArchivistBossOpponent), nameof(ArchivistBossOpponent.DamageFileSequence))]
+        [HarmonyPatch(typeof(ArchivistBossOpponent), nameof(DamageFileSequence))]
         [HarmonyPostfix]
         public static IEnumerator ReplaceFindFileSequence(IEnumerator sequence)
         {
             if (!SaveFile.IsAscension)
             {
                 yield return sequence;
-                yield break; 
+                yield break;
             }
 
             ViewManager.Instance.SwitchToView(View.Default, false, false);
-			yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.1f);
             int index = EventManagement.CompletedZones.Count;
-			int damage = damages[index];
+            int damage = damages[index];
             string prefabSuffix = filetypes[index];
-			CustomCoroutine.WaitThenExecute(0.15f, delegate
-			{
-				AudioController.Instance.PlaySound3D("archivist_spawn_filecube", MixerGroup.TableObjectsSFX, LifeManager.Instance.Scales.transform.position, 1f, 0f, null, null, null, null, false);
-			}, false);
-			yield return LifeManager.Instance.ShowDamageSequence(damage, 1, false, 0.25f, ResourceBank.Get<GameObject>("Prefabs/Environment/ScaleWeights/Weight_DataFile_" + prefabSuffix), 0f, true);
-			yield break;
+            CustomCoroutine.WaitThenExecute(0.15f, delegate
+            {
+                AudioController.Instance.PlaySound3D("archivist_spawn_filecube", MixerGroup.TableObjectsSFX, LifeManager.Instance.Scales.transform.position, 1f, 0f, null, null, null, null, false);
+            }, false);
+            yield return LifeManager.Instance.ShowDamageSequence(damage, 1, false, 0.25f, ResourceBank.Get<GameObject>("Prefabs/Environment/ScaleWeights/Weight_DataFile_" + prefabSuffix), 0f, true);
+            yield break;
         }
 
         public override IEnumerator IntroSequence(EncounterData encounter)
@@ -57,14 +58,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             CardInfo info = CardLoader.GetCardByName("DeadTree");
 
             if (EventManagement.CompletedZones.Count >= 1)
-                info.mods.Add(new CardModificationInfo(0,2));
+                info.mods.Add(new CardModificationInfo(0, 2));
             if (EventManagement.CompletedZones.Count >= 2)
-                info.mods.Add(new CardModificationInfo(0,2));
+                info.mods.Add(new CardModificationInfo(0, 2));
             if (EventManagement.CompletedZones.Count == 3)
-                info.mods.Add(new (Ability.Reach));
-            
+                info.mods.Add(new(Ability.Reach));
+
             return info;
-        } 
+        }
 
         public override IEnumerator StartNewPhaseSequence()
         {
@@ -79,8 +80,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.SwitchToView(View.Board);
 
             // Clear out the queue and the board
-            yield return this.ClearQueue();
-            yield return this.ClearBoard();
+            yield return ClearQueue();
+            yield return ClearBoard();
 
             yield return BoardManager.Instance.CreateCardInSlot(CardLoader.GetCardByName(CustomCards.VIRUS_SCANNER), BoardManager.Instance.OpponentSlotsCopy[0]);
             yield return new WaitForSeconds(0.25f);
@@ -99,8 +100,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 // Find the last empty slot
                 int slot = -1;
                 for (int i = 0; i < 4; i++)
+                {
                     if (BoardManager.Instance.PlayerSlotsCopy[i].Card == null)
                         slot = i;
+                }
 
                 if (slot >= 0)
                 {
@@ -115,7 +118,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 else
                 {
                     yield return BoardManager.Instance.PlayerSlotsCopy[4].Card.Die(true, null, true); // sorry
-                    yield return new WaitForSeconds(0.25f); 
+                    yield return new WaitForSeconds(0.25f);
                 }
             }
 
@@ -124,8 +127,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return BoardManager.Instance.CreateCardInSlot(CardLoader.GetCardByName(CustomCards.OLD_DATA), BoardManager.Instance.PlayerSlotsCopy[4]);
             yield return new WaitForSeconds(0.75f);
 
-            yield return base.ReplaceBlueprint("ArchivistBossP2", false);
-	        yield return new WaitForSeconds(0.25f);
+            yield return ReplaceBlueprint("ArchivistBossP2", false);
+            yield return new WaitForSeconds(0.25f);
         }
     }
 }

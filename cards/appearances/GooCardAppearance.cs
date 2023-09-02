@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    public class GooDiscCardAppearance : EmissiveDiscBorderBase
+    public class GooDiscCardAppearance : DiscCardColorAppearance
     {
-        public static CardAppearanceBehaviour.Appearance ID { get; private set; }
+        public static new Appearance ID { get; private set; }
 
-        public override Color EmissionColor { get { return GameColors.Instance.limeGreen; } }
+        public override Color? BorderColor => GameColors.Instance.limeGreen;
 
         static GooDiscCardAppearance()
         {

@@ -1,18 +1,17 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
+using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
-using HarmonyLib;
-using System.Linq;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
-	public class CellDeEvolve : Evolve
-	{
-		public override Ability Ability => AbilityID;
+    public class CellDeEvolve : Evolve
+    {
+        public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
         static CellDeEvolve()
@@ -21,15 +20,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Transforms When Unpowered";
             info.rulebookDescription = "If [creature] is NOT within a circuit at the beginning of the turn, it will transform back its original form.";
             info.canStack = false;
-            info.powerLevel = 1;
+            info.powerLevel = 0;
             info.opponentUsable = true;
-            info.conduitCell = true;
+            info.SetExtendedProperty(AbilityIconBehaviours.CELL_INVERSE, true).conduitCell = true;
             info.passive = false;
             info.hasColorOverride = true;
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.CellDrawRandomCardOnDeath).Info.colorOverride;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            CellDeEvolve.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(CellDeEvolve),
@@ -37,23 +36,25 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-		public override bool RespondsToUpkeep(bool playerUpkeep)
+        public override bool RespondsToUpkeep(bool playerUpkeep)
         {
-            return base.RespondsToUpkeep(playerUpkeep) && !ConduitCircuitManager.Instance.SlotIsWithinCircuit(this.Card.Slot);
+            return base.RespondsToUpkeep(playerUpkeep) && !ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
         }
 
         [HarmonyPatch(typeof(EvolveParams), nameof(EvolveParams.GetDefaultEvolution))]
         [HarmonyPrefix]
         internal static bool UpdateDefaultEvolutionWithCellDeEvolve(CardInfo info, ref CardInfo __result)
         {
-            if (info.HasAbility(CellDeEvolve.AbilityID))
+            if (info.HasAbility(AbilityID))
             {
                 CardInfo cardInfo = info.Clone() as CardInfo;
-                CardModificationInfo cardModificationInfo = new CardModificationInfo(0, 0);
-                cardModificationInfo.fromEvolve = true;
+                CardModificationInfo cardModificationInfo = new(0, 0)
+                {
+                    fromEvolve = true,
 
-                // Make it so the card doesn't copy this mod when it de-evolves
-                cardModificationInfo.nonCopyable = true;
+                    // Make it so the card doesn't copy this mod when it de-evolves
+                    nonCopyable = true
+                };
 
                 // If this came from CellDevEvolve (i.e., the default evolution is re-evolving)
                 // we don't need to change the name or change the attack or anything like that.
@@ -63,12 +64,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 // But if it does not have an evolve mod, we need to add a default evolve mod.
                 if (!info.Mods.Any(m => m.fromEvolve))
                 {
-                    cardModificationInfo.nameReplacement = String.Format(Localization.Translate("Beta {0}"), cardInfo.DisplayedNameLocalized);
+                    cardModificationInfo.nameReplacement = string.Format(Localization.Translate("Beta {0}"), cardInfo.DisplayedNameLocalized);
                     cardModificationInfo.attackAdjustment = -1;
                 }
 
-                cardModificationInfo.abilities = new () { CellEvolve.AbilityID };
-                cardModificationInfo.negateAbilities = new () { CellDeEvolve.AbilityID } ;
+                cardModificationInfo.abilities = new() { CellEvolve.AbilityID };
+                cardModificationInfo.negateAbilities = new() { AbilityID };
 
                 cardInfo.Mods.Add(cardModificationInfo);
                 __result = cardInfo;
@@ -77,5 +78,5 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
             return true;
         }
-	}
+    }
 }

@@ -2,8 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.Achievements;
@@ -13,7 +11,6 @@ using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Saves;
 using Pixelplacement;
-using TMPro;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards.Stickers
@@ -34,7 +31,9 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             get
             {
                 if (_transparentTexture != null)
+                {
                     return _transparentTexture;
+                }
 
                 _transparentTexture = new(2, 2, TextureFormat.RGBA32, false);
                 _transparentTexture.SetPixels(new Color[] { TRANSPARENT_COLOR, TRANSPARENT_COLOR, TRANSPARENT_COLOR, TRANSPARENT_COLOR });
@@ -50,12 +49,18 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             get
             {
                 if (_falloffTexture != null)
+                {
                     return _falloffTexture;
+                }
 
                 _falloffTexture = new(6, 6, TextureFormat.RGBA32, false);
                 for (int x = 0; x < _falloffTexture.width; x++)
+                {
                     for (int y = 0; y < _falloffTexture.height; y++)
+                    {
                         _falloffTexture.SetPixel(x, y, x == 0 ? Color.black : TRANSPARENT_COLOR);
+                    }
+                }
 
                 _falloffTexture.Apply();
 
@@ -71,19 +76,20 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         }
 
         internal static Dictionary<string, Achievement> StickerRewards = new() {
-            { "sticker_altcat", Achievement.KMOD_CHALLENGELEVEL1 },
-            { "sticker_null", Achievement.KMOD_CHALLENGELEVEL2 },
-            { "sticker_altcat_3", Achievement.KMOD_SPECIAL3 },
+            { "sticker_null", P03AchievementManagement.FIRST_WIN },
+            { "sticker_altcat", P03AchievementManagement.SCALES_TILTED_3X }
         };
 
-        internal readonly static List<string> AllStickerKeys = new(StickerRewards.Keys);
+        internal static readonly List<string> AllStickerKeys = new(StickerRewards.Keys);
 
         private static Texture2D GetStickerTexture(string keyName)
         {
             Texture2D tempTexture = TextureHelper.GetImageAsTexture($"{keyName}.png", typeof(Stickers).Assembly);
-            Texture2D retval = new(tempTexture.width + 2, tempTexture.height + 2, TextureFormat.RGBA32, false);
-            retval.name = tempTexture.name;
-            retval.wrapMode = TextureWrapMode.Clamp;
+            Texture2D retval = new(tempTexture.width + 2, tempTexture.height + 2, TextureFormat.RGBA32, false)
+            {
+                name = tempTexture.name,
+                wrapMode = TextureWrapMode.Clamp
+            };
             for (int x = 0; x < retval.width; x++)
             {
                 retval.SetPixel(x, 0, TRANSPARENT_COLOR);
@@ -99,25 +105,29 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             return retval;
         }
 
-        private readonly static List<Texture2D> AllStickers = new(AllStickerKeys.Select(GetStickerTexture));
+        private static readonly List<Texture2D> AllStickers = new(AllStickerKeys.Select(GetStickerTexture));
 
-        private static Color Transparency(Color c)
-        {
-            return new(c.r, c.g, c.b, c.a * 0.3f);
-        }
+        private static Color Transparency(Color c) => new(c.r, c.g, c.b, c.a * 0.3f);
 
         private static Texture2D MakeFadedTexture(Texture2D texture)
         {
-            Texture2D newTexture = new(texture.width, texture.height, TextureFormat.RGBA32, false);
-            newTexture.name = texture.name;
+            Texture2D newTexture = new(texture.width, texture.height, TextureFormat.RGBA32, false)
+            {
+                name = texture.name
+            };
             for (int x = 0; x < texture.width; x++)
+            {
                 for (int y = 0; y < texture.height; y++)
+                {
                     newTexture.SetPixel(x, y, Transparency(texture.GetPixel(x, y)));
+                }
+            }
+
             newTexture.Apply();
             return newTexture;
         }
 
-        private readonly static List<Texture2D> AllFadedStickers = new(AllStickers.Select(MakeFadedTexture));
+        private static readonly List<Texture2D> AllFadedStickers = new(AllStickers.Select(MakeFadedTexture));
 
         private static Color Shadow(Color c)
         {
@@ -127,18 +137,25 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         private static Texture2D MakeShadowTexture(Texture2D texture)
         {
-            Texture2D newTexture = new(texture.width, texture.height, TextureFormat.RGBA32, false);
-            newTexture.name = texture.name;
+            Texture2D newTexture = new(texture.width, texture.height, TextureFormat.RGBA32, false)
+            {
+                name = texture.name
+            };
             for (int x = 0; x < texture.width; x++)
+            {
                 for (int y = 0; y < texture.height; y++)
+                {
                     newTexture.SetPixel(x, y, Shadow(texture.GetPixel(x, y)));
+                }
+            }
+
             newTexture.Apply();
             return newTexture;
         }
 
-        private readonly static List<Texture2D> AllShadowStickers = new(AllStickers.Select(MakeShadowTexture));
+        private static readonly List<Texture2D> AllShadowStickers = new(AllStickers.Select(MakeShadowTexture));
 
-        private readonly static Dictionary<StickerStyle, List<Texture2D>> AllStickerTypes = new()
+        private static readonly Dictionary<StickerStyle, List<Texture2D>> AllStickerTypes = new()
         {
             { StickerStyle.Standard, AllStickers },
             { StickerStyle.Faded, AllFadedStickers },
@@ -153,11 +170,17 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         {
             Dictionary<string, Vector3> retval = new();
             if (String.IsNullOrEmpty(parsed))
+            {
                 return retval;
+            }
 
-            foreach (var p in parsed.Split('|').Select(s => s.Split(',')))
+            foreach (string[] p in parsed.Split('|').Select(s => s.Split(',')))
+            {
                 if (p.Length == 4)
+                {
                     retval.Add(p[0], new(float.Parse(p[1]), float.Parse(p[2]), float.Parse(p[3])));
+                }
+            }
 
             return retval;
         }
@@ -166,40 +189,44 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         {
             Dictionary<string, Dictionary<string, Vector3>> retval = new();
             if (String.IsNullOrEmpty(parsed))
+            {
                 return retval;
+            }
 
-            foreach (var p in parsed.Split('@').Select(s => s.Split('/')))
+            foreach (string[] p in parsed.Split('@').Select(s => s.Split('/')))
+            {
                 retval.Add(p[0], ParseVectorMap(p[1]));
+            }
 
             return retval;
         }
 
-        private static string FormatVectorMap(Dictionary<string, Vector3> value)
-        {
-            return String.Join("|", value.Select(kvp => $"{kvp.Key},{kvp.Value.x},{kvp.Value.y},{kvp.Value.z}"));
-        }
+        private static string FormatVectorMap(Dictionary<string, Vector3> value) => String.Join("|", value.Select(kvp => $"{kvp.Key},{kvp.Value.x},{kvp.Value.y},{kvp.Value.z}"));
 
-        private static string FormatVectorMapOfMaps(Dictionary<string, Dictionary<string, Vector3>> value)
-        {
-            return String.Join("@", value.Select(kvp => $"{kvp.Key}/{FormatVectorMap(kvp.Value)}"));
-        }
+        private static string FormatVectorMapOfMaps(Dictionary<string, Dictionary<string, Vector3>> value) => String.Join("@", value.Select(kvp => $"{kvp.Key}/{FormatVectorMap(kvp.Value)}"));
 
         private static string GetCardKey(CardInfo card)
         {
             if (card == null)
+            {
                 return null;
+            }
 
             string retval = card.name;
             string cardKey = CustomCards.ConvertCardToCompleteCode(card);
             int duplicates = 0;
-            foreach (var deckCard in Part3SaveData.Data.deck.Cards)
+            foreach (CardInfo deckCard in Part3SaveData.Data.deck.Cards)
             {
                 if (deckCard.name.Equals(retval))
                 {
                     if (cardKey.Equals(CustomCards.ConvertCardToCompleteCode(deckCard)))
+                    {
                         break;
+                    }
                     else
+                    {
                         duplicates += 1;
+                    }
                 }
             }
             return $"{retval}{duplicates}";
@@ -209,10 +236,12 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         {
             if (card == null)
             {
-                foreach (var key in dictionary.Keys)
+                foreach (string key in dictionary.Keys)
                 {
                     if (dictionary[key].ContainsKey(stickerName))
+                    {
                         dictionary[key].Remove(stickerName);
+                    }
                 }
                 return dictionary;
             }
@@ -220,7 +249,9 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             string cardKey = GetCardKey(card);
 
             if (!dictionary.ContainsKey(cardKey))
+            {
                 dictionary[cardKey] = new();
+            }
 
             if (String.IsNullOrEmpty(stickerName))
             {
@@ -229,9 +260,13 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             }
 
             if (vector.HasValue)
+            {
                 dictionary[cardKey][stickerName] = vector.Value;
+            }
             else if (dictionary[cardKey].ContainsKey(stickerName))
+            {
                 dictionary[cardKey].Remove(stickerName);
+            }
 
             return dictionary;
         }
@@ -242,10 +277,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "AppliedStickerPositions", FormatVectorMapOfMaps(value));
         }
 
-        internal static void UpdateStickerPosition(CardInfo card, string stickerName, Vector3? position)
-        {
-            AppliedStickerPositions = AppliedStickerPositions.UpdateVectorHelper(card, stickerName, position);
-        }
+        internal static void UpdateStickerPosition(CardInfo card, string stickerName, Vector3? position) => AppliedStickerPositions = AppliedStickerPositions.UpdateVectorHelper(card, stickerName, position);
 
         private static Dictionary<string, Dictionary<string, Vector3>> AppliedStickerRotations
         {
@@ -253,10 +285,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "AppliedStickerRotations", FormatVectorMapOfMaps(value));
         }
 
-        internal static void UpdateStickerRotation(CardInfo card, string stickerName, Vector3? eulerAngles)
-        {
-            AppliedStickerRotations = AppliedStickerRotations.UpdateVectorHelper(card, stickerName, eulerAngles);
-        }
+        internal static void UpdateStickerRotation(CardInfo card, string stickerName, Vector3? eulerAngles) => AppliedStickerRotations = AppliedStickerRotations.UpdateVectorHelper(card, stickerName, eulerAngles);
 
         private static Dictionary<string, Dictionary<string, Vector3>> AppliedStickerScales
         {
@@ -264,17 +293,18 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "AppliedStickerScales", FormatVectorMapOfMaps(value));
         }
 
-        internal static void UpdateStickerScale(CardInfo card, string stickerName, Vector3? scale)
-        {
-            AppliedStickerScales = AppliedStickerScales.UpdateVectorHelper(card, stickerName, scale);
-        }
+        internal static void UpdateStickerScale(CardInfo card, string stickerName, Vector3? scale) => AppliedStickerScales = AppliedStickerScales.UpdateVectorHelper(card, stickerName, scale);
 
         internal static bool IsStickerApplied(string stickerName)
         {
-            var stickerDict = AppliedStickerPositions;
-            foreach (var cardKey in stickerDict.Keys)
+            Dictionary<string, Dictionary<string, Vector3>> stickerDict = AppliedStickerPositions;
+            foreach (string cardKey in stickerDict.Keys)
+            {
                 if (stickerDict[cardKey].ContainsKey(stickerName))
+                {
                     return true;
+                }
+            }
 
             return false;
         }
@@ -318,7 +348,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
             textureRenderer.sortingOrder = style == StickerStyle.Standard ? 500 : -500;
 
-            float widthOverHeight = ((float)texture.width) / ((float)texture.height);
+            float widthOverHeight = texture.width / ((float)texture.height);
             float width = 0.5f;
             float height = width / widthOverHeight;
             sticker.transform.localScale = new(width, height, 1f);
@@ -331,7 +361,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 projectorObject.transform.SetParent(sticker.transform);
                 projectorObject.transform.localPosition = new(0f, 0f, -1.25f);
 
-                var projector = projectorObject.AddComponent<Projector>();
+                Projector projector = projectorObject.AddComponent<Projector>();
                 string shaderName = interactable ? "P03/Projector/UnStenciledSticker" : "P03/Projector/StenciledSticker";
                 Shader lightShader = AssetBundleManager.Shaders.Find(sh => sh.name.Equals(shaderName));
                 projector.material = new(lightShader);
@@ -359,7 +389,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             }
             else
             {
-                GameObject.Destroy(sticker.GetComponent<MeshCollider>());
+                UnityEngine.Object.Destroy(sticker.GetComponent<MeshCollider>());
             }
 
             return sticker;
@@ -391,23 +421,29 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             yield return sequence;
 
             if (!P03AscensionSaveData.IsP03Run)
+            {
                 yield break;
+            }
 
             if (StickerRewards.Where(kvp => ModdedAchievementManager.AchievementById(kvp.Value).IsUnlocked).Count() == 0)
+            {
                 yield break;
+            }
 
             if (__instance.gameObject.GetComponent<StickerInterfaceManager>() == null)
+            {
                 __instance.gameObject.AddComponent<StickerInterfaceManager>();
+            }
 
-            GameObject stickerButton = GameObject.Instantiate(ResourceBank.Get<GameObject>("prefabs/rulebook/TableTablet"), __instance.transform);
-            GameObject.Destroy(stickerButton.GetComponentInChildren<TableRuleBook>());
+            GameObject stickerButton = UnityEngine.Object.Instantiate(ResourceBank.Get<GameObject>("prefabs/rulebook/TableTablet"), __instance.transform);
+            UnityEngine.Object.Destroy(stickerButton.GetComponentInChildren<TableRuleBook>());
 
             stickerButton.transform.localScale = new(0.5f, 0.5f, 0.5f);
             stickerButton.transform.localEulerAngles = new(0f, 90f, 0f);
 
-            var previousInteractable = stickerButton.GetComponentInChildren<OpenRulebookInteractable>();
-            var osi = previousInteractable.gameObject.AddComponent<OpenStickerInteractable>();
-            GameObject.Destroy(previousInteractable);
+            OpenRulebookInteractable previousInteractable = stickerButton.GetComponentInChildren<OpenRulebookInteractable>();
+            OpenStickerInteractable osi = previousInteractable.gameObject.AddComponent<OpenStickerInteractable>();
+            UnityEngine.Object.Destroy(previousInteractable);
             osi.SetEnabled(true);
 
             stickerButton.name = "StickerBook";
@@ -429,7 +465,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             Transform tablet = __instance.transform.Find("StickerBook");
             if (tablet != null)
             {
-                Tween.Position(tablet, tablet.transform.position + new Vector3(0f, 0f, -2f), 0.2f, 0f, completeCallback: () => GameObject.Destroy(tablet.gameObject));
+                Tween.Position(tablet, tablet.transform.position + new Vector3(0f, 0f, -2f), 0.2f, 0f, completeCallback: () => UnityEngine.Object.Destroy(tablet.gameObject));
             }
             yield return sequence;
         }
@@ -439,19 +475,25 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         private static void ApplyStickersToCard(ref Card __instance)
         {
             if (__instance.StatsLayer is not DiskRenderStatsLayer)
+            {
                 return;
+            }
 
             for (int i = 1; i <= 5; i++)
+            {
                 __instance.StatsLayer.transform.Find($"Top/Stickers/Sticker_{i}").gameObject.layer = 2;
+            }
 
-            foreach (var proj in __instance.GetComponentsInChildren<Projector>())
-                GameObject.Destroy(proj.transform.parent.gameObject);
+            foreach (Projector proj in __instance.GetComponentsInChildren<Projector>())
+            {
+                UnityEngine.Object.Destroy(proj.transform.parent.gameObject);
+            }
 
             string cardKey = GetCardKey(__instance.Info);
-            var positions = AppliedStickerPositions;
-            var scales = AppliedStickerScales;
-            var rotations = AppliedStickerRotations;
-            var activeInterface = StickerInterfaceManager.Instance != null && StickerInterfaceManager.Instance.StickerInterfaceActive;
+            Dictionary<string, Dictionary<string, Vector3>> positions = AppliedStickerPositions;
+            Dictionary<string, Dictionary<string, Vector3>> scales = AppliedStickerScales;
+            Dictionary<string, Dictionary<string, Vector3>> rotations = AppliedStickerRotations;
+            bool activeInterface = StickerInterfaceManager.Instance != null && StickerInterfaceManager.Instance.StickerInterfaceActive;
 
             if (positions.ContainsKey(cardKey))
             {
@@ -464,21 +506,25 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                     stencil.transform.localPosition = new(0f, -0.05f, 0f);
                     stencil.transform.localEulerAngles = new(0f, 0f, 0f);
                     stencil.GetComponent<Renderer>().material = new Material(STENCIL_SHADER);
-                    GameObject.Destroy(stencil.GetComponent<Collider>());
+                    UnityEngine.Object.Destroy(stencil.GetComponent<Collider>());
                 }
 
-                foreach (var stickerKey in positions[cardKey].Keys)
+                foreach (string stickerKey in positions[cardKey].Keys)
                 {
-                    var sticker = GetSticker(stickerKey, activeInterface, true, StickerStyle.Standard);
+                    GameObject sticker = GetSticker(stickerKey, activeInterface, true, StickerStyle.Standard);
                     sticker.transform.SetParent(__instance.StatsLayer.transform);
                     sticker.transform.localPosition = positions[cardKey][stickerKey];
                     sticker.transform.localEulerAngles = new(0f, 180f, 90f);
 
                     if (scales.ContainsKey(cardKey) && scales[cardKey].ContainsKey(stickerKey))
+                    {
                         sticker.transform.localScale = scales[cardKey][stickerKey];
+                    }
 
                     if (rotations.ContainsKey(cardKey) && rotations[cardKey].ContainsKey(stickerKey))
+                    {
                         sticker.transform.localEulerAngles = rotations[cardKey][stickerKey];
+                    }
 
                     // Reparent
                     sticker.transform.SetParent(__instance.StatsLayer.transform.Find(sticker.transform.localPosition.x > 0 ? "Top" : "Bottom"), true);

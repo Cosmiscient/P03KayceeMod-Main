@@ -1,13 +1,8 @@
-using UnityEngine;
-using HarmonyLib;
-using System.Collections.Generic;
-using System.Reflection;
-using System.IO;
-using InscryptionAPI.Sound;
-using UnityEngine.Networking;
 using System;
-using BepInEx;
 using System.Linq;
+using HarmonyLib;
+using InscryptionAPI.Sound;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -19,7 +14,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         internal static void LoadMyCustomAudio(ref AudioController __instance)
         {
             // Please dont' break anything...
-            foreach (string clipName in new string[] { "bottle_break", "angel_reveal" })
+            foreach (string clipName in new string[] { "bottle_break", "angel_reveal", "fireball", "molotov" })
             {
                 if (!__instance.SFX.Any(ac => ac.name.Equals(clipName, StringComparison.InvariantCultureIgnoreCase)))
                 {

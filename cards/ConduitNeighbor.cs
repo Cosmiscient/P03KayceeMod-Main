@@ -1,11 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
@@ -13,7 +9,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
     public class ConduitNeighbor : AbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -21,14 +17,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Static Electricity";
-            info.rulebookDescription = "[creature] will provide cause adjacent cards to behave as if they are part of a completed conduit.";
+            info.rulebookDescription = "[creature] will cause adjacent cards to behave as if they are part of a completed conduit.";
             info.canStack = false;
             info.powerLevel = 2;
             info.opponentUsable = true;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            ConduitNeighbor.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(ConduitNeighbor),
@@ -52,7 +48,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 if (toLeft.Card != null)
                 {
-                    if (toLeft.Card.HasAbility(ConduitNeighbor.AbilityID))
+                    if (toLeft.Card.HasAbility(AbilityID))
                     {
                         __result = true;
                     }
@@ -63,7 +59,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 if (toRight.Card != null)
                 {
-                    if (toRight.Card.HasAbility(ConduitNeighbor.AbilityID))
+                    if (toRight.Card.HasAbility(AbilityID))
                     {
                         __result = true;
                     }
@@ -109,7 +105,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             List<CardSlot> slots = Singleton<BoardManager>.Instance.GetSlots(slot.IsPlayerSlot);
             int num = slots.IndexOf(slot);
-            List<PlayableCard> list = new List<PlayableCard>();
+            List<PlayableCard> list = new();
             bool flag = false;
             bool flag2 = false;
             for (int i = 0; i < slots.Count; i++)
@@ -141,7 +137,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 if (toLeft.Card != null)
                 {
-                    if (toLeft.Card.HasAbility(ConduitNeighbor.AbilityID))
+                    if (toLeft.Card.HasAbility(AbilityID))
                     {
                         list.Add(toLeft.Card);
                     }
@@ -152,7 +148,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 if (toRight.Card != null)
                 {
-                    if (toRight.Card.HasAbility(ConduitNeighbor.AbilityID))
+                    if (toRight.Card.HasAbility(AbilityID))
                     {
                         list.Add(toRight.Card);
                     }

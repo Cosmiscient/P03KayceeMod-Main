@@ -7,6 +7,7 @@ using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Triggers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -17,7 +18,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
-        public static readonly SlotModificationManager.ModificationType SlotModID = SlotModificationManager.New(P03Plugin.PluginGuid, "FullyLoaded", TextureHelper.GetImageAsTexture("cardslot_fully_loaded.png", typeof(FullyLoaded).Assembly));
+        public class FullyLoadedSlot : NonCardTriggerReceiver, IPassiveAttackBuff
+        {
+            public int GetPassiveAttackBuff(PlayableCard target) => target.Slot.GetSlotModification() == SlotModID ? 1 : 0;
+        }
+
+        public static SlotModificationManager.ModificationType SlotModID { get; private set; }
 
         static FullyLoaded()
         {
@@ -36,22 +42,21 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 typeof(FullyLoaded),
                 TextureHelper.GetImageAsTexture("ability_fully_loaded.png", typeof(FullyLoaded).Assembly)
             ).Id;
+
+            FullyLoaded.SlotModID = SlotModificationManager.New(
+                P03Plugin.PluginGuid,
+                "FullyLoaded",
+                typeof(FullyLoadedSlot),
+                TextureHelper.GetImageAsTexture("cardslot_fully_loaded.png", typeof(FullyLoaded).Assembly)
+            );
         }
 
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
-            this.Card.Slot.SetSlotModification(SlotModID);
+            yield return this.Card.Slot.SetSlotModification(SlotModID);
             yield break;
         }
 
         public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
-
-        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.GetPassiveAttackBuffs))]
-        [HarmonyPostfix]
-        private static void AddBuffForCardSlot(PlayableCard __instance, ref int __result)
-        {
-            if (__instance.Slot.GetSlotModification() == SlotModID)
-                __result += 1;
-        }
     }
 }

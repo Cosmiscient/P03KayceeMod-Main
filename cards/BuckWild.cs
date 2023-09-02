@@ -1,19 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03KayceeRun;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
-namespace Infiniscryption.P03KayceeRun.Cards
+namespace P03KayceeRun.Cards
 {
     [HarmonyPatch]
     public class BuckWild : DrawCreatedCard
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -28,7 +26,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            BuckWild.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(BuckWild),
@@ -36,7 +34,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToTakeDamage(PlayableCard source) => source != null;
+        public override bool RespondsToTakeDamage(PlayableCard source)
+        {
+            return source != null;
+        }
 
         private CardInfo LastCreatedCard;
 
@@ -44,7 +45,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnTakeDamage(PlayableCard source)
         {
-            this.Card.Anim.StrongNegationEffect();
+            Card.Anim.StrongNegationEffect();
             yield return new WaitForSeconds(0.2f);
             if (source.OpponentCard)
             {
@@ -72,7 +73,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static IEnumerator StopAttackIfNull(IEnumerator sequence, CardSlot attackingSlot)
         {
             if (attackingSlot.Card == null)
+            {
                 yield break;
+            }
 
             yield return sequence;
         }

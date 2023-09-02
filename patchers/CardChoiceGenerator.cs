@@ -1,9 +1,10 @@
-using HarmonyLib;
-using DiskCardGame;
-using System.Collections.Generic;
-using Infiniscryption.P03KayceeRun.Sequences;
-using System.Linq;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using DiskCardGame;
+using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03KayceeRun.Sequences;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -11,9 +12,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     public static class CardChoiceGenerator
     {
 
-        public class Part3RareCardChoicesNodeData : CardChoicesNodeData {} 
+        public class Part3RareCardChoicesNodeData : CardChoicesNodeData { }
 
-        private static Dictionary<RunBasedHoloMap.Zone, CardMetaCategory> selectionCategories = new()
+        private static readonly Dictionary<RunBasedHoloMap.Zone, CardMetaCategory> selectionCategories = new()
         {
             { RunBasedHoloMap.Zone.Neutral, CustomCards.NeutralRegion },
             { RunBasedHoloMap.Zone.Magic, CustomCards.WizardRegion },
@@ -25,18 +26,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static string GetNameContribution(CardInfo card)
         {
             string[] nameSplit = card.displayedName.Split(' ', '-');
-            if (nameSplit.Length > 1)
-            {
-                if (nameSplit[0].ToLowerInvariant().Contains("gem"))
-                    return nameSplit[1];
-                else
-                    return nameSplit[0];
-            }
-
-            if (card.displayedName.Contains("bot"))
-                return card.displayedName.Replace("bot", "");
-
-            return card.displayedName;
+            return nameSplit.Length > 1
+                ? nameSplit[0].ToLowerInvariant().Contains("gem") ? nameSplit[1] : nameSplit[0]
+                : card.displayedName.Contains("bot") ? card.displayedName.Replace("bot", "") : card.displayedName;
         }
 
         private static CardInfo GenerateMycoCard(int randomSeed)
@@ -50,19 +42,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             int health = Math.Max(left.Health, right.Health);
             int attack = Math.Max(left.Attack, right.Attack);
-            List<Ability> abilities = new ();
+            List<Ability> abilities = new();
             abilities.AddRange(left.Abilities);
             abilities.AddRange(right.Abilities);
             int energyCost = Math.Max(left.energyCost, right.energyCost);
 
-            CardModificationInfo mod = new();
-            mod.nonCopyable = true;
-            mod.abilities = abilities;
-            mod.healthAdjustment = health;
-            mod.attackAdjustment = attack;
-            mod.energyCostAdjustment = energyCost;
-            mod.nameReplacement = name;
-            mod.gemify = left.Gemified || right.Gemified;
+            CardModificationInfo mod = new()
+            {
+                nonCopyable = true,
+                abilities = abilities,
+                healthAdjustment = health,
+                attackAdjustment = attack,
+                energyCostAdjustment = energyCost,
+                nameReplacement = name,
+                gemify = left.Gemified || right.Gemified
+            };
             if (mod.abilities.Contains(Ability.Transformer))
             {
                 if (left.evolveParams != null)
@@ -90,7 +84,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 {
                     int newRandomSeed = P03AscensionSaveData.RandomSeed;
                     for (int i = 0; i < 3; i++)
-                        __result.Add(new () { CardInfo = GenerateMycoCard(newRandomSeed + 100 * i)});
+                        __result.Add(new() { CardInfo = GenerateMycoCard(newRandomSeed + (100 * i)) });
 
                     return false;
                 }

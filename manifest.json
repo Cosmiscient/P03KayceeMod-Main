@@ -5,6 +5,7 @@
     "description": "Had enough of Leshy? Face P03 inside of Kaycee's Mod! Now with NPCs, extra cards, and secrets.",
     "dependencies": [
         "API_dev-API-2.4.0",
-        "AllTheSigils-All_The_Sigils-2.5.4"
+        "AllTheSigils-All_The_Sigils-2.5.4",
+        "WhistleWind-New_Spell_Card_Toolkit-1.1.2"
     ]
 }

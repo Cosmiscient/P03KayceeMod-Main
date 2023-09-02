@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
@@ -22,11 +21,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 requiredAbility = required;
                 gainedAbility = gained;
                 modId = $"{RuleKey}{required}Gains{gained}";
+                AbilityIconBehaviours.DynamicAbilityCardModIds.Add(modId);
             }
         }
 
-        private List<Rule> PlayerRules = new();
-        private List<Rule> OpponentRules = new();
+        private readonly List<Rule> PlayerRules = new();
+        private readonly List<Rule> OpponentRules = new();
 
         private void ApplyAbilities(List<Rule> rules, List<CardSlot> slots)
         {
@@ -38,8 +38,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     {
                         if (!slot.Card.TemporaryMods.Any(m => m.singletonId.Equals(rule.modId)))
                         {
-                            CardModificationInfo info = new(rule.gainedAbility);
-                            info.singletonId = rule.modId;
+                            CardModificationInfo info = new(rule.gainedAbility)
+                            {
+                                singletonId = rule.modId
+                            };
                             slot.Card.AddTemporaryMod(info);
                         }
                     }
@@ -47,13 +49,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                 // Remove all where there is no longer a rule for it
                 // Remove all where the rule no longer applies to this card
-                List<CardModificationInfo> modsToRemove = slot.Card.temporaryMods.Where(m => 
+                List<CardModificationInfo> modsToRemove = slot.Card.temporaryMods.Where(m =>
                     !string.IsNullOrEmpty(m.singletonId) &&
                     m.singletonId.StartsWith(RuleKey) &&
                     !rules.Any(r => r.modId.Equals(m.singletonId) && slot.Card.HasAbility(r.requiredAbility))
                 ).ToList();
                 foreach (CardModificationInfo mod in modsToRemove)
+                {
                     slot.Card.RemoveTemporaryMod(mod);
+                }
             }
         }
 
@@ -66,15 +70,19 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 if (slot.Card != null)
                 {
-                    foreach (var abilityComb in slot.Card.GetComponents<CardsWithAbilityHaveAbility>())
+                    foreach (CardsWithAbilityHaveAbility abilityComb in slot.Card.GetComponents<CardsWithAbilityHaveAbility>())
                     {
                         if ((abilityComb.AppliesToFriendly && !slot.Card.OpponentCard) ||
                             (abilityComb.AppliesToOpposing && slot.Card.OpponentCard))
+                        {
                             PlayerRules.Add(new(abilityComb.RequiredAbility, abilityComb.GainedAbility));
+                        }
 
                         if ((abilityComb.AppliesToFriendly && slot.Card.OpponentCard) ||
                             (abilityComb.AppliesToOpposing && !slot.Card.OpponentCard))
+                        {
                             OpponentRules.Add(new(abilityComb.RequiredAbility, abilityComb.GainedAbility));
+                        }
                     }
                 }
             }
@@ -92,8 +100,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static void CreateManager()
         {
-            if (CardsWithAbilityHaveAbilityManager.Instance == null)
+            if (Instance == null)
+            {
                 TurnManager.Instance.gameObject.AddComponent<CardsWithAbilityHaveAbilityManager>();
+            }
         }
     }
 }

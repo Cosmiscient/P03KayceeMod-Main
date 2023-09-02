@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    public class QuestCardAppearance : EmissiveDiscBorderBase
+    public class QuestCardAppearance : DiscCardColorAppearance
     {
-        public static CardAppearanceBehaviour.Appearance ID { get; private set; }
+        public static new Appearance ID { get; private set; }
 
-        public override Color EmissionColor { get { return GameColors.Instance.darkBlue; } }
+        public override Color? BorderColor => GameColors.Instance.darkBlue;
 
         static QuestCardAppearance()
         {

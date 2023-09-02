@@ -1,14 +1,14 @@
 using System;
-using System.Linq;
 using System.Collections;
+using System.Linq;
 using DiskCardGame;
-using Infiniscryption.P03KayceeRun.Patchers;
-using UnityEngine;
+using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03KayceeRun.Quests;
+using InscryptionAPI.Helpers;
 using InscryptionAPI.Items;
 using InscryptionAPI.Items.Extensions;
-using InscryptionAPI.Helpers;
 using InscryptionAPI.Resource;
-using Infiniscryption.P03KayceeRun.Quests;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
@@ -22,26 +22,31 @@ namespace Infiniscryption.P03KayceeRun.Items
             QuestState goobertState = DefaultQuestDefinitions.FindGoobert.CurrentState;
 
             if (goobertState == DefaultQuestDefinitions.FindGoobert.InitialState || goobertState.StateName.EndsWith("P03WhereIsGoobert"))
-                return new (GameColors.Instance.brightLimeGreen, "Please! You've got to help me get out of here!");
+            {
+                return new(GameColors.Instance.brightLimeGreen, "Please! You've got to help me get out of here!");
+            }
 
             if (Part3SaveData.Data.items.Contains(ItemData.name))
-                    return new (GameColors.Instance.brightLimeGreen, "Thank you! I hope he doesn't notice me here...");
+            {
+                return new(GameColors.Instance.brightLimeGreen, "Thank you! I hope he doesn't notice me here...");
+            }
 
             if (DefaultQuestDefinitions.FindGoobert.CurrentState.StateName.ToLowerInvariant().EndsWith("P03GoobertHome"))
-                return new (GameColors.Instance.brightLimeGreen, "Thank you!");
+            {
+                return new(GameColors.Instance.brightLimeGreen, "Thank you!");
+            }
 
             // Okay, you only get to this point if you've bought goobert but don't have him anymore.
             // If he's in your collection as a card, we'll say something different
-            if (Part3SaveData.Data.deck.Cards.Any(c => c.name == CustomCards.MYCO_CONSTRUCT_BASE))
-                return new (GameColors.Instance.brightLimeGreen, "So much power, but so much pain...");
-
-            return new (GameColors.Instance.brightBlue, "Good riddance to that little freak.");
+            return Part3SaveData.Data.deck.Cards.Any(c => c.name == CustomCards.MYCO_CONSTRUCT_BASE)
+                ? new(GameColors.Instance.brightLimeGreen, "So much power, but so much pain...")
+                : new(GameColors.Instance.brightBlue, "Good riddance to that little freak.");
         }
 
         public static GameObject GetGameObject()
         {
             GameObject gameObject = ShockerItem.GetBaseGameObject("Prefabs/Items/GooBottleItem", "GoobertBottle");
-            GameObject.Destroy(gameObject.GetComponentInChildren<GooBottleItem>());
+            Destroy(gameObject.GetComponentInChildren<GooBottleItem>());
             gameObject.AddComponent<GoobertHuh>();
             return gameObject;
         }
@@ -72,7 +77,7 @@ namespace Infiniscryption.P03KayceeRun.Items
             ViewManager.Instance.SwitchToView(View.ConsumablesOnly, false, true);
             yield return new WaitForSeconds(0.2f);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03GoobertAnnoyed", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
-            this.PlayShakeAnimation();
+            PlayShakeAnimation();
             yield return TextDisplayer.Instance.PlayDialogueEvent("GoobertConfused", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03GoobertShutUp", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             yield return new WaitForSeconds(0.1f);
@@ -81,8 +86,8 @@ namespace Infiniscryption.P03KayceeRun.Items
 
             // Mark the quest as a failure - you lost Goobert.
             DefaultQuestDefinitions.FindGoobert.CurrentState.Status = QuestState.QuestStateStatus.Failure;
-            
-            this.PlayExitAnimation();
+
+            PlayExitAnimation();
             yield break;
         }
     }

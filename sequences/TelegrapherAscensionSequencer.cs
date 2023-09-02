@@ -1,18 +1,16 @@
 using System.Collections;
-using DiskCardGame;
+using System.Collections.Generic;
 using System.Linq;
+using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Patchers;
 using UnityEngine;
-using System.Collections.Generic;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
 {
     public class TelegrapherAscensionSequencer : TelegrapherBattleSequencer
     {
-        private static string[] APE_ADJECTIVES = new string[] { "Fungible", "Terminally Online", "AI Generated", "Wholesome", "Investment", "Inquisitive", "Endangered", "Bored", "Annoyed", "Sexy", "Tech", "Broseph", "Overgrown", "Fancy", "Expensive", "Scandalous", "Medium", "Personal", "Non-Fungible", "Trimmed", "Golly", "Devious", "Grape"};
-
-        private static Sprite[] APE_PORTRATS;
-        private const int NUMBER_OF_APES = 5;
+        private static readonly string[] APE_ADJECTIVES = new string[] { "Fungible", "Terminally Online", "AI Generated", "Wholesome", "Investment", "Inquisitive", "Endangered", "Bored", "Annoyed", "Sexy", "Tech", "Broseph", "Overgrown", "Fancy", "Expensive", "Scandalous", "Medium", "Personal", "Non-Fungible", "Trimmed", "Golly", "Devious", "Grape" };
         private int apesCreated = 0;
         private static List<string> apeAdjectivesRemaining = new(APE_ADJECTIVES);
 
@@ -20,26 +18,25 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public override bool RespondsToUpkeep(bool playerUpkeep)
         {
-            if (!SaveFile.IsAscension)
-                return base.RespondsToUpkeep(playerUpkeep);
-
-            return !playerUpkeep && BoardManager.Instance.OpponentSlotsCopy.Any(s => s.Card != null && s.Card.Info.name == CustomCards.GOLLYCOIN);
+            return !SaveFile.IsAscension
+                ? base.RespondsToUpkeep(playerUpkeep)
+                : !playerUpkeep && BoardManager.Instance.OpponentSlotsCopy.Any(s => s.Card != null && s.Card.Info.name == CustomCards.GOLLYCOIN);
         }
 
         private static CardInfo GenerateStupidAssApe(int statPoints)
         {
             // Sort out the name
             if (apeAdjectivesRemaining == null || apeAdjectivesRemaining.Count == 0)
-                apeAdjectivesRemaining = new (APE_ADJECTIVES);
+                apeAdjectivesRemaining = new(APE_ADJECTIVES);
 
             CardInfo cardByName = CardLoader.GetCardByName(CustomCards.NFT);
 
-            int seed = P03AscensionSaveData.RandomSeed + 100 * TurnManager.Instance.TurnNumber;
+            int seed = P03AscensionSaveData.RandomSeed + (100 * TurnManager.Instance.TurnNumber);
 
             int apeNameIndex = SeededRandom.Range(0, apeAdjectivesRemaining.Count, seed++);
             string apeName = apeAdjectivesRemaining[apeNameIndex];
             apeAdjectivesRemaining.RemoveAt(apeNameIndex);
-            
+
             List<AbilityInfo> validAbilities = ScriptableObjectLoader<AbilityInfo>.AllData.FindAll((AbilityInfo x) => x.metaCategories.Contains(AbilityMetaCategory.BountyHunter));
             CardModificationInfo cardModificationInfo = CardInfoGenerator.CreateRandomizedAbilitiesStatsMod(validAbilities, statPoints, 1, 1);
             cardModificationInfo.nameReplacement = Localization.Translate(apeName + " " + "Ape");
@@ -48,10 +45,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return cardByName;
         }
 
-        private List<CardSlot> EmptyLanes()
-        {
-            return BoardManager.Instance.OpponentSlotsCopy.Where(s => (s.Card == null || s.Card.Info.name == CustomCards.GOLLYCOIN) && BoardManager.Instance.GetCardQueuedForSlot(s) == null).ToList();
-        }
+        private List<CardSlot> EmptyLanes() => BoardManager.Instance.OpponentSlotsCopy.Where(s => (s.Card == null || s.Card.Info.name == CustomCards.GOLLYCOIN) && BoardManager.Instance.GetCardQueuedForSlot(s) == null).ToList();
 
         public override IEnumerator OnUpkeep(bool playerUpkeep)
         {
@@ -60,9 +54,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield return base.OnUpkeep(playerUpkeep);
                 yield break;
             }
-            
+
             // Here, we spend a gollycoin on an NFT.
-            
+
 
             // Doublecheck that we have a gollycoin
             if (playerUpkeep || !BoardManager.Instance.OpponentSlotsCopy.Any(s => s.Card != null && s.Card.Info.name == CustomCards.GOLLYCOIN))
@@ -91,15 +85,17 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
                 // Get rid of all gollycoin on the board
                 foreach (CardSlot slot in BoardManager.Instance.OpponentSlotsCopy)
+                {
                     if (slot.Card != null && slot.Card.Info.name == CustomCards.GOLLYCOIN)
                         slot.Card.ExitBoard(0.4f, Vector3.zero);
+                }
 
                 // Spawn a random ape
                 int statPoints = Mathf.RoundToInt((float)Mathf.Min(8, (apesCreated + 3) * 2.5f));
                 CardInfo ape = GenerateStupidAssApe(statPoints);
                 apesCreated += 1;
 
-                int seed = P03AscensionSaveData.RandomSeed + 1000 * apesCreated;
+                int seed = P03AscensionSaveData.RandomSeed + (1000 * apesCreated);
                 CardSlot targetSlot = slots[SeededRandom.Range(0, slots.Count, seed)];
                 yield return TurnManager.Instance.Opponent.QueueCard(ape, targetSlot);
 
@@ -137,21 +133,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield break; // Again, I don't want to do anything network related
         }
 
-        public override bool RespondsToOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer)
-        {
-            if (!SaveFile.IsAscension)
-                return base.RespondsToOtherCardDie(card, deathSlot, fromCombat, killer);
+        public override bool RespondsToOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer) => !SaveFile.IsAscension ? base.RespondsToOtherCardDie(card, deathSlot, fromCombat, killer) : false;
 
-            return false;
-        }
-
-        public override bool RespondsToOtherCardResolve(PlayableCard otherCard)
-        {
-            if (!SaveFile.IsAscension)
-                return base.RespondsToOtherCardResolve(otherCard);
-
-            return false;
-        }
+        public override bool RespondsToOtherCardResolve(PlayableCard otherCard) => !SaveFile.IsAscension ? base.RespondsToOtherCardResolve(otherCard) : false;
 
         private readonly int[] APE_CARDS_PLAN = new int[]
         {

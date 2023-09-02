@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DigitalRuby.LightningBolt;
 using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
@@ -31,20 +32,20 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 EventManagement.NumberOfLivesRemaining = 1;
             }
 
-            yield return TextDisplayer.Instance.PlayDialogueEvent(this.PreIntroDialogueId, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            yield return TextDisplayer.Instance.PlayDialogueEvent(PreIntroDialogueId, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             AudioController.Instance.SetLoopAndPlay("part3_boss", 0, true, true);
             AudioController.Instance.SetLoopVolumeImmediate(0.2f, 0);
             P03AnimationController.Instance.ShowInfected(true);
             ViewManager.Instance.SwitchToView(View.P03Face, false, true);
             yield return new WaitForSeconds(0.1f);
-            this.SetSceneEffectsShown(true);
+            SetSceneEffectsShown(true);
             P03AnimationController.Instance.FaceRenderer.SetTVEffectsEnabled(true);
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.MycologistAngry, false, true);
             yield return new WaitForSeconds(1f);
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistAscensionBoss", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.MycologistIdle, false, true);
             ViewManager.Instance.SwitchToView(View.Default, false, false);
-            base.SpawnScenery("GiantMushroomEffects");
+            SpawnScenery("GiantMushroomEffects");
             yield return new WaitForSeconds(1f);
             yield break;
         }
@@ -70,12 +71,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public override IEnumerator StartNewPhaseSequence()
         {
             ViewManager.Instance.SwitchToView(View.Default, false, true);
-            yield return base.ClearBoard();
-            yield return base.ClearQueue();
+            yield return ClearBoard();
+            yield return ClearQueue();
 
             // We aren't going to use an encounter blueprint for this
-            this.Blueprint = null;
-            this.ReplaceAndAppendTurnPlan(new List<List<CardInfo>>()); // There are no cards in the plan!
+            Blueprint = null;
+            ReplaceAndAppendTurnPlan(new List<List<CardInfo>>()); // There are no cards in the plan!
 
             yield return new WaitForSeconds(0.5f);
             ViewManager.Instance.SwitchToView(View.P03Face, false, true);
@@ -111,7 +112,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             CardSlot centerSlot = BoardManager.Instance.opponentSlots[2];
             CardSlot rightSlot = BoardManager.Instance.opponentSlots[3];
 
-            Tween.Position(centerSlot.Card.transform, centerSlot.transform.position + Vector3.up * 0.1f, 0.1f, 0f);
+            Tween.Position(centerSlot.Card.transform, centerSlot.transform.position + (Vector3.up * 0.1f), 0.1f, 0f);
             Tween.Position(leftSlot.Card.transform, centerSlot.transform.position, 0.3f, 0f);
             Tween.Position(rightSlot.Card.transform, centerSlot.transform.position, 0.3f, 0f);
             yield return new WaitForSeconds(0.2f);
@@ -121,12 +122,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             AudioController.Instance.PlaySound3D("teslacoil_overload", MixerGroup.TableObjectsSFX, centerSlot.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
             TableVisualEffectsManager.Instance.ThumpTable(0.3f);
 
-            GameObject topLightning = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), this.gameObject.transform.parent);
+            GameObject topLightning = Instantiate(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), gameObject.transform.parent);
             topLightning.GetComponent<LightningBoltScript>().EndObject = centerSlot.Card.gameObject;
 
             yield return new WaitForSeconds(0.3f);
 
-            GameObject.Destroy(topLightning);
+            Destroy(topLightning);
 
             BoardManager.Instance.opponentSlots[1].Card.ExitBoard(0.01f, Vector3.down);
             BoardManager.Instance.opponentSlots[3].Card.ExitBoard(0.01f, Vector3.down);
@@ -139,11 +140,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             goobert.transform.SetParent(centerSlot.gameObject.transform);
             Transform gooTransform = goobert.transform.Find("GooBottleItem(Clone)/GooWizardBottle");
             ConsumableItem itemcontroller = goobert.GetComponentInChildren<ConsumableItem>();
-            GameObject.Destroy(itemcontroller);
+            Destroy(itemcontroller);
 
             //GameObject.Destroy(goobert.GetComponentInChildren<GooWizardAnimationController>());
             //GameObject.Destroy(goobert.GetComponentInChildren<Animator>());
-            Vector3 target = new Vector3(0f, .6f, 0f);
+            Vector3 target = new(0f, .6f, 0f);
             goobert.transform.localPosition = target + (Vector3.up * 3f);
             gooTransform.localEulerAngles = new(0f, 276f, 0f);
             Tween.LocalPosition(goobert.transform, target, 3f, 0f);
@@ -155,18 +156,18 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             gooTransform.Find("GooWizard/Cork").gameObject.SetActive(false);
 
-            GameObject gooLightning = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), this.gameObject.transform.parent);
+            GameObject gooLightning = Instantiate(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), gameObject.transform.parent);
             gooLightning.GetComponent<LightningBoltScript>().StartObject = BoardManager.Instance.opponentSlots[0].gameObject;
             gooLightning.GetComponent<LightningBoltScript>().StartPosition = Vector3.up * 1.5f;
             gooLightning.GetComponent<LightningBoltScript>().EndObject = BoardManager.Instance.opponentSlots[4].gameObject;
             gooLightning.GetComponent<LightningBoltScript>().EndPosition = Vector3.up * 1.5f;
 
-            base.StartCoroutine(ConstantStatic(centerSlot.gameObject, 4f));
+            StartCoroutine(ConstantStatic(centerSlot.gameObject, 4f));
             yield return new WaitForSeconds(1f);
             gooTransform.Find("GooWizard/Bottle").gameObject.SetActive(false);
             AudioController.Instance.PlaySound3D("bottle_break", MixerGroup.TableObjectsSFX, centerSlot.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
 
-            base.StartCoroutine(this.GooSpeakBackground());
+            StartCoroutine(GooSpeakBackground());
 
             Tween.LocalScale(gooTransform, new Vector3(0.3f, 3f, 0.3f), 3f, 0f);
             //Tween.LocalPosition(goobert.transform.Find("GooWizardBottle"), new Vector3(0f, -1.5f, 0f), 3f, 0f);
@@ -177,12 +178,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
 
 
-            Tween.LocalPosition(gooTransform, gooTransform.localPosition + Vector3.down * 5f, 0.3f, 0f);
+            Tween.LocalPosition(gooTransform, gooTransform.localPosition + (Vector3.down * 5f), 0.3f, 0f);
 
             yield return new WaitForSeconds(0.3f);
 
-            GameObject.Destroy(gooTransform.gameObject);
-            GameObject.Destroy(gooLightning);
+            Destroy(gooTransform.gameObject);
+            Destroy(gooLightning);
 
             BoardManager.Instance.opponentSlots[2].Card.ExitBoard(0.01f, Vector3.down);
 
@@ -192,7 +193,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             ViewManager.Instance.SwitchToView(View.Board, false, true);
 
-            GameObject.Destroy(goobert);
+            Destroy(goobert);
 
             AscensionStatsData.TryIncrementStat(StatManagement.EXPERIMENTS_CREATED);
 
@@ -243,7 +244,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             Part3SaveData.Data.deck.AddCard(CardLoader.GetCardByName(CustomCards.MYCO_CONSTRUCT_BASE));
             AchievementManager.Unlock(P03AchievementManagement.MYCOLOGISTS_COMPLETED);
             StoryEventsData.SetEventCompleted(EventManagement.MYCO_DEFEATED);
-            yield return this.UnInfectP03();
+            yield return UnInfectP03();
             ResetConduitBorder();
             yield break;
         }

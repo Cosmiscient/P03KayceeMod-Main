@@ -1,16 +1,12 @@
 using System.Collections;
 using DiskCardGame;
 using HarmonyLib;
-using UnityEngine;
-using Pixelplacement;
-using System;
-using DigitalRuby.LightningBolt;
-using System.Collections.Generic;
 using Infiniscryption.P03KayceeRun.Patchers;
+using InscryptionAPI.Helpers;
 using InscryptionAPI.Items;
 using InscryptionAPI.Items.Extensions;
 using InscryptionAPI.Resource;
-using InscryptionAPI.Helpers;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
@@ -22,8 +18,8 @@ namespace Infiniscryption.P03KayceeRun.Items
             public override void ManagedUpdate()
             {
                 base.ManagedUpdate();
-                this.transform.localEulerAngles = Vector3.zero;
-                this.transform.localPosition = new Vector3(0f, 0.322f, 0f);
+                transform.localEulerAngles = Vector3.zero;
+                transform.localPosition = new Vector3(0f, 0.322f, 0f);
             }
         }
 
@@ -34,9 +30,9 @@ namespace Infiniscryption.P03KayceeRun.Items
         {
             GameObject gameObject = ShockerItem.GetBaseGameObject($"Prefabs/Environment/ScaleWeights/{PREFAB}", "LifeCube");
 
-            GameObject.Destroy(gameObject.GetComponentInChildren<Rigidbody>());
-            GameObject.Destroy(gameObject.GetComponentInChildren<Part3Weight>());
-            
+            Destroy(gameObject.GetComponentInChildren<Rigidbody>());
+            Destroy(gameObject.GetComponentInChildren<Part3Weight>());
+
             Transform weight = gameObject.transform.Find($"{PREFAB}(Clone)");
             // weight.transform.localEulerAngles = Vector3.zero;
             // weight.transform.localPosition = new Vector3(0f, 0.322f + 0.322f + .1636f, 0f);
@@ -72,9 +68,9 @@ namespace Infiniscryption.P03KayceeRun.Items
 
         public static ConsumableItem FixGameObject(GameObject obj)
         {
-            GameObject.Destroy(obj.GetComponentInChildren<Rigidbody>());
-            GameObject.Destroy(obj.GetComponentInChildren<Part3Weight>());
-            
+            Destroy(obj.GetComponentInChildren<Rigidbody>());
+            Destroy(obj.GetComponentInChildren<Part3Weight>());
+
             Transform weight = obj.transform.Find($"{PREFAB}(Clone)");
             // weight.transform.localEulerAngles = Vector3.zero;
             // weight.transform.localPosition = new Vector3(0f, 0.322f + 0.322f + .1636f, 0f);
@@ -87,12 +83,17 @@ namespace Infiniscryption.P03KayceeRun.Items
 
         public override IEnumerator ActivateSequence()
         {
-            base.PlayExitAnimation();
+            PlayExitAnimation();
             yield return new WaitForSeconds(0.5f);
-            if (TurnManager.Instance.SpecialSequencer != null && TurnManager.Instance.SpecialSequencer is DamageRaceBattleSequencer)
+            if (TurnManager.Instance.SpecialSequencer is not null and DamageRaceBattleSequencer)
+            {
                 TurnManager.Instance.SpecialSequencer.DamageAddedToScale(2, true);
+            }
             else
+            {
                 yield return LifeManager.Instance.ShowDamageSequence(2, 1, false, 0f, ResourceBank.Get<GameObject>("Prefabs/Environment/ScaleWeights/Weight_DataFile_KB"), 0.1f);
+            }
+
             yield return new WaitForSeconds(0.5f);
             ViewManager.Instance.SwitchToView(View.Default);
             yield return EventManagement.SayDialogueOnce("P03AscensionLifeItem", EventManagement.USED_LIFE_ITEM);
