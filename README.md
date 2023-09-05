@@ -145,11 +145,18 @@ While the full credits will play in-game when you win for the first time, I have
 - [BepInEx](https://inscryption.thunderstore.io/package/BepInEx/BepInExPack_Inscryption/)
 - [API](https://inscryption.thunderstore.io/package/API_dev/API/)
 - [All The Sigils](https://inscryption.thunderstore.io/package/AllTheSigils/All_The_Sigils/)
+- [Achievements](https://inscryption.thunderstore.io/package/Infiniscryption/Achievements/)
+- [Spells](https://inscryption.thunderstore.io/package/WhistleWind/New_Spell_Card_Toolkit/)
 
 ## Changelog 
 
 <details>
 <summary>Changelog</summary>
+
+3.9 (4.0 alpha 1)
+- Expansion Pack 2 is now complete. We have added 22 new cards and 20 new sigils.
+- There are now achievements. Completing achievements unlocks stickers that can be used to customize your cards with each run.
+- Seedbot now plants seeds instead of creating trees. Seeds immediately bury themselves and then sprout into trees on the following turn.
 
 3.1.6
 - Fixed some defects with the \[redacted\] boss.

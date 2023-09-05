@@ -75,6 +75,7 @@
     <Exec Command="xcopy /Y $(ProjectDir)\assets\*.wav &quot;C:\Program Files (x86)\Steam\steamapps\common\Inscryption\BepInEx\plugins\Infiniscryption\assets&quot;" />
     -->
     <Exec Command="xcopy /Y $(ProjectDir)\assets\*.wav $(ProjectDir)\package\plugins\wavs" />
+    <Exec Command="xcopy /Y $(ProjectDir)\assets\*.mp3 $(ProjectDir)\package\plugins\wavs" />
     <Exec Command="xcopy /Y $(ProjectDir)\P03AssetBundle\Assets\AssetBundles\p03assetbundle $(ProjectDir)\package\plugins\assetfiles" />
     <Exec Command="xcopy /Y $(ProjectDir)\QuestAPI.md $(ProjectDir)\package" />
     <Exec Command="xcopy /Y $(TargetPath) $(ProjectDir)\package" />

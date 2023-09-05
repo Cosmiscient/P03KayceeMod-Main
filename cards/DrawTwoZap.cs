@@ -32,10 +32,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToResolveOnBoard()
-        {
-            return true;
-        }
+        public override bool RespondsToResolveOnBoard() => true;
 
         public override IEnumerator OnResolveOnBoard()
         {
@@ -51,7 +48,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return CardSpawner.Instance.SpawnCardToHand(CardLoader.GetCardByName(ExpansionPackCards_2.ZAP_CARD), null);
             yield return new WaitForSeconds(0.45f);
             yield return LearnAbility(0.1f);
-            yield return LearnAbility();
         }
     }
 }

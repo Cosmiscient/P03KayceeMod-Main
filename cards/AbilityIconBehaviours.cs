@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DiskCardGame;
 using HarmonyLib;
@@ -45,8 +46,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void ColorizeConduitAbilities(CardDisplayer3D __instance, PlayableCard playableCard)
         {
+            if (__instance.AbilityIcons == null || playableCard == null || playableCard.TemporaryMods == null)
+                return;
+
             foreach (CardModificationInfo mod in playableCard.TemporaryMods)
             {
+                if (mod == null || String.IsNullOrEmpty(mod.singletonId) || mod.abilities == null)
+                    continue;
+
                 if (DynamicAbilityCardModIds.Contains(mod.singletonId))
                 {
                     foreach (Ability ability in mod.abilities)

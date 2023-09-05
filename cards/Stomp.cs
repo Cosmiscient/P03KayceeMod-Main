@@ -6,6 +6,7 @@ using Infiniscryption.P03KayceeRun;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Helpers.Extensions;
 using UnityEngine;
 
 namespace P03KayceeRun.cards
@@ -34,16 +35,14 @@ namespace P03KayceeRun.cards
             ).Id;
         }
 
-        public override bool RespondsToResolveOnBoard()
-        {
-            return true;
-        }
+        public override bool RespondsToResolveOnBoard() => true;
 
         public override IEnumerator OnResolveOnBoard()
         {
             Card.Anim.StrongNegationEffect();
-            TableVisualEffectsManager.Instance.ThumpTable(0.5f);
-            List<CardSlot> slotsToShuffle = new(BoardManager.Instance.GetSlots(Card.OpponentCard));
+            TableVisualEffectsManager.Instance.ThumpTable(1f);
+            yield return new WaitForSeconds(0.15f);
+            List<CardSlot> slotsToShuffle = BoardManager.Instance.GetSlotsCopy(Card.OpponentCard);
             List<PlayableCard> cardsToAssign = slotsToShuffle.Where(s => s.Card != null).Select(s => s.Card).ToList();
 
             Dictionary<PlayableCard, CardSlot> assignments = new();
@@ -52,9 +51,7 @@ namespace P03KayceeRun.cards
             {
                 CardSlot newTarget = card.Slot;
                 while (newTarget == card.Slot)
-                {
                     newTarget = slotsToShuffle[SeededRandom.Range(0, slotsToShuffle.Count, randomSeed++)];
-                }
 
                 assignments[card] = newTarget;
                 slotsToShuffle.Remove(newTarget);

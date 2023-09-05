@@ -31,10 +31,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToDrawn()
-        {
-            return true;
-        }
+        public override bool RespondsToDrawn() => true;
 
         public override IEnumerator OnDrawn()
         {
@@ -71,7 +68,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private Ability ChooseAbility()
         {
-            List<Ability> learnedAbilities = AbilitiesUtil.GetLearnedAbilities(false, 0, 5, SaveManager.SaveFile.IsPart1 ? AbilityMetaCategory.Part1Modular : AbilityMetaCategory.Part3Modular);
+            List<Ability> learnedAbilities = AbilitiesUtil.GetLearnedAbilities(false, -100, 0, SaveManager.SaveFile.IsPart1 ? AbilityMetaCategory.Part1Modular : AbilityMetaCategory.Part3Modular);
             learnedAbilities.RemoveAll((Ability x) => x == Ability.RandomAbility || Card.HasAbility(x) || x == AbilityID || AbilitiesUtil.GetInfo(x).powerLevel >= 0);
 
             return learnedAbilities.Count > 0

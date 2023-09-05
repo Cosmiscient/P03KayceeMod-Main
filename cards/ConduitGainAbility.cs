@@ -11,6 +11,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
     {
         protected abstract Ability AbilityToGive { get; }
         protected virtual Ability SecondaryAbilityToGive => Ability.None;
+        protected virtual bool Gemify => false;
 
         internal const string CONDUIT_ABILITY_ID = "ConduitGainAbilityMod";
 
@@ -74,11 +75,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     if (ability.Card == card)
                     {
-                        retval.Add(ability.AbilityToGive);
+                        if (ability.AbilityToGive != Ability.None)
+                            retval.Add(ability.AbilityToGive);
                         if (ability.SecondaryAbilityToGive != Ability.None)
-                        {
                             retval.Add(ability.SecondaryAbilityToGive);
-                        }
+                        if (ability.Gemify)
+                            retval.Add(Ability.None);
                     }
                 }
             }
@@ -103,7 +105,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 if (!Match(conduitAbilities, info.abilities))
                 {
                     info.abilities.Clear();
-                    info.abilities.AddRange(conduitAbilities);
+                    info.abilities.AddRange(conduitAbilities.Where(a => a != Ability.None));
+                    info.gemify = conduitAbilities.Any(a => a == Ability.None);
                     slot.Card.AddTemporaryMod(info);
                     slot.Card.UpdateFaceUpOnBoardEffects();
                 }

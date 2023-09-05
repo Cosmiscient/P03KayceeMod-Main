@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Helpers;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Triggers;
 using UnityEngine;
@@ -57,17 +56,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return mType;
         }
 
-        public static ModificationType New(string modGuid, string modificationName, Type behaviour)
-        {
-            return New(modGuid, modificationName, behaviour, null);
-        }
+        public static ModificationType New(string modGuid, string modificationName, Type behaviour) => New(modGuid, modificationName, behaviour, null);
 
         public static IEnumerator SetSlotModification(this CardSlot slot, ModificationType modType)
         {
             if (slot == null)
                 yield break;
 
-            var oldModification = ModificationType.NoModification;
+            ModificationType oldModification = ModificationType.NoModification;
             if (SlotModification.ContainsKey(slot))
             {
                 AllModifiedSlots[SlotModification[slot]].Remove(slot);
@@ -77,7 +73,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             SlotModification[slot] = modType;
             AllModifiedSlots[modType].Add(slot);
 
-            var defn = AllSlotModifications.FirstOrDefault(m => m.ModificationType == modType);
+            Info defn = AllSlotModifications.FirstOrDefault(m => m.ModificationType == modType);
             if (defn == null || defn.Texture == null)
                 ResetSlot(slot);
             else
@@ -85,7 +81,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             if (defn != null && defn.SlotBehaviour != null)
             {
-                var triggerComponent = BoardManager.Instance.gameObject.GetComponent(defn.SlotBehaviour);
+                Component triggerComponent = BoardManager.Instance.gameObject.GetComponent(defn.SlotBehaviour);
                 if (triggerComponent == null)
                     BoardManager.Instance.gameObject.AddComponent(defn.SlotBehaviour);
             }
@@ -102,10 +98,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (slot == null)
                 return ModificationType.NoModification;
 
-            if (SlotModification.ContainsKey(slot))
-                return SlotModification[slot];
-
-            return ModificationType.NoModification;
+            return SlotModification.ContainsKey(slot) ? SlotModification[slot] : ModificationType.NoModification;
         }
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.SetupPhase))]
@@ -113,7 +106,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static void ResetBuffedSlots()
         {
             SlotModification.Clear();
-            foreach (var slotList in AllModifiedSlots.Values)
+            foreach (List<CardSlot> slotList in AllModifiedSlots.Values)
             {
                 slotList.Clear();
             }
@@ -123,15 +116,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static IEnumerator CleanUpBuffedSlots(IEnumerator sequence)
         {
-            foreach (var slot in BoardManager.Instance.AllSlots)
+            foreach (CardSlot slot in BoardManager.Instance.AllSlots)
+            {
                 if (slot.GetSlotModification() != ModificationType.NoModification)
                     yield return slot.SetSlotModification(ModificationType.NoModification);
+            }
 
-            foreach (var defn in AllSlotModifications)
+            foreach (Info defn in AllSlotModifications.Where(m => m.SlotBehaviour != null))
             {
-                var comp = BoardManager.Instance.gameObject.GetComponent(defn.SlotBehaviour);
+                Component comp = BoardManager.Instance.gameObject.GetComponent(defn.SlotBehaviour);
                 if (comp != null)
-                    GameObject.Destroy(comp);
+                    UnityEngine.Object.Destroy(comp);
             }
 
             yield return sequence;

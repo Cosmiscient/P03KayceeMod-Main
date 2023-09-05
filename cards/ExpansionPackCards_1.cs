@@ -1,9 +1,8 @@
+using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
-using DiskCardGame;
-using InscryptionAPI.Helpers;
-using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Guid;
+using InscryptionAPI.Helpers;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -11,6 +10,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
     public static class ExpansionPackCards_1
     {
         internal const string EXP_1_PREFIX = "P03KCMXP1";
+        internal static string SEED_CARD => $"{EXP_1_PREFIX}_SEED";
 
         static ExpansionPackCards_1()
         {
@@ -329,6 +329,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 5)
                 //.SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(GemRotator.AbilityID);
+
+            // Seed
+            CardManager.New(EXP_1_PREFIX, "SEED", "Seed", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_seed.png", typeof(ExpansionPackCards_1).Assembly))
+                .AddSpecialAbilities(SeedBehaviour.AbilityID);
         }
 
         [HarmonyPatch(typeof(CardLoader), nameof(CardLoader.Clone))]

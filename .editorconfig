@@ -13,3 +13,5 @@ csharp_style_expression_bodied_lambdas = when_on_single_line
 csharp_style_expression_bodied_methods = when_on_single_line
 csharp_style_expression_bodied_properties = when_on_single_line
 csharp_prefer_braces = when_multiline
+
+dotnet_diagnostic.IDE0051.severity = none

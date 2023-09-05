@@ -19,7 +19,7 @@ namespace P03KayceeRun.cards
         static ActivatedGainPower()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
-            info.rulebookName = "Empower";
+            info.rulebookName = "Overcharge";
             info.rulebookDescription = $"Activate: Pay {ENERGY_COST} Energy to increase the Power of this card by 1";
             info.canStack = false;
             info.powerLevel = 1;

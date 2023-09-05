@@ -1,18 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using DiskCardGame;
-using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
     public class ScrapDumper : AbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -22,12 +18,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Scrap Dumper";
             info.rulebookDescription = "When a card bearing this sigil is played, a broken bot is played on the opposing space.";
             info.canStack = false;
-            info.powerLevel = 2;
+            info.powerLevel = 3;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
 
-            ScrapDumper.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(ScrapDumper),
@@ -40,12 +36,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override IEnumerator OnResolveOnBoard()
         {
             ViewManager.Instance.SwitchToView(View.Board, false, false);
-            CardSlot target = this.Card.slot.opposingSlot;
+            CardSlot target = Card.slot.opposingSlot;
 
 
             if (target == null || target.Card != null)
             {
-                this.Card.Anim.StrongNegationEffect();
+                Card.Anim.StrongNegationEffect();
                 yield return new WaitForSeconds(0.2f);
                 yield break;
             }
@@ -53,11 +49,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return new WaitForSeconds(0.25f);
             CardInfo familiar = CardLoader.GetCardByName("BrokenBot");
 
-            yield return BoardManager.Instance.CreateCardInSlot(familiar, this.Card.slot.opposingSlot);
+            yield return BoardManager.Instance.CreateCardInSlot(familiar, Card.slot.opposingSlot);
             yield return new WaitForSeconds(0.25f);
 
         }
 
-        
+
     }
 }

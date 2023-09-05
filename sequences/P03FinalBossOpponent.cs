@@ -6,7 +6,6 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Encounters;
-using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Pixelplacement;
 using UnityEngine;
@@ -95,19 +94,19 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return new WaitForSeconds(0.1f);
             SetSceneEffectsShown(true);
 
-            //Pause background audio?
+            // Pause background audio?
             AudioController.Instance.SetLoopPaused(true);
 
-            audioSource = audioObject.AddComponent<AudioSource>();
-            string path = AudioHelper.FindAudioClip("P03_Phase1");
-            AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
-            audioSource.clip = audioClip;
-            audioSource.loop = true;
-            audioSource.volume = BossManagement.bossMusicVolume;
-            audioSource.Play();
+            // audioSource = audioObject.AddComponent<AudioSource>();
+            // string path = AudioHelper.FindAudioClip("P03_Phase1");
+            // AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
+            // audioSource.clip = audioClip;
+            // audioSource.loop = true;
+            // audioSource.volume = BossManagement.bossMusicVolume;
+            // audioSource.Play();
 
-            //AudioController.Instance.SetLoopAndPlay($"P03_Phase1", 0, true, true);
-            //AudioController.Instance.SetLoopVolumeImmediate(0.35f, 0);
+            AudioController.Instance.SetLoopAndPlay($"P03_Phase1", 0, true, true);
+            AudioController.Instance.SetLoopVolumeImmediate(0.35f, 0);
             yield return StartBattleSequence();
             yield break;
         }
@@ -146,12 +145,19 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Angry, true, true);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseTwo", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
-                string path = AudioHelper.FindAudioClip("P03_Phase2");
-                AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
-                audioSource.clip = audioClip;
-                audioSource.loop = true;
-                audioSource.volume = BossManagement.bossMusicVolume;
-                audioSource.Play();
+                // string path = AudioHelper.FindAudioClip("P03_Phase2");
+                // AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
+                // audioSource.clip = audioClip;
+                // audioSource.loop = true;
+                // audioSource.volume = BossManagement.bossMusicVolume;
+                // audioSource.Play();
+
+                AudioController.Instance.SetLoopAndPlay($"P03_Phase2", 1, true, true);
+                AudioController.Instance.SetLoopVolume(0f, 1f, 0, false);
+                AudioController.Instance.loopSources[1].Stop();
+                AudioController.Instance.loopSources[1].time = AudioController.Instance.loopSources[0].time;
+                AudioController.Instance.loopSources[1].Play();
+                AudioController.Instance.SetLoopVolume(0.35f, 1f, 1, false);
 
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseTwoInControl", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
@@ -318,8 +324,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Angry, true, true);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseThree", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
-            //AudioController.Instance.SetLoopVolumeImmediate(0f, 1);
-            audioSource.volume = 0;
+            AudioController.Instance.SetLoopVolumeImmediate(0f, 1);
 
             yield return new WaitForSeconds(FasterEvents ? 0.6f : 1.5f);
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Happy, true, true);
@@ -371,12 +376,15 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             source.Stop();
             yield return new WaitForSeconds(1f);
 
-            string path = AudioHelper.FindAudioClip("P03_Phase3");
-            AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
-            audioSource.clip = audioClip;
-            audioSource.loop = true;
-            audioSource.volume = BossManagement.bossMusicVolume;
-            audioSource.Play();
+            // string path = AudioHelper.FindAudioClip("P03_Phase3");
+            // AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
+            // audioSource.clip = audioClip;
+            // audioSource.loop = true;
+            // audioSource.volume = BossManagement.bossMusicVolume;
+            // audioSource.Play();
+
+            AudioController.Instance.SetLoopAndPlay($"P03_Phase3", 0, true, true);
+            AudioController.Instance.SetLoopVolumeImmediate(0.35f, 0);
 
             yield return new WaitForSeconds(1f);
 

@@ -14,6 +14,7 @@ namespace P03KayceeRun.cards
         internal const string EXP_2_PREFIX = "P03KCMXP2";
 
         internal const string ZAP_CARD = "P03KCMXP2_ZAP";
+        internal const string CHARGE_CARD = "P03KCMXP2_CHARGE";
 
         static ExpansionPackCards_2()
         {
@@ -133,7 +134,7 @@ namespace P03KayceeRun.cards
                 .AddAbilities(FireBomb.AbilityID, Ability.Strafe);
 
             // Give-A-Way
-            CardManager.New(EXP_2_PREFIX, "GiveAWay", "Give-A-Way", 2, 2)
+            CardManager.New(EXP_2_PREFIX, "GiveAWay", "Give-A-Way", 2, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_giveaway.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetNeutralP03Card()
@@ -188,6 +189,56 @@ namespace P03KayceeRun.cards
                 .SetCost(energyCost: 2)
                 .SetNeutralP03Card()
                 .AddAbilities(RandomNegativeAbility.AbilityID);
+
+            // Emerald Squid
+            CardManager.New(EXP_2_PREFIX, "EmeraldSquid", "656D6572616C64", 0, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_greengemsquid.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 2)
+                .SetNeutralP03Card()
+                .SetStatIcon(GreenGemPower.AbilityID);
+
+            // Charge!
+            CardManager.New(EXP_2_PREFIX, "CHARGE", "Charge!", 0, 0)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_charge.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 0)
+                .SetGlobalSpell()
+                .SetSpellAppearanceP03()
+                .AddAbilities(RefillBattery.AbilityID);
+
+            // Weeper
+            CardManager.New(EXP_2_PREFIX, "Weeper", "Weeper", 0, 3)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_weeper.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 2)
+                .SetRegionalP03Card(CardTemple.Undead)
+                .AddAbilities(EnergySiphon.AbilityID);
+
+            // Suicell
+            CardManager.New(EXP_2_PREFIX, "Suicell", "Sui-Cell", 1, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_suicell.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 3)
+                .SetRegionalP03Card(CardTemple.Tech, CardTemple.Undead)
+                .AddAbilities(CellExplodonate.AbilityID);
+
+            // Kindness Giver
+            CardManager.New(EXP_2_PREFIX, "KindnessGiver", "Kindness Giver", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_kindness_giver.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 4)
+                .SetRegionalP03Card(CardTemple.Tech)
+                .AddAbilities(ConduitGemify.AbilityID, Ability.GainGemBlue);
+
+            // Kindness Giver
+            CardManager.New(EXP_2_PREFIX, "Gopher", "G0ph3r", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gopher.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 1)
+                .SetRegionalP03Card(CardTemple.Nature)
+                .AddAbilities(Miner.AbilityID);
+
+            // P00dl3
+            CardManager.New(EXP_2_PREFIX, "Poodle", "P00dl3", 0, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_poodle.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 3)
+                .SetRegionalP03Card(CardTemple.Nature)
+                .AddAbilities(Ability.MoveBeside, Ability.BuffNeighbours);
         }
     }
 }
