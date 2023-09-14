@@ -1,10 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
+using Infiniscryption.P03KayceeRun.Quests;
 using InscryptionAPI.Card;
+using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Helpers.Extensions;
 using InscryptionAPI.Triggers;
 using UnityEngine;
 
@@ -16,7 +20,31 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public static Ability AbilityID { get; private set; }
         public override Ability Ability => AbilityID;
 
-        public static List<SlotModificationManager.ModificationType> OnFire { get; private set; }
+        public static Ability FlameStokerID { get; private set; }
+
+        public static readonly AbilityMetaCategory FlamingAbility = GuidManager.GetEnumValue<AbilityMetaCategory>(P03Plugin.PluginGuid, "FlamingAbility");
+
+        private static List<SlotModificationManager.ModificationType> OnFire { get; set; }
+
+        public static SlotModificationManager.ModificationType GetFireLevel(int fireLevel, CardSlot target, PlayableCard source = null)
+        {
+            if (source == null)
+                return OnFire[fireLevel];
+
+            if (target.IsOpponentSlot() != source.IsPlayerCard())
+                return OnFire[fireLevel];
+
+            if (BoardManager.Instance.GetSlotsCopy(source.IsPlayerCard())
+                                     .Any(s => s.Card != null
+                                            && s.Card.HasAbility(FlameStokerID)))
+            {
+
+                if (fireLevel < OnFire.Count - 1)
+                    return OnFire[fireLevel + 1];
+            }
+
+            return OnFire[fireLevel];
+        }
 
         public class BurningSlot : NonCardTriggerReceiver, ISlotModificationChanged
         {
@@ -73,6 +101,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                                 }
                                 else
                                 {
+                                    if (slot.Card.Health == 1)
+                                        DefaultQuestDefinitions.Pyromania.IncrementQuestCounter(onlyIfActive: true);
+
                                     yield return slot.Card.TakeDamage(1, null);
                                 }
                                 yield return new WaitForSeconds(0.25f);
@@ -97,9 +128,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookDescription = "When [creature] attacks, it sets the target space on fire for two turns.";
             info.canStack = false;
             info.powerLevel = 3;
-            info.opponentUsable = false;
+            info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular, FlamingAbility };
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
@@ -113,6 +144,22 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 OnFire.Add(SlotModificationManager.New(P03Plugin.PluginGuid, $"OnFire{i}", typeof(BurningSlot)));
             }
+
+            AbilityInfo fsInfo = ScriptableObject.CreateInstance<AbilityInfo>();
+            fsInfo.rulebookName = "Flame Stoker";
+            fsInfo.rulebookDescription = "While [creature] is on board, all fires you start will be stronger, causing them to last one turn longer.";
+            fsInfo.canStack = false;
+            fsInfo.powerLevel = 1;
+            fsInfo.opponentUsable = true;
+            fsInfo.passive = true;
+            fsInfo.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, FlamingAbility };
+
+            AbilityID = AbilityManager.Add(
+                P03Plugin.PluginGuid,
+                fsInfo,
+                typeof(FireBomb),
+                TextureHelper.GetImageAsTexture("ability_flame_stoker.png", typeof(FireBomb).Assembly)
+            ).Id;
         }
 
         public bool RespondsToPostSingularSlotAttackSlot(CardSlot attackingSlot, CardSlot targetSlot) => attackingSlot == Card.Slot;
@@ -130,7 +177,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 }
             });
             yield return new WaitForSeconds(1f);
-            yield return targetSlot.SetSlotModification(OnFire[2]);
+            yield return targetSlot.SetSlotModification(GetFireLevel(2, targetSlot, attackingSlot.Card));
             yield return new WaitForSeconds(0.25f);
             yield break;
         }

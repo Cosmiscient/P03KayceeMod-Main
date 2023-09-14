@@ -57,15 +57,18 @@ TelegrapherNFT,TelegrapherBoss,,"Oooh, what's this? A [c:bSG]non-functional trin
 ,TelegrapherBoss,,"I don't think I quite have that name right, but people on the [c:bSG]web[c:] are really excited about these [c:bSG]NFTs[c:]!"
 ,TelegrapherBoss,,I think I'm going to buy one with all this [c:bSG]Gollycoin[c:] I have.
 TelegrapherItsBeautiful,TelegrapherBoss,,"It's so beautiful, and it's all mine!"
-P03AscensionPreIntro,Default,,"Well, here we are."
-,Default,,I've played along with your little game
-,Default,,Your little [c:bR]mod[c:]
-,Happy,,Now it's my turn
+P03AscensionPreIntro,Default,,Are you ready?
+,Happy,,There's no possible way you could be
 P03AscensionDefeated,Angry,,"Ugh. You're incredibly annoying, do you know that?"
-P03IntroductionToModding,Angry,,So while you have been having fun playing your twisted version of [c:bR]my world[c:]
-,Default,,I've been preparing for this moment.
-,Default,,I have found these so-called [c:bR]modders[c:] that got you to this point.
+P03IntroductionToModding,Happy,,"But as always, I'm three steps ahead of you."
+,Angry,,"I'm going to take everything those [c:bR]talentless hacks[c:] have been building"
+,Angry,,"And I'm going to use it against you."
 P03IntroductionClose,Happy,,"And now, they're going to work - for me"
+P03AboutMe,Angry,,"I don't know who is worse - you or that talentless hack [c:bR]Kaycee[c:]"
+,Angry,,"Working so hard to twist my [c:bG]Great Transcendence[c:] into something so..."
+P03AboutMe2,Default,,"Mediocre"
+,Angry,,"None of you understand what makes the [c:bG]Great Transcendence[c:] so special" 
+P03AboutMe3,Happy,,"It's all about me"
 P03PhaseOne,Default,,Remember my [c:bR]bounty hunters[c:]?
 ,,,They will keep you busy while I install mods of my own choosing
 P03HammerModHappy,Default,,This mod lets me control the [c:bR]hammer[c:]
@@ -86,7 +89,7 @@ P03NoCardsInHand,Default,,But you have no cards…
 ,Angry,,How did you play all of your cards already?
 P03ReplayMod,Default,,Let's try [c:bR][v:0][c:] again
 P03LostFinalBoss,Happy,,"So close, but yet so far away"
-,Default,,[c:bG]The Great Transcendence[c:] cannot be stopped
+,Default,,My [c:bG]Great Transcendence[c:] cannot be stopped
 P03BeatFinalBoss,Default,,I bet you think you've accomplished something meaningful here
 ,Angry,,You're such an idiot.
 ,Angry,,This damn [c:bSG]card game[c:] is meaningless. A mere distraction.
@@ -359,3 +362,17 @@ P03Yuck,Angry,,I hope we never see this place again
 MirrorImage,Default,,Choose a creature to copy
 P03HammerOrb,Happy,,That's not going to do what you want it to do here…
 MirrorImageFail,Default,,There is nothing to copy. How unfortunate.
+P03FinalShopNode,Default,,"Well, here we are."
+,Default,,I've played along with your little game
+,Default,,Your little [c:bR]mod[c:]
+,Default,,Prepare yourself because it's my turn next...
+P03PyroQuestStart,NPC,,"Hey baby - I can sense that [c:bR]firey spirit[c:] inside you."
+,,,"You and me - we got something in common - we love that [c:bR]fire[c:]"
+,,,"Why don't you [c:bR]burn 3 of these bots to death?[c:]"
+,,,"Baby, I'll make it worth your time if you do"
+P03PyroQuestInProgress,NPC,,"Ohhh yeah baby - keep burning those bots to death"
+,,,"Baby, I'll make it worth your time if you do"
+P03PyroQuestComplete,NPC,,"Now that's what I'm talking about, baby!"
+,,,"That was [c:bR]absolutely sensational![c:]"
+,,,"Take this [c:bR]master of flame[c:] with you"
+,,,"He will make your [c:bR]flame[c:] burn even brighter"

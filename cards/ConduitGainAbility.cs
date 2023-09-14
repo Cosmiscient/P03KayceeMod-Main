@@ -88,11 +88,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return retval;
         }
 
-        private static bool Match(List<Ability> a, List<Ability> b)
+        private static bool Match(List<Ability> a, CardModificationInfo bMod)
         {
-            List<Ability> anotb = a.Except(b).ToList();
-            List<Ability> bnota = b.Except(a).ToList();
-            return !anotb.Any() && !bnota.Any();
+            List<Ability> b = new(bMod.abilities);
+            if (bMod.gemify)
+                b.Add(Ability.None);
+
+            return !a.Except(b).Any() && !b.Except(a).Any();
         }
 
         private static void ResolveForSlots(List<CardSlot> slots)
@@ -102,7 +104,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 List<Ability> conduitAbilities = GetConduitAbilitiesForSlot(slot);
                 CardModificationInfo info = GetConduitAbilityMod(slot.Card);
 
-                if (!Match(conduitAbilities, info.abilities))
+                if (!Match(conduitAbilities, info))
                 {
                     info.abilities.Clear();
                     info.abilities.AddRange(conduitAbilities.Where(a => a != Ability.None));

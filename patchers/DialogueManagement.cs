@@ -1,12 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using System.Collections.Generic;
-using System;
-using System.Linq;
-using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Faces;
+using Infiniscryption.P03KayceeRun.Helpers;
 using InscryptionAPI.Dialogue;
-using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -19,24 +18,22 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return Emotion.Anger;
             if (face == P03AnimationController.Face.Thinking)
                 return Emotion.Curious;
-            // if (face == P03AnimationController.Face.Happy)
-            //     return Emotion.Laughter;
-            if (face == P03AnimationController.Face.MycologistAngry)
+            if (face == P03AnimationController.Face.Bored)
                 return Emotion.Anger;
-            if (face == P03AnimationController.Face.MycologistLaughing)
-                return Emotion.Laughter;
-            return Emotion.Neutral;
+            return face == P03AnimationController.Face.Happy
+                ? Emotion.Neutral
+                : face == P03AnimationController.Face.MycologistAngry
+                ? Emotion.Anger
+                : face == P03AnimationController.Face.MycologistLaughing ? Emotion.Laughter : Emotion.Neutral;
         }
 
         private static P03AnimationController.Face ParseFace(this string face)
         {
-            if (String.IsNullOrEmpty(face))
-                return P03AnimationController.Face.NoChange;
-
-            if (face.ToLowerInvariant().StartsWith("npc"))
-                return P03ModularNPCFace.ModularNPCFace;
-
-            return (P03AnimationController.Face)Enum.Parse(typeof(P03AnimationController.Face), face);
+            return String.IsNullOrEmpty(face)
+                ? P03AnimationController.Face.NoChange
+                : face.ToLowerInvariant().StartsWith("npc")
+                ? P03ModularNPCFace.ModularNPCFace
+                : (P03AnimationController.Face)Enum.Parse(typeof(P03AnimationController.Face), face);
         }
 
         private static void AddDialogue(string id, List<string> lines, List<string> faces, List<string> dialogueWavies)
@@ -61,7 +58,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             else if (faces.Exists(s => s.ToLowerInvariant().Contains("mycolo")))
                 speaker = DialogueEvent.Speaker.P03MycologistMain;
 
-            bool leshy = speaker == DialogueEvent.Speaker.Leshy || speaker == DialogueEvent.Speaker.Goo;
+            bool leshy = speaker is DialogueEvent.Speaker.Leshy or DialogueEvent.Speaker.Goo;
 
             Emotion leshyEmotion = faces.Exists(s => s.ToLowerInvariant().Contains("goocurious")) ? Emotion.Curious : Emotion.Neutral;
 
@@ -88,7 +85,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             //    }).ToList())
             //});
 
-            DialogueEvent dialogueEvent = (new DialogueEvent()
+            DialogueEvent dialogueEvent = new()
             {
                 id = id,
                 speakers = new List<DialogueEvent.Speaker>() { DialogueEvent.Speaker.Single, speaker },
@@ -106,7 +103,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         line.letterAnimation = TextDisplayer.LetterAnimation.WavyJitter;
                     return line;
                 }).ToList())
-            });
+            };
 
             //Debug.Log("DIALOGUE EVENT DEBUG: " + dialogueEvent.id);
 
@@ -224,7 +221,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 string profanity = SeededRandom.Bool(P03AscensionSaveData.RandomSeed + offset++) ? "fucking" : "the fuck";
                 List<string> words = message.Split(' ').ToList();
                 int findex = SeededRandom.Range(0, words.Count, P03AscensionSaveData.RandomSeed + offset++);
-                if (words[findex].ToLowerInvariant() == "the" || words[findex].ToLowerInvariant() == "a")
+                if (words[findex].ToLowerInvariant() is "the" or "a")
                     profanity = "fucking";
                 message = String.Join(" ", words);
             }
@@ -232,9 +229,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(TextDisplayer), nameof(TextDisplayer.ShowUntilInput))]
         [HarmonyPrefix]
-        private static void Profanity2(ref string message)
-        {
-            Profanity(ref message);
-        }
+        private static void Profanity2(ref string message) => Profanity(ref message);
     }
 }

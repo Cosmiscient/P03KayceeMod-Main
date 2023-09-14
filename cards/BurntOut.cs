@@ -24,7 +24,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.powerLevel = -1;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular, FireBomb.FlamingAbility };
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
@@ -61,7 +61,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     }
                 });
                 yield return new WaitForSeconds(1f);
-                yield return oldSlot.SetSlotModification(FireBomb.OnFire[2]);
+                yield return oldSlot.SetSlotModification(FireBomb.GetFireLevel(2, oldSlot));
                 yield return new WaitForSeconds(0.25f);
                 yield break;
             }

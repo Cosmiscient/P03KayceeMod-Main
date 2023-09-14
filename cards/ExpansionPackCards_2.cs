@@ -16,6 +16,8 @@ namespace P03KayceeRun.cards
         internal const string ZAP_CARD = "P03KCMXP2_ZAP";
         internal const string CHARGE_CARD = "P03KCMXP2_CHARGE";
 
+        internal const string FLAME_CHARMER_CARD = "P03KCMXP2_FlameCharmer";
+
         static ExpansionPackCards_2()
         {
             // Swapper Latcher
@@ -113,11 +115,11 @@ namespace P03KayceeRun.cards
                 .AddAbilities(Molotov.AbilityID);
 
             // Flaming Exeskeleton
-            CardManager.New(EXP_2_PREFIX, "FlamingExeskeleton", "Flaming Exeskeleton", 3, 3)
+            CardManager.New(EXP_2_PREFIX, "FlamingExeskeleton", "Flaming Exeskeleton", 2, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_flaming_exeskeleton.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetRegionalP03Card(CardTemple.Undead)
-                .AddAbilities(Ability.Brittle, BurntOut.AbilityID);
+                .AddAbilities(Ability.Brittle, FireBomb.AbilityID, BurntOut.AbilityID);
 
             // Gas Conduit
             CardManager.New(EXP_2_PREFIX, "GasConduit", "Gas Conduit", 0, 2)
@@ -128,7 +130,7 @@ namespace P03KayceeRun.cards
 
             // Street Sweeper
             CardManager.New(EXP_2_PREFIX, "StreetSweeper", "Street Sweeper", 2, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gasconduit.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_streetcleaner.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 6)
                 .SetNeutralP03Card()
                 .AddAbilities(FireBomb.AbilityID, Ability.Strafe);
@@ -239,6 +241,43 @@ namespace P03KayceeRun.cards
                 .SetCost(energyCost: 3)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .AddAbilities(Ability.MoveBeside, Ability.BuffNeighbours);
+
+            // Flame Charmter
+            CardManager.New(EXP_2_PREFIX, "FlameCharmer", "Flamecharmer", 0, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_flame_charmer.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 2)
+                .AddAbilities(FireBomb.FlameStokerID, Ability.MadeOfStone);
+
+            // Artillery Droid
+            CardManager.New(EXP_2_PREFIX, "ArtilleryDroid", "Artillery Droid", 1, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_artillery_droid.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 4)
+                .SetNeutralP03Card()
+                .AddAbilities(MissileStrike.AbilityID);
+
+            // Ultra Bot
+            CardManager.New(EXP_2_PREFIX, "UltraBot", "Ultra Bot", 1, 4)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ultra_bot.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 5)
+                .SetNeutralP03Card()
+                .SetRare()
+                .SetExtendedProperty(MissileStrike.NUMBER_OF_MISSILES, 3)
+                .AddAbilities(MissileStrike.AbilityID);
+
+            // Hellfire Droid
+            CardManager.New(EXP_2_PREFIX, "HellfireDroid", "Hellfire Droid", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_hellfire_droid.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 5)
+                .SetRegionalP03Card(CardTemple.Undead)
+                .SetRare()
+                .AddAbilities(MissileStrikeSelf.AbilityID);
+
+            // Energy Vampire
+            CardManager.New(EXP_2_PREFIX, "EnergyVampire", "Energy Vampire", 0, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_energy_vampire.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 2)
+                .SetRegionalP03Card(CardTemple.Undead)
+                .AddAbilities(AbsorbShield.AbilityID);
         }
     }
 }

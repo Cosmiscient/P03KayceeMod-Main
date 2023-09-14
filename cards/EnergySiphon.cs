@@ -34,7 +34,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer) => fromCombat && card.OpponentCard == Card.OpponentCard;
+        public override bool RespondsToOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer) => Card.OnBoard && fromCombat && card.OpponentCard == Card.OpponentCard;
 
         public override IEnumerator OnOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer)
         {

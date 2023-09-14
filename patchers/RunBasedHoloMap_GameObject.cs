@@ -522,6 +522,37 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return retval;
         }
 
+        private static GameObject BuildFinalShopNode()
+        {
+            GameObject shopNodeBase = Resources.Load<GameObject>("prefabs/map/holomapareas/HoloMapArea_StartingIslandWaypoint");
+            GameObject retval = UnityEngine.Object.Instantiate(shopNodeBase);
+
+            UnityEngine.Object.Destroy(retval.transform.Find("Nodes/CurrencyGainNode3D").gameObject);
+            UnityEngine.Object.Destroy(retval.transform.Find("WaypointStation").gameObject);
+
+            Transform nodeParent = retval.transform.Find("Nodes");
+            Transform sceneryParent = retval.transform.Find("Scenery");
+
+            // Copy/rotate the bridge
+            GameObject bridge = UnityEngine.Object.Instantiate(sceneryParent.Find("HoloBridge_Entrance").gameObject, sceneryParent);
+            bridge.transform.localEulerAngles = new(0f, 0f, 0f);
+            bridge.transform.localPosition = new(bridge.transform.localPosition.x, bridge.transform.localPosition.y, -1.9f);
+
+            // Make the final shop nodes
+            BuildSpecialNode(HoloMapNode.NodeDataType.CreateTransformer, 0, Zone.Neutral, nodeParent, sceneryParent, 1.5f, 1f);
+            BuildSpecialNode(HoloMapNode.NodeDataType.OverclockCard, 0, Zone.Neutral, nodeParent, sceneryParent, 1.5f, -1f);
+            BuildSpecialNode(HoloMapNode.NodeDataType.BuildACard, 0, Zone.Neutral, nodeParent, sceneryParent, -1.5f, 1f);
+            BuildSpecialNode(HoloMapNode.NodeDataType.AttachGem, 0, Zone.Neutral, nodeParent, sceneryParent, -1.5f, -1f);
+            BuildSpecialNode(HoloMapNode.NodeDataType.AddCardAbility, 0, Zone.Neutral, nodeParent, sceneryParent, -2.5f, 0f);
+            BuildSpecialNode(HoloMapNode.NodeDataType.AddCardAbility, 0, Zone.Neutral, nodeParent, sceneryParent, 2.5f, 0f);
+
+            HoloMapArea area = retval.GetComponent<HoloMapArea>();
+            area.firstEnterDialogueId = "P03FinalShopNode";
+
+            retval.SetActive(false);
+            return retval;
+        }
+
         private static GameObject BuildHubNode()
         {
             GameObject hubNodeBase = Resources.Load<GameObject>("prefabs/map/holomapareas/HoloMapArea_StartingIslandWaypoint");
@@ -529,7 +560,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // We don't want the bottom arrow
             retval.transform.Find("Nodes/MoveArea_S").gameObject.SetActive(false);
-            retval.transform.Find("Nodes/CurrencyGainNode3D").gameObject.SetActive(false);
+            UnityEngine.Object.Destroy(retval.transform.Find("Nodes/CurrencyGainNode3D").gameObject);
 
             // We need to set a conditional up arrow
             HoloMapArea areaData = retval.GetComponent<HoloMapArea>();
@@ -740,6 +771,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (bp.specialTerrain == HoloMapBlueprint.LOWER_TOWER_ROOM)
                 return BuildLowerTowerRoom();
+
+            if (bp.specialTerrain == HoloMapBlueprint.FINAL_SHOP_NODE)
+                return BuildFinalShopNode();
 
             P03Plugin.Log.LogInfo($"Instantiating base object {neutralHoloPrefab}");
             GameObject area = UnityEngine.Object.Instantiate(neutralHoloPrefab);
@@ -983,7 +1017,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return (Zone)Enum.Parse(typeof(Zone), components[components.Length - 1]);
         }
 
-        public static Tuple<int, int> GetStartingSpace(Zone regionCode) => regionCode == Zone.Neutral ? new(0, 1) : new(0, 2);
+        public static Tuple<int, int> GetStartingSpace(Zone regionCode) => regionCode == Zone.Neutral ? new(0, 2) : new(0, 2);
 
         public static HoloMapWorldData GetAscensionWorldbyId(string id)
         {

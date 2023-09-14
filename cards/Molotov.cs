@@ -3,14 +3,10 @@ using System.Collections.Generic;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
-using InscryptionCommunityPatch.Card;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
-using InscryptionAPI.Triggers;
-using UnityEngine;
-using System.Linq;
 using Pixelplacement;
-using System;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -29,9 +25,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.powerLevel = 0;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular, FireBomb.FlamingAbility };
 
-            Molotov.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(Molotov),
@@ -41,15 +37,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private IEnumerator BombCard(CardSlot target, PlayableCard attacker)
         {
-            GameObject bomb = GameObject.Instantiate<GameObject>(AssetBundleManager.Prefabs["Molotov"]);
+            GameObject bomb = Instantiate(AssetBundleManager.Prefabs["Molotov"]);
             OnboardDynamicHoloPortrait.HolofyGameObject(bomb, GameColors.instance.glowRed);
-            bomb.transform.position = attacker.transform.position + Vector3.up * 0.1f;
+            bomb.transform.position = attacker.transform.position + (Vector3.up * 0.1f);
 
-            var midpoint = Vector3.Lerp(attacker.Slot.transform.position, target.transform.position, 0.5f) + (Vector3.up * 0.25f);
+            Vector3 midpoint = Vector3.Lerp(attacker.Slot.transform.position, target.transform.position, 0.5f) + (Vector3.up * 0.25f);
 
             Tween.Position(bomb.transform, midpoint, 0.25f, 0f, Tween.EaseOut, Tween.LoopType.None, null, null, true);
             Tween.Position(bomb.transform, target.transform.position, 0.25f, 0.25f, Tween.EaseIn, Tween.LoopType.None, null, null, true);
-            Tween.Position(bomb.transform, target.transform.position - (Vector3.up * 0.2f), 0.1f, 0.5f, Tween.EaseIn, Tween.LoopType.None, null, () => GameObject.Destroy(bomb), true);
+            Tween.Position(bomb.transform, target.transform.position - (Vector3.up * 0.2f), 0.1f, 0.5f, Tween.EaseIn, Tween.LoopType.None, null, () => Destroy(bomb), true);
             Tween.LocalRotation(bomb.transform, Quaternion.Euler(new(90f, 0f, 0f)), 0.5f, 0f, Tween.EaseLinear, Tween.LoopType.None, null, null, true);
 
             yield return new WaitForSeconds(0.5f);
@@ -57,34 +53,34 @@ namespace Infiniscryption.P03KayceeRun.Cards
             target.Card?.Anim.PlayHitAnimation();
 
             // The fireball should play and then delete itself, but we'll destroy it after some time anyway
-            var fireball = GameObject.Instantiate<GameObject>(AssetBundleManager.Prefabs["Fire_Ball"], target.transform);
+            GameObject fireball = Instantiate(AssetBundleManager.Prefabs["Fire_Ball"], target.transform);
             CustomCoroutine.WaitThenExecute(3f, delegate ()
             {
                 if (fireball != null)
-                    GameObject.Destroy(fireball);
+                    Destroy(fireball);
             });
 
             yield return new WaitForSeconds(1f);
-            yield return target.SetSlotModification(FireBomb.OnFire[2]);
+            yield return target.SetSlotModification(FireBomb.GetFireLevel(2, target, attacker));
             yield return new WaitForSeconds(0.25f);
             yield break;
         }
 
-        public override bool RespondsToPreDeathAnimation(bool wasSacrifice) => this.Card.OnBoard;
+        public override bool RespondsToPreDeathAnimation(bool wasSacrifice) => Card.OnBoard;
 
         public override IEnumerator OnPreDeathAnimation(bool wasSacrifice)
         {
-            this.Card.Anim.LightNegationEffect();
-            var adjSlots = BoardManager.Instance.GetAdjacentSlots(this.Card.Slot);
-            if (adjSlots.Count > 0 && adjSlots[0].Index < this.Card.Slot.Index)
+            Card.Anim.LightNegationEffect();
+            List<CardSlot> adjSlots = BoardManager.Instance.GetAdjacentSlots(Card.Slot);
+            if (adjSlots.Count > 0 && adjSlots[0].Index < Card.Slot.Index)
             {
-                yield return BombCard(adjSlots[0], this.Card);
+                yield return BombCard(adjSlots[0], Card);
                 adjSlots.RemoveAt(0);
             }
-            yield return BombCard(this.Card.Slot.opposingSlot, this.Card);
-            if (adjSlots.Count > 0 && adjSlots[0].Index > this.Card.Slot.Index)
+            yield return BombCard(Card.Slot.opposingSlot, Card);
+            if (adjSlots.Count > 0 && adjSlots[0].Index > Card.Slot.Index)
             {
-                yield return BombCard(adjSlots[0], this.Card);
+                yield return BombCard(adjSlots[0], Card);
             }
         }
     }

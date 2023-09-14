@@ -16,7 +16,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     public class P03AscensionOpponent : Part3BossOpponent
     {
         public override string PreIntroDialogueId => "";
-
+        public override bool GiveCurrencyOnDefeat => false;
         public override string PostDefeatedDialogueId => "P03AscensionDefeated";
 
         private readonly List<string> PhaseTwoWeirdCards = new() { "MantisGod", "Coyote", "Moose", "Grizzly", "FrankNStein", "Amalgam", "Adder" };
@@ -28,6 +28,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         private static readonly HighlightedInteractable OpponentQueueSlotPrefab = ResourceBank.Get<HighlightedInteractable>("Prefabs/Cards/QueueSlot");
 
         private bool FasterEvents = false;
+
+        public P03FinalBossScreenArray ScreenArray;
 
         private readonly GameObject audioObject = new("P03BossMusicAudioObject");
         public AudioSource audioSource;
@@ -87,12 +89,29 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return null;
         }
 
+        public override void SetSceneEffectsShown(bool shown)
+        {
+            if (shown)
+            {
+                ScreenArray = P03FinalBossScreenArray.Create(BoardManager.Instance.gameObject.transform);
+                ScreenArray.transform.localPosition = new(0f, 0f, 7f);
+                ScreenArray.ShowFace(P03AnimationController.Face.Happy);
+            }
+            else
+            {
+                if (ScreenArray != null)
+                {
+                    ScreenArray.StopAllCoroutines();
+                    Destroy(ScreenArray.gameObject);
+                }
+            }
+        }
+
         public override IEnumerator IntroSequence(EncounterData encounter)
         {
             yield return TextDisplayer.Instance.PlayDialogueEvent(PreIntroDialogueId, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             ViewManager.Instance.SwitchToView(View.P03Face, false, true);
             yield return new WaitForSeconds(0.1f);
-            SetSceneEffectsShown(true);
 
             // Pause background audio?
             AudioController.Instance.SetLoopPaused(true);
@@ -118,9 +137,18 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             InitializeCards();
 
             yield return new WaitForSeconds(1f);
-            yield return TextDisplayer.Instance.PlayDialogueEvent("P03IntroductionToModding", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+
+            yield return TextDisplayer.Instance.PlayDialogueEvent("P03AboutMe", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             ViewManager.Instance.SwitchToView(View.P03FaceClose, false, false);
-            yield return TextDisplayer.Instance.PlayDialogueEvent("P03IntroductionClose", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            yield return TextDisplayer.Instance.PlayDialogueEvent("P03AboutMe2", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            ViewManager.Instance.SwitchToView(View.Default, false, false);
+            SetSceneEffectsShown(true);
+            yield return TextDisplayer.Instance.PlayDialogueEvent("P03AboutMe3", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+
+            yield return new WaitForSeconds(1f);
+            yield return TextDisplayer.Instance.PlayDialogueEvent("P03IntroductionToModding", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            // ViewManager.Instance.SwitchToView(View.P03FaceClose, false, false);
+            // yield return TextDisplayer.Instance.PlayDialogueEvent("P03IntroductionClose", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             ViewManager.Instance.SwitchToView(View.BoardCentered, false, false);
 
             yield return QueueCard(GenerateCard(0), BoardManager.Instance.OpponentSlotsCopy[2], true, true, true);
@@ -140,6 +168,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 ViewManager.Instance.SwitchToView(View.Board, false, false);
                 yield return ClearBoard();
                 yield return ClearQueue();
+                ScreenArray.ShowFace(P03AnimationController.Face.Angry, P03AnimationController.Face.Bored);
 
                 ViewManager.Instance.SwitchToView(View.Default, false, false);
                 P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Angry, true, true);
@@ -152,8 +181,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 // audioSource.volume = BossManagement.bossMusicVolume;
                 // audioSource.Play();
 
-                AudioController.Instance.SetLoopAndPlay($"P03_Phase2", 1, true, true);
-                AudioController.Instance.SetLoopVolume(0f, 1f, 0, false);
+                AudioController.Instance.SetLoopAndPlay($"P03_Phase2", 1, true, false);
+                AudioController.Instance.SetLoopVolumeImmediate(0f, 1);
+                AudioController.Instance.SetLoopVolume(0f, 0f, 0, false);
                 AudioController.Instance.loopSources[1].Stop();
                 AudioController.Instance.loopSources[1].time = AudioController.Instance.loopSources[0].time;
                 AudioController.Instance.loopSources[1].Play();
@@ -163,6 +193,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseTwoInControl", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield return new WaitForSeconds(1f);
 
+                ScreenArray.ShowFace(P03AnimationController.Face.Angry, P03AnimationController.Face.Default, P03AnimationController.Face.Bored);
                 ViewManager.Instance.SwitchToView(View.Default, false, false);
                 yield return new WaitForSeconds(0.15f);
                 ViewManager.Instance.SwitchToView(View.Board, false, false);
@@ -311,6 +342,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             OpponentAnimationController.Instance.ClearLookTarget();
 
+            ScreenArray.ShowFace(P03AnimationController.Face.Bored);
+
             yield return new WaitForSeconds(1f);
 
             if (WeirdManager != null)
@@ -428,10 +461,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             TableVisualEffectsManager.Instance.SetDustParticlesActive(!showEffects);
             if (showEffects)
             {
+                ScreenArray.EndLoadingFaces(P03FinalBossExtraScreen.LOOKUP_FACE);
+                ScreenArray.RecolorFrames(P03FinalBossExtraScreen.RedFrameColor);
                 UIManager.Instance.Effects.GetEffect<ScreenColorEffect>().SetColor(GameColors.Instance.nearWhite);
                 UIManager.Instance.Effects.GetEffect<ScreenColorEffect>().SetAlpha(1f);
                 UIManager.Instance.Effects.GetEffect<ScreenColorEffect>().SetIntensity(0f, 1f);
-                SpawnScenery("LightQuadTableEffect");
+                //SpawnScenery("LightQuadTableEffect");
 
                 Color angryColor = GameColors.Instance.red;
                 Color partiallyTransparentRed = new(angryColor.r, angryColor.g, angryColor.b, 0.5f);
@@ -502,6 +537,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             if (shopping)
             {
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03ShoppingForMod", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+                ScreenArray.StartLoadingFaces();
                 yield return new WaitForSeconds(0.3f);
             }
             yield return !firstPlay
@@ -532,6 +568,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         {
             ViewManager.Instance.SwitchToView(View.P03Face, false, false);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03UnityMod", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            ScreenArray.EndLoadingFaces();
             ViewManager.Instance.SwitchToView(View.Consumables, false, false);
             yield return new WaitForSeconds(0.5f);
             ResourceDrone.Instance.gameObject.transform.localPosition = ResourceDrone.Instance.gameObject.transform.localPosition + (Vector3.up * 6f);
@@ -550,6 +587,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public IEnumerator APISequence()
         {
+            ScreenArray.EndLoadingFaces();
             ViewManager.Instance.SwitchToView(View.P03Face, false, false);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03ApiInstalled", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             ViewManager.Instance.SwitchToView(View.Consumables, false, false);
@@ -600,9 +638,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             if (PlayerHand.Instance.cardsInHand.Count == 0)
             {
+                ScreenArray.EndLoadingFaces(P03AnimationController.Face.Angry);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03NoCardsInHand", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield break;
             }
+
+            ScreenArray.EndLoadingFaces();
 
             InteractionCursor.Instance.InteractionDisabled = true;
 
@@ -654,10 +695,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03AngryNoHammer", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+                ScreenArray.EndLoadingFaces(P03AnimationController.Face.Angry);
                 ViewManager.Instance.SwitchToView(View.Default);
                 yield return new WaitForSeconds(0.1f);
                 yield break;
             }
+
+            ScreenArray.EndLoadingFaces();
 
             ViewManager.Instance.SwitchToView(View.P03Face, false, false);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03HammerModHappy", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);

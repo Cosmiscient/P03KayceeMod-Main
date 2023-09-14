@@ -13,13 +13,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public static readonly string[] MODS = new string[] { "Special Hammer Mod", "Incredible Drafting Mod", "The Community API", "Super-Duper Unity Editor" };
 
-        public P03AscensionOpponent P03AscensionOpponent
-        {
-            get
-            {
-                return TurnManager.Instance.opponent as P03AscensionOpponent;
-            }
-        }
+        public P03AscensionOpponent P03AscensionOpponent => TurnManager.Instance.opponent as P03AscensionOpponent;
 
         public override EncounterData BuildCustomEncounter(CardBattleNodeData nodeData)
         {
@@ -73,18 +67,26 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 case 8:
                     yield return P03AscensionOpponent.UnityEngineSequence();
                     yield break;
+                default:
+                    break;
             }
         }
 
         public override IEnumerator GameEnd(bool playerWon)
         {
             OpponentAnimationController.Instance.ClearLookTarget();
+            ViewManager.Instance.SwitchToView(View.Default, false, false);
 
             if (playerWon)
             {
+                P03AscensionOpponent.ScreenArray.EndLoadingFaces(P03AnimationController.Face.SurrenderFlag);
+                yield return new WaitForSeconds(1.5f);
+
                 //Turn off the boss music
-                GameObject bossMusic = GameObject.Find("P03BossMusicAudioObject");
-                GameObject.Destroy(bossMusic);
+                // GameObject bossMusic = GameObject.Find("P03BossMusicAudioObject");
+                // GameObject.Destroy(bossMusic);
+                AudioController.Instance.StopAllLoops();
+                yield return new WaitForSeconds(0.1f);
 
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03BeatFinalBoss", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
@@ -115,11 +117,38 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             }
             else
             {
+                P03AscensionOpponent.ScreenArray.EndLoadingFaces(P03AnimationController.Face.Happy);
+                yield return new WaitForSeconds(1.5f);
+
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03LostFinalBoss", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield return new WaitForSeconds(1.5f);
                 EventManagement.FinishAscension(false);
             }
+        }
+
+        public override IEnumerator DamageAddedToScale(int amount, bool playerIsAttacker)
+        {
+            if (playerIsAttacker)
+            {
+                P03AscensionOpponent.ScreenArray.ShowFace(
+                    P03AnimationController.Face.Angry,
+                    P03AnimationController.Face.Default,
+                    P03AnimationController.Face.Choking,
+                    P03FinalBossExtraScreen.LOOKUP_FACE,
+                    P03AnimationController.Face.Dying
+                );
+            }
+            else
+            {
+                P03AscensionOpponent.ScreenArray.ShowFace(
+                    P03AnimationController.Face.Happy,
+                    P03AnimationController.Face.Default,
+                    P03AnimationController.Face.Bored,
+                    P03AnimationController.Face.Happy
+                );
+            }
+            yield return base.DamageAddedToScale(amount, playerIsAttacker);
         }
     }
 }

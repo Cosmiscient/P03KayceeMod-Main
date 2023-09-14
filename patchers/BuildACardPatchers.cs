@@ -34,7 +34,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             Ability.GemDependant,
             VesselHeart.AbilityID,
             SnakeStrafe.AbilityID,
-            Ability.DrawCopy
+            Ability.DrawCopy,
+            BurntOut.AbilityID,
+            Molotov.AbilityID,
+            FireBomb.AbilityID,
+            MissileStrike.AbilityID
         };
 
         [HarmonyPatch(typeof(BuildACardInfo), nameof(BuildACardInfo.GetValidAbilities))]
@@ -46,8 +50,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 __result.Remove(Ability.DrawCopyOnDeath);
                 __result.Remove(Ability.GainBattery);
                 foreach (Ability ab in AscensionAbilities)
+                {
                     if (!__result.Contains(ab))
                         __result.Add(ab);
+                }
 
                 __result = __result.Distinct().Randomize().Take(8).ToList();
             }

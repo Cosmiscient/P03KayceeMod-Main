@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using DiskCardGame;
 using HarmonyLib;
-using InscryptionAPI;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -24,12 +23,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookDescription = $"Cards within a circuit completed by [creature] have Fire Strike and Burnt Out.";
             info.canStack = false;
             info.powerLevel = 1;
-            info.opponentUsable = false;
+            info.opponentUsable = true;
             info.conduit = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, FireBomb.FlamingAbility, AbilityMetaCategory.Part3Modular };
 
-            ConduitGas.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(ConduitGas),

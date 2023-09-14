@@ -1,10 +1,10 @@
-using HarmonyLib;
-using DiskCardGame;
-using UnityEngine;
-using System.Linq;
-using System.Collections.Generic;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using DiskCardGame;
+using HarmonyLib;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -27,7 +27,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             { "FastTravelMapNode_Tech", RunBasedHoloMap.Zone.Tech },
             { "FastTravelMapNode_NorthPath", RunBasedHoloMap.Zone.Neutral }
         };
-        
+
         [HarmonyPatch(typeof(FastTravelNode), "OnCursorSelectEnd")]
         [HarmonyPrefix]
         public static bool FastTravelInAscensionMode(ref FastTravelNode __instance)
@@ -40,7 +40,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (fastTravelNodes[__instance.gameObject.name] == EventManagement.CurrentZone)
                 {
                     HoloGameMap.Instance.ToggleFastTravelActive(false, false);
-                    return false; 
+                    return false;
                 }
 
                 EventManagement.AddVisitedZone(__instance.gameObject.name);
@@ -74,13 +74,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static void SetFastTravelNodeActive(ref FastTravelNode __instance)
         {
             if (SaveFile.IsAscension)
+            {
                 __instance.gameObject.SetActive(
-                    fastTravelNodes.Keys.Contains(__instance.gameObject.name) && 
+                    fastTravelNodes.Keys.Contains(__instance.gameObject.name) &&
                     (
                         !EventManagement.CompletedZones.Contains(__instance.gameObject.name) ||
                         fastTravelNodes[__instance.gameObject.name] == EventManagement.CurrentZone
                     )
                 );
+            }
         }
 
         [HarmonyPatch(typeof(HoloMapWaypointNode), nameof(HoloMapWaypointNode.OnCursorSelectEnd))]
@@ -106,7 +108,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             public static void SetDroneFlying()
             {
                 P03Plugin.Log.LogInfo("Drone flying = true");
-                FastTravelManagement.isDroneFlying = true;
+                isDroneFlying = true;
             }
 
             [HarmonyPostfix]
@@ -114,22 +116,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 P03Plugin.Log.LogInfo("Drone flying = false");
                 yield return sequence;
-                FastTravelManagement.isDroneFlying = false;
+                isDroneFlying = false;
             }
         }
 
-        [HarmonyPatch(typeof(HoloGameMap), "UpdateColors")]
+        [HarmonyPatch(typeof(HoloGameMap), nameof(HoloGameMap.UpdateColors))]
         [HarmonyPrefix]
         public static bool ManuallySetMapColorsIfDroneFlying(ref HoloGameMap __instance)
         {
-            if (SaveFile.IsAscension && FastTravelManagement.isDroneFlying)
+            if (SaveFile.IsAscension && isDroneFlying)
             {
                 P03Plugin.Log.LogInfo("Setting map colors after drone flight");
                 HoloMapArea currentArea = HoloMapAreaManager.Instance.CurrentArea;
-                Traverse mapTrav = new Traverse(__instance);
-                mapTrav.Method("SetSceneColors", new Type[] { typeof(Color), typeof(Color)}).GetValue(currentArea.MainColor, currentArea.LightColor);
-                mapTrav.Method("SetSceneryColors", new Type[] { typeof(Color), typeof(Color)}).GetValue(GameColors.Instance.blue, GameColors.Instance.gold);
-                mapTrav.Method("SetNodeColors", new Type[] { typeof(Color), typeof(Color)}).GetValue(GameColors.Instance.darkBlue, GameColors.Instance.brightBlue);
+                __instance.SetSceneColors(currentArea.MainColor, currentArea.LightColor);
+                __instance.SetSceneryColors(GameColors.Instance.blue, GameColors.Instance.gold);
+                __instance.SetNodeColors(GameColors.Instance.darkBlue, GameColors.Instance.brightBlue);
                 return false;
             }
             return true;
@@ -139,7 +140,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             // We do our own special sequence when you complete a boss
             // ... we just play the drone and move you back to the hub world.
-            
+
             yield return new WaitUntil(() => HoloMapAreaManager.Instance.CurrentArea != null);
             HoloGameMap.Instance.ToggleFastTravelActive(false, false);
             HoloMapAreaManager.Instance.CurrentArea.OnAreaActive();
@@ -153,7 +154,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             SaveManager.SaveToFile();
         }
 
-        public static IEnumerator ReturnToHomeBase() 
+        public static IEnumerator ReturnToHomeBase()
         {
             string worldId = RunBasedHoloMap.GetAscensionWorldID(RunBasedHoloMap.Zone.Neutral);
             Tuple<int, int> pos = RunBasedHoloMap.GetStartingSpace(RunBasedHoloMap.Zone.Neutral);

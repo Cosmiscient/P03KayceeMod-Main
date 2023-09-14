@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 3545831680
+CRC: 2608013091
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: ab13f04b7b71f0acc7fec3a7087adf16
+    Hash: 94dda68385b3f005755437ab6782894c
   TypeTreeHash:
     serializedVersion: 2
     Hash: afd12bf211ec48792818822e52781931
@@ -41,8 +41,12 @@ Assets:
 - Assets/Models/bottle.fbx
 - Assets/Effects/Fire_Material.mat
 - Assets/Shaders/ProjectStickerShader.shader
+- Assets/Textures/PolaroidMaterial.mat
 - Assets/Shaders/MultiplyProjectorShader.shader
 - Assets/Effects/Fire_Particles.png
 - Assets/Effects/Fire_Parent.prefab
+- Assets/Prefabs/Missile.prefab
+- Assets/Prefabs/polaroid_model.prefab
+- Assets/Models/missile_model.dae
 - Assets/Effects/Fire_Material_Additive.mat
 Dependencies: []

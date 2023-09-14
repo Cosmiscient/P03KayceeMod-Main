@@ -1,11 +1,10 @@
-using HarmonyLib;
-using DiskCardGame;
-using System.Collections.Generic;
-using System.Reflection.Emit;
-using System.Reflection;
 using System;
-using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using DiskCardGame;
+using HarmonyLib;
+using InscryptionAPI.Card;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -56,7 +55,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     Component c = __instance.gameObject.GetComponent(type);
                     if (c != null)
                     {
-                        GameObject.DestroyImmediate(c);
+                        UnityEngine.Object.DestroyImmediate(c);
                     }
                 }
                 if (__instance.Anim is DiskCardAnimationController dcac)
@@ -68,7 +67,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                             childrenToDelete.Add(t);
 
                         foreach (Transform t in childrenToDelete)
-                            GameObject.DestroyImmediate(t.gameObject);
+                            UnityEngine.Object.DestroyImmediate(t.gameObject);
 
                         dcac.holoPortraitParent.gameObject.SetActive(false);
                     }
@@ -90,8 +89,82 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static void FlipLatchedAbility(ref CardAbilityIcons __instance, Ability ability, bool flipped)
         {
-            if (__instance.latchIcon.Ability == ability)
+            if (__instance.latchIcon != null && __instance.latchIcon.Ability == ability)
                 __instance.latchIcon.SetFlippedX(flipped);
+        }
+
+        [HarmonyPatch(typeof(CombatPhaseManager), nameof(CombatPhaseManager.SlotAttackSlot))]
+        [HarmonyPrefix]
+        [HarmonyBefore("ATS")] // This is a bugfix to help with an issue in ATS
+        private static bool StopSequenceIfAttackerIsNull(CardSlot attackingSlot) => attackingSlot != null;
+
+        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.GetPassiveAttackBuffs))]
+        [HarmonyPostfix]
+        private static void GemifyBuffWithTempMods(PlayableCard __instance, ref int __result)
+        {
+            if (__instance.IsGemified() && !__instance.Info.Gemified)
+            {
+                if (__instance.OpponentCard)
+                {
+                    if ((OpponentGemsManager.Instance?.HasGem(GemType.Orange)).GetValueOrDefault())
+                        __result += 1;
+                }
+                else
+                {
+                    if ((ResourcesManager.Instance?.HasGem(GemType.Orange)).GetValueOrDefault())
+                        __result += 1;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.GetPassiveHealthBuffs))]
+        [HarmonyPostfix]
+        private static void GemifyHealthBuffWithTempMods(PlayableCard __instance, ref int __result)
+        {
+            if (__instance.IsGemified() && !__instance.Info.Gemified)
+            {
+                if (__instance.OpponentCard)
+                {
+                    if ((OpponentGemsManager.Instance?.HasGem(GemType.Green)).GetValueOrDefault())
+                        __result += 2;
+                }
+                else
+                {
+                    if ((ResourcesManager.Instance?.HasGem(GemType.Green)).GetValueOrDefault())
+                        __result += 2;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(RenderStatsLayer), nameof(RenderStatsLayer.RenderCard))]
+        [HarmonyPrefix]
+        private static void AllowGemifyToWorkWithTempMods(ref RenderStatsLayer __instance, CardRenderInfo info)
+        {
+            if (__instance is not DiskRenderStatsLayer drsl)
+                return;
+
+            PlayableCard pCard = __instance.PlayableCard;
+            if (pCard == null)
+                return;
+
+            if (pCard.IsGemified())
+            {
+                drsl.gemSquares.ForEach(o => o.SetActive(true));
+                if (pCard.OpponentCard)
+                {
+                    if ((OpponentGemsManager.Instance?.HasGem(GemType.Orange)).GetValueOrDefault())
+                        info.attackTextColor = GameColors.Instance.gold;
+                    if ((OpponentGemsManager.Instance?.HasGem(GemType.Green)).GetValueOrDefault())
+                        info.attackTextColor = GameColors.Instance.brightLimeGreen;
+                }
+                else
+                {
+                    if (ResourcesManager.Instance.HasGem(GemType.Orange))
+                        info.attackTextColor = GameColors.Instance.gold;
+                    if (ResourcesManager.Instance.HasGem(GemType.Green))
+                        info.attackTextColor = GameColors.Instance.brightLimeGreen;
+                }
+            }
         }
     }
 }

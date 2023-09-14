@@ -78,7 +78,7 @@ namespace Infiniscryption.P03KayceeRun.Helpers
         internal static void LoadMyCustomAudio(ref AudioController __instance)
         {
             // Please dont' break anything...
-            foreach (string clipName in new string[] { "bottle_break", "angel_reveal", "fireball", "molotov", "static" })
+            foreach (string clipName in new string[] { "bottle_break", "angel_reveal", "fireball", "molotov", "static", "missile_launch", "missile_explosion" })
             {
                 if (!__instance.SFX.Any(ac => ac.name.Equals(clipName, StringComparison.InvariantCultureIgnoreCase)))
                 {
