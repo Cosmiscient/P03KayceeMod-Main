@@ -1,12 +1,12 @@
+using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.Spells.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
-namespace P03KayceeRun.cards
+namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
     public static class ExpansionPackCards_2
@@ -15,8 +15,11 @@ namespace P03KayceeRun.cards
 
         internal const string ZAP_CARD = "P03KCMXP2_ZAP";
         internal const string CHARGE_CARD = "P03KCMXP2_CHARGE";
+        internal const string FORCED_UPGRADE_CARD = "P03KCMXP2_FORCED_UPGRADE";
 
         internal const string FLAME_CHARMER_CARD = "P03KCMXP2_FlameCharmer";
+
+        internal const string RINGWORM_CARD = "P03KCMXP2_RoboRingworm";
 
         static ExpansionPackCards_2()
         {
@@ -115,7 +118,7 @@ namespace P03KayceeRun.cards
                 .AddAbilities(Molotov.AbilityID);
 
             // Flaming Exeskeleton
-            CardManager.New(EXP_2_PREFIX, "FlamingExeskeleton", "Flaming Exeskeleton", 2, 2)
+            CardManager.New(EXP_2_PREFIX, "FlamingExeskeleton", "Revignite", 2, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_flaming_exeskeleton.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetRegionalP03Card(CardTemple.Undead)
@@ -218,7 +221,7 @@ namespace P03KayceeRun.cards
             CardManager.New(EXP_2_PREFIX, "Suicell", "Sui-Cell", 1, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_suicell.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 3)
-                .SetRegionalP03Card(CardTemple.Tech, CardTemple.Undead)
+                .SetRegionalP03Card(CardTemple.Tech)
                 .AddAbilities(CellExplodonate.AbilityID);
 
             // Kindness Giver
@@ -278,6 +281,102 @@ namespace P03KayceeRun.cards
                 .SetCost(energyCost: 2)
                 .SetRegionalP03Card(CardTemple.Undead)
                 .AddAbilities(AbsorbShield.AbilityID);
+
+            // Orange Moxduster
+            CardManager.New(EXP_2_PREFIX, "OrangeMoxduster", "Orange Moxduster", 0, 3)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_orange_moxduster.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 4)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddTraits(Trait.Gem)
+                .AddAbilities(Ability.GainGemOrange, MagicDust.AbilityID);
+
+            // Charge!
+            CardManager.New(EXP_2_PREFIX, "FORCED_UPGRADE", "Forced Upgrade", 0, 0)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_forced_upgrade.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 2)
+                .SetTargetedSpell()
+                .SetSpellAppearanceP03()
+                .AddAbilities(ForcedUpgrade.AbilityID);
+
+            // Dr Zambot
+            CardManager.New(EXP_2_PREFIX, "DrZambot", "Dr Zambot", 1, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_dr_zambot.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 4)
+                .SetRegionalP03Card(CardTemple.Nature)
+                .SetRare()
+                .AddAbilities(DrawUpgrade.AbilityID);
+
+            // Trash Compactor
+            CardManager.New(EXP_2_PREFIX, "TrashCompactor", "Trash Compactor", 0, 3)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_disposal_bot.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 4)
+                .SetRegionalP03Card(CardTemple.Undead)
+                .SetRare()
+                .AddAbilities(Shred.AbilityID);
+
+            // Triple Gunner
+            CardInfo qgun = CardManager.New(EXP_2_PREFIX, "QuadGunner", "Mega Gunner", 2, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_quad_gunner.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 6)
+                .AddAbilities(Ability.TriStrike, Ability.DoubleStrike);
+
+            CardInfo tgun = CardManager.New(EXP_2_PREFIX, "TripleGunner", "Triple Gunner", 2, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_triple_gunner.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 6)
+                .AddAbilities(Ability.TriStrike)
+                .SetEvolve(qgun, 1);
+
+            CardManager.BaseGameCards.First(c => c.name == "CloserBot").SetEvolve(tgun, 1);
+
+            // Encapsulator
+            CardManager.New(EXP_2_PREFIX, "Encapsulator", "Encapsulator", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_encapsulator.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 2)
+                .SetNeutralP03Card()
+                .AddAbilities(ActivatedStoreCharge.AbilityID);
+
+            // Sir Blast
+            CardManager.New(EXP_2_PREFIX, "SirBlast", "Sir Blast", 2, 3)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_sirblast.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 4)
+                .SetNeutralP03Card()
+                .SetRare()
+                .AddAbilities(MolotovAll.AbilityID);
+
+            CardManager.New(EXP_2_PREFIX, "RoboRingworm", "R1ngw0rm", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_roboringworm.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 2)
+                .SetTraits(CustomCards.UpgradeVirus)
+                .SetNeutralP03Card();
+
+            // Lockjaw Cell
+            CardManager.New(EXP_2_PREFIX, "LockjawCell", "Lockjaw", 1, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_lockjaw_cell.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 5)
+                .SetRegionalP03Card(CardTemple.Tech)
+                .SetRare()
+                .AddAbilities(Ability.Reach, CellSteelTrap.AbilityID);
+
+            // Bleene's Acolyte
+            CardManager.New(EXP_2_PREFIX, "BleeneAcolyte", "Bleene's Acolyte", 0, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_bleene_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 2)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(GemBlueGift.AbilityID, GemGreenGift.AbilityID);
+
+            // Orlu's Acolyte
+            CardManager.New(EXP_2_PREFIX, "OrluAcolyte", "Orlu's Acolyte", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_orlu_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 3)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(GemOrangeFlying.AbilityID, GemBlueLoot.AbilityID);
+
+            // Goranj's Acolyte
+            CardManager.New(EXP_2_PREFIX, "GoranjAcolyte", "Goranj's Acolyte", 2, 4)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_goranj_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 4)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(GemOrangeBrittle.AbilityID, GemGreenBuffEnemy.AbilityID);
         }
     }
 }

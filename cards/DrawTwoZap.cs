@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
-using P03KayceeRun.cards;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards

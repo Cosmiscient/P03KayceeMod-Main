@@ -154,7 +154,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             fsInfo.passive = true;
             fsInfo.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, FlamingAbility };
 
-            AbilityID = AbilityManager.Add(
+            FlameStokerID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 fsInfo,
                 typeof(FireBomb),

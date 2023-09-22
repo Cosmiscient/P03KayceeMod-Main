@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
-using Infiniscryption.P03KayceeRun;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
-namespace P03KayceeRun.cards
+namespace Infiniscryption.P03KayceeRun.Cards
 {
     public class AbsorbShield : AbilityBehaviour
     {

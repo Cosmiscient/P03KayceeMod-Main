@@ -92,6 +92,11 @@ namespace Infiniscryption.P03KayceeRun
                 FixDeckEditor();
         }
 
+        private class DummyPatchTarget
+        {
+            private List<Ability> DummyMethod() => null;
+        }
+
         [HarmonyPatch]
         private class DeckEditorCompatPatch
         {
@@ -107,7 +112,7 @@ namespace Infiniscryption.P03KayceeRun
                             return meth;
                     }
                 }
-                return null;
+                return typeof(DummyPatchTarget).GetMethod("DummyMethod");
             }
 
             public static bool Prefix(ref List<Ability> __result)

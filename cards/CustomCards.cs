@@ -24,6 +24,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public static readonly CardMetaCategory NewBeastTransformers = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "NewBeastTransformers");
 
+        public static readonly Trait UpgradeVirus = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "UpgradeMachineVirus");
         public static readonly Trait Unrotateable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "Unrotateable");
         public static readonly Trait QuestCard = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "QuestCard");
 
@@ -68,7 +69,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             if (P03AscensionSaveData.IsP03Run || ScreenManagement.ScreenState == CardTemple.Tech)
             {
-
                 string compName = __result.name.ToLowerInvariant();
                 if (compName.StartsWith("sentinel") || __result.name == "TechMoxTriple")
                 {
@@ -648,9 +648,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.ModifyCardList += delegate (List<CardInfo> cards)
             {
-                foreach (CardInfo ci in cards.Where(ci => ci.temple == CardTemple.Tech && ci.metaCategories.Contains(CardMetaCategory.Rare)))
+                foreach (CardInfo ci in cards.Where(ci => ci.temple == CardTemple.Tech))
                 {
-                    ci.AddAppearances(RareDiscCardAppearance.ID);
+                    if (ci.metaCategories.Contains(CardMetaCategory.Rare))
+                        ci.AddAppearances(RareDiscCardAppearance.ID);
+
+                    for (int i = 0; i < ci.abilities.Count; i++)
+                    {
+                        if (ci.abilities[i] == Ability.SteelTrap)
+                            ci.abilities[i] = BetterSteelTrap.AbilityID;
+                    }
                 }
 
                 return cards;
@@ -669,6 +676,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.AddMetaCategories(NeutralRegion);
             info.temple = CardTemple.Tech;
             return info;
+        }
+
+        public static bool EligibleForGemBonus(this PlayableCard card, GemType gem)
+        {
+            return card.OpponentCard ? OpponentGemsManager.Instance.HasGem(gem) : ResourcesManager.Instance.HasGem(gem);
         }
 
         public static CardInfo SetRegionalP03Card(this CardInfo info, params CardTemple[] region)
@@ -712,16 +724,24 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return info;
         }
 
+        public static CardInfo SetColorProperty(this CardInfo info, string colorKey, Color color)
+        {
+            return info.SetExtendedProperty(
+                colorKey,
+                $"{color.r},{color.g},{color.b},{color.a}"
+            );
+        }
+
         public static CardInfo SetSpellAppearanceP03(this CardInfo info)
         {
             info.AddAppearances(DiscCardColorAppearance.ID);
-            info.SetExtendedProperty("BorderColor", GameColors.Instance.yellow);
-            info.SetExtendedProperty("EnergyColor", GameColors.Instance.yellow);
-            info.SetExtendedProperty("NameTextColor", Color.black);
-            info.SetExtendedProperty("NameBannerColor", Color.white);
-            info.SetExtendedProperty("AttackColor", GameColors.Instance.yellow);
-            info.SetExtendedProperty("HealthColor", GameColors.Instance.yellow);
-            info.SetExtendedProperty("DefaultAbilityColor", GameColors.Instance.yellow);
+            info.SetExtendedProperty("BorderColor", "gold");
+            info.SetExtendedProperty("EnergyColor", "gold");
+            info.SetExtendedProperty("NameTextColor", "black");
+            info.SetExtendedProperty("NameBannerColor", "white");
+            info.SetExtendedProperty("AttackColor", "gold");
+            info.SetExtendedProperty("HealthColor", "gold");
+            info.SetExtendedProperty("DefaultAbilityColor", "gold");
             return info;
         }
 

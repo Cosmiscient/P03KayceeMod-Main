@@ -4,7 +4,6 @@ using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
-using P03KayceeRun.cards;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards

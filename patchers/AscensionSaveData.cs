@@ -1,15 +1,15 @@
-using HarmonyLib;
-using DiskCardGame;
-using InscryptionAPI.Saves;
-using System.Text;
-using System.IO;
-using System.IO.Compression;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
-using Infiniscryption.P03KayceeRun.Items;
+using System.Text;
+using DiskCardGame;
+using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Quests;
+using InscryptionAPI.Saves;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -33,7 +33,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 retval += Part3SaveData.Data != null && Part3SaveData.Data.playerPos != null ? Part3SaveData.Data.playerPos.gridX : 0;
                 retval += Part3SaveData.Data != null && Part3SaveData.Data.playerPos != null ? 100000 * Part3SaveData.Data.playerPos.gridY : 0;
-                
+
                 return retval;
             }
         }
@@ -65,7 +65,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         public static bool IsP03Run
         {
-            get 
+            get
             {
                 if (SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part3"))
                     return true;
@@ -117,11 +117,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return default(T);
 
             var bytes = Convert.FromBase64String(data);
-            using(MemoryStream input = new MemoryStream(bytes))
+            using (MemoryStream input = new MemoryStream(bytes))
             {
-                using(MemoryStream output = new MemoryStream())
+                using (MemoryStream output = new MemoryStream())
                 {
-                    using(GZipStream stream = new GZipStream(input, CompressionMode.Decompress))
+                    using (GZipStream stream = new GZipStream(input, CompressionMode.Decompress))
                     {
                         stream.CopyTo(output);
                         //output.Flush();            
@@ -161,7 +161,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // So what we do is we actually keep two Part3Save copies alive in the ModdedSaveFile, and we swap in whichever
             // one is necessary based on context (see the patch for LoadFromFile)
-            
+
             // But whenever the file is saved, only the original part 3 save data gets saved in the normal spot
             // This fixes issues that arise when people unload the P03 KCM mod.
 
@@ -198,7 +198,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
-        
+
 
         [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.TestSaveFileCorrupted))]
         [HarmonyPrefix]
@@ -274,7 +274,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (IsP03Run)
             {
-                __result = __result ?? new ();
+                __result = __result ?? new();
                 __result.regionTier = EventManagement.CompletedZones.Count;
             }
         }
@@ -303,33 +303,39 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 StarterDeckInfo deckInfo = StarterDecksUtil.GetInfo(AscensionSaveData.Data.currentStarterDeck);
 
-                List<CardInfo> starterDeckCards = deckInfo.cards.Select(i => CardLoader.GetCardByName(i.name)).ToList();           
+                List<CardInfo> starterDeckCards = deckInfo.cards.Select(i => CardLoader.GetCardByName(i.name)).ToList();
 
-                foreach(CardInfo info in starterDeckCards)
+                foreach (CardInfo info in starterDeckCards)
                     //__instance.deck.AddCard(CustomCards.ModifyCardForAscension(info));
                     __instance.deck.AddCard(info);
 
                 if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.WeakStarterDeck))
                 {
-                    foreach(CardInfo info in __instance.deck.Cards)
+                    foreach (CardInfo info in __instance.deck.Cards)
                     {
                         if (info.mods == null)
                             info.mods = new();
                         info.mods.Add(new(Ability.BuffEnemy));
                     }
                 }
-                
+
                 __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.DRAFT_TOKEN));
                 __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.DRAFT_TOKEN));
 
                 // __instance.deck.AddCard(CardLoader.GetCardByName(ExpansionPackCards_1.EXP_1_PREFIX + "_GemRotator"));
-                
+
                 // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.UNC_TOKEN));
                 // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.UNC_TOKEN));
                 // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.UNC_TOKEN));
 
                 if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("rarestarter"))
                     __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));
+
+                if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("ringworm"))
+                {
+                    __instance.deck.AddCard(CardLoader.GetCardByName(ExpansionPackCards_2.RINGWORM_CARD));
+                    __instance.currency = 25;
+                }
 
                 // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));
                 // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));

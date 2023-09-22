@@ -163,12 +163,19 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public void EndLoadingFaces(params P03AnimationController.Face[] face)
         {
-            showingLoadingFaces = false;
+            try
+            {
+                showingLoadingFaces = false;
 
-            if (face.Length == 0)
-                StartCoroutine(ShowFaceSequence(0.04f, null, P03AnimationController.Face.Happy, P03AnimationController.Face.Bored, P03AnimationController.Face.Default));
-            else
-                StartCoroutine(ShowFaceSequence(0.04f, null, face));
+                if (face.Length == 0)
+                    StartCoroutine(ShowFaceSequence(0.04f, null, P03AnimationController.Face.Happy, P03AnimationController.Face.Bored, P03AnimationController.Face.Default));
+                else
+                    StartCoroutine(ShowFaceSequence(0.04f, null, face));
+            }
+            catch
+            {
+                // Do nothing for now
+            }
         }
 
         public void RecolorFrames(Color color)

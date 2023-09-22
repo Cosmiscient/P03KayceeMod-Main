@@ -19,7 +19,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnResolveOnBoard()
         {
-            yield return OnUpkeep(!PlayableCard.OpponentCard);
+            yield return OnTurnEnd(!PlayableCard.OpponentCard);
         }
 
         public override IEnumerator OnUpkeep(bool playerUpkeep)

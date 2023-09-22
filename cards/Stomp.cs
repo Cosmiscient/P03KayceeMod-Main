@@ -2,14 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
-using Infiniscryption.P03KayceeRun;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
 using UnityEngine;
 
-namespace P03KayceeRun.cards
+namespace Infiniscryption.P03KayceeRun.Cards
 {
     public class Stomp : AbilityBehaviour
     {

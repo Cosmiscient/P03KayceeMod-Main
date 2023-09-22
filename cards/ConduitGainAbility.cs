@@ -61,6 +61,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 CardModificationInfo info = ConduitAbilityMods[card];
                 card.RemoveTemporaryMod(info);
                 ConduitAbilityMods.Remove(card);
+                card.RenderCard();
                 card.UpdateFaceUpOnBoardEffects();
             }
         }
@@ -110,6 +111,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     info.abilities.AddRange(conduitAbilities.Where(a => a != Ability.None));
                     info.gemify = conduitAbilities.Any(a => a == Ability.None);
                     slot.Card.AddTemporaryMod(info);
+                    slot.Card.RenderCard();
                     slot.Card.UpdateFaceUpOnBoardEffects();
                 }
             }

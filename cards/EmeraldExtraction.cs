@@ -26,7 +26,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            EmeraldExtraction.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(EmeraldExtraction),
@@ -34,18 +34,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToResolveOnBoard() => BoardManager.Instance.GetSlots(!this.Card.OpponentCard).Any(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemGreen) || s.Card.HasAbility(Ability.GainGemTriple)));
+        public override bool RespondsToResolveOnBoard() => BoardManager.Instance.GetSlots(!Card.OpponentCard).Where(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemGreen) || s.Card.HasAbility(Ability.GainGemTriple))).Count() >= 2;
 
         public override IEnumerator OnResolveOnBoard()
         {
-            if (this.Card.TemporaryMods.Any(m => m.singletonId.Equals(nameof(EmeraldExtraction))))
+            if (Card.TemporaryMods.Any(m => m.singletonId.Equals(nameof(EmeraldExtraction))))
                 yield break;
 
-            int healthBuff = this.Card.AllAbilities().Where(ab => ab == EmeraldExtraction.AbilityID).Count();
-            CardModificationInfo mod = new(0, healthBuff);
-            mod.singletonId = nameof(EmeraldExtraction);
-            this.Card.Anim.StrongNegationEffect();
-            this.Card.AddTemporaryMod(mod);
+            int healthBuff = Card.AllAbilities().Where(ab => ab == AbilityID).Count();
+            CardModificationInfo mod = new(0, healthBuff)
+            {
+                singletonId = nameof(EmeraldExtraction)
+            };
+            Card.Anim.StrongNegationEffect();
+            Card.AddTemporaryMod(mod);
 
             yield break;
         }

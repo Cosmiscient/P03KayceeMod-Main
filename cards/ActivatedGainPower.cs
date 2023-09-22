@@ -1,13 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
-using Infiniscryption.P03KayceeRun;
-using Infiniscryption.P03KayceeRun.Cards;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
-namespace P03KayceeRun.cards
+namespace Infiniscryption.P03KayceeRun.Cards
 {
     public class ActivatedGainPower : ActivatedAbilityBehaviour
     {
@@ -20,7 +18,7 @@ namespace P03KayceeRun.cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Overcharge";
-            info.rulebookDescription = $"Activate: Pay {ENERGY_COST} Energy to increase the Power of this card by 1";
+            info.rulebookDescription = $"Pay {ENERGY_COST} Energy to increase the Power of this card by 1";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;

@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards;
 using InscryptionAPI.Card;
 using UnityEngine;
 
@@ -165,6 +167,113 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         info.attackTextColor = GameColors.Instance.brightLimeGreen;
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(EvolveParams), nameof(EvolveParams.GetDefaultEvolution))]
+        [HarmonyPrefix]
+        internal static bool UpdateDefaultEvolutionWithCellEvolve(CardInfo info, ref CardInfo __result)
+        {
+            if (info.HasAbility(CellEvolve.AbilityID))
+            {
+                CardInfo cardInfo = info.Clone() as CardInfo;
+                CardModificationInfo cardModificationInfo = new(0, 0)
+                {
+                    fromEvolve = true,
+
+                    // Make it so the card doesn't copy this mod when it re-evolves
+                    nonCopyable = true
+                };
+
+                // If this came from CellEvolve (i.e., the default evolution is de-evolving)
+                // we don't need to change the name or change the attack or anything like that.
+                // The de-evolution will end up remove the evolution mod and the card will revert
+                // back to the original version.
+                //
+                // But if it does not have an evolve mod, we need to add a default de-evolve mod.
+                if (!info.Mods.Any(m => m.fromEvolve))
+                {
+                    cardModificationInfo.nameReplacement = String.Format(Localization.Translate("{0} 2.0"), cardInfo.DisplayedNameLocalized);
+                    cardModificationInfo.attackAdjustment = 1;
+                    cardModificationInfo.healthAdjustment = 1;
+                }
+
+                cardModificationInfo.abilities = new() { CellDeEvolve.AbilityID };
+                cardModificationInfo.negateAbilities = new() { CellEvolve.AbilityID };
+
+                cardInfo.Mods.Add(cardModificationInfo);
+                __result = cardInfo;
+
+                return false;
+            }
+            if (info.HasAbility(CellDeEvolve.AbilityID))
+            {
+                CardInfo cardInfo = info.Clone() as CardInfo;
+                CardModificationInfo cardModificationInfo = new(0, 0)
+                {
+                    fromEvolve = true,
+
+                    // Make it so the card doesn't copy this mod when it de-evolves
+                    nonCopyable = true
+                };
+
+                // If this came from CellDevEvolve (i.e., the default evolution is re-evolving)
+                // we don't need to change the name or change the attack or anything like that.
+                // The evolution will end up remove the de-evolution mod and the card will revert
+                // back to the original version.
+                //
+                // But if it does not have an evolve mod, we need to add a default evolve mod.
+                if (!info.Mods.Any(m => m.fromEvolve))
+                {
+                    cardModificationInfo.nameReplacement = string.Format(Localization.Translate("Beta {0}"), cardInfo.DisplayedNameLocalized);
+                    cardModificationInfo.attackAdjustment = -1;
+                }
+
+                cardModificationInfo.abilities = new() { CellEvolve.AbilityID };
+                cardModificationInfo.negateAbilities = new() { CellDeEvolve.AbilityID };
+
+                cardInfo.Mods.Add(cardModificationInfo);
+                __result = cardInfo;
+
+                return false;
+            }
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                CardInfo cardInfo = CardLoader.Clone(info);
+
+                CardModificationInfo prevEvolveMod = info.Mods.FirstOrDefault(m => m.fromEvolve);
+                if (prevEvolveMod != null)
+                {
+                    prevEvolveMod.attackAdjustment += 1;
+                    prevEvolveMod.healthAdjustment += 1;
+
+                    if (prevEvolveMod.nameReplacement.EndsWith(".0"))
+                    {
+                        int prevVersion = int.Parse(prevEvolveMod.nameReplacement
+                                                       .Split(' ')
+                                                       .Last()
+                                                       .Replace(".0", ""));
+                        prevEvolveMod.nameReplacement = prevEvolveMod.nameReplacement.Replace($"{prevVersion}.0", $"{prevVersion + 1}.0");
+                    }
+                    else
+                    {
+                        prevEvolveMod.nameReplacement += " 2.0";
+                    }
+                }
+                else
+                {
+                    CardModificationInfo evolveMod = new(1, 1)
+                    {
+                        fromEvolve = true,
+                        nameReplacement = cardInfo.name + " 2.0",
+                        nonCopyable = false
+                    };
+                    cardInfo.mods.Add(evolveMod);
+                }
+                __result = cardInfo;
+
+                return false;
+            }
+            return true;
         }
     }
 }

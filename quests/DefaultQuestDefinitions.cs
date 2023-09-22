@@ -7,7 +7,6 @@ using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Saves;
-using P03KayceeRun.cards;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {

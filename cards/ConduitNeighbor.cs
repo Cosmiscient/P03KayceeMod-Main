@@ -40,8 +40,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             __result = __instance.GetConduitsForSlot(slot).Count > 0;
 
-            CardSlot toLeft = Singleton<BoardManager>.Instance.GetAdjacent(slot, adjacentOnLeft: true);
-            CardSlot toRight = Singleton<BoardManager>.Instance.GetAdjacent(slot, adjacentOnLeft: false);
+            CardSlot toLeft = BoardManager.Instance.GetAdjacent(slot, adjacentOnLeft: true);
+            CardSlot toRight = BoardManager.Instance.GetAdjacent(slot, adjacentOnLeft: false);
 
             //If adjacent to conduit neighbor, slot is within circuit
             if (toLeft != null)
@@ -103,56 +103,44 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static bool ConduitNeighborAsConduit(ConduitCircuitManager __instance, ref List<PlayableCard> __result, CardSlot slot)
         {
-            List<CardSlot> slots = Singleton<BoardManager>.Instance.GetSlots(slot.IsPlayerSlot);
+            List<CardSlot> slots = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
             int num = slots.IndexOf(slot);
             List<PlayableCard> list = new();
-            bool flag = false;
-            bool flag2 = false;
+            bool circuitOnLeft = false;
+            bool circuitOnRight = false;
             for (int i = 0; i < slots.Count; i++)
             {
                 if (slots[i].Card != null && slots[i].Card.HasConduitAbility())
                 {
                     if (i < num)
                     {
-                        flag = true;
+                        circuitOnLeft = true;
                         list.Add(slots[i].Card);
                     }
                     else if (i > num)
                     {
-                        flag2 = true;
+                        circuitOnRight = true;
                         list.Add(slots[i].Card);
                     }
                 }
             }
-            if (!flag || !flag2)
+            if (!circuitOnLeft || !circuitOnRight)
             {
                 list.Clear();
             }
 
-            CardSlot toLeft = Singleton<BoardManager>.Instance.GetAdjacent(slot, adjacentOnLeft: true);
-            CardSlot toRight = Singleton<BoardManager>.Instance.GetAdjacent(slot, adjacentOnLeft: false);
+            CardSlot toLeft = BoardManager.Instance.GetAdjacent(slot, adjacentOnLeft: true);
+            CardSlot toRight = BoardManager.Instance.GetAdjacent(slot, adjacentOnLeft: false);
 
             //If slot is adjacent to conduit neighbor, add conduit neighbor card to list of conduits
-            if (toLeft != null)
+            if (toLeft?.Card != null && toLeft.Card.HasAbility(AbilityID))
             {
-                if (toLeft.Card != null)
-                {
-                    if (toLeft.Card.HasAbility(AbilityID))
-                    {
-                        list.Add(toLeft.Card);
-                    }
-                }
+                list.Add(toLeft.Card);
             }
 
-            if (toRight != null)
+            if (toRight?.Card != null && toRight.Card.HasAbility(AbilityID))
             {
-                if (toRight.Card != null)
-                {
-                    if (toRight.Card.HasAbility(AbilityID))
-                    {
-                        list.Add(toRight.Card);
-                    }
-                }
+                list.Add(toRight.Card);
             }
 
             __result = list;

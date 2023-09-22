@@ -35,7 +35,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        private IEnumerator BombCard(CardSlot target, PlayableCard attacker)
+        public static IEnumerator BombCard(CardSlot target, PlayableCard attacker, int level = 2, float speed = 0.5f)
         {
             GameObject bomb = Instantiate(AssetBundleManager.Prefabs["Molotov"]);
             OnboardDynamicHoloPortrait.HolofyGameObject(bomb, GameColors.instance.glowRed);
@@ -43,12 +43,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             Vector3 midpoint = Vector3.Lerp(attacker.Slot.transform.position, target.transform.position, 0.5f) + (Vector3.up * 0.25f);
 
-            Tween.Position(bomb.transform, midpoint, 0.25f, 0f, Tween.EaseOut, Tween.LoopType.None, null, null, true);
-            Tween.Position(bomb.transform, target.transform.position, 0.25f, 0.25f, Tween.EaseIn, Tween.LoopType.None, null, null, true);
-            Tween.Position(bomb.transform, target.transform.position - (Vector3.up * 0.2f), 0.1f, 0.5f, Tween.EaseIn, Tween.LoopType.None, null, () => Destroy(bomb), true);
-            Tween.LocalRotation(bomb.transform, Quaternion.Euler(new(90f, 0f, 0f)), 0.5f, 0f, Tween.EaseLinear, Tween.LoopType.None, null, null, true);
+            Tween.Position(bomb.transform, midpoint, speed / 2f, 0f, Tween.EaseOut, Tween.LoopType.None, null, null, true);
+            Tween.Position(bomb.transform, target.transform.position, speed / 2f, speed / 2f, Tween.EaseIn, Tween.LoopType.None, null, null, true);
+            Tween.Position(bomb.transform, target.transform.position - (Vector3.up * 0.2f), 0.1f, speed, Tween.EaseIn, Tween.LoopType.None, null, () => Destroy(bomb), true);
+            Tween.LocalRotation(bomb.transform, Quaternion.Euler(new(90f, 0f, 0f)), speed, 0f, Tween.EaseLinear, Tween.LoopType.None, null, null, true);
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(speed);
             AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, target.transform.position, .7f);
             target.Card?.Anim.PlayHitAnimation();
 
@@ -60,9 +60,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     Destroy(fireball);
             });
 
-            yield return new WaitForSeconds(1f);
-            yield return target.SetSlotModification(FireBomb.GetFireLevel(2, target, attacker));
-            yield return new WaitForSeconds(0.25f);
+            yield return new WaitForSeconds(speed * 2f);
+            yield return target.SetSlotModification(FireBomb.GetFireLevel(level, target, attacker));
+            yield return new WaitForSeconds(speed / 2f);
             yield break;
         }
 

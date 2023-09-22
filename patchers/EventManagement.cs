@@ -1,17 +1,15 @@
-using HarmonyLib;
-using DiskCardGame;
-using InscryptionAPI.Saves;
-using System.Linq;
 using System;
-using System.Collections.Generic;
-using InscryptionAPI.Guid;
-using Infiniscryption.P03KayceeRun.Sequences;
 using System.Collections;
-using UnityEngine;
-using Infiniscryption.P03KayceeRun.Items;
-using Infiniscryption.P03KayceeRun.Faces;
+using System.Collections.Generic;
+using System.Linq;
+using DiskCardGame;
+using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Quests;
+using Infiniscryption.P03KayceeRun.Sequences;
+using InscryptionAPI.Guid;
+using InscryptionAPI.Saves;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -57,8 +55,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         internal static bool SawCredits
         {
-            get { return ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "SawCreditsB"); }
-            set { ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "SawCreditsB", value); }
+            get => ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "SawCreditsB");
+            set => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "SawCreditsB", value);
         }
 
         public static Part3SaveData.WorldPosition MycologistReturnPosition
@@ -117,7 +115,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 {
                     return RunBasedHoloMap.Building ? RunBasedHoloMap.BuildingZone : RunBasedHoloMap.GetRegionCodeFromWorldID(HoloMapAreaManager.Instance.CurrentWorld.name);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return RunBasedHoloMap.Zone.Neutral;
                 }
@@ -180,7 +178,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             get
             {
-                int tier = EventManagement.CompletedZones.Count;
+                int tier = CompletedZones.Count;
                 int modifier = AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.BaseDifficulty);
                 return tier + modifier + (tier == 0 ? 0 : 1);
             }
@@ -220,7 +218,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         public static int UpgradePrice(HoloMapNode.NodeDataType nodeType)
         {
-            float baseCost = 7 + (AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.ExpensivePelts) ? 3f + 2f * CompletedZones.Count : 1f * CompletedZones.Count);
+            float baseCost = 7 + (AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.ExpensivePelts) ? 3f + (2f * CompletedZones.Count) : 1f * CompletedZones.Count);
 
             if (CostAdjustments.ContainsKey(nodeType))
             {
@@ -231,7 +229,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     baseCost += CostAdjustments[nodeType];
             }
 
-            return UnityEngine.Mathf.RoundToInt(baseCost);
+            return Mathf.RoundToInt(baseCost);
         }
 
         public static Tuple<int, int> CurrencyGainRange
@@ -241,8 +239,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 int minExpectedUpgrades = AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.ExpensivePelts) ? 2 * CompletedZones.Count : 3 * CompletedZones.Count;
                 int actualUpgrades = Part3SaveData.Data.deck.Cards.Select(c => c.mods.Count()).Sum();
                 int upgradeDiff = Math.Max(0, minExpectedUpgrades - actualUpgrades - (Part3SaveData.Data.currency / 6));
-                int low = 4 + CompletedZones.Count + 3 * upgradeDiff;
-                int high = 8 + CompletedZones.Count + 3 * upgradeDiff;
+                int low = 4 + CompletedZones.Count + (3 * upgradeDiff);
+                int high = 8 + CompletedZones.Count + (3 * upgradeDiff);
                 return new(low, high);
             }
         }
@@ -291,14 +289,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         public static int NumberOfLivesRemaining
         {
-            get { return ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, "NumberOfLivesRemaining"); }
-            set { ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "NumberOfLivesRemaining", value); }
+            get => ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, "NumberOfLivesRemaining");
+            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "NumberOfLivesRemaining", value);
         }
 
         public static int NumberOfLosses
         {
-            get { return ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, "NumberOfLosses"); }
-            set { ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "NumberOfLosses", value); }
+            get => ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, "NumberOfLosses");
+            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "NumberOfLosses", value);
         }
 
         public const int ENEMIES_TO_UNLOCK_BOSS = 4;
@@ -321,10 +319,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             get
             {
                 string zoneCsv = ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, "CompletedZones");
-                if (zoneCsv == default(string))
-                    return new List<string>();
-
-                return zoneCsv.Split(',').ToList();
+                return zoneCsv == default ? new List<string>() : zoneCsv.Split(',').ToList();
             }
         }
 
@@ -350,10 +345,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             get
             {
                 string zoneCsv = ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, "VisitedZones");
-                if (zoneCsv == default(string))
-                    return new List<string>();
-
-                return zoneCsv.Split(',').ToList();
+                return zoneCsv == default ? new List<string>() : zoneCsv.Split(',').ToList();
             }
         }
         public static void AddVisitedZone(string id)
@@ -367,16 +359,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         public static StoryEvent GetStoryEventForOpponent(Opponent.Type opponent)
         {
-            if (opponent == Opponent.Type.PhotographerBoss)
-                return StoryEvent.PhotographerDefeated;
-            if (opponent == Opponent.Type.TelegrapherBoss)
-                return StoryEvent.TelegrapherDefeated;
-            if (opponent == Opponent.Type.CanvasBoss)
-                return StoryEvent.CanvasDefeated;
-            if (opponent == Opponent.Type.ArchivistBoss)
-                return StoryEvent.ArchivistDefeated;
-
-            return StoryEvent.WoodcarverDefeated;
+            return opponent == Opponent.Type.PhotographerBoss
+                ? StoryEvent.PhotographerDefeated
+                : opponent == Opponent.Type.TelegrapherBoss
+                ? StoryEvent.TelegrapherDefeated
+                : opponent == Opponent.Type.CanvasBoss
+                ? StoryEvent.CanvasDefeated
+                : opponent == Opponent.Type.ArchivistBoss ? StoryEvent.ArchivistDefeated : StoryEvent.WoodcarverDefeated;
         }
 
         [HarmonyPatch(typeof(ProgressionData), nameof(ProgressionData.LearnedMechanic))]
@@ -456,7 +445,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
                 if ((int)storyEvent == (int)HAS_DRAFT_TOKEN)
                 {
-                    __result = Part3SaveData.Data.deck.Cards.Any(card => card.name == CustomCards.DRAFT_TOKEN || card.name == CustomCards.RARE_DRAFT_TOKEN);
+                    __result = Part3SaveData.Data.deck.Cards.Any(card => card.name is CustomCards.DRAFT_TOKEN or CustomCards.RARE_DRAFT_TOKEN);
                     return false;
                 }
 
@@ -517,7 +506,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 if (__instance.Opponent.NumLives <= 0 || __instance.Opponent.Surrendered)
                 {
-                    NumberOfZoneEnemiesKilled = NumberOfZoneEnemiesKilled + 1;
+                    NumberOfZoneEnemiesKilled++;
 
                     if (DefaultQuestDefinitions.TippedScales.IsDefaultActive())
                         DefaultQuestDefinitions.TippedScales.IncrementQuestCounter();
@@ -549,10 +538,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return true;
 
             Card queueCard = BoardManager.Instance.GetCardQueuedForSlot(slot);
-            if (queueCard != null && queueCard.Info.name.Equals(CustomCards.BRAIN))
-                return true;
-
-            return false;
+            return queueCard != null && queueCard.Info.name.Equals(CustomCards.BRAIN);
         }
 
         [HarmonyPatch(typeof(TurnManager), "CleanupPhase")]
@@ -561,12 +547,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (SaveFile.IsAscension)
             {
-                if (BoardManager.Instance.opponentSlots.Any(SlotHasBrain))
+                if (BoardManager.Instance.AllSlotsCopy.Any(SlotHasBrain))
                 {
                     yield return TextDisplayer.Instance.PlayDialogueEvent("P03BountyHunterBrain", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                     CardInfo brain = CardLoader.GetCardByName(CustomCards.BRAIN);
-                    brain.mods = new();
-                    brain.mods.Add(new(Ability.DrawRandomCardOnDeath));
+                    brain.mods = new() {
+                        new(Ability.DrawRandomCardOnDeath)
+                    };
                     Part3SaveData.Data.deck.AddCard(brain);
                 }
             }
@@ -596,8 +583,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (success)
             {
                 foreach (AscensionChallenge c in AscensionSaveData.Data.activeChallenges)
+                {
                     if (!AscensionSaveData.Data.conqueredChallenges.Contains(c))
                         AscensionSaveData.Data.conqueredChallenges.Add(c);
+                }
 
                 if (!string.IsNullOrEmpty(AscensionSaveData.Data.currentStarterDeck) && !AscensionSaveData.Data.conqueredStarterDecks.Contains(AscensionSaveData.Data.currentStarterDeck))
                     AscensionSaveData.Data.conqueredStarterDecks.Add(AscensionSaveData.Data.currentStarterDeck);
@@ -609,7 +598,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // Also delete the normal ascension current run just in case
             //AscensionSaveData.Data.currentRun = null;
 
-            if (EventManagement.CompletedZones.Count > 0)
+            if (CompletedZones.Count > 0)
                 AscensionSaveData.Data.numRunsSinceReachedFirstBoss = 0;
 
             // Let's no longer force this to false

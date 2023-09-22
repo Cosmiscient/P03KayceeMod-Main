@@ -49,5 +49,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             yield return base.Activate();
         }
+
+        public new IEnumerator OnBellRung(bool playerCombatPhase)
+        {
+            yield return Activate();
+        }
     }
 }

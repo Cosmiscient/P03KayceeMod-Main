@@ -71,17 +71,19 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         }
 
-        public override bool RespondsToResolveOnBoard() => ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
+        private bool ShouldExplode => !Card.Dead && Card.Slot != null && ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
 
-        public override bool RespondsToOtherCardResolve(PlayableCard otherCard) => ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
+        public override bool RespondsToResolveOnBoard() => ShouldExplode;
 
-        public override bool RespondsToOtherCardAssignedToSlot(PlayableCard otherCard) => ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
+        public override bool RespondsToOtherCardResolve(PlayableCard otherCard) => ShouldExplode;
 
-        public bool RespondsToBellRung(bool playerCombatPhase) => ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
+        public override bool RespondsToOtherCardAssignedToSlot(PlayableCard otherCard) => ShouldExplode;
 
-        public override bool RespondsToTurnEnd(bool playerTurnEnd) => ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
+        public bool RespondsToBellRung(bool playerCombatPhase) => ShouldExplode;
 
-        public override bool RespondsToUpkeep(bool playerUpkeep) => ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
+        public override bool RespondsToTurnEnd(bool playerTurnEnd) => ShouldExplode;
+
+        public override bool RespondsToUpkeep(bool playerUpkeep) => ShouldExplode;
 
         public override IEnumerator OnResolveOnBoard() { yield return Explodonate(); }
 
