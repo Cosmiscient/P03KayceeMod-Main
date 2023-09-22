@@ -69,7 +69,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             if (SaveManager.SaveFile.IsPart3)
             {
-                ResourcesManager.Instance.ForceGemsUpdate();
                 List<GameObject> defaultIconGroups = __instance.AbilityIcons.defaultIconGroups;
                 foreach (GameObject group in defaultIconGroups)
                 {
@@ -148,15 +147,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private static void ReRenderCards()
         {
-            foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
+            if (GameFlowManager.IsCardBattle)
             {
-                if (slot.Card != null && slot.Card.HasAnyOfAbilities(GemReRenderAbilities))
-                    slot.Card.RenderCard();
-            }
-            foreach (PlayableCard card in PlayerHand.Instance.cardsInHand)
-            {
-                if (card.HasAnyOfAbilities(GemReRenderAbilities))
-                    card.RenderCard();
+                foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
+                {
+                    if (slot.Card != null && slot.Card.HasAnyOfAbilities(GemReRenderAbilities))
+                        slot.Card.RenderCard();
+                }
+                foreach (PlayableCard card in PlayerHand.Instance.cardsInHand)
+                {
+                    if (card.HasAnyOfAbilities(GemReRenderAbilities))
+                        card.RenderCard();
+                }
             }
         }
 

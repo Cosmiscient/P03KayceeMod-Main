@@ -77,6 +77,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         internal static Dictionary<string, Achievement> StickerRewards = new() {
             { "sticker_null", P03AchievementManagement.FIRST_WIN },
+            { "sticker_skull", P03AchievementManagement.SKULLSTORM },
             { "sticker_altcat", P03AchievementManagement.SCALES_TILTED_3X }
         };
 

@@ -162,8 +162,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Rh1n0
             CardManager.New(EXP_2_PREFIX, "Rhino", "Rh1n0", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_rhino.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 6)
+                .SetCost(energyCost: 5)
                 .SetRegionalP03Card(CardTemple.Nature)
+                .SetRare()
                 .AddAbilities(ActivatedGainPower.AbilityID);
 
             // 3leph4nt
@@ -377,6 +378,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(GemOrangeBrittle.AbilityID, GemGreenBuffEnemy.AbilityID);
+
+            // Gem Augur
+            CardManager.New(EXP_2_PREFIX, "GemAugur", "Gem Augur", 2, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gem_augur.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 6)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(GemStrike.AbilityID);
         }
     }
 }

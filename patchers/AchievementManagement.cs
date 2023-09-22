@@ -1,13 +1,10 @@
 using System.Linq;
-using System.Resources;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.Achievements;
 using Infiniscryption.P03KayceeRun.Cards;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Saves;
-using InscryptionAPI.Card;
-using MonoMod.ModInterop;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -49,7 +46,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         static P03AchievementManagement()
         {
-            var grp = ModdedAchievementManager.NewGroup(
+            ModdedAchievementManager.AchievementGroupDefinition grp = ModdedAchievementManager.NewGroup(
                 P03Plugin.PluginGuid,
                 "P03 In Kaycee's Mod",
                 TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
@@ -70,7 +67,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Win a run with every challenge skull from the first page enabled",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_skull.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [red skull] sticker
 
             CONTROL_NFT = ModdedAchievementManager.New(
@@ -205,7 +202,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Deal 6 damage with Plasma Jimmy in a single turn",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_plasma.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [orange wizard hat] sticker
 
             FULLY_OVERCLOCKED = ModdedAchievementManager.New(
@@ -236,7 +233,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             ).ID; // [hermes boots, shoe with wings on it] sticker
         }
 
-        class CardBattleAchievementMonitor : Singleton<CardBattleAchievementMonitor>
+        private class CardBattleAchievementMonitor : Singleton<CardBattleAchievementMonitor>
         {
             private bool BattleActive = false;
 
@@ -359,31 +356,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.OpponentTurn))]
         [HarmonyPrefix]
-        private static void TurnStart()
-        {
-            CardBattleAchievementMonitor.Instance?.TurnStart(false);
-        }
+        private static void TurnStart() => CardBattleAchievementMonitor.Instance?.TurnStart(false);
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.PlayerTurn))]
         [HarmonyPrefix]
-        private static void TurnStartPlayer()
-        {
-            CardBattleAchievementMonitor.Instance?.TurnStart(true);
-        }
+        private static void TurnStartPlayer() => CardBattleAchievementMonitor.Instance?.TurnStart(true);
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
         [HarmonyPrefix]
-        private static void Cleanup()
-        {
-            CardBattleAchievementMonitor.Instance?.CleanUp();
-        }
+        private static void Cleanup() => CardBattleAchievementMonitor.Instance?.CleanUp();
 
         [HarmonyPatch(typeof(CombatPhaseManager), nameof(CombatPhaseManager.SlotAttackSlot))]
         [HarmonyPostfix]
-        private static void SlotAttack(CardSlot attackingSlot, CardSlot opposingSlot)
-        {
-            CardBattleAchievementMonitor.Instance?.SlotAttackSlot(attackingSlot, opposingSlot);
-        }
+        private static void SlotAttack(CardSlot attackingSlot, CardSlot opposingSlot) => CardBattleAchievementMonitor.Instance?.SlotAttackSlot(attackingSlot, opposingSlot);
 
         [HarmonyPatch(typeof(ActivatedDealDamage), nameof(ActivatedDealDamage.Activate))]
         [HarmonyPrefix]

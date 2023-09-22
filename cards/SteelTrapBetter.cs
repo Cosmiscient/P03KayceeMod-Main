@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using UnityEngine;
@@ -42,12 +43,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         static BetterSteelTrap()
         {
-            AbilityManager.FullAbility infoClone = AbilityManager.BaseGameAbilities.AbilityByID(Ability.SteelTrap).Clone();
-            infoClone.Info.rulebookDescription = "When a card bearing this sigil perishes, the creature opposing it perishes as well. A Vessel is created in your hand.";
+            AbilityManager.FullAbility infoClone = AbilityManager.BaseGameAbilities.AbilityByID(Ability.SteelTrap);
+
+            AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
+            info.rulebookName = "Holo Trap";
+            info.rulebookDescription = "When a card bearing this sigil perishes, the creature opposing it perishes as well. A Vessel is created in your hand.";
+            info.canStack = false;
+            info.powerLevel = infoClone.Info.powerLevel;
+            info.opponentUsable = true;
+            info.passive = false;
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
-                infoClone.Info,
+                info,
                 typeof(BetterSteelTrap),
                 infoClone.Texture
             ).Id;

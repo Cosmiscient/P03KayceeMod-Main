@@ -2,12 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
-using Infiniscryption.P03KayceeRun.Helpers;
-using InscryptionAPI.Card;
-using InscryptionAPI.Encounters;
-using UnityEngine;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+using InscryptionAPI.Card;
+using InscryptionAPI.Encounters;
 
 namespace Infiniscryption.P03KayceeRun.Encounters
 {
@@ -32,20 +30,19 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             P03Plugin.Log.LogDebug($"Generating enemy defn: {cardName} becomes {replacement} at {difficulty} and gets overclocked at {overclock}");
             List<EncounterBlueprintData.CardBlueprint> retval = new();
 
-            EncounterBlueprintData.CardBlueprint baseBp = new();
-            baseBp.card = String.IsNullOrEmpty(cardName) ? null : CardLoader.Clone(CardManager.AllCardsCopy.CardByName(cardName));
+            EncounterBlueprintData.CardBlueprint baseBp = new()
+            {
+                card = String.IsNullOrEmpty(cardName) ? null : CardLoader.Clone(CardManager.AllCardsCopy.CardByName(cardName))
+            };
 
             if (overclock > 0 && overclock < difficulty && String.IsNullOrEmpty(cardName))
                 overclock = difficulty;
 
-            if (overclock == 0 && difficulty == 0)
-                baseBp.maxDifficulty = MAX_DIFFICULTY;
-            else if (overclock == 0 && difficulty > 0)
-                baseBp.maxDifficulty = difficulty - 1;
-            else if (overclock > 0 && difficulty == 0)
-                baseBp.maxDifficulty = overclock - 1;
-            else
-                baseBp.maxDifficulty = Math.Min(overclock, difficulty) - 1;
+            baseBp.maxDifficulty = overclock == 0 && difficulty == 0
+                ? MAX_DIFFICULTY
+                : overclock == 0 && difficulty > 0
+                ? difficulty - 1
+                : overclock > 0 && difficulty == 0 ? overclock - 1 : Math.Min(overclock, difficulty) - 1;
 
             if (random > 0)
                 baseBp.randomReplaceChance = random;
@@ -54,13 +51,12 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             if (difficulty > 0 && replacement != null)
             {
-                EncounterBlueprintData.CardBlueprint diff = new();
-                diff.card = String.IsNullOrEmpty(replacement) ? null : CardLoader.Clone(CardManager.AllCardsCopy.CardByName(replacement));
-                diff.minDifficulty = difficulty;
-                if (overclock > difficulty)
-                    diff.maxDifficulty = overclock - 1;
-                else
-                    diff.maxDifficulty = MAX_DIFFICULTY;
+                EncounterBlueprintData.CardBlueprint diff = new()
+                {
+                    card = String.IsNullOrEmpty(replacement) ? null : CardLoader.Clone(CardManager.AllCardsCopy.CardByName(replacement)),
+                    minDifficulty = difficulty,
+                    maxDifficulty = overclock > difficulty ? overclock - 1 : MAX_DIFFICULTY
+                };
 
                 if (difficulty >= overclock && overclock > 0)
                 {
@@ -77,8 +73,10 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             if (overclock > 0)
             {
-                EncounterBlueprintData.CardBlueprint ov = new();
-                ov.minDifficulty = overclock;
+                EncounterBlueprintData.CardBlueprint ov = new()
+                {
+                    minDifficulty = overclock
+                };
                 if (overclock > difficulty && difficulty > 0)
                 {
                     ov.card = String.IsNullOrEmpty(replacement) ? null : CardLoader.Clone(CardManager.AllCardsCopy.CardByName(replacement));
@@ -87,10 +85,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 else
                 {
                     ov.card = String.IsNullOrEmpty(cardName) ? null : CardLoader.Clone(CardManager.AllCardsCopy.CardByName(cardName));
-                    if (difficulty > overclock)
-                        ov.maxDifficulty = difficulty - 1;
-                    else
-                        ov.maxDifficulty = MAX_DIFFICULTY;
+                    ov.maxDifficulty = difficulty > overclock ? difficulty - 1 : MAX_DIFFICULTY;
                 }
                 if (ov.card != null)
                 {
@@ -534,8 +529,8 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 3
             neutralBombsAndShields.turns.AddTurn(
-                Enemy("Bombbot", replacement: "P03KCMXP1_AmmoBot", difficulty: 2),
-                Enemy(null, replacement: "Bombbot", difficulty: 3, overclock: 4)
+                Enemy("P03KCMXP2_Molotov", replacement: "P03KCMXP2_PyroBot", difficulty: 2),
+                Enemy(null, replacement: "P03KCMXP2_Molotov", difficulty: 3, overclock: 4)
             );
 
             // TURN 4
@@ -548,13 +543,13 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             // TURN 5
             neutralBombsAndShields.turns.AddTurn(
                 Enemy("Shieldbot", replacement: "CloserBot", difficulty: 4),
-                Enemy(null, replacement: "P03KCMXP1_AmmoBot", difficulty: 3)
+                Enemy(null, replacement: "P03KCMXP2_PyroBot", difficulty: 3)
             );
 
             // TURN 6
             neutralBombsAndShields.turns.AddTurn(
                 Enemy(null, replacement: "CloserBot", difficulty: 4, overclock: 6, overclockAbility: Ability.DeathShield),
-                Enemy("Shieldbot", replacement: "BombMaiden", difficulty: 6)
+                Enemy("Shieldbot", replacement: "P03KCMXP2_SirBlast", difficulty: 6)
             );
 
             // TURN 7
@@ -1279,6 +1274,68 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 Enemy("XformerGrizzlyBot")
             );
 
+            // Encounter: Tech_AttackConduits
+            EncounterBlueprintData techObnoxiousConduits = EncounterManager.New("P03KCM_Tech_ObnoxiousConduits", addToPool: true);
+            techObnoxiousConduits.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Tech);
+            techObnoxiousConduits.turns = new();
+
+            // TURN 1
+            techObnoxiousConduits.turns.AddTurn(
+                Enemy("NullConduit", replacement: "ConduitTower", difficulty: 1),
+                Enemy("NullConduit", replacement: "ConduitTower", difficulty: 1),
+                Enemy("P03KCMXP2_UrchinCell", overclock: 3)
+            );
+
+            // TURN 2
+            techObnoxiousConduits.turns.AddTurn(
+                Enemy("LeapBot", replacement: "CellGift", difficulty: 2)
+            );
+
+            // TURN 3
+            techObnoxiousConduits.turns.AddTurn(
+                Enemy("P03KXMCP2_Suicell"),
+                Enemy(null, replacement: "Shieldbot", difficulty: 4),
+                Enemy(null, replacement: "ConduitTower", difficulty: 3, overclock: 4)
+            );
+
+            // TURN 4
+            techObnoxiousConduits.turns.AddTurn(
+                Enemy("NullConduit", replacement: "ConduitTower", difficulty: 1),
+                Enemy("P03KCMXP2_UrchinCell", overclock: 3),
+                Enemy(null, replacement: "CellBuff", difficulty: 4),
+                Enemy(null, replacement: "P03KCMXP2_LockjawCell", difficulty: 5)
+            );
+
+            // TURN 5
+            techObnoxiousConduits.turns.AddTurn(
+                Enemy("NullConduit", replacement: "P03KCMXP1_ConduitDebuffEnemy", difficulty: 2),
+                Enemy(null, replacement: "P03KCMXP1_ConduitDebuffEnemy", difficulty: 6),
+                Enemy("P03KCMXP2_UrchinCell", replacement: "P03KCMXP2_LockjawCell", difficulty: 5)
+            );
+
+            // TURN 6
+            techObnoxiousConduits.turns.AddTurn(
+                Enemy("P03KCMXP2_UrchinCell", replacement: "Insectodrone", difficulty: 5),
+                Enemy(null, replacement: "P03KXMCP2_Suicell", difficulty: 2)
+            );
+
+            // TURN 7
+            techObnoxiousConduits.turns.AddTurn(
+                Enemy("ConduitTower", replacement: "P03KCMXP1_ConduitDebuffEnemy", difficulty: 4),
+                Enemy(null, replacement: "P03KCMXP2_LockjawCell", difficulty: 6)
+            );
+
+            // TURN 8
+            techObnoxiousConduits.turns.AddTurn(
+                Enemy(null, replacement: "CellBuff", difficulty: 4),
+                Enemy(null, replacement: "LeapBot", difficulty: 3)
+            );
+
+            // TURN 9
+            techObnoxiousConduits.turns.AddTurn(
+                Enemy(null, replacement: "CloserBot", difficulty: 3)
+            );
+
 
             // Encounter: Tech_AttackConduits
             EncounterBlueprintData techAttackConduits = EncounterManager.New("P03KCM_Tech_AttackConduits", addToPool: true);
@@ -1706,6 +1763,64 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 Enemy("P03KCMXP1_Executor", replacement: "CloserBot", difficulty: 6)
             );
 
+            // Encounter: Undead_FlamingSkeleSwarm
+            EncounterBlueprintData undeadFlamingSkeleSwarm = EncounterManager.New("P03KCM_Undead_Flaming_SkeleSwarm", addToPool: true);
+            undeadFlamingSkeleSwarm.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Undead);
+            undeadFlamingSkeleSwarm.turns = new();
+
+            // TURN 1
+            undeadFlamingSkeleSwarm.turns.AddTurn(
+                Enemy("P03KCMXP2_FlamingExeskeleton"),
+                Enemy("P03KCMXP2_FlamingExeskeleton"),
+                Enemy(null, replacement: "SentryBot", difficulty: 1),
+                Enemy(null, replacement: "Shutterbug", difficulty: 5)
+            );
+
+            // TURN 2
+            undeadFlamingSkeleSwarm.turns.AddTurn(
+                Enemy(null, replacement: "LatcherBrittle", difficulty: 3)
+            );
+
+            // TURN 3
+            undeadFlamingSkeleSwarm.turns.AddTurn(
+                Enemy("P03KCMXP2_FlamingExeskeleton", replacement: "P03KCMXP1_ZombieProcess", difficulty: 6, overclock: 6, overclockAbility: FireBomb.AbilityID),
+                Enemy("P03KCMXP2_FlamingExeskeleton", replacement: "P03KCMXP2_PyroBot", difficulty: 3)
+            );
+
+            // TURN 4
+            undeadFlamingSkeleSwarm.turns.AddTurn(
+                Enemy(null, replacement: "P03KCMXP2_FlamingExeskeleton", difficulty: 5),
+                Enemy(null, replacement: "LatcherBrittle", difficulty: 4)
+            );
+
+            // TURN 5
+            undeadFlamingSkeleSwarm.turns.AddTurn(
+                Enemy("P03KCMXP2_FlamingExeskeleton", overclock: 2),
+                Enemy("RoboSkeleton", replacement: "P03KCMXP2_PyroBot", difficulty: 6),
+                Enemy(null, replacement: "RoboSkeleton", difficulty: 2)
+            );
+
+            // TURN 6
+            undeadFlamingSkeleSwarm.turns.AddTurn(
+                Enemy("Insectodrone"),
+                Enemy(null, replacement: "LatcherBrittle", difficulty: 3)
+            );
+
+            // TURN 7
+            undeadFlamingSkeleSwarm.turns.AddTurn(
+                Enemy("P03KCMXP2_FlamingExeskeleton", replacement: "Insectodrone", difficulty: 4)
+            );
+
+            // TURN 8
+            undeadFlamingSkeleSwarm.turns.AddTurn(
+                Enemy(null, replacement: "P03KCMXP2_FlamingExeskeleton", difficulty: 4)
+            );
+
+            // TURN 9
+            undeadFlamingSkeleSwarm.turns.AddTurn(
+                Enemy(null, replacement: "CloserBot", difficulty: 6)
+            );
+
 
             // Encounter: Undead_SkeleSwarm
             EncounterBlueprintData undeadSkeleSwarm = EncounterManager.New("P03KCM_Undead_SkeleSwarm", addToPool: true);
@@ -1771,9 +1886,9 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             // Sanity check
             EncounterManager.SyncEncounterList();
             EncounterBlueprintData test = EncounterManager.AllEncountersCopy.First(ebd => ebd.name == undeadSkeleSwarm.name);
-            foreach (var cbp in test.turns[6].Where(c => c.card != null))
+            foreach (EncounterBlueprintData.CardBlueprint cbp in test.turns[6].Where(c => c.card != null))
                 P03Plugin.Log.LogInfo($"Turn 7 of Skeleswarm. Copy of {cbp.card.name} has {cbp.card.mods.Count} mods");
-            foreach (var cbp in undeadSkeleSwarm.turns[6].Where(c => c.card != null))
+            foreach (EncounterBlueprintData.CardBlueprint cbp in undeadSkeleSwarm.turns[6].Where(c => c.card != null))
                 P03Plugin.Log.LogInfo($"Turn 7 of Skeleswarm. ORIGINAL of {cbp.card.name} has {cbp.card.mods.Count} mods");
 
             // Encounter: Undead_WingLatchers
@@ -2069,6 +2184,63 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             GeneratorDamageRace.turns.AddTurn(
                 Enemy("SentryBot")
             );
+
+            // Encounter: Wizard_Guardians
+            EncounterBlueprintData wizardGuardians = EncounterManager.New("P03KCM_Wizard_Guardians", addToPool: true);
+            wizardGuardians.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Wizard);
+            wizardGuardians.turns = new();
+
+            // TURN 1
+            wizardGuardians.turns.AddTurn(
+                Enemy("EmptyVessel_GreenGem", overclock: 4, overclockAbility: Ability.GainGemOrange)
+            );
+
+            // TURN 2
+            wizardGuardians.turns.AddTurn(
+                Enemy("EmptyVessel_GreenGem", overclock: 4, overclockAbility: Ability.GainGemOrange),
+                Enemy("EmptyVessel_GreenGem", overclock: 4, overclockAbility: Ability.GainGemOrange)
+            );
+
+            // TURN 3
+            wizardGuardians.turns.AddTurn(
+                Enemy("EmeraldSquid", overclock: 3, overclockAbility: Ability.GainGemGreen)
+            );
+
+            // TURN 4
+            wizardGuardians.turns.AddTurn(
+                Enemy(null, replacement: "EmeraldSquid", difficulty: 1, overclock: 3, overclockAbility: Ability.GainGemGreen)
+            );
+
+            // TURN 5
+            wizardGuardians.turns.AddTurn(
+                Enemy(null, replacement: "P03KCMXP2_EmeraldGuardian", difficulty: 3, overclock: 5),
+                Enemy(null, replacement: "P03KCMXP2_RubyGuardian", difficulty: 4, overclock: 5)
+            );
+
+            // TURN 6
+            wizardGuardians.turns.AddTurn(
+                Enemy("EmeraldSquid", overclock: 3, overclockAbility: Ability.GainGemGreen),
+                Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 2, overclock: 4, overclockAbility: Ability.GainGemOrange)
+            );
+
+            // TURN 7
+            wizardGuardians.turns.AddTurn(
+                Enemy("Automaton", replacement: "P03KCMXP2_GemAugur", difficulty: 5, overclock: 6),
+                Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 2, overclock: 4, overclockAbility: Ability.GainGemOrange)
+            );
+
+            // TURN 8
+            wizardGuardians.turns.AddTurn(
+                Enemy("EmeraldSquid", overclock: 4, overclockAbility: Ability.Submerge),
+                Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 1, overclock: 4, overclockAbility: Ability.GainGemOrange)
+            );
+
+            // TURN 9
+            wizardGuardians.turns.AddTurn(
+                Enemy("Automaton", replacement: "P03KCMXP2_GemAugur", difficulty: 5, overclock: 6),
+                Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 2, overclock: 4, overclockAbility: Ability.GainGemOrange)
+            );
+
         }
     }
 }

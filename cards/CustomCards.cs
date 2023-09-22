@@ -678,10 +678,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return info;
         }
 
-        public static bool EligibleForGemBonus(this PlayableCard card, GemType gem)
-        {
-            return card.OpponentCard ? OpponentGemsManager.Instance.HasGem(gem) : ResourcesManager.Instance.HasGem(gem);
-        }
+        public static bool EligibleForGemBonus(this PlayableCard card, GemType gem) => GameFlowManager.IsCardBattle && card.OpponentCard ? OpponentGemsManager.Instance.HasGem(gem) : ResourcesManager.Instance.HasGem(gem);
 
         public static CardInfo SetRegionalP03Card(this CardInfo info, params CardTemple[] region)
         {

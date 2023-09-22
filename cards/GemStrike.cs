@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
@@ -18,11 +19,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private int NumberOfAttacks => BoardManager.Instance.GetSlotsCopy(!Card.OpponentCard).Where(s => s.Card != null && s.Card.HasAnyOfAbilities(Ability.GainGemBlue, Ability.GainGemGreen, Ability.GainGemOrange, Ability.GainGemTriple)).Count();
 
+        private bool hasDealtDamageDirectlyThisTurn = false;
+
         static GemStrike()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Gem Strike";
-            info.rulebookDescription = "[creature] attacks once for each gem provider its owner controls.";
+            info.rulebookDescription = "[creature] attacks once for each gem provider its owner controls, but can only attack the opponent directly once.";
             info.canStack = false;
             info.powerLevel = 2;
             info.opponentUsable = true;
@@ -49,5 +52,36 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return retval;
         }
         public bool RemoveDefaultAttackSlot() => NumberOfAttacks == 0;
+
+        public override bool RespondsToUpkeep(bool playerUpkeep) => true;
+
+        public override IEnumerator OnUpkeep(bool playerUpkeep)
+        {
+            hasDealtDamageDirectlyThisTurn = false;
+            yield break;
+        }
+
+        public override bool RespondsToDealDamageDirectly(int amount) => amount > 0;
+
+        public override IEnumerator OnDealDamageDirectly(int amount)
+        {
+            hasDealtDamageDirectlyThisTurn = true;
+            yield break;
+        }
+
+        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.AttackIsBlocked))]
+        [HarmonyPrefix]
+        private static bool BlockAttackIfGemStrikeAttacked(CardSlot opposingSlot, ref bool __result, PlayableCard __instance)
+        {
+            if (__instance.HasAbility(AbilityID) && opposingSlot.Card == null)
+            {
+                if (__instance.GetComponentInChildren<GemStrike>().hasDealtDamageDirectlyThisTurn)
+                {
+                    __result = false;
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
