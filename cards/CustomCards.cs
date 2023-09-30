@@ -28,6 +28,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public static readonly Trait Unrotateable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "Unrotateable");
         public static readonly Trait QuestCard = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "QuestCard");
 
+        public static readonly Texture2D DUMMY_DECAL = TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly);
+
         public const string DRAFT_TOKEN = "P03KCM_Draft_Token";
         public const string UNC_TOKEN = "P03KCM_Draft_Token_Uncommon";
         public const string RARE_DRAFT_TOKEN = "P03KCM_Draft_Token_Rare";
@@ -474,11 +476,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(P03Plugin.CardPrefx, FIREWALL, "Firewall", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_firewall.png", typeof(CustomCards).Assembly))
                 .AddAbilities(Ability.PreventAttack)
+                .SetCost(energyCost: 5)
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, FIREWALL_NORMAL, "Firewall", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_firewall.png", typeof(CustomCards).Assembly))
                 .AddAbilities(Ability.PreventAttack, Ability.StrafeSwap)
+                .SetCost(energyCost: 5)
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, BRAIN, "Hunter Brain", 0, 2)
@@ -586,7 +590,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             goobertCardBase.AddAppearances(GooDiscCardAppearance.ID);
             goobertCardBase.AddSpecialAbilities(GoobertCenterCardBehaviour.AbilityID);
             goobertCardBase.AddAbilities(TripleCardStrike.AbilityID, PowerDrain.AbilityID);
-            goobertCardBase.AddTraits(Unrotateable);
+            goobertCardBase.AddTraits(Unrotateable, Trait.Uncuttable);
             goobertCardBase.temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, SKELETON_LORD, "Skeleton Master", 0, 4)
@@ -678,7 +682,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return info;
         }
 
-        public static bool EligibleForGemBonus(this PlayableCard card, GemType gem) => GameFlowManager.IsCardBattle && card.OpponentCard ? OpponentGemsManager.Instance.HasGem(gem) : ResourcesManager.Instance.HasGem(gem);
+        public static bool EligibleForGemBonus(this PlayableCard card, GemType gem) => GameFlowManager.IsCardBattle && (card.OpponentCard ? OpponentGemsManager.Instance.HasGem(gem) : ResourcesManager.Instance.HasGem(gem));
 
         public static CardInfo SetRegionalP03Card(this CardInfo info, params CardTemple[] region)
         {
@@ -739,6 +743,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.SetExtendedProperty("AttackColor", "gold");
             info.SetExtendedProperty("HealthColor", "gold");
             info.SetExtendedProperty("DefaultAbilityColor", "gold");
+            info.SetExtendedProperty("PortraitColor", "gold");
+            info.SetExtendedProperty("Holofy", true);
             return info;
         }
 

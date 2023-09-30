@@ -1,44 +1,31 @@
-using HarmonyLib;
-using DiskCardGame;
-using InscryptionAPI.Saves;
-using System.Linq;
 using System;
 using System.Collections.Generic;
-using InscryptionAPI.Guid;
-using Infiniscryption.P03KayceeRun.Sequences;
-using System.Collections;
-using UnityEngine;
-using Infiniscryption.P03KayceeRun.Items;
-using Infiniscryption.P03KayceeRun.Faces;
-using Infiniscryption.P03KayceeRun.Cards;
+using System.Linq;
+using DiskCardGame;
+using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Patchers;
+using InscryptionAPI.Guid;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {
     [HarmonyPatch]
     public static class QuestManager
     {
-        private static Dictionary<SpecialEvent, QuestDefinition> AllQuests = new();
+        private static readonly Dictionary<SpecialEvent, QuestDefinition> AllQuests = new();
 
         public static IEnumerable<QuestDefinition> AllQuestDefinitions = AllQuests.Values;
 
         internal static int CalculateQuestSize(SpecialEvent eventId)
         {
             QuestDefinition nextQuest = AllQuests.Values.FirstOrDefault(q => q.PriorEventId == eventId);
-            if (nextQuest == null)
-                return 1;
-            else
-                return 1 + CalculateQuestSize(nextQuest.EventId);
+            return nextQuest == null ? 1 : 1 + CalculateQuestSize(nextQuest.EventId);
         }
 
         /// <summary>
         /// Gets the definition for a given quest based on its unique ID
         /// </summary>
         /// <param name="eventId">The event ID for the quest</param>
-        public static QuestDefinition Get(SpecialEvent eventId)
-        {
-            return AllQuests[eventId];
-        }
+        public static QuestDefinition Get(SpecialEvent eventId) => AllQuests[eventId];
 
         /// <summary>
         /// Creates a new blank quest and adds it to the quest pool
@@ -88,7 +75,9 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     string[] guidParts = substr.Split('_');
                     SpecialEvent dEvent = GuidManager.GetEnumValue<SpecialEvent>(guidParts[0], guidParts[1]);
 
-                    events.Add(new(dEvent, Get(dEvent).GenerateRoomFilter())); // randomly selected events should appear in the first color
+                    QuestDefinition selected = Get(dEvent);
+                    selected.QuestGenerated = true;
+                    events.Add(new(dEvent, selected.GenerateRoomFilter())); // randomly selected events should appear in the first color
                     possibles.Clear();
                 }
                 catch (Exception ex)

@@ -7,22 +7,19 @@ namespace Infiniscryption.P03KayceeRun.Cards
     {
         private bool portraitSpawned = false;
 
-        public static CardAppearanceBehaviour.Appearance ID { get; private set; }
+        public static Appearance ID { get; private set; }
 
         public override void ApplyAppearance()
-		{
-			if (base.Card.Anim is DiskCardAnimationController dcac && this.Card is PlayableCard pCard && pCard.OnBoard && !portraitSpawned)
-			{
-				dcac.SpawnHoloPortrait(this.Card.Info.holoPortraitPrefab);
-                this.Card.renderInfo.hidePortrait = true;
-                portraitSpawned = true;
-			}
-		}
-
-        public override void OnPreRenderCard()
         {
-            this.ApplyAppearance();
+            if (Card.Anim is DiskCardAnimationController dcac && Card is PlayableCard pCard && pCard.OnBoard && !portraitSpawned)
+            {
+                dcac.SpawnHoloPortrait(Card.Info.holoPortraitPrefab);
+                Card.renderInfo.hidePortrait = true;
+                portraitSpawned = true;
+            }
         }
+
+        public override void OnPreRenderCard() => ApplyAppearance();
 
         static OnboardHoloPortrait()
         {

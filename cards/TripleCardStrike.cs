@@ -24,7 +24,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.flipYIfOpponent = true;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            TripleCardStrike.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(TripleCardStrike),
@@ -35,9 +35,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public List<CardSlot> GetOpposingSlots(List<CardSlot> originalSlots, List<CardSlot> otherAddedSlots)
         {
             List<CardSlot> retval = new();
-            
-            int slot = this.Card.Slot.Index;
-            List<CardSlot> opposingSlots = BoardManager.Instance.GetSlots(this.Card.OpponentCard);
+
+            int slot = Card.Slot.Index;
+            List<CardSlot> opposingSlots = BoardManager.Instance.GetSlots(Card.OpponentCard);
             if (slot > 0 && opposingSlots[slot - 1].Card != null)
                 retval.Add(opposingSlots[slot - 1]);
             if (opposingSlots[slot].Card != null)
@@ -50,15 +50,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public bool RemoveDefaultAttackSlot()
         {
-            int slot = this.Card.Slot.Index;
-            List<CardSlot> opposingSlots = BoardManager.Instance.GetSlots(this.Card.OpponentCard);
+            int slot = Card.Slot.Index;
+            List<CardSlot> opposingSlots = BoardManager.Instance.GetSlots(Card.OpponentCard);
             if (slot > 0 && opposingSlots[slot - 1].Card != null)
                 return true;
             if (slot + 1 < opposingSlots.Count && opposingSlots[slot + 1].Card != null)
                 return true;
-            if (opposingSlots[slot].Card != null)
-                return true;
-            return false;
+            return opposingSlots[slot].Card != null;
         }
 
         public bool RespondsToGetOpposingSlots() => true;

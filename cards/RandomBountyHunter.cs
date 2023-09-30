@@ -11,30 +11,30 @@ namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
     public class RandomBountyHunter : AbilityBehaviour
-	{
-		public static Ability AbilityID;
-		public override Ability Ability => AbilityID;
+    {
+        public static Ability AbilityID;
+        public override Ability Ability => AbilityID;
 
         private static PlayableCard LastTriggeredCard;
 
-		public override bool RespondsToDrawn() => true;
+        public override bool RespondsToDrawn() => true;
 
-		public override IEnumerator OnDrawn()
-		{
-			(PlayerHand.Instance as PlayerHand3D).MoveCardAboveHand(base.Card);
-			yield return base.Card.FlipInHand(new Action(this.AddMod));
-			yield return base.LearnAbility(0.5f);
-			yield break;
-		}
+        public override IEnumerator OnDrawn()
+        {
+            (PlayerHand.Instance as PlayerHand3D).MoveCardAboveHand(Card);
+            yield return Card.FlipInHand(new Action(AddMod));
+            yield return LearnAbility(0.5f);
+            yield break;
+        }
 
-		private void AddMod()
-		{
-            LastTriggeredCard = base.Card;
-			base.Card.Status.hiddenAbilities.Add(this.Ability);
-			CardModificationInfo mod = BountyHunterGenerator.GenerateMod(Math.Min(TurnManager.Instance.TurnNumber, 3), 20);
-			base.Card.AddTemporaryMod(mod);
-            base.Card.RenderCard();
-		}
+        private void AddMod()
+        {
+            LastTriggeredCard = Card;
+            Card.Status.hiddenAbilities.Add(Ability);
+            CardModificationInfo mod = BountyHunterGenerator.GenerateMod(Math.Min(TurnManager.Instance.TurnNumber, 3), 20);
+            Card.AddTemporaryMod(mod);
+            Card.RenderCard();
+        }
 
         static RandomBountyHunter()
         {
@@ -47,7 +47,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            RandomBountyHunter.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(RandomBountyHunter),
@@ -59,7 +59,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void UpdatedDisplayNameTheHardWay(ref CardInfo __instance, ref string __result)
         {
-            if (__instance.HasAbility(RandomBountyHunter.AbilityID))
+            if (__instance.HasAbility(AbilityID))
             {
                 if (TurnManager.Instance != null && !TurnManager.Instance.GameEnded)
                 {
@@ -67,34 +67,50 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     if (BoardManager.Instance != null)
                     {
                         foreach (CardSlot slot in BoardManager.Instance.PlayerSlotsCopy)
+                        {
                             if (slot.Card != null && slot.Card.Info == __instance)
-                                foreach (var tMod in slot.Card.TemporaryMods)
+                            {
+                                foreach (CardModificationInfo tMod in slot.Card.TemporaryMods)
+                                {
                                     if (tMod.bountyHunterInfo != null)
                                     {
                                         __result = tMod.nameReplacement;
                                         return;
                                     }
+                                }
+                            }
+                        }
 
                         foreach (PlayableCard pCard in PlayerHand.Instance.CardsInHand)
+                        {
                             if (pCard.Info == __instance)
-                                foreach (var tMod in pCard.TemporaryMods)
+                            {
+                                foreach (CardModificationInfo tMod in pCard.TemporaryMods)
+                                {
                                     if (tMod.bountyHunterInfo != null)
                                     {
                                         __result = tMod.nameReplacement;
                                         return;
                                     }
+                                }
+                            }
+                        }
 
                         if (LastTriggeredCard != null && LastTriggeredCard.Info == __instance)
-                            foreach (var tMod in LastTriggeredCard.TemporaryMods)
+                        {
+                            foreach (CardModificationInfo tMod in LastTriggeredCard.TemporaryMods)
+                            {
                                 if (tMod.bountyHunterInfo != null)
                                 {
                                     __result = tMod.nameReplacement;
                                     return;
                                 }
+                            }
+                        }
                     }
                 }
                 P03Plugin.Log.LogDebug($"RBH Card Name is {__result}");
             }
         }
-	}
+    }
 }

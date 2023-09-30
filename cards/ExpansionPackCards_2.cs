@@ -20,6 +20,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         internal const string FLAME_CHARMER_CARD = "P03KCMXP2_FlameCharmer";
 
         internal const string RINGWORM_CARD = "P03KCMXP2_RoboRingworm";
+        internal const string LEAPBOT_NEO = "P03KCMXP2_LeapBotNeo";
 
         static ExpansionPackCards_2()
         {
@@ -329,6 +330,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.BaseGameCards.First(c => c.name == "CloserBot").SetEvolve(tgun, 1);
 
+            // L33pbot Neo
+            CardInfo lpneo = CardManager.New(EXP_2_PREFIX, "LeapBotNeo", "L33pB0t Neo", 2, 4)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_leapbot_neo.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 4)
+                .AddAbilities(Ability.Reach, Hopper.AbilityID);
+
+            CardManager.BaseGameCards.First(c => c.name == "LeapBot").SetEvolve(lpneo, 1);
+
             // Encapsulator
             CardManager.New(EXP_2_PREFIX, "Encapsulator", "Encapsulator", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_encapsulator.png", typeof(ExpansionPackCards_2).Assembly))
@@ -384,7 +393,24 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gem_augur.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 6)
                 .SetRegionalP03Card(CardTemple.Wizard)
+                .SetRare()
                 .AddAbilities(GemStrike.AbilityID);
+
+            // Sparkplug Cell
+            CardManager.New(EXP_2_PREFIX, "SparkplugCell", "Sparkplug Cell", 0, 4)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_short_circuit_cell.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 4)
+                .SetRegionalP03Card(CardTemple.Tech)
+                .SetRare()
+                .AddAbilities(CellDrawZapUpkeep.AbilityID);
+
+            // Splice Conduit
+            CardManager.New(EXP_2_PREFIX, "SpliceConduit", "Splice Conduit", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_splice_conduit.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 6)
+                .SetRegionalP03Card(CardTemple.Tech)
+                .SetRare()
+                .AddAbilities(ConduitAbsorb.AbilityID);
         }
     }
 }

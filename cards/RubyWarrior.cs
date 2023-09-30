@@ -26,7 +26,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            RubyWarrior.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(RubyWarrior),
@@ -34,20 +34,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToResolveOnBoard() => BoardManager.Instance.GetSlots(!this.Card.OpponentCard).Any(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemOrange) || s.Card.HasAbility(Ability.GainGemTriple)));
+        public override bool RespondsToResolveOnBoard() => BoardManager.Instance.GetSlots(!Card.OpponentCard).Any(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemOrange) || s.Card.HasAbility(Ability.GainGemTriple)));
 
         public override IEnumerator OnResolveOnBoard()
         {
-            var cardSlots = BoardManager.Instance.GetSlots(!this.Card.OpponentCard);
+            List<CardSlot> cardSlots = BoardManager.Instance.GetSlots(!Card.OpponentCard);
 
             DiskCardWeapon defaultWeapon = DiskCardWeapon.Default;
-            if (base.Card.Anim is DiskCardAnimationController dac)
+            if (Card.Anim is DiskCardAnimationController dac)
             {
                 defaultWeapon = (DiskCardWeapon)dac.weaponMeshes.FindIndex(m => m.name == dac.weaponMeshFilter.mesh.name);
                 dac.SetWeaponMesh(DiskCardWeapon.Revolver);
             }
 
-            foreach (var slot in cardSlots)
+            foreach (CardSlot slot in cardSlots)
             {
                 if (slot.Card != null && (slot.Card.HasAbility(Ability.GainGemOrange) || slot.Card.HasAbility(Ability.GainGemTriple)))
                 {
@@ -56,17 +56,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                     // Borrowed this code from ActivatedDealDamage
                     bool impactFrameReached = false;
-                    this.Card.Anim.PlayAttackAnimation(false, slot.opposingSlot, delegate ()
+                    Card.Anim.PlayAttackAnimation(false, slot.opposingSlot, delegate ()
                     {
                         impactFrameReached = true;
                     });
                     yield return new WaitUntil(() => impactFrameReached);
-                    yield return slot.opposingSlot.Card.TakeDamage(this.Card.Attack, this.Card);
+                    yield return slot.opposingSlot.Card.TakeDamage(Card.Attack, Card);
                     yield return new WaitForSeconds(0.25f);
                 }
             }
 
-            if (base.Card.Anim is DiskCardAnimationController dac2)
+            if (Card.Anim is DiskCardAnimationController dac2)
             {
                 dac2.SetWeaponMesh(defaultWeapon);
             }

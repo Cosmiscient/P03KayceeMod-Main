@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 2608013091
+CRC: 435269309
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 94dda68385b3f005755437ab6782894c
+    Hash: 7f245ac0b15fdb88725d1d710c9e1c28
   TypeTreeHash:
     serializedVersion: 2
-    Hash: afd12bf211ec48792818822e52781931
+    Hash: 15080e466337a84c34f3f4dffc413d78
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -25,6 +25,8 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 48
   Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
 - Class: 198
   Script: {instanceID: 0}
 - Class: 199
@@ -32,20 +34,28 @@ ClassTypes:
 SerializeReferenceClassIdentifiers: []
 Assets:
 - Assets/Shaders/ProjectedUnstenciledSticker.shader
+- Assets/Textures/Tractorbeam.mat
 - Assets/Prefabs/Molotov.prefab
+- Assets/Prefabs/UFO.prefab
+- Assets/Textures/UFO_Black_Down.mat
 - Assets/Shaders/LightProjectorShader.shader
 - Assets/Effects/Fire_Flamethrower.prefab
 - Assets/Effects/Fire_Ball.prefab
 - Assets/Effects/Fire_Glow.mat
 - Assets/Shaders/StickerStencilApply.shader
 - Assets/Models/bottle.fbx
+- Assets/Textures/UFO_Fire.mat
 - Assets/Effects/Fire_Material.mat
 - Assets/Shaders/ProjectStickerShader.shader
+- Assets/Textures/UFO_Middle.mat
 - Assets/Textures/PolaroidMaterial.mat
 - Assets/Shaders/MultiplyProjectorShader.shader
 - Assets/Effects/Fire_Particles.png
 - Assets/Effects/Fire_Parent.prefab
+- Assets/Textures/UFO_Base.mat
+- Assets/Effects/UFO_Particles.png
 - Assets/Prefabs/Missile.prefab
+- Assets/Prefabs/LaserRifle.prefab
 - Assets/Prefabs/polaroid_model.prefab
 - Assets/Models/missile_model.dae
 - Assets/Effects/Fire_Material_Additive.mat

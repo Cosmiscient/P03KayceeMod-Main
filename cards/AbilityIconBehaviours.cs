@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
@@ -164,11 +165,21 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         [HarmonyPatch(typeof(ResourcesManager), nameof(ResourcesManager.Instance.AddGem))]
         [HarmonyPostfix]
-        private static void GemsAddSwitch() => ReRenderCards();
+        private static IEnumerator GemsAddSwitch(IEnumerator sequence)
+        {
+            yield return sequence;
+            ReRenderCards();
+            yield break;
+        }
 
         [HarmonyPatch(typeof(ResourcesManager), nameof(ResourcesManager.Instance.LoseGem))]
         [HarmonyPostfix]
-        private static void GemsLoseSwitch() => ReRenderCards();
+        private static IEnumerator GemsRemoveSwitch(IEnumerator sequence)
+        {
+            yield return sequence;
+            ReRenderCards();
+            yield break;
+        }
 
         [HarmonyPatch(typeof(ResourcesManager), nameof(ResourcesManager.Instance.ForceGemsUpdate))]
         [HarmonyPostfix]

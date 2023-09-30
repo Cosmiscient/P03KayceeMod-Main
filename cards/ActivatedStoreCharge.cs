@@ -18,7 +18,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Recharge Reserves";
-            info.rulebookDescription = $"Activate: Pay {ENERGY_COST} Energy to create a Charge in your hand. Charge is defined as a spell that refills 1 Energy when played.";
+            info.rulebookDescription = $"Pay {ENERGY_COST} Energy to create a Charge in your hand. Charge is defined as a spell that refills 1 Energy when played.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;

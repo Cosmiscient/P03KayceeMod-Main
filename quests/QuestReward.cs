@@ -1,18 +1,11 @@
-using HarmonyLib;
-using DiskCardGame;
-using InscryptionAPI.Saves;
-using System.Linq;
 using System;
-using System.Collections.Generic;
-using InscryptionAPI.Guid;
-using Infiniscryption.P03KayceeRun.Sequences;
 using System.Collections;
-using UnityEngine;
-using Infiniscryption.P03KayceeRun.Items;
-using Infiniscryption.P03KayceeRun.Faces;
-using Infiniscryption.P03KayceeRun.Cards;
+using System.Collections.Generic;
+using System.Linq;
+using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Pixelplacement;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {
@@ -27,13 +20,13 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
         public override IEnumerator GrantReward()
         {
-            if (this.Amount != 0)
+            if (Amount != 0)
             {
                 P03AnimationController.Face currentFace = P03AnimationController.Instance.CurrentFace;
                 View currentView = ViewManager.Instance.CurrentView;
                 yield return new WaitForSeconds(0.4f);
-                yield return P03AnimationController.Instance.ShowChangeCurrency(this.Amount, true);
-                Part3SaveData.Data.currency += this.Amount;
+                yield return P03AnimationController.Instance.ShowChangeCurrency(Amount, true);
+                Part3SaveData.Data.currency += Amount;
                 yield return new WaitForSeconds(0.2f);
                 P03AnimationController.Instance.SwitchToFace(currentFace);
                 yield return new WaitForSeconds(0.1f);
@@ -46,17 +39,17 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
     public class QuestRewardDynamicCoins : QuestRewardCoins
     {
-        public override int Amount 
-        { 
-            get 
+        public override int Amount
+        {
+            get
             {
                 if (base.Amount > 0)
                     return base.Amount;
-                
-                var range = EventManagement.CurrencyGainRange;
+
+                Tuple<int, int> range = EventManagement.CurrencyGainRange;
                 return (range.Item1 + range.Item2) / 2;
             }
-            set { base.Amount = value; }
+            set => base.Amount = value;
         }
     }
 
@@ -67,21 +60,20 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
         protected virtual IEnumerator DoCardAction(SelectableCard card, CardInfo info)
         {
-            Part3SaveData.Data.deck.AddCard(CardLoader.GetCardByName(this.CardName));
+            Part3SaveData.Data.deck.AddCard(CardLoader.GetCardByName(CardName));
 
-            if (String.IsNullOrEmpty(this.DialogueId))
-                yield return new WaitForSeconds(1.5f);
-            else
-                yield return TextDisplayer.Instance.PlayDialogueEvent(this.DialogueId, TextDisplayer.MessageAdvanceMode.Input);
+            yield return String.IsNullOrEmpty(DialogueId)
+                ? new WaitForSeconds(1.5f)
+                : TextDisplayer.Instance.PlayDialogueEvent(DialogueId, TextDisplayer.MessageAdvanceMode.Input);
         }
 
         protected SelectableCard lastCreatedCard;
 
         protected IEnumerator DisplayCard(CardInfo cardInfo)
         {
-            GameObject cardGO = UnityEngine.Object.Instantiate<GameObject>(SpecialNodeHandler.Instance.buildACardSequencer.selectableCardPrefab);
+            GameObject cardGO = UnityEngine.Object.Instantiate(SpecialNodeHandler.Instance.buildACardSequencer.selectableCardPrefab);
             lastCreatedCard = cardGO.GetComponent<SelectableCard>();
-            
+
             lastCreatedCard.Initialize(cardInfo);
             lastCreatedCard.SetEnabled(false);
             lastCreatedCard.SetInteractionEnabled(false);
@@ -101,14 +93,14 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
         public override IEnumerator GrantReward()
         {
-            if (String.IsNullOrEmpty(this.CardName))
+            if (String.IsNullOrEmpty(CardName))
                 yield break;
 
-            CardInfo cardInfo = CardLoader.GetCardByName(this.CardName);
+            CardInfo cardInfo = CardLoader.GetCardByName(CardName);
 
-            yield return this.DisplayCard(cardInfo);
-            yield return this.DoCardAction(lastCreatedCard, cardInfo);
-            yield return this.RemoveCard();
+            yield return DisplayCard(cardInfo);
+            yield return DoCardAction(lastCreatedCard, cardInfo);
+            yield return RemoveCard();
         }
     }
 
@@ -117,7 +109,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         protected override IEnumerator DoCardAction(SelectableCard card, CardInfo info)
         {
             yield return new WaitForSeconds(0.75f);
-            Part3SaveData.Data.deck.RemoveCardByName(this.CardName);
+            Part3SaveData.Data.deck.RemoveCardByName(CardName);
             card.Anim.PlayPermaDeathAnimation();
             yield return new WaitForSeconds(0.75f);
             yield break;
@@ -125,7 +117,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
         public override IEnumerator GrantReward()
         {
-            if (!Part3SaveData.Data.deck.Cards.Any(c => c.name == this.CardName))
+            if (!Part3SaveData.Data.deck.Cards.Any(c => c.name == CardName))
                 yield break;
 
             yield return base.GrantReward();
@@ -138,7 +130,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
         public override IEnumerator GrantReward()
         {
-            if (!string.IsNullOrEmpty(this.ItemName))
+            if (!string.IsNullOrEmpty(ItemName))
             {
                 if (Part3SaveData.Data.items.Count < P03AscensionSaveData.MaxNumberOfItems)
                 {
@@ -146,7 +138,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     yield return new WaitForEndOfFrame();
                     ViewManager.Instance.SwitchToView(View.ConsumablesOnly, false, true);
                     yield return new WaitForSeconds(0.8f);
-                    Part3SaveData.Data.items.Add(this.ItemName);
+                    Part3SaveData.Data.items.Add(ItemName);
                     yield return new WaitForEndOfFrame();
                     ItemsManager.Instance.UpdateItems(false);
                     yield return new WaitForSeconds(1f);
@@ -162,11 +154,11 @@ namespace Infiniscryption.P03KayceeRun.Quests
     {
         public override IEnumerator GrantReward()
         {
-            if (!string.IsNullOrEmpty(this.ItemName))
+            if (!string.IsNullOrEmpty(ItemName))
             {
-                if (Part3SaveData.Data.items.Contains(this.ItemName))
+                if (Part3SaveData.Data.items.Contains(ItemName))
                 {
-                    ItemSlot slot = ItemsManager.Instance.Slots.First(s => s.Item != null && s.Item.name.Equals(this.ItemName));
+                    ItemSlot slot = ItemsManager.Instance.Slots.First(s => s.Item != null && s.Item.name.Equals(ItemName));
 
                     View currentView = ViewManager.Instance.CurrentView;
                     yield return new WaitForEndOfFrame();
@@ -174,11 +166,49 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     yield return new WaitForSeconds(0.8f);
                     slot.Item.PlayExitAnimation();
                     yield return new WaitForSeconds(1f);
-                    ItemsManager.Instance.RemoveItemFromSaveData(this.ItemName);
+                    ItemsManager.Instance.RemoveItemFromSaveData(ItemName);
                     slot.DestroyItem();
                     ViewManager.Instance.SwitchToView(currentView, false, false);
                     yield return new WaitForSeconds(0.2f);
                 }
+            }
+            yield break;
+        }
+    }
+
+    public class QuestRewardTransformCard : QuestRewardCard
+    {
+        public string TransformIntoCardName { get; set; }
+
+        protected override IEnumerator DoCardAction(SelectableCard card, CardInfo info)
+        {
+            yield return new WaitForSeconds(1.5f);
+            card.Anim.SetFaceDown(true, false);
+            yield return new WaitForSeconds(0.2f);
+            card.Anim.SetShaking(true);
+
+            List<CardModificationInfo> cardMods = new(info.Mods.Select(m => (CardModificationInfo)m.Clone()));
+            CardInfo newCardInfo = CardLoader.GetCardByName(TransformIntoCardName);
+
+            Part3SaveData.Data.deck.RemoveCard(info);
+            Part3SaveData.Data.deck.AddCard(newCardInfo);
+            cardMods.ForEach(m => Part3SaveData.Data.deck.ModifyCard(newCardInfo, m));
+
+            card.SetInfo(newCardInfo);
+            yield return new WaitForSeconds(0.45f);
+            card.Anim.SetShaking(false);
+            card.SetFaceDown(false, false);
+            yield return new WaitForSeconds(1.5f);
+        }
+
+        public override IEnumerator GrantReward()
+        {
+            CardInfo startCard = Part3SaveData.Data.deck.Cards.FirstOrDefault(ci => ci.name == CardName);
+            if (startCard != null)
+            {
+                yield return DisplayCard(startCard);
+                yield return DoCardAction(lastCreatedCard, startCard);
+                yield return RemoveCard();
             }
             yield break;
         }
@@ -199,12 +229,14 @@ namespace Infiniscryption.P03KayceeRun.Quests
             yield return new WaitForSeconds(0.2f);
             card.Anim.SetShaking(true);
 
-            CardModificationInfo mod = new();
-            mod.gemify = this.Gemify;
-            if (this.Ability != Ability.NUM_ABILITIES)
-                mod.abilities = new() { this.Ability };
-            mod.attackAdjustment = this.AttackAdjustment;
-            mod.healthAdjustment = this.HealthAdjustment;
+            CardModificationInfo mod = new()
+            {
+                gemify = Gemify
+            };
+            if (Ability != Ability.NUM_ABILITIES)
+                mod.abilities = new() { Ability };
+            mod.attackAdjustment = AttackAdjustment;
+            mod.healthAdjustment = HealthAdjustment;
             Part3SaveData.Data.deck.ModifyCard(info, mod);
 
             card.SetInfo(info);
@@ -216,24 +248,24 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
         public override IEnumerator GrantReward()
         {
-            if (this.NumberOfCards > 0)
+            if (NumberOfCards > 0)
             {
                 IEnumerable<CardInfo> cardQuery = Part3SaveData.Data.deck.Cards;
-                if (this.Gemify)
+                if (Gemify)
                     cardQuery = cardQuery.Where(c => !c.Gemified);
-                if (this.Ability != Ability.NUM_ABILITIES)
-                    cardQuery = cardQuery.Where(c => !c.HasAbility(this.Ability));
+                if (Ability != Ability.NUM_ABILITIES)
+                    cardQuery = cardQuery.Where(c => !c.HasAbility(Ability));
                 List<CardInfo> cards = cardQuery.ToList();
-                
+
                 int randomSeed = P03AscensionSaveData.RandomSeed;
-                while (cards.Count > this.NumberOfCards)
+                while (cards.Count > NumberOfCards)
                     cards.RemoveAt(SeededRandom.Range(0, cards.Count, randomSeed++));
-                
+
                 foreach (CardInfo card in cards)
                 {
-                    yield return this.DisplayCard(card);
-                    yield return this.DoCardAction(lastCreatedCard, card);
-                    yield return this.RemoveCard();
+                    yield return DisplayCard(card);
+                    yield return DoCardAction(lastCreatedCard, card);
+                    yield return RemoveCard();
                 }
             }
             yield break;
@@ -246,8 +278,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
         public override IEnumerator GrantReward()
         {
-            if (this.RewardAction != null)
-                this.RewardAction();
+            RewardAction?.Invoke();
             yield break;
         }
     }

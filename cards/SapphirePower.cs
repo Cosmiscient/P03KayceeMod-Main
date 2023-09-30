@@ -1,12 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using InscryptionAPI;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
-using InscryptionAPI.Triggers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -30,7 +27,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.GainGemBlue).Info.colorOverride;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            SapphirePower.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(SapphirePower),

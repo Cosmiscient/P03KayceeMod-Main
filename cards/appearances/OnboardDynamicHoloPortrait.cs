@@ -20,14 +20,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private bool portraitSpawned = false;
 
-        public static CardAppearanceBehaviour.Appearance ID { get; private set; }
+        public static Appearance ID { get; private set; }
 
         private GameObject GetPrefab()
         {
-            string key = this.Card.Info.GetExtendedProperty(PORTRAIT_KEY);
+            string key = Card.Info.GetExtendedProperty(PORTRAIT_KEY);
             if (string.IsNullOrEmpty(key))
             {
-                key = this.Card.Info.GetExtendedProperty(PREFAB_KEY);
+                key = Card.Info.GetExtendedProperty(PREFAB_KEY);
 
                 if (string.IsNullOrEmpty(key))
                     return null;
@@ -42,15 +42,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private Vector3 GetVector3(string key, bool zeroDefault = true)
         {
-            string offset = this.Card.Info.GetExtendedProperty(key);
+            string offset = Card.Info.GetExtendedProperty(key);
             if (string.IsNullOrEmpty(offset))
                 return zeroDefault ? Vector3.zero : Vector3.one;
 
             string[] offsetSplit = offset.Split(',');
-            if (offsetSplit.Length != 3)
-                return zeroDefault ? Vector3.zero : Vector3.one;
-
-            return new Vector3(float.Parse(offsetSplit[0], CultureInfo.InvariantCulture),
+            return offsetSplit.Length != 3
+                ? zeroDefault ? Vector3.zero : Vector3.one
+                : new Vector3(float.Parse(offsetSplit[0], CultureInfo.InvariantCulture),
                                float.Parse(offsetSplit[1], CultureInfo.InvariantCulture),
                                float.Parse(offsetSplit[2], CultureInfo.InvariantCulture));
         }
@@ -63,7 +62,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             compsToDestroy.AddRange(obj.GetComponentsInChildren<Animator>());
 
             foreach (Component c in compsToDestroy.Where(c => c != null))
-                GameObject.Destroy(c);
+                Destroy(c);
 
             Color halfMain = new(color.r, color.g, color.b, 0.5f);
 
@@ -97,7 +96,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private void CleanGameObject(GameObject obj)
         {
-            string colorKey = this.Card.Info.GetExtendedProperty(COLOR);
+            string colorKey = Card.Info.GetExtendedProperty(COLOR);
             Color color = GameColors.Instance.brightBlue;
             if (!string.IsNullOrEmpty(colorKey))
             {
@@ -106,7 +105,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     color = new Color(float.Parse(colorSplit[0]), float.Parse(colorSplit[1]), float.Parse(colorSplit[2]));
             }
 
-            string shaderKey = this.Card.Info.GetExtendedProperty(SHADER_KEY);
+            string shaderKey = Card.Info.GetExtendedProperty(SHADER_KEY);
             if (string.IsNullOrEmpty(shaderKey))
                 shaderKey = "SFHologram/HologramShader";
 
@@ -120,7 +119,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (prefab == null)
                 return;
 
-            GameObject gameObject = GameObject.Instantiate<GameObject>(prefab, dcac.holoPortraitParent);
+            GameObject gameObject = Instantiate(prefab, dcac.holoPortraitParent);
             CleanGameObject(gameObject);
             gameObject.transform.localPosition = GetVector3(OFFSET_KEY);
             gameObject.transform.localEulerAngles = GetVector3(ROTATION_KEY);
@@ -139,17 +138,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override void ApplyAppearance()
         {
-            if (base.Card.Anim is DiskCardAnimationController dcac && this.Card is PlayableCard pCard && pCard.OnBoard && !portraitSpawned)
+            if (Card.Anim is DiskCardAnimationController dcac && Card is PlayableCard pCard && pCard.OnBoard && !portraitSpawned)
             {
                 SpawnHoloPortrait(dcac);
-                this.Card.renderInfo.hidePortrait = portraitSpawned;
+                Card.renderInfo.hidePortrait = portraitSpawned;
             }
         }
 
-        public override void OnPreRenderCard()
-        {
-            this.ApplyAppearance();
-        }
+        public override void OnPreRenderCard() => ApplyAppearance();
 
         static OnboardDynamicHoloPortrait()
         {

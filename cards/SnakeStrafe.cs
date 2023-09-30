@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
-using System.Linq;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -24,7 +23,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
 
-            SnakeStrafe.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(SnakeStrafe),
@@ -32,9 +31,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        private CardSlot FirstEmptySlot(bool toLeft)
+        private static CardSlot FirstEmptySlot(CardSlot thisSlot, bool toLeft)
         {
-            CardSlot nextSlot = BoardManager.Instance.GetAdjacent(this.Card.Slot, toLeft);
+            CardSlot nextSlot = BoardManager.Instance.GetAdjacent(thisSlot, toLeft);
             while (nextSlot != null)
             {
                 if (nextSlot.Card == null)
@@ -45,20 +44,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
         }
 
         public override IEnumerator DoStrafe(CardSlot toLeft, CardSlot toRight)
-		{
-            CardSlot destination = FirstEmptySlot(this.movingLeft);
+        {
+            CardSlot destination = FirstEmptySlot(Card.Slot, movingLeft);
             if (destination == null)
             {
-                this.movingLeft = !this.movingLeft;
-                destination = FirstEmptySlot(this.movingLeft);
+                movingLeft = !movingLeft;
+                destination = FirstEmptySlot(Card.Slot, movingLeft);
             }
-			yield return this.MoveToSlot(destination, destination != null);
-			if (destination != null)
-			{
-				yield return base.PreSuccessfulTriggerSequence();
-				yield return base.LearnAbility(0f);
-			}
-			yield break;
-		}
+            yield return MoveToSlot(destination, destination != null);
+            if (destination != null)
+            {
+                yield return PreSuccessfulTriggerSequence();
+                yield return LearnAbility(0f);
+            }
+            yield break;
+        }
     }
 }

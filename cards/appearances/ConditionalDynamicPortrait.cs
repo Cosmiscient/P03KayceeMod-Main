@@ -1,13 +1,13 @@
+using System.Linq;
 using DiskCardGame;
 using InscryptionAPI.Card;
-using System.Linq;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-	public class ConditionalDynamicPortrait : CardAppearanceBehaviour
-	{
-        public static CardAppearanceBehaviour.Appearance ID { get; private set; }
+    public class ConditionalDynamicPortrait : CardAppearanceBehaviour
+    {
+        public static Appearance ID { get; private set; }
 
         static ConditionalDynamicPortrait()
         {
@@ -27,32 +27,29 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         }
 
-		public override void ApplyAppearance()
-		{
-            base.Card.RenderInfo.prefabPortrait = null;
-			base.Card.RenderInfo.hidePortrait = false;
+        public override void ApplyAppearance()
+        {
+            Card.RenderInfo.prefabPortrait = null;
+            Card.RenderInfo.hidePortrait = false;
             //base.Card.RenderInfo.portraitColor = GameColors.Instance.gold;
-            if (base.Card is PlayableCard pCard)
+            if (Card is PlayableCard pCard)
             {
                 if (pCard.temporaryMods.Any(mod => mod.bountyHunterInfo != null))
                 {
-                    base.Card.RenderInfo.prefabPortrait = AnimatedPortrait;
-                    base.Card.RenderInfo.hidePortrait = true;
-                    base.Card.RenderInfo.nameOverride = pCard.temporaryMods.First(mod => mod.bountyHunterInfo != null).nameReplacement;
-                    P03Plugin.Log.LogDebug($"Bounty hunter name override {base.Card.renderInfo.nameOverride}");
+                    Card.RenderInfo.prefabPortrait = AnimatedPortrait;
+                    Card.RenderInfo.hidePortrait = true;
+                    Card.RenderInfo.nameOverride = pCard.temporaryMods.First(mod => mod.bountyHunterInfo != null).nameReplacement;
+                    P03Plugin.Log.LogDebug($"Bounty hunter name override {Card.renderInfo.nameOverride}");
                 }
             }
-		}
-
-		public override void ResetAppearance()
-		{
-			base.Card.RenderInfo.prefabPortrait = null;
-			base.Card.RenderInfo.hidePortrait = false;
-		}
-
-        public override void OnPreRenderCard()
-        {
-            ApplyAppearance();
         }
-	}
+
+        public override void ResetAppearance()
+        {
+            Card.RenderInfo.prefabPortrait = null;
+            Card.RenderInfo.hidePortrait = false;
+        }
+
+        public override void OnPreRenderCard() => ApplyAppearance();
+    }
 }

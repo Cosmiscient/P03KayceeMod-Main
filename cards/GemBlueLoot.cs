@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
 using HarmonyLib;
@@ -35,6 +36,42 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToDealDamageDirectly(int amount) => base.RespondsToDealDamageDirectly(amount) && Card.EligibleForGemBonus(GemType.Blue);
+        public override bool RespondsToDealDamageDirectly(int amount) => base.RespondsToDealDamageDirectly(amount) && Card.EligibleForGemBonus(GemType.Blue) && amount > 0;
+
+        public override IEnumerator OnDealDamageDirectly(int amount)
+        {
+            if (CardDrawPiles.Instance is not CardDrawPiles3D)
+            {
+                yield return base.OnDealDamageDirectly(amount);
+                yield break;
+            }
+
+            CardDrawPiles3D piles = CardDrawPiles3D.Instance;
+
+            bool drewFromMainDeck = false;
+            View oldView = ViewManager.Instance.CurrentView;
+            ViewManager.Instance.SwitchToView(piles.pilesView);
+            yield return new WaitForSeconds(0.4f);
+            for (int i = 0; i < amount; i++)
+            {
+                if (piles.Deck.CardsInDeck > 0 && (!drewFromMainDeck || piles.SideDeck.CardsInDeck == 0))
+                {
+                    drewFromMainDeck = true;
+                    piles.pile.Draw();
+                    yield return piles.DrawCardFromDeck();
+                    yield return new WaitForSeconds(0.1f);
+                }
+                else if (piles.SideDeck.CardsInDeck > 0 && (drewFromMainDeck || piles.Deck.CardsInDeck == 0))
+                {
+                    drewFromMainDeck = false;
+                    piles.sidePile.Draw();
+                    yield return piles.DrawFromSidePile();
+                    yield return new WaitForSeconds(0.1f);
+                }
+            }
+
+            ViewManager.Instance.SwitchToView(oldView);
+            yield return new WaitForSeconds(0.4f);
+        }
     }
 }

@@ -142,7 +142,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
             OnFire = new();
             for (int i = 1; i <= 4; i++)
             {
-                OnFire.Add(SlotModificationManager.New(P03Plugin.PluginGuid, $"OnFire{i}", typeof(BurningSlot)));
+                OnFire.Add(SlotModificationManager.New(
+                    P03Plugin.PluginGuid,
+                    $"OnFire{i}",
+                    typeof(BurningSlot),
+                    TextureHelper.GetImageAsTexture($"card_slot_fire_{i}.png", typeof(FireBomb).Assembly)
+                ));
             }
 
             AbilityInfo fsInfo = ScriptableObject.CreateInstance<AbilityInfo>();

@@ -35,7 +35,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            NewPermaDeath.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(NewPermaDeath),
@@ -43,31 +43,28 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer)
-        {
-            return true;
-        }
+        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
 
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
-            if (this.Card.HasAbility(Ability.DrawCopy) || this.Card.HasAbility(Ability.DrawCopyOnDeath))
+            if (Card.HasAbility(Ability.DrawCopy) || Card.HasAbility(Ability.DrawCopyOnDeath))
                 yield break;
 
-            if (this.Card.Slot != null && this.Card.HasAbility(CellUndying.AbilityID) && ConduitCircuitManager.Instance.SlotIsWithinCircuit(this.Card.Slot))
+            if (Card.Slot != null && Card.HasAbility(CellUndying.AbilityID) && ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot))
                 yield break;
 
-            if (this.Card.HasTrait(CustomCards.QuestCard))
+            if (Card.HasTrait(CustomCards.QuestCard))
                 AchievementManager.Unlock(P03AchievementManagement.KILL_QUEST_CARD);
 
             // Create an exeskeleton
             DeckInfo deck = SaveManager.SaveFile.CurrentDeck;
 
-            CardInfo card = deck.Cards.Find((CardInfo x) => x.HasAbility(NewPermaDeath.AbilityID) && x.name == this.Card.Info.name);
+            CardInfo card = deck.Cards.Find((CardInfo x) => x.HasAbility(AbilityID) && x.name == Card.Info.name);
 
             // If there is no card with this name in your deck, it's probably because it's a transformer and it's
             // currently on its other side
-            if (card == null && this.Card.HasAbility(Ability.Transformer) && this.Card.Info.evolveParams != null)
-                card = deck.Cards.Find(x => x.HasAbility(NewPermaDeath.AbilityID) && x.name == this.Card.Info.evolveParams.evolution.name);
+            if (card == null && Card.HasAbility(Ability.Transformer) && Card.Info.evolveParams != null)
+                card = deck.Cards.Find(x => x.HasAbility(AbilityID) && x.name == Card.Info.evolveParams.evolution.name);
 
             // If the card is STILL null, then congratulations - you've managed to find some sort of weird edge case.
             // We will just let the game play out without erroring
@@ -75,13 +72,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 yield break;
 
             CardInfo replacement = CardLoader.GetCardByName("RoboSkeleton");
-            CardModificationInfo mod = new();
-            mod.abilities = new(card.Abilities.Where(ab => ab != NewPermaDeath.AbilityID && !NOT_COPYABLE_ABILITIES.Contains(ab)).Take(3));
+            CardModificationInfo mod = new()
+            {
+                abilities = new(card.Abilities.Where(ab => ab != AbilityID && !NOT_COPYABLE_ABILITIES.Contains(ab)).Take(3))
+            };
             replacement.mods.Add(mod);
             deck.AddCard(replacement);
 
             deck.RemoveCard(card);
-            yield return base.LearnAbility(0.5f);
+            yield return LearnAbility(0.5f);
             yield break;
         }
 
@@ -89,7 +88,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         public static bool PretendHasPermadeath(Ability ability, ref PlayableCard __instance, ref bool __result)
         {
-            if (ability == Ability.PermaDeath && __instance.HasAbility(NewPermaDeath.AbilityID))
+            if (ability == Ability.PermaDeath && __instance.HasAbility(AbilityID))
             {
                 __result = true;
                 return false;

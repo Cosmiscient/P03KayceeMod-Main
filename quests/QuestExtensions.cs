@@ -34,6 +34,29 @@ namespace Infiniscryption.P03KayceeRun.Quests
         }
 
         /// <summary>
+        /// Sets a condition for when the quest must be generated
+        /// </summary>
+        public static QuestDefinition SetMustBeGeneratedCondition(this QuestDefinition parent, Func<bool> condition)
+        {
+            parent.MustBeGeneratedConditon = condition;
+            return parent;
+        }
+
+        /// <summary>
+        /// Sets a condition for where the quest can exist on the map
+        /// </summary>
+        public static QuestDefinition SetValidRoomCondition(this QuestDefinition parent, Predicate<HoloMapBlueprint> condition)
+        {
+            parent.ValidRoomCondition = condition;
+            return parent;
+        }
+
+        /// <summary>
+        /// Sets the room generation condition so that the quest won't generate at the starting spot of the map
+        /// </summary>
+        public static QuestDefinition GenerateAwayFromStartingArea(this QuestDefinition parent) => parent.SetValidRoomCondition(bp => bp.color != 1);
+
+        /// <summary>
         /// Sets a condition (restriction) for the quest to be valid for generation.
         /// </summary>
         public static QuestDefinition SetGenerateCondition(this QuestDefinition parent, Func<bool> condition)
@@ -215,6 +238,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// </summary>
         public static int GetQuestCounter(this QuestDefinition defn) => ModdedSaveManager.RunState.GetValueAsInt(defn.ModGuid, String.Format("{0}_Counter", defn.QuestName));
 
+        public static QuestState WaitForQuestCounter(this QuestState state, int threshold) => state.SetDynamicStatus(() => state.ParentQuest.GetQuestCounter() >= threshold ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Active);
+
         /// <summary>
         /// Helper to determine if this particular quest state is the "default" active state when the quest is active.
         /// </summary>
@@ -271,6 +296,12 @@ namespace Infiniscryption.P03KayceeRun.Quests
         public static QuestState AddGainAbilitiesReward(this QuestState state, int count, Ability ability)
         {
             state.Rewards.Add(new QuestRewardModifyRandomCards() { NumberOfCards = count, Ability = ability });
+            return state;
+        }
+
+        public static QuestState AddReward(this QuestState state, QuestReward reward)
+        {
+            state.Rewards.Add(reward);
             return state;
         }
     }

@@ -24,7 +24,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            MirrorImage.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(MirrorImage),
@@ -35,16 +35,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static List<CardSlot> GetCopyableSlots()
         {
             List<CardSlot> possibles = new();
-            foreach (var slot in BoardManager.Instance.playerSlots.Concat(BoardManager.Instance.opponentSlots))
+            foreach (CardSlot slot in BoardManager.Instance.playerSlots.Concat(BoardManager.Instance.opponentSlots))
+            {
                 if (slot.Card != null)
                     possibles.Add(slot);
+            }
 
             return possibles;
         }
 
-        public override bool RespondsToPlayFromHand() => !this.Card.OpponentCard && GetCopyableSlots().Count > 0;
+        public override bool RespondsToPlayFromHand() => !Card.OpponentCard && GetCopyableSlots().Count > 0;
 
-        public override bool RespondsToResolveOnBoard() => this.Card.OpponentCard;
+        public override bool RespondsToResolveOnBoard() => Card.OpponentCard;
 
         public override IEnumerator OnResolveOnBoard()
         {
@@ -58,8 +60,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ViewManager.Instance.SwitchToView(View.Board, false, false);
             yield return new WaitForSeconds(0.2f);
 
-            yield return base.PreSuccessfulTriggerSequence();
-            yield return this.Card.TransformIntoCard(CloneForRubberstamp(possibles[0].Card.Info));
+            yield return PreSuccessfulTriggerSequence();
+            yield return Card.TransformIntoCard(CloneForRubberstamp(possibles[0].Card.Info));
             yield return new WaitForSeconds(0.8f);
 
             ViewManager.Instance.SwitchToView(currentview, false, false);
@@ -69,12 +71,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             CardInfo clone = CardLoader.Clone(target);
             if (clone.mods.Count == 0)
+            {
                 foreach (CardModificationInfo mod in target.mods)
                     clone.mods.Add(mod.Clone() as CardModificationInfo);
+            }
 
-            foreach (CardModificationInfo mod in this.Card.Info.mods)
+            foreach (CardModificationInfo mod in Card.Info.mods)
+            {
                 if (clone.Abilities.Count < 4)
                     clone.mods.Add(mod.Clone() as CardModificationInfo);
+            }
 
             return clone;
         }
@@ -107,7 +113,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardInfo clone = CloneForRubberstamp(target.Card.Info);
 
-            this.Card.SetInfo(clone);
+            Card.SetInfo(clone);
             yield return new WaitForSeconds(0.2f);
         }
     }

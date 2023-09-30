@@ -1,9 +1,6 @@
 using System.Collections;
 using DiskCardGame;
-using Infiniscryption.P03KayceeRun.Faces;
-using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -17,7 +14,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnResolveOnBoard()
         {
-            this.Card.SetInfo(this.Card.Info);
+            Card.SetInfo(Card.Info);
             yield break;
         }
 

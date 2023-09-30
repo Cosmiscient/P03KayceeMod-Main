@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Infiniscryption.P03KayceeRun.Cards
 {
     public class LoseOnDeath : AbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -23,7 +23,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            LoseOnDeath.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(LoseOnDeath),
@@ -31,10 +31,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer)
-        {
-            return true;
-        }
+        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
 
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
@@ -43,5 +40,5 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ViewManager.Instance.SwitchToView(View.Default);
             yield break;
         }
-	}
+    }
 }

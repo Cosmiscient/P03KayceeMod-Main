@@ -1,8 +1,7 @@
-using HarmonyLib;
 using DiskCardGame;
-using UnityEngine;
-using System.Collections.Generic;
+using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -22,10 +21,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 }
 
                 Transform result = Find(child, target);
-                if (result != null) 
+                if (result != null)
                 {
                     return result;
-                }  
+                }
             }
             return null;
         }
@@ -45,20 +44,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (abilityIconParent.Find(name) == null)
             {
                 GameObject twoAbilities = abilityIconParent.Find("DefaultIcons_2Abilities").gameObject;
-                GameObject newGroup = GameObject.Instantiate(twoAbilities, abilityIconParent);
+                GameObject newGroup = Object.Instantiate(twoAbilities, abilityIconParent);
                 newGroup.name = name;
 
-                float leftOffset = (-((float)numberOfIcons / 2f) * X_STEP_SIZE) + (X_STEP_SIZE / 2f);
+                float leftOffset = (-(numberOfIcons / 2f) * X_STEP_SIZE) + (X_STEP_SIZE / 2f);
 
 
-                newGroup.transform.Find("Ability_1").localPosition = new (leftOffset, 0f, 0f);
-                newGroup.transform.Find("Ability_2").localPosition = new (leftOffset + X_STEP_SIZE, 0f, 0f);
+                newGroup.transform.Find("Ability_1").localPosition = new(leftOffset, 0f, 0f);
+                newGroup.transform.Find("Ability_2").localPosition = new(leftOffset + X_STEP_SIZE, 0f, 0f);
 
                 for (int i = 2; i < numberOfIcons; i++)
                 {
-                    GameObject newIcon = GameObject.Instantiate(newGroup.transform.Find("Ability_1").gameObject, newGroup.transform);
-                    newIcon.name = $"Ability_{i+1}";
-                    newIcon.transform.localPosition = new (leftOffset + X_STEP_SIZE * (float)i, 0f, 0f);
+                    GameObject newIcon = Object.Instantiate(newGroup.transform.Find("Ability_1").gameObject, newGroup.transform);
+                    newIcon.name = $"Ability_{i + 1}";
+                    newIcon.transform.localPosition = new(leftOffset + (X_STEP_SIZE * i), 0f, 0f);
                 }
 
                 controller.defaultIconGroups.Add(newGroup);
@@ -98,7 +97,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                 if (__instance is PlayableCard pcard && pcard.OnBoard)
                 {
-                    MaterialHelper.RecolorAllMaterials(parent.gameObject, GameColors.Instance.brightLimeGreen, "Standard", true, forceEnable:true);
+                    MaterialHelper.RecolorAllMaterials(parent.gameObject, GameColors.Instance.brightLimeGreen, "Standard", true, forceEnable: true);
                 }
                 else
                 {
@@ -132,7 +131,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                 if (playableCard == null || !playableCard.OnBoard)
                 {
-                    MaterialHelper.RecolorAllMaterials(parent.gameObject, GameColors.Instance.brightLimeGreen, "Standard", true, forceEnable:true);
+                    MaterialHelper.RecolorAllMaterials(parent.gameObject, GameColors.Instance.brightLimeGreen, "Standard", true, forceEnable: true);
                 }
                 else
                 {
@@ -152,17 +151,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             [SerializeField]
             private Vector3 thisBaseline;
 
-            private void Awake()
-            {
-                ResetBaselines();
-            }
+            private void Awake() => ResetBaselines();
 
             public void ResetBaselines()
             {
                 if (_matchingTransform != null)
-                    this.baseline = _matchingTransform.localScale;
+                    baseline = _matchingTransform.localScale;
 
-                this.thisBaseline = this.gameObject.transform.localScale;
+                thisBaseline = gameObject.transform.localScale;
             }
 
             private void LateUpdate()
@@ -170,22 +166,22 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 if (_matchingTransform != null)
                 {
 
-                    this.gameObject.transform.localScale = new (
-                        this.thisBaseline.x * this.baseline.y / _matchingTransform.localScale.y,
-                        this.thisBaseline.y * this.baseline.x / _matchingTransform.localScale.x,
-                        this.thisBaseline.z * this.baseline.z / _matchingTransform.localScale.z
+                    gameObject.transform.localScale = new(
+                        thisBaseline.x * baseline.y / _matchingTransform.localScale.y,
+                        thisBaseline.y * baseline.x / _matchingTransform.localScale.x,
+                        thisBaseline.z * baseline.z / _matchingTransform.localScale.z
                     );
-                    this.gameObject.transform.localPosition = new (0f, 0f, -0.05f);
+                    gameObject.transform.localPosition = new(0f, 0f, -0.05f);
                 }
-                foreach (AbilityIconInteractable icon in this.gameObject.GetComponentsInChildren<AbilityIconInteractable>())
-                    icon.gameObject.transform.localPosition = new (icon.gameObject.transform.localPosition.x, 0f, 0f);
+                foreach (AbilityIconInteractable icon in gameObject.GetComponentsInChildren<AbilityIconInteractable>())
+                    icon.gameObject.transform.localPosition = new(icon.gameObject.transform.localPosition.x, 0f, 0f);
             }
 
             [SerializeField]
             private Transform _matchingTransform;
             public Transform MatchingTransform
             {
-                get { return _matchingTransform; }
+                get => _matchingTransform;
                 set
                 {
                     _matchingTransform = value;
@@ -193,10 +189,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 }
             }
 
-            public void TestShader(string shaderName)
-            {
-                MaterialHelper.RecolorAllMaterials(this.gameObject, GameColors.Instance.brightLimeGreen, shaderName, true);
-            }
+            public void TestShader(string shaderName) => MaterialHelper.RecolorAllMaterials(gameObject, GameColors.Instance.brightLimeGreen, shaderName, true);
         }
     }
 }

@@ -981,7 +981,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // And now we're just going to add one more regional upgrade
             retval.GetRandomPointOfInterest().upgrade = REGION_DATA[region].defaultReward;
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 3; i++)
                 retval.GetRandomPointOfInterest().upgrade = UnlockAscensionItemNodeData.UnlockItemsAscension;
 
             retval.GetRandomPointOfInterest().upgrade = AscensionRecycleCardNodeData.AscensionRecycleCard;

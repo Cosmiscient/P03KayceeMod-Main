@@ -12,19 +12,19 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 {
     [HarmonyPatch]
     public class UnlockAscensionItemSequencer : SelectItemsSequencer
-	{
-        public static UnlockAscensionItemSequencer Instance {get; private set; }
+    {
+        public static UnlockAscensionItemSequencer Instance { get; private set; }
 
         public override void Start()
         {
-            if (this.slots == null)
+            if (slots == null)
             {
-                GameObject slots = GameObject.Instantiate(SpecialNodeHandler.Instance.unlockItemSequencer.gameObject.transform.Find("ItemSlots").gameObject, this.gameObject.transform);
+                GameObject slots = Instantiate(SpecialNodeHandler.Instance.unlockItemSequencer.gameObject.transform.Find("ItemSlots").gameObject, gameObject.transform);
                 GameObject centerSlot = slots.transform.Find("ItemSlot_Center").gameObject;
-                GameObject leftSlot = GameObject.Instantiate(centerSlot, centerSlot.transform.parent);
+                GameObject leftSlot = Instantiate(centerSlot, centerSlot.transform.parent);
                 leftSlot.name = "ItemSlot_Left";
                 leftSlot.transform.localPosition = new(-2.5f, 5f, -2.28f);
-                GameObject rightSlot = GameObject.Instantiate(centerSlot, centerSlot.transform.parent);
+                GameObject rightSlot = Instantiate(centerSlot, centerSlot.transform.parent);
                 rightSlot.name = "ItemSlot_Right";
                 rightSlot.transform.localPosition = new(2.5f, 5f, -2.28f);
 
@@ -35,10 +35,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 };
 
                 foreach (SelectableItemSlot slot in this.slots)
+                {
                     if (slot.gameObject.GetComponent<AlternateInputInteractable>() == null)
                         slot.gameObject.AddComponent<AlternateInputInteractable>();
+                }
 
-                this.slotsGamepadControl = slots.GetComponentInChildren<GamepadGridControl>();
+                slotsGamepadControl = slots.GetComponentInChildren<GamepadGridControl>();
             }
             base.Start();
         }
@@ -65,10 +67,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         {
             if (nodeData is UnlockAscensionItemNodeData)
             {
-                if (UnlockAscensionItemSequencer.Instance == null)
-                    UnlockAscensionItemSequencer.Instance = __instance.gameObject.AddComponent<UnlockAscensionItemSequencer>();
-                
-                SpecialNodeHandler.Instance.StartCoroutine(UnlockAscensionItemSequencer.Instance.SelectItem(nodeData as UnlockAscensionItemNodeData));
+                if (Instance == null)
+                    Instance = __instance.gameObject.AddComponent<UnlockAscensionItemSequencer>();
+
+                SpecialNodeHandler.Instance.StartCoroutine(Instance.SelectItem(nodeData as UnlockAscensionItemNodeData));
                 return false;
             }
             return true;
@@ -77,7 +79,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         private List<ConsumableItemData> GetItems()
         {
             int randomSeed = P03AscensionSaveData.RandomSeed;
-            List<string> items = new() { "Battery", ShockerItem.ItemData.name, "ShieldGenerator", LifeItem.ItemData.name, "BombRemote", "PocketWatch" };
+            List<string> items = new() { "Battery", ShockerItem.ItemData.name, "ShieldGenerator", LifeItem.ItemData.name, "BombRemote", "PocketWatch", UfoItem.ItemData.name, RifleItem.ItemData.name };
             while (items.Count > 3)
                 items.RemoveAt(SeededRandom.Range(0, items.Count, randomSeed++));
 
@@ -92,27 +94,27 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return items.Select(ItemsUtil.GetConsumableByName).ToList();
         }
 
-		public IEnumerator SelectItem(UnlockAscensionItemNodeData nodeData)
-		{
-			ViewManager.Instance.SwitchToView(View.Default, false, true);
+        public IEnumerator SelectItem(UnlockAscensionItemNodeData nodeData)
+        {
+            ViewManager.Instance.SwitchToView(View.Default, false, true);
 
-			yield return new WaitForSeconds(0.1f);
-            SelectableItemSlot selectedSlot = (SelectableItemSlot) null;
+            yield return new WaitForSeconds(0.1f);
+            SelectableItemSlot selectedSlot = null;
             List<ConsumableItemData> data = GetItems();
-            
-            foreach (SelectableItemSlot slot in this.slots)
+
+            foreach (SelectableItemSlot slot in slots)
             {
-                ConsumableItemData item = data[this.slots.IndexOf(slot)];
+                ConsumableItemData item = data[slots.IndexOf(slot)];
                 slot.gameObject.SetActive(true);
                 slot.CreateItem(item, false);
                 slot.CursorSelectStarted += i => selectedSlot = i as SelectableItemSlot;
                 slot.CursorEntered += i => Singleton<OpponentAnimationController>.Instance.SetLookTarget(i.transform, Vector3.up * 2f);
                 slot.GetComponent<AlternateInputInteractable>().AlternateSelectStarted = i => RuleBookController.Instance.OpenToItemPage(slot.Item.Data.name, true);
-            
+
                 yield return new WaitForSeconds(0.1f);
             }
 
-            this.SetSlotCollidersEnabled(true);
+            SetSlotCollidersEnabled(true);
 
             yield return new WaitUntil(() => selectedSlot != null);
 
@@ -122,7 +124,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03Wut", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 DefaultQuestDefinitions.FindGoobert.CurrentState.Status = QuestState.QuestStateStatus.Success;
             }
-            else if (this.slots[2].Item.Data.name.Equals(GoobertHuh.ItemData.name))
+            else if (slots[2].Item.Data.name.Equals(GoobertHuh.ItemData.name))
             {
                 // If you fail to buy Goobert, you "fail" at that state of the quest
                 yield return DefaultQuestDefinitions.FindGoobert.CurrentState.Status = QuestState.QuestStateStatus.Failure;
@@ -131,29 +133,28 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             RuleBookController.Instance.SetShown(false);
             Part3SaveData.Data.items.Add(selectedSlot.Item.Data.name);
 
-            this.DisableSlotsAndExitItems(selectedSlot);
+            DisableSlotsAndExitItems(selectedSlot);
             yield return new WaitForSeconds(0.2f);
             selectedSlot.Item.PlayExitAnimation();
             yield return new WaitForSeconds(0.1f);
             ItemsManager.Instance.UpdateItems();
 
-            foreach (SelectableItemSlot slot in this.slots)
+            foreach (SelectableItemSlot slot in slots)
             {
                 slot.ClearDelegates();
                 slot.GetComponent<AlternateInputInteractable>().ClearDelegates();
             }
 
-            this.SetSlotsActive(false);
+            SetSlotsActive(false);
 
             OpponentAnimationController.Instance.ClearLookTarget();
 
-            foreach (SelectableItemSlot slot in this.slots)
-                UnityEngine.Object.Destroy(slot.Item.gameObject);
+            foreach (SelectableItemSlot slot in slots)
+                Destroy(slot.Item.gameObject);
 
             SaveManager.SaveToFile(false);
 
-            if (GameFlowManager.Instance != null)
-                GameFlowManager.Instance.TransitionToGameState(GameState.Map, null);
-		}
-	}
+            GameFlowManager.Instance?.TransitionToGameState(GameState.Map, null);
+        }
+    }
 }

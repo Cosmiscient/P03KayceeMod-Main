@@ -1293,7 +1293,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 3
             techObnoxiousConduits.turns.AddTurn(
-                Enemy("P03KXMCP2_Suicell"),
+                Enemy("P03KCMXP2_Suicell"),
                 Enemy(null, replacement: "Shieldbot", difficulty: 4),
                 Enemy(null, replacement: "ConduitTower", difficulty: 3, overclock: 4)
             );
@@ -1316,7 +1316,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             // TURN 6
             techObnoxiousConduits.turns.AddTurn(
                 Enemy("P03KCMXP2_UrchinCell", replacement: "Insectodrone", difficulty: 5),
-                Enemy(null, replacement: "P03KXMCP2_Suicell", difficulty: 2)
+                Enemy(null, replacement: "P03KCMXP2_Suicell", difficulty: 2)
             );
 
             // TURN 7
@@ -2203,12 +2203,12 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 3
             wizardGuardians.turns.AddTurn(
-                Enemy("EmeraldSquid", overclock: 3, overclockAbility: Ability.GainGemGreen)
+                Enemy("P03KCMXP2_EmeraldSquid", overclock: 3, overclockAbility: Ability.GainGemGreen)
             );
 
             // TURN 4
             wizardGuardians.turns.AddTurn(
-                Enemy(null, replacement: "EmeraldSquid", difficulty: 1, overclock: 3, overclockAbility: Ability.GainGemGreen)
+                Enemy(null, replacement: "P03KCMXP2_EmeraldSquid", difficulty: 1, overclock: 3, overclockAbility: Ability.GainGemGreen)
             );
 
             // TURN 5
@@ -2219,7 +2219,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 6
             wizardGuardians.turns.AddTurn(
-                Enemy("EmeraldSquid", overclock: 3, overclockAbility: Ability.GainGemGreen),
+                Enemy("P03KCMXP2_EmeraldSquid", overclock: 3, overclockAbility: Ability.GainGemGreen),
                 Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 2, overclock: 4, overclockAbility: Ability.GainGemOrange)
             );
 
@@ -2231,7 +2231,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 8
             wizardGuardians.turns.AddTurn(
-                Enemy("EmeraldSquid", overclock: 4, overclockAbility: Ability.Submerge),
+                Enemy("P03KCMXP2_EmeraldSquid", overclock: 4, overclockAbility: Ability.Submerge),
                 Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 1, overclock: 4, overclockAbility: Ability.GainGemOrange)
             );
 

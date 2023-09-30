@@ -1,23 +1,20 @@
-using DiskCardGame;
-using InscryptionAPI.Card;
-using UnityEngine;
-using InscryptionAPI.Helpers;
-using System.Collections.Generic;
-using HarmonyLib;
 using System.Collections;
+using System.Collections.Generic;
+using DiskCardGame;
+using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
+using InscryptionAPI.Card;
+using InscryptionAPI.Helpers;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
     public class DiscCardColorAppearance : CardAppearanceBehaviour
     {
-        private Dictionary<string, Color?> _setColors = new();
+        private readonly Dictionary<string, Color?> _setColors = new();
 
-        protected virtual Color? LookupColor(string key)
-        {
-            return null;
-        }
+        protected virtual Color? LookupColor(string key) => null;
 
         private Color? GetColor(string key)
         {
@@ -27,10 +24,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
             _setColors[key] = LookupColor(key);
 
             if (!_setColors[key].HasValue)
-                _setColors[key] = GetColorFromString(this.Card.Info.GetExtendedProperty(key));
+                _setColors[key] = GetColorFromString(Card.Info.GetExtendedProperty(key));
 
             return _setColors[key];
         }
+
+        private bool? _holofy = null;
 
         public virtual Color? BorderColor { get => GetColor("BorderColor"); set => _setColors["BorderColor"] = value; }
         public virtual Color? PortraitColor { get => GetColor("PortraitColor"); set => _setColors["PortraitColor"] = value; }
@@ -40,6 +39,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public virtual Color? AttackColor { get => GetColor("AttackColor"); set => _setColors["AttackColor"] = value; }
         public virtual Color? HealthColor { get => GetColor("HealthColor"); set => _setColors["HealthColor"] = value; }
         public virtual Color? DefaultAbilityColor { get => GetColor("DefaultAbilityColor"); set => _setColors["DefaultAbilityColor"] = value; }
+        public virtual bool HolofyBorder { get => _holofy.GetValueOrDefault(Card.Info.GetExtendedPropertyAsBool("Holofy").GetValueOrDefault(false)); set => _holofy = value; }
 
         internal static Texture2D RedTexture { get; set; }
         internal static Texture2D GoldTexture { get; set; }
@@ -49,7 +49,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private static Dictionary<string, Color> GameColorsCache;
 
-        public static CardAppearanceBehaviour.Appearance ID { get; private set; }
+        public static Appearance ID { get; private set; }
 
         static DiscCardColorAppearance()
         {
@@ -79,14 +79,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private static float ColorDistance(Color a, Color b)
         {
-            float fbar = 0.5f * ((float)a.r + (float)b.r);
+            float fbar = 0.5f * (a.r + b.r);
             float deltar = (float)(a.r - b.r);
             float deltag = (float)(a.g - b.g);
             float deltab = (float)(a.b - b.b);
-            if (fbar < 128)
-                return Mathf.Sqrt(2 * deltar * deltar + 4 * deltag * deltag + 3 * deltab * deltab);
-            else
-                return Mathf.Sqrt(3 * deltar * deltar + 4 * deltag * deltag + 2 * deltab * deltab);
+            return fbar < 128
+                ? Mathf.Sqrt((2 * deltar * deltar) + (4 * deltag * deltag) + (3 * deltab * deltab))
+                : Mathf.Sqrt((3 * deltar * deltar) + (4 * deltag * deltag) + (2 * deltab * deltab));
         }
 
         private static void PopulateGameColorsCache()
@@ -94,9 +93,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (GameColorsCache != null)
                 return;
 
-            GameColorsCache = new ();
+            GameColorsCache = new();
 
-            foreach (var field in typeof(GameColors).GetFields())
+            foreach (System.Reflection.FieldInfo field in typeof(GameColors).GetFields())
             {
                 if (field.FieldType == typeof(Color))
                 {
@@ -115,22 +114,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private void CalcRareTexture()
         {
-            if (!this.BorderColor.HasValue)
+            if (!BorderColor.HasValue)
             {
                 currentTexture = BlueTexture;
                 return;
             }
 
-            float red = ColorDistance(GameColors.Instance.darkRed, this.BorderColor.Value);
-            float gold = ColorDistance(GameColors.Instance.darkGold, this.BorderColor.Value);
-            float blue = ColorDistance(GameColors.Instance.blue, this.BorderColor.Value);
+            float red = ColorDistance(GameColors.Instance.darkRed, BorderColor.Value);
+            float gold = ColorDistance(GameColors.Instance.darkGold, BorderColor.Value);
+            float blue = ColorDistance(GameColors.Instance.blue, BorderColor.Value);
 
-            if (red < gold && red < blue)
-                currentTexture = RedTexture;
-            else if (gold < red && gold < blue)
-                currentTexture = GoldTexture;
-            else
-                currentTexture = BlueTexture;
+            currentTexture = red < gold && red < blue ? RedTexture : gold < red && gold < blue ? GoldTexture : BlueTexture;
         }
 
         internal static Color? GetColorFromString(string colorKey)
@@ -138,35 +132,25 @@ namespace Infiniscryption.P03KayceeRun.Cards
             try
             {
                 string[] keyComponents = colorKey.Split(',');
-                
+
                 if (keyComponents.Length == 1)
                 {
                     if (keyComponents[0][0] == '#')
                     {
-                        Color htmlColor;
-                        if (ColorUtility.TryParseHtmlString(keyComponents[0], out htmlColor))
-                            return htmlColor;
-                        else
-                            return null;
+                        return ColorUtility.TryParseHtmlString(keyComponents[0], out Color htmlColor) ? htmlColor : null;
                     }
                     PopulateGameColorsCache();
                     return GameColorsCache[keyComponents[0].ToLowerInvariant()];
                 }
-                else if (keyComponents.Length == 2)
-                {
-                    return GetColorFromString(keyComponents[0]) * float.Parse(keyComponents[1]);
-                }
-                else if (keyComponents.Length == 3)
-                {
-                    return new Color(float.Parse(keyComponents[0]), float.Parse(keyComponents[1]), float.Parse(keyComponents[2]));
-                }
-                else if (keyComponents.Length == 4)
-                {
-                    return new Color(float.Parse(keyComponents[0]), float.Parse(keyComponents[1]), float.Parse(keyComponents[2]), float.Parse(keyComponents[3]));
-                }
                 else
                 {
-                    return null;
+                    return keyComponents.Length == 2
+                        ? GetColorFromString(keyComponents[0]) * float.Parse(keyComponents[1])
+                        : keyComponents.Length == 3
+                                            ? new Color(float.Parse(keyComponents[0]), float.Parse(keyComponents[1]), float.Parse(keyComponents[2]))
+                                            : keyComponents.Length == 4
+                                                                ? new Color(float.Parse(keyComponents[0]), float.Parse(keyComponents[1]), float.Parse(keyComponents[2]), float.Parse(keyComponents[3]))
+                                                                : null;
                 }
             }
             catch
@@ -197,13 +181,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
             "_DetailAlbedoMap",
         };
 
-        private void ApplyColorSafe(string path, Color color, bool emission)
+        private void ApplyColorSafe(string path, Color color, bool emission, bool holofy = false)
         {
             try
             {
-                Transform tComp = this.gameObject.transform.Find(path);
+                Transform tComp = gameObject.transform.Find(path);
                 if (tComp != null && tComp.gameObject != null)
                 {
+                    if (holofy)
+                    {
+                        OnboardDynamicHoloPortrait.HolofyGameObject(tComp.gameObject, color);
+                        return;
+                    }
                     GameObject component = tComp.gameObject;
                     MeshRenderer renderer = component.GetComponent<MeshRenderer>();
                     Material material = renderer.material;
@@ -212,7 +201,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     {
                         material.EnableKeyword("_EMISSION");
                         material.SetColor("_EmissionColor", color);
-                    } else {
+                    }
+                    else
+                    {
                         material.SetColor("_Color", color);
                     }
                 }
@@ -229,23 +220,27 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (currentTexture == null)
                 CalcRareTexture();
 
-            MaterialHelper.RetextureAllRenderers(this.gameObject, currentTexture, originalTextureKey: "floppydisc");
+            if (!HolofyBorder)
+                MaterialHelper.RetextureAllRenderers(gameObject, currentTexture, originalTextureKey: "floppydisc");
 
             // Apply the color to the border
-            if (this.BorderColor.HasValue)
+            if (BorderColor.HasValue)
+            {
                 foreach (string key in BorderObjectPaths)
-                    ApplyColorSafe(key, this.BorderColor.Value, true);
+                    ApplyColorSafe(key, BorderColor.Value, true, HolofyBorder);
+            }
 
             // Apply the color to the name background
-            if (this.NameBannerColor.HasValue)
-                foreach (string key in StickerObjectPaths)
-                    ApplyColorSafe(key, this.NameBannerColor.Value, false);
-
-
-            if (this.NameTextColor.HasValue && this.Card.StatsLayer is DiskRenderStatsLayer drsl)
+            if (NameBannerColor.HasValue)
             {
-                if (this.EnergyColor.HasValue)
-                    drsl.lightColor = this.EnergyColor.Value;
+                foreach (string key in StickerObjectPaths)
+                    ApplyColorSafe(key, NameBannerColor.Value, false);
+            }
+
+            if (NameTextColor.HasValue && Card.StatsLayer is DiskRenderStatsLayer drsl)
+            {
+                if (EnergyColor.HasValue)
+                    drsl.lightColor = EnergyColor.Value;
 
                 if (drsl.labelText.fontMaterial.shader.name.EndsWith("(Surface)"))
                     drsl.labelText.fontMaterial.shader = Shader.Find(drsl.labelText.fontMaterial.shader.name.Replace(" (Surface)", ""));
@@ -255,15 +250,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                 drsl.labelText.fontMaterial.SetTexture("_MainTex", WhiteTextTexture);
                 drsl.labelText.renderer.material.SetTexture("_MainTex", WhiteTextTexture);
-                string hexcode = ColorUtility.ToHtmlStringRGBA(this.NameTextColor.Value);
-                drsl.labelText.SetText($"<color=#{hexcode}>{this.Card.Info.DisplayedNameLocalized}</color>", true);
+                string hexcode = ColorUtility.ToHtmlStringRGBA(NameTextColor.Value);
+                drsl.labelText.SetText($"<color=#{hexcode}>{Card.Info.DisplayedNameLocalized}</color>", true);
             }
         }
 
         public override void OnPreRenderCard()
         {
             base.OnPreRenderCard();
-            this.ApplyAppearance();
+            ApplyAppearance();
         }
 
         //private static readonly Color _defaultBarColor = new Color(.4858f, .8751f, 1f, 1f);
@@ -272,7 +267,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static IEnumerator FixMiddleColor(IEnumerator sequence, CardRenderCamera __instance, RenderStatsLayer layer, CardRenderInfo info, PlayableCard playableCard, bool updateMain, bool updateEmission)
         {
-            if (!(layer is DiskRenderStatsLayer drsl))
+            if (layer is not DiskRenderStatsLayer drsl)
             {
                 yield return sequence;
                 yield break;
@@ -287,38 +282,38 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // The only way I can figure out how to do this is to just copy/paste the original method straight from dnSpy.
             // Sorry. I kinda hate doing it this way but I couldn't figure out a better way to do it.
             CardRenderCamera.renderQueue.Add(layer);
-			while (CardRenderCamera.renderQueue.Count == 0 || CardRenderCamera.renderQueue[0] != layer)
-			{
-				CardRenderCamera.renderQueue.RemoveAll((RenderStatsLayer x) => !__instance.ValidStatsLayer(x));
-				if (!__instance.ValidStatsLayer(layer))
-				{
-					yield break;
-				}
-				yield return new WaitForEndOfFrame();
-			}
-			if (__instance.ValidStatsLayer(layer))
-			{
-				__instance.cardDisplayer.DisplayInfo(info, playableCard);
+            while (CardRenderCamera.renderQueue.Count == 0 || CardRenderCamera.renderQueue[0] != layer)
+            {
+                CardRenderCamera.renderQueue.RemoveAll((RenderStatsLayer x) => !__instance.ValidStatsLayer(x));
+                if (!__instance.ValidStatsLayer(layer))
+                {
+                    yield break;
+                }
+                yield return new WaitForEndOfFrame();
+            }
+            if (__instance.ValidStatsLayer(layer))
+            {
+                __instance.cardDisplayer.DisplayInfo(info, playableCard);
 
                 // Also change the bar color here.
                 GameObject delimiter = __instance.transform.Find("CardsPlane/Base/Delimiter").gameObject;
                 SpriteRenderer renderer = delimiter.GetComponent<SpriteRenderer>();
                 renderer.color = myBarColor;
-				yield return new WaitForEndOfFrame();
-			}
+                yield return new WaitForEndOfFrame();
+            }
 
-			if (__instance.ValidStatsLayer(layer))
-			{
-				if (updateMain)
-				{
-					__instance.SetRenderLayerMainTexture(layer, RenderTextureSnapshotter.CopyRenderTexture(__instance.snapshotRenderTexture, FilterMode.Point));
-				}
-				if (updateEmission)
-				{
-					__instance.SetRenderLayerEmissionTexture(layer, RenderTextureSnapshotter.CopyRenderTexture(__instance.snapshotEmissionRenderTexture, FilterMode.Point));
-				}
-				CardRenderCamera.renderQueue.Remove(layer);
-			}
+            if (__instance.ValidStatsLayer(layer))
+            {
+                if (updateMain)
+                {
+                    __instance.SetRenderLayerMainTexture(layer, RenderTextureSnapshotter.CopyRenderTexture(__instance.snapshotRenderTexture, FilterMode.Point));
+                }
+                if (updateEmission)
+                {
+                    __instance.SetRenderLayerEmissionTexture(layer, RenderTextureSnapshotter.CopyRenderTexture(__instance.snapshotEmissionRenderTexture, FilterMode.Point));
+                }
+                CardRenderCamera.renderQueue.Remove(layer);
+            }
 
             yield break;
         }
@@ -327,7 +322,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static void RenderDiscCardAdjustColors(ref RenderStatsLayer __instance, CardRenderInfo info)
         {
-            if (!(__instance is DiskRenderStatsLayer drsl))
+            if (__instance is not DiskRenderStatsLayer drsl)
                 return;
 
             DiscCardColorAppearance appearance = drsl.gameObject.transform.parent.parent.gameObject.GetComponent<DiscCardColorAppearance>();
@@ -335,29 +330,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (appearance == null)
                 return;
 
-            if (appearance.AttackColor.HasValue)
-                info.attackTextColor = appearance.AttackColor.Value;
-            else
-                info.attackTextColor = drsl.defaultLightColor;
+            info.attackTextColor = appearance.AttackColor ?? drsl.defaultLightColor;
 
-            if (appearance.HealthColor.HasValue)
-                info.healthTextColor = appearance.HealthColor.Value;
-            else
-                info.healthTextColor = drsl.defaultLightColor;
+            info.healthTextColor = appearance.HealthColor ?? drsl.defaultLightColor;
 
-            if (appearance.DefaultAbilityColor.HasValue)
-                info.defaultAbilityColor = appearance.DefaultAbilityColor.Value;
-            else
-                info.defaultAbilityColor = drsl.defaultLightColor;
+            info.defaultAbilityColor = appearance.DefaultAbilityColor ?? drsl.defaultLightColor;
 
-            if (appearance.PortraitColor.HasValue)
-                info.portraitColor = appearance.PortraitColor.Value;
-            else
-                info.portraitColor = drsl.defaultLightColor;
-            
+            info.portraitColor = appearance.PortraitColor ?? drsl.defaultLightColor;
+
             if (appearance.NameTextColor.HasValue)
             {
-                info.nameTextColor = appearance.NameTextColor.Value; 
+                info.nameTextColor = appearance.NameTextColor.Value;
 
                 // Do it here too?
                 drsl.labelText.fontMaterial.SetTexture("_MainTex", WhiteTextTexture);

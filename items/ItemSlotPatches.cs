@@ -1,9 +1,7 @@
-using HarmonyLib;
-using DiskCardGame;
-using UnityEngine;
-using System.Linq;
-using System.Collections.Generic;
 using System;
+using DiskCardGame;
+using HarmonyLib;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
@@ -68,7 +66,7 @@ namespace Infiniscryption.P03KayceeRun.Items
 
         //         if (skipDropAnimation)
         //             __instance.Item.PlayEnterAnimation(true);
-                
+
         //         return false;
         //     }
         //     return true;
@@ -77,8 +75,11 @@ namespace Infiniscryption.P03KayceeRun.Items
         [HarmonyPatch(typeof(ItemPage), nameof(ItemPage.FillPage))]
         [HarmonyPostfix]
         private static void P03FillPage(ref ItemPage __instance, string headerText, params object[] otherArgs)
-        {			
-			ConsumableItemData consumableByName = ItemsUtil.GetConsumableByName(otherArgs[0] as string);
+        {
+            if (__instance.itemModel != null && !__instance.itemModel.activeSelf)
+                __instance.itemModel.SetActive(true);
+
+            ConsumableItemData consumableByName = ItemsUtil.GetConsumableByName(otherArgs[0] as string);
 
             if (SaveManager.SaveFile.IsPart3)
                 __instance.descriptionTextMesh.color = Color.white;
@@ -88,31 +89,31 @@ namespace Infiniscryption.P03KayceeRun.Items
             //     return true;
 
             // if (__instance.headerTextMesh != null)
-			// 	__instance.headerTextMesh.text = headerText;
+            // 	__instance.headerTextMesh.text = headerText;
 
-			// if (__instance.itemModelParent != null)
-			// {
-			// 	if (__instance.itemModel != null)
-			// 	{
-			// 		GameObject.Destroy(__instance.itemModel);
-			// 	}
-			// 	__instance.itemModel = CreateObject(consumableByName, __instance.itemModelParent).gameObject;
+            // if (__instance.itemModelParent != null)
+            // {
+            // 	if (__instance.itemModel != null)
+            // 	{
+            // 		GameObject.Destroy(__instance.itemModel);
+            // 	}
+            // 	__instance.itemModel = CreateObject(consumableByName, __instance.itemModelParent).gameObject;
 
             //     Animator anim = __instance.itemModel.GetComponentInChildren<Animator>();
             //     if (anim != null)
             //         anim.enabled = false;
 
-			// 	__instance.itemModel.transform.localPosition = Vector3.zero;
-			// 	Transform[] componentsInChildren = __instance.itemModel.GetComponentsInChildren<Transform>();
-			// 	for (int i = 0; i < componentsInChildren.Length; i++)
-			// 	{
-			// 		componentsInChildren[i].gameObject.layer = __instance.itemModelParent.gameObject.layer;
-			// 	}
-			// }
-			// else
-			// {
-			// 	__instance.iconRenderer.sprite = consumableByName.rulebookSprite;
-			// }
+            // 	__instance.itemModel.transform.localPosition = Vector3.zero;
+            // 	Transform[] componentsInChildren = __instance.itemModel.GetComponentsInChildren<Transform>();
+            // 	for (int i = 0; i < componentsInChildren.Length; i++)
+            // 	{
+            // 		componentsInChildren[i].gameObject.layer = __instance.itemModelParent.gameObject.layer;
+            // 	}
+            // }
+            // else
+            // {
+            // 	__instance.iconRenderer.sprite = consumableByName.rulebookSprite;
+            // }
 
             // __instance.nameTextMesh.text = Localization.Translate(consumableByName.rulebookName);
 
@@ -124,7 +125,7 @@ namespace Infiniscryption.P03KayceeRun.Items
                 string englishText = goobertDialogue.Item2;
                 if (__instance.itemModel == null)
                     englishText = $"To the user: {englishText}";
-                
+
                 __instance.descriptionTextMesh.text = Localization.Translate(goobertDialogue.Item2);
 
                 __instance.descriptionTextMesh.color = goobertDialogue.Item1;

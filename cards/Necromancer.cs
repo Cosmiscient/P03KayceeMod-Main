@@ -24,7 +24,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            Necromancer.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(Necromancer),
@@ -32,14 +32,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer)
-        {
-            return fromCombat && this.Card.OnBoard && card.OpponentCard == this.Card.OpponentCard && !card.HasAbility(Ability.Brittle) && !card.HasAbility(Ability.IceCube);
-        }
+        public override bool RespondsToOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer) => fromCombat && Card.OnBoard && card.OpponentCard == Card.OpponentCard && !card.HasAbility(Ability.Brittle) && !card.HasAbility(Ability.IceCube);
 
         public override IEnumerator OnOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer)
         {
-            yield return base.PreSuccessfulTriggerSequence();
+            yield return PreSuccessfulTriggerSequence();
             yield return new WaitForSeconds(0.3f);
 
             CardInfo info = null;
@@ -52,10 +49,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 if (P03AscensionSaveData.IsP03Run)
                 {
                     info = CardLoader.GetCardByName("RoboSkeleton");
-                    CardModificationInfo mod = new();
-                    mod.healthAdjustment = -1;
-                    mod.attackAdjustment = -1;
-                    mod.energyCostAdjustment = -2;
+                    CardModificationInfo mod = new()
+                    {
+                        healthAdjustment = -1,
+                        attackAdjustment = -1,
+                        energyCostAdjustment = -2
+                    };
                     info.Mods.Add(mod);
                 }
                 else
@@ -63,9 +62,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     info = CardLoader.GetCardByName("Skeleton");
                 }
             }
-            
+
             yield return BoardManager.Instance.CreateCardInSlot(info, deathSlot, 0.15f, true);
-            yield return base.LearnAbility(0.5f);
+            yield return LearnAbility(0.5f);
             yield break;
         }
     }

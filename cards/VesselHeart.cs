@@ -1,11 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
@@ -13,7 +11,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
     public class VesselHeart : AbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -29,7 +27,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            VesselHeart.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(VesselHeart),
@@ -40,7 +38,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
             // Figure out the card we're getting
-            int randomSeed = P03AscensionSaveData.RandomSeed + TurnManager.Instance.TurnNumber * 25 + this.Card.Slot.Index;
+            int randomSeed = P03AscensionSaveData.RandomSeed + (TurnManager.Instance.TurnNumber * 25) + Card.Slot.Index;
             float randomDraw = SeededRandom.Value(randomSeed);
 
             string familiarName = "EmptyVessel_BlueGem";
@@ -54,13 +52,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo familiar = CardLoader.GetCardByName(familiarName);
 
             yield return new WaitForSeconds(0.4f);
-            yield return BoardManager.Instance.CreateCardInSlot(familiar, this.Card.slot);
+            yield return BoardManager.Instance.CreateCardInSlot(familiar, Card.slot);
             yield return new WaitForSeconds(0.25f);
             yield break;
         }
 
         public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
 
-        
+
     }
 }

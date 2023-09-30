@@ -25,6 +25,9 @@ namespace Infiniscryption.P03KayceeRun.Quests
         internal static QuestDefinition ListenToTheRadio { get; private set; }
         internal static QuestDefinition PowerUpTheTower { get; private set; }
         internal static QuestDefinition Pyromania { get; private set; }
+        internal static QuestDefinition Conveyors { get; private set; }
+        internal static QuestDefinition BountyTarget { get; private set; }
+        internal static QuestDefinition LeapBotNeo { get; private set; }
 
         // These are the special story maps
         internal static QuestDefinition FindGoobert { get; private set; }
@@ -260,18 +263,46 @@ namespace Infiniscryption.P03KayceeRun.Quests
             defaultState.AddDialogueState("PHEW!", "P03DamageRaceSuccess").AddDynamicMonetaryReward(); ;
 
             // Pyromania
-            // Radio Tower
-
             Pyromania = QuestManager.Add(P03Plugin.PluginGuid, "Pyromania");
             Pyromania.SetGenerateCondition(() => Part3SaveData.Data.deck.Cards.Where(c => c.Abilities.Any(a => AbilitiesUtil.GetInfo(a).metaCategories.Contains(FireBomb.FlamingAbility))).Count() >= 2)
                      .AddDialogueState("BURN BABY BURN", "P03PyroQuestStart")
                      .AddDefaultActiveState("BURN BABY BURN", "P03PyroQuestInProgress")
-                     .SetDynamicStatus(() =>
-                     {
-                         return Pyromania.GetQuestCounter() >= BURNED_CARDS ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Active;
-                     })
+                     .WaitForQuestCounter(BURNED_CARDS)
                      .AddDialogueState("SO SATISFYING...", "P03PyroQuestComplete")
                      .AddGainCardReward(ExpansionPackCards_2.FLAME_CHARMER_CARD);
+
+            // Conveyors
+            Conveyors = QuestManager.Add(P03Plugin.PluginGuid, "Conveyors");
+            Conveyors.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.ALL_CONVEYOR.challengeType))
+                     .AddDialogueState("CONVEYOR FIELD TRIALS", "P03ConveyorQuestStart")
+                     .AddDialogueState("START FIELD TRIALS?", "P03ConveyorQuestStarting")
+                     .AddDefaultActiveState("FIELD TRIALS IN PROGRESS", "P03ConveyorQuestActive")
+                     .WaitForQuestCounter(5)
+                     .AddDialogueState("FIELD TRIALS COMPLETE", "P03ConveyorQuestComplete")
+                     .AddDynamicMonetaryReward()
+                     .AddGainItemReward("PocketWatch");
+
+            // Bounty
+            BountyTarget = QuestManager.Add(P03Plugin.PluginGuid, "BountyTarget");
+            BountyTarget.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3)
+                        .AddDialogueState("CATCH A FUGITIVE?", "P03BountyQuestIntro")
+                        .AddDialogueState("LET'S CATCH A FUGITIVE?!", "P03BountyQuestStarted")
+                        .AddDefaultActiveState("LET'S GET HIM!", "P03BountyQuestInProgress")
+                        .AddDialogueState("YOU GOT HIM!", "P03BountyQuestComplete")
+                        .AddDynamicMonetaryReward();
+
+            // LeapBot Neo
+            LeapBotNeo = QuestManager.Add(P03Plugin.PluginGuid, "LeapBotNeo");
+            static bool generateLBNQuest() => LeapBotNeo.GetQuestCounter() > 7 && Part3SaveData.Data.deck.Cards.Any(c => c.name == "LeapBot");
+            QuestState dummyState = LeapBotNeo.SetGenerateCondition(generateLBNQuest)
+                                       .SetMustBeGeneratedCondition(generateLBNQuest)
+                                       .GenerateAwayFromStartingArea()
+                                       .AddDummyStartingState(() => Part3SaveData.Data.deck.Cards.Any(c => c.name == "LeapBot") ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Failure);
+
+            dummyState.AddDialogueState("DISAPPOINTING", "P03LeapBotQuestFailed", QuestState.QuestStateStatus.Failure);
+            dummyState.AddDialogueState("ITS GLORIOUS", "P03LeapBotQuest")
+                      .AddReward(new QuestRewardTransformCard() { CardName = "LeapBot", TransformIntoCardName = ExpansionPackCards_2.LEAPBOT_NEO });
+
         }
     }
 }

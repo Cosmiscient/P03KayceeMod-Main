@@ -1,17 +1,18 @@
-using HarmonyLib;
-using DiskCardGame;
-using System.Collections.Generic;
-using InscryptionAPI.Helpers;
-using System.Linq;
-using UnityEngine;
-using InscryptionAPI.Ascension;
-using InscryptionAPI.Guid;
-using System.Collections;
 using System;
-using InscryptionAPI.Saves;
-using InscryptionAPI.Card;
-using Infiniscryption.P03KayceeRun.Cards;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using DiskCardGame;
 using DiskCardGame.CompositeRules;
+using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03KayceeRun.Quests;
+using InscryptionAPI.Ascension;
+using InscryptionAPI.Card;
+using InscryptionAPI.Guid;
+using InscryptionAPI.Helpers;
+using InscryptionAPI.Saves;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -40,44 +41,44 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             && AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.LessLives) > 0
             && AscensionSaveData.Data.GetNumChallengesOfTypeActive(BOUNTY_HUNTER) >= 2;
 
+        public static bool ConveyorIsActive =>
+            SaveFile.IsAscension
+            && (AscensionSaveData.Data.ChallengeIsActive(ALL_CONVEYOR.challengeType)
+                || DefaultQuestDefinitions.Conveyors.IsDefaultActive())
+            && TurnManager.Instance.opponent is not Part3BossOpponent;
+
         internal static bool TurboVesselsUIPlayed
         {
-            get { return ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "TurboVesselsUIPlayed"); }
-            set { ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "TurboVesselsUIPlayed", value); }
+            get => ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "TurboVesselsUIPlayed");
+            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "TurboVesselsUIPlayed", value);
         }
 
         internal static bool LeapingSidedeckUIPlayed
         {
-            get { return ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "LeapingSidedeckUIPlayed"); }
-            set { ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "LeapingSidedeckUIPlayed", value); }
+            get => ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "LeapingSidedeckUIPlayed");
+            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "LeapingSidedeckUIPlayed", value);
         }
 
         internal static bool TradLivesUIPlayed
         {
-            get { return ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "TradLivesUIPlayed"); }
-            set { ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "TradLivesUIPlayed", value); }
+            get => ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "TradLivesUIPlayed");
+            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "TradLivesUIPlayed", value);
         }
 
         internal static bool ExpensiveRespawnUIPlayed
         {
-            get { return ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "ExpensiveRespawnUIPlayed"); }
-            set { ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "ExpensiveRespawnUIPlayed", value); }
+            get => ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "ExpensiveRespawnUIPlayed");
+            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "ExpensiveRespawnUIPlayed", value);
         }
 
         private static CanvasBossOpponent CanvasBoss => Singleton<TurnManager>.Instance.Opponent as CanvasBossOpponent;
         private static CompositeRuleTriggerHandler rulesHandler;
         private static CompositeBattleRule currentRule;
-        private static CompositeRuleDisplayer ruleDisplayer;
+        private static readonly CompositeRuleDisplayer ruleDisplayer;
 
         public static Part3BossOpponent dummyCanvasBoss;
 
-        private static string CompatibleChallengeList
-        {
-            get
-            {
-                return ModdedSaveManager.SaveData.GetValue(P03Plugin.PluginGuid, "P03CompatibleChallenges");
-            }
-        }
+        private static string CompatibleChallengeList => ModdedSaveManager.SaveData.GetValue(P03Plugin.PluginGuid, "P03CompatibleChallenges");
 
         public const int HAMMER_ENERGY_COST = 2;
 
@@ -125,141 +126,132 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             TURBO_VESSELS = GuidManager.GetEnumValue<AscensionChallenge>(P03Plugin.PluginGuid, "TurboVessels");
             LEEPBOT_SIDEDECK = GuidManager.GetEnumValue<AscensionChallenge>(P03Plugin.PluginGuid, "LeepbotSidedeck");
 
-            PatchedChallengesReference = new();
+            PatchedChallengesReference = new() {
+                //PatchedChallengesReference.Add(
+                //    AscensionChallenge.NoClover,
+                //    new() {
+                //        challengeType = ALL_CONVEYOR,
+                //        title = "Overactive Factory",
+                //        description = "All regular battles are conveyor battles",
+                //        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_conveyorbattle.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                //        activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_conveyorbattle_active.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                //        pointValue = 0
+                //    }
+                //);
 
-            //PatchedChallengesReference.Add(
-            //    AscensionChallenge.NoClover,
-            //    new() {
-            //        challengeType = ALL_CONVEYOR,
-            //        title = "Overactive Factory",
-            //        description = "All regular battles are conveyor battles",
-            //        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_conveyorbattle.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-            //        activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_conveyorbattle_active.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-            //        pointValue = 0
-            //    }
-            //);
-
-            PatchedChallengesReference.Add(
-                AscensionChallenge.NoClover,
-                new()
                 {
-                    challengeType = TURBO_VESSELS,
-                    title = "Turbo Vessels",
-                    description = "Your vessels have the Double Sprinter sigil.",
-                    iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_turbovessel.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_turbovessel_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    pointValue = 5
-                }
-            );
+                    AscensionChallenge.NoClover,
+                    new() {
+                        challengeType = TURBO_VESSELS,
+                        title = "Turbo Vessels",
+                        description = "Your vessels have the Double Sprinter sigil.",
+                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_turbovessel.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_turbovessel_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 5
+                    }
+                },
 
-            PatchedChallengesReference.Add(
-                AscensionChallenge.SubmergeSquirrels,
-                new()
                 {
-                    challengeType = BOUNTY_HUNTER,
-                    title = "Wanted Fugitive",
-                    description = "Your bounty level is permanently increased by 1",
-                    iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_bounthunter.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    activatedSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_activated_default"), TextureHelper.SpriteType.ChallengeIcon),
-                    pointValue = 10
-                }
-            );
+                    AscensionChallenge.SubmergeSquirrels,
+                    new() {
+                        challengeType = BOUNTY_HUNTER,
+                        title = "Wanted Fugitive",
+                        description = "Your bounty level is permanently increased by 1",
+                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_bounthunter.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_activated_default"), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 10
+                    }
+                },
 
-            PatchedChallengesReference.Add(
-                AscensionChallenge.GrizzlyMode,
-                new()
                 {
-                    challengeType = BOUNTY_HUNTER,
-                    title = "Wanted Fugitive",
-                    description = "Your bounty level is permanently increased by 1",
-                    iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_bounthunter.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    activatedSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_activated_default"), TextureHelper.SpriteType.ChallengeIcon),
-                    pointValue = 10
-                }
-            );
+                    AscensionChallenge.GrizzlyMode,
+                    new() {
+                        challengeType = BOUNTY_HUNTER,
+                        title = "Wanted Fugitive",
+                        description = "Your bounty level is permanently increased by 1",
+                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_bounthunter.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_activated_default"), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 10
+                    }
+                },
 
-            PatchedChallengesReference.Add(
-                AscensionChallenge.BossTotems,
-                new()
                 {
-                    challengeType = PAINTING_CHALLENGE,
-                    title = "Eccentric Painter",
-                    description = "All bosses start with a random canvas rule.",
-                    iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_eccentricpainter.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_eccentricpainter_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    pointValue = 35
-                }
-            );
+                    AscensionChallenge.BossTotems,
+                    new() {
+                        challengeType = PAINTING_CHALLENGE,
+                        title = "Eccentric Painter",
+                        description = "All bosses start with a random canvas rule.",
+                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_eccentricpainter.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_eccentricpainter_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 35
+                    }
+                },
 
-            PatchedChallengesReference.Add(
-                AscensionChallenge.AllTotems,
-                new()
                 {
-                    challengeType = ENERGY_HAMMER,
-                    title = "Energy Hammer",
-                    description = "The hammer now costs 2 energy to use",
-                    iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_energyhammer.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_energyhammer_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    pointValue = 10
-                }
-            );
+                    AscensionChallenge.AllTotems,
+                    new() {
+                        challengeType = ENERGY_HAMMER,
+                        title = "Energy Hammer",
+                        description = "The hammer now costs 2 energy to use",
+                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_energyhammer.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_energyhammer_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 10
+                    }
+                },
 
-            PatchedChallengesReference.Add(
-                AscensionChallenge.NoHook,
-                ChallengeManager.BaseGameChallenges.First(fc => fc.Challenge.challengeType == AscensionChallenge.LessConsumables)
-            );
-
-            PatchedChallengesReference.Add(
-                AscensionChallenge.ExpensivePelts,
-                new()
                 {
-                    challengeType = AscensionChallenge.ExpensivePelts,
-                    title = "Pricey Upgrades",
-                    description = "All upgrades cost more",
-                    iconSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_expensivepelts"), TextureHelper.SpriteType.ChallengeIcon),
-                    activatedSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_activated_default"), TextureHelper.SpriteType.ChallengeIcon),
-                    pointValue = 5
-                }
-            );
+                    AscensionChallenge.NoHook,
+                    ChallengeManager.BaseGameChallenges.First(fc => fc.Challenge.challengeType == AscensionChallenge.LessConsumables)
+                },
 
-            PatchedChallengesReference.Add(
-                AscensionChallenge.LessLives,
-                new()
                 {
-                    challengeType = AscensionChallenge.LessLives,
-                    title = "Costly Respawn",
-                    description = "Respawn Cost is 15. With Traditional Lives, you've one chance.",
-                    iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_oneup.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    activatedSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_activated_default"), TextureHelper.SpriteType.ChallengeIcon),
-                    pointValue = 20
-                }
-            );
+                    AscensionChallenge.ExpensivePelts,
+                    new() {
+                        challengeType = AscensionChallenge.ExpensivePelts,
+                        title = "Pricey Upgrades",
+                        description = "All upgrades cost more",
+                        iconSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_expensivepelts"), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_activated_default"), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 5
+                    }
+                },
 
-            PatchedChallengesReference.Add(
-                AscensionChallenge.WeakStarterDeck,
-                new()
                 {
-                    challengeType = TRADITIONAL_LIVES,
-                    title = "Traditional Lives",
-                    description = "You have two lives per region.",
-                    iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_tradLives.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_tradLives_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    pointValue = 10
-                }
-            );
+                    AscensionChallenge.LessLives,
+                    new() {
+                        challengeType = AscensionChallenge.LessLives,
+                        title = "Costly Respawn",
+                        description = "Respawn Cost is 15. With Traditional Lives, you've one chance.",
+                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_oneup.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_activated_default"), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 20
+                    }
+                },
 
-            PatchedChallengesReference.Add(
-                AscensionChallenge.NoBossRares,
-                new()
                 {
-                    challengeType = LEEPBOT_SIDEDECK,
-                    title = "Leaping Side Deck",
-                    description = "Replace your Empty Vessels with L33pbots.",
-                    iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_leepbot.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_leepbot_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                    pointValue = 15
+                    AscensionChallenge.WeakStarterDeck,
+                    new() {
+                        challengeType = TRADITIONAL_LIVES,
+                        title = "Traditional Lives",
+                        description = "You have two lives per region.",
+                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_tradLives.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_tradLives_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 10
+                    }
+                },
+
+                {
+                    AscensionChallenge.NoBossRares,
+                    new() {
+                        challengeType = LEEPBOT_SIDEDECK,
+                        title = "Leaping Side Deck",
+                        description = "Replace your Empty Vessels with L33pbots.",
+                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_leepbot.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_leepbot_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 15
+                    }
                 }
-            );
+            };
 
             ValidChallenges = new()
             {
@@ -290,8 +282,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             ChallengeManager.ModifyChallenges += delegate (List<ChallengeManager.FullChallenge> challenges)
             {
                 if (P03AscensionSaveData.IsP03Run)
+                {
                     for (int i = 0; i < challenges.Count; i++)
+                    {
                         if (PatchedChallengesReference.ContainsKey(challenges[i].Challenge.challengeType))
+                        {
                             //challenges[i] = PatchedChallengesReference[challenges[i].challengeType];
                             challenges[i] = new()
                             {
@@ -299,6 +294,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                                 AppearancesInChallengeScreen = 1,
                                 UnlockLevel = challenges[i].UnlockLevel
                             };
+                        }
+                    }
+                }
 
                 return challenges;
             };
@@ -342,7 +340,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         Debug.Log("Facing Archivist boss");
                         Debug.Log("EffectID: " + randomEffectID);
                         //1 is 5 damage to random card, 4 is all cards damaged by 1
-                        if ((randomEffectID == 1) || (randomEffectID == 4))
+                        if (randomEffectID is 1 or 4)
                         {
                             //Player take damage, 1 damage on scales
                             randomEffectID = 0;
@@ -376,10 +374,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(AscensionChallengeScreen), nameof(AscensionChallengeScreen.OnEnable))]
         [HarmonyPostfix]
-        private static void HideLockedBossIcon(AscensionChallengeScreen __instance)
-        {
-            __instance.gameObject.GetComponentInChildren<ChallengeIconGrid>().Start();
-        }
+        private static void HideLockedBossIcon(AscensionChallengeScreen __instance) => __instance.gameObject.GetComponentInChildren<ChallengeIconGrid>().Start();
 
         // [HarmonyPatch(typeof(AscensionChallengePaginator), nameof(AscensionChallengePaginator.ShowVisibleChallenges))]
         // [HarmonyPostfix]
@@ -398,10 +393,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 __instance.finalBossIcon.SetActive(false);
                 float xStart = -1.65f;
                 for (int i = 0; i < __instance.topRowIcons.Count; i++)
-                    __instance.topRowIcons[i].localPosition = new Vector2(xStart + (float)i * 0.55f, __instance.topRowIcons[i].localPosition.y);
+                    __instance.topRowIcons[i].localPosition = new Vector2(xStart + (i * 0.55f), __instance.topRowIcons[i].localPosition.y);
 
                 for (int j = 0; j < __instance.bottomRowIcons.Count; j++)
-                    __instance.bottomRowIcons[j].localPosition = new Vector2(xStart + (float)j * 0.55f, __instance.bottomRowIcons[j].localPosition.y);
+                    __instance.bottomRowIcons[j].localPosition = new Vector2(xStart + (j * 0.55f), __instance.bottomRowIcons[j].localPosition.y);
             }
         }
 
@@ -411,7 +406,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         public static void ValidP03Challenges(ref bool __result, AscensionChallenge challenge, int level)
         {
-            var fullChallenge = ChallengeManager.AllChallenges.FirstOrDefault(fc => fc.Challenge.challengeType == challenge);
+            ChallengeManager.FullChallenge fullChallenge = ChallengeManager.AllChallenges.FirstOrDefault(fc => fc.Challenge.challengeType == challenge);
             if (fullChallenge == null)
                 return;
 
@@ -419,7 +414,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 if (PatchedChallengesReference.Any(kvp => kvp.Value.challengeType == challenge))
                 {
-                    var kvp = PatchedChallengesReference.First(kvp => kvp.Value.challengeType == challenge);
+                    KeyValuePair<AscensionChallenge, AscensionChallengeInfo> kvp = PatchedChallengesReference.First(kvp => kvp.Value.challengeType == challenge);
                     if (kvp.Value.challengeType != kvp.Key)
                     {
                         __result = AscensionUnlockSchedule.ChallengeIsUnlockedForLevel(kvp.Key, level);
@@ -466,17 +461,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (AscensionSaveData.Data.ChallengeIsActive(TURBO_VESSELS) && info.name.StartsWith("EmptyVessel"))
             {
-                CardModificationInfo mod = new();
-                mod.abilities = new() { DoubleSprint.AbilityID };
-                mod.nameReplacement = "Turbo Vessel";
+                CardModificationInfo mod = new()
+                {
+                    abilities = new() { DoubleSprint.AbilityID },
+                    nameReplacement = "Turbo Vessel"
+                };
                 info.mods.Add(mod);
                 info.SetPortrait(TURBO_SPRINTER_TEXTURE);
             }
 
             if (AscensionSaveData.Data.ChallengeIsActive(LEEPBOT_SIDEDECK))
             {
-                CardModificationInfo antiMod = new();
-                antiMod.negateAbilities = new() { Ability.ConduitNull };
+                CardModificationInfo antiMod = new()
+                {
+                    negateAbilities = new() { Ability.ConduitNull }
+                };
                 info.mods.Add(antiMod);
             }
         }
@@ -499,10 +498,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             IEnumerable<string> cardNames = Enumerable.Empty<string>();
             if (AscensionSaveData.Data.ChallengeIsActive(LEEPBOT_SIDEDECK))
             {
-                if (AscensionSaveData.Data.ChallengeIsActive(TURBO_VESSELS))
-                    cardNames = cardNames.Concat(Enumerable.Repeat("P03KCM_TURBO_LEAPBOT", 10));
-                else
-                    cardNames = cardNames.Concat(Enumerable.Repeat("LeapBot", 10));
+                cardNames = AscensionSaveData.Data.ChallengeIsActive(TURBO_VESSELS)
+                    ? cardNames.Concat(Enumerable.Repeat("P03KCM_TURBO_LEAPBOT", 10))
+                    : cardNames.Concat(Enumerable.Repeat("LeapBot", 10));
             }
             else if (StoryEventsData.EventCompleted(StoryEvent.GemsModuleFetched))
             {
@@ -546,10 +544,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return false;
         }
 
-        private static bool CardShouldExplode(this PlayableCard card)
-        {
-            return !card.Info.name.ToLowerInvariant().Contains("vessel") && !card.Info.HasTrait(Trait.Terrain);
-        }
+        private static bool CardShouldExplode(this PlayableCard card) => !card.Info.name.ToLowerInvariant().Contains("vessel") && !card.Info.HasTrait(Trait.Terrain);
 
         [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.UpdateFaceUpOnBoardEffects))]
         [HarmonyPostfix]
@@ -582,10 +577,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static class HammerPatch
         {
             [HarmonyPrefix]
-            private static void Prefix(ref TargetSlotItem __instance, ref TargetSlotItem __state)
-            {
-                __state = __instance;
-            }
+            private static void Prefix(ref TargetSlotItem __instance, ref TargetSlotItem __state) => __state = __instance;
 
             [HarmonyPostfix]
             private static IEnumerator Postfix(IEnumerator sequence, TargetSlotItem __state)
@@ -609,10 +601,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static class HammerPatchPostSelect
         {
             [HarmonyPrefix]
-            private static void Prefix(ref HammerItem __instance, ref HammerItem __state)
-            {
-                __state = __instance;
-            }
+            private static void Prefix(ref HammerItem __instance, ref HammerItem __state) => __state = __instance;
 
             [HarmonyPostfix]
             private static IEnumerator SpendHammerEnergy(IEnumerator sequence, HammerItem __state)
@@ -641,11 +630,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             yield return sequence;
 
-            if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(ALL_CONVEYOR.challengeType) && TurnManager.Instance.opponent is not Part3BossOpponent)
+            if (ConveyorIsActive)
             {
                 if (TurnManager.Instance.TurnNumber > 0 && playerUpkeep)
                 {
-                    if (TurnManager.Instance.TurnNumber == 1)
+                    if (TurnManager.Instance.TurnNumber == 1 && AscensionSaveData.Data.ChallengeIsActive(ALL_CONVEYOR.challengeType))
                         ChallengeActivationUI.Instance.ShowActivation(ALL_CONVEYOR.challengeType);
 
                     yield return BoardManager.Instance.MoveAllCardsClockwise();
@@ -657,10 +646,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static void MakeAIRecognizeRotation(BoardState board, bool playerIsAttacker)
         {
-            if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(ALL_CONVEYOR.challengeType) && playerIsAttacker && TurnManager.Instance.opponent is not Part3BossOpponent)
+            if (ConveyorIsActive)
             {
                 // We need to rotate the board
-                var anchorCard = board.playerSlots[0].card;
+                BoardState.CardState anchorCard = board.playerSlots[0].card;
                 for (int i = 1; i < board.playerSlots.Count; i++)
                     board.playerSlots[i - 1].card = board.playerSlots[i].card;
                 board.playerSlots[board.playerSlots.Count - 1].card = board.opponentSlots[board.opponentSlots.Count - 1].card;
@@ -674,7 +663,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static void MakeAIPreferLeftmostBountyHunters(BoardState.CardState card, BoardState board, ref int __result)
         {
-            if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(ALL_CONVEYOR.challengeType) && TurnManager.Instance.opponent is not Part3BossOpponent)
+            if (ConveyorIsActive)
             {
                 if (board.opponentSlots.Contains(card.slot))
                 {
@@ -687,21 +676,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        public static readonly Texture2D UP_CONVEYOR_SLOT = TextureHelper.GetImageAsTexture("cadslot_up.png", typeof(AscensionChallengeManagement).Assembly);
+
         [HarmonyPatch(typeof(BoardManager3D), nameof(BoardManager3D.ShowSlots))]
         [HarmonyPrefix]
         private static void SetRotationSlotTextures()
         {
-            if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(ALL_CONVEYOR.challengeType) && TurnManager.Instance.opponent is not Part3BossOpponent)
+            if (ConveyorIsActive)
             {
-                for (int i = 0; i < BoardManager.Instance.opponentSlots.Count - 1; i++)
-                    BoardManager.Instance.opponentSlots[i].SetTexture(Resources.Load<Texture2D>("art/cards/card_slot_left"));
-
-                BoardManager.Instance.opponentSlots[BoardManager.Instance.opponentSlots.Count - 1].SetTexture(TextureHelper.GetImageAsTexture("cadslot_up.png", typeof(AscensionChallengeManagement).Assembly));
-
-                for (int i = 1; i < BoardManager.Instance.playerSlots.Count; i++)
-                    BoardManager.Instance.playerSlots[i].SetTexture(Resources.Load<Texture2D>("art/cards/card_slot_left"));
-
-                BoardManager.Instance.playerSlots[0].SetTexture(TextureHelper.GetImageAsTexture("cadslot_up.png", typeof(AscensionChallengeManagement).Assembly));
+                BoardManager.Instance.AllSlotsCopy.ForEach(s => s.ResetSlot());
             }
         }
     }

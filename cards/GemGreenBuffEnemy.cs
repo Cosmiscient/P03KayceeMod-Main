@@ -36,6 +36,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public int GetPassiveAttackBuff(PlayableCard target) => target.Slot == Card.Slot.opposingSlot && !Card.EligibleForGemBonus(GemType.Green) ? 1 : 0;
+        public int GetPassiveAttackBuff(PlayableCard target) => Card.OnBoard && target.Slot == Card.Slot.opposingSlot && !Card.EligibleForGemBonus(GemType.Green) ? 1 : 0;
     }
 }

@@ -1,11 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Triggers;
 using UnityEngine;
@@ -36,14 +33,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
 
-            FullyLoaded.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(FullyLoaded),
                 TextureHelper.GetImageAsTexture("ability_fully_loaded.png", typeof(FullyLoaded).Assembly)
             ).Id;
 
-            FullyLoaded.SlotModID = SlotModificationManager.New(
+            SlotModID = SlotModificationManager.New(
                 P03Plugin.PluginGuid,
                 "FullyLoaded",
                 typeof(FullyLoadedSlot),
@@ -53,7 +50,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
-            yield return this.Card.Slot.SetSlotModification(SlotModID);
+            yield return Card.Slot.SetSlotModification(SlotModID);
             yield break;
         }
 

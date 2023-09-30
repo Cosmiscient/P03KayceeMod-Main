@@ -1,17 +1,10 @@
-using HarmonyLib;
-using DiskCardGame;
-using InscryptionAPI.Saves;
-using System.Linq;
 using System;
-using System.Collections.Generic;
-using InscryptionAPI.Guid;
-using Infiniscryption.P03KayceeRun.Sequences;
 using System.Collections;
-using UnityEngine;
-using Infiniscryption.P03KayceeRun.Items;
+using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Patchers;
-using Infiniscryption.P03KayceeRun.Cards;
+using InscryptionAPI.Saves;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {
@@ -54,6 +47,35 @@ namespace Infiniscryption.P03KayceeRun.Quests
             string newDescriptor = $"{faceCode}|{head}|{arms}|{body}";
             ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, $"NPC{se}", newDescriptor);
             return new NPCDescriptor(newDescriptor);
+        }
+
+        /// <summary>
+        /// Speak a line of dialogue as the NPC for a given quest definition
+        /// </summary>
+        /// <param name="dialogueCode"></param>
+        /// <returns></returns>
+        public static IEnumerator SayDialogue(SpecialEvent questParent, string dialogueCode, bool switchViews = true)
+        {
+            string faceCode = GetDescriptorForNPC(questParent).faceCode;
+            P03ModularNPCFace.Instance.SetNPCFace(faceCode);
+            View currentView = ViewManager.Instance.CurrentView;
+
+            if (switchViews)
+            {
+                ViewManager.Instance.SwitchToView(View.P03Face, false, false);
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            P03AnimationController.Instance.SwitchToFace(P03ModularNPCFace.ModularNPCFace, true, true);
+            yield return new WaitForSeconds(0.1f);
+            yield return TextDisplayer.Instance.PlayDialogueEvent(dialogueCode, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            yield return new WaitForSeconds(0.1f);
+
+            if (switchViews)
+            {
+                ViewManager.Instance.SwitchToView(currentView, false, false);
+                yield return new WaitForSeconds(0.15f);
+            }
         }
     }
 }

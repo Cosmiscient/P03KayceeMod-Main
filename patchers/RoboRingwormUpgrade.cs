@@ -136,7 +136,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 fireObj.transform.localPosition = new(-1.3f, 0.46f, 2.17f);
                 AudioController.Instance.PlaySound3D("fireball", MixerGroup.TableObjectsSFX, fireObj.transform.position, 0.35f);
                 yield return new WaitForSeconds(1.0f);
-                yield return new WaitWhile(() => !InputButtons.GetButton(Button.EndTurn));
                 P03AnimationController.Instance.UnplugInputCable(delegate
                 {
                     abilityMachine.diskDrive.JostleUnplugged();

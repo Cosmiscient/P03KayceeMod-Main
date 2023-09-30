@@ -22,10 +22,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private AlarmState GetDefaultState()
         {
-            int? defaultState = this.Card.Info.GetExtendedPropertyAsInt(DEFAULT_STATE_KEY);
-            if (defaultState.HasValue && defaultState.Value >= 0 && defaultState.Value <= 3)
-                return (AlarmState)defaultState.Value;
-            return AlarmState.Up;
+            int? defaultState = Card.Info.GetExtendedPropertyAsInt(DEFAULT_STATE_KEY);
+            return defaultState.HasValue && defaultState.Value >= 0 && defaultState.Value <= 3 ? (AlarmState)defaultState.Value : AlarmState.Up;
         }
 
         private AlarmState CurrentState = AlarmState.Up;
@@ -33,7 +31,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
-        private static Dictionary<AlarmState, Texture> Textures = new();
+        private static readonly Dictionary<AlarmState, Texture> Textures = new();
 
         private RotatingAlarm()
         {
@@ -52,7 +50,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
 
-            RotatingAlarm.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(RotatingAlarm),
@@ -67,52 +65,40 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public static AlarmState GetNextAbility(AlarmState current)
         {
-            if (current == AlarmState.Up)
-                return AlarmState.Right;
-            if (current == AlarmState.Right)
-                return AlarmState.Down;
-            if (current == AlarmState.Down)
-                return AlarmState.Left;
-            return AlarmState.Up;
+            return current == AlarmState.Up
+                ? AlarmState.Right
+                : current == AlarmState.Right ? AlarmState.Down : current == AlarmState.Down ? AlarmState.Left : AlarmState.Up;
         }
 
         public Texture GetTextureForAlarm(AlarmState current)
         {
-            if (this.Card.OpponentCard)
-            {
-                if (current == AlarmState.Up)
-                    return Textures[AlarmState.Down];
-                if (current == AlarmState.Down)
-                    return Textures[AlarmState.Up];
-                return Textures[current];
-            }
-            else
-                return Textures[current];
+            return Card.OpponentCard
+                ? current == AlarmState.Up
+                    ? Textures[AlarmState.Down]
+                    : current == AlarmState.Down ? Textures[AlarmState.Up] : Textures[current]
+                : Textures[current];
         }
 
         public override bool RespondsToResolveOnBoard() => true;
 
         public override IEnumerator OnResolveOnBoard()
         {
-            this.Card.RenderInfo.OverrideAbilityIcon(AbilityID, GetTextureForAlarm(this.CurrentState));
-	        this.Card.RenderCard();
+            Card.RenderInfo.OverrideAbilityIcon(AbilityID, GetTextureForAlarm(CurrentState));
+            Card.RenderCard();
             yield return new WaitForEndOfFrame();
         }
 
-        public override bool RespondsToUpkeep(bool playerUpkeep)
-        {
-            return playerUpkeep != this.Card.OpponentCard;
-        }
+        public override bool RespondsToUpkeep(bool playerUpkeep) => playerUpkeep != Card.OpponentCard;
 
         public override IEnumerator OnUpkeep(bool playerUpkeep)
         {
             ViewManager.Instance.SwitchToView(View.Board, false, false);
             yield return new WaitForSeconds(0.25f);
-            AudioController.Instance.PlaySound3D("cuckoo_clock_open", MixerGroup.TableObjectsSFX, this.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.VerySmall), null, null, null, false);
+            AudioController.Instance.PlaySound3D("cuckoo_clock_open", MixerGroup.TableObjectsSFX, gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.VerySmall), null, null, null, false);
             yield return new WaitForSeconds(0.1f);
-            this.CurrentState = GetNextAbility(this.CurrentState);
-            this.Card.RenderInfo.OverrideAbilityIcon(AbilityID, GetTextureForAlarm(this.CurrentState));
-	        this.Card.RenderCard();
+            CurrentState = GetNextAbility(CurrentState);
+            Card.RenderInfo.OverrideAbilityIcon(AbilityID, GetTextureForAlarm(CurrentState));
+            Card.RenderCard();
             yield return new WaitForSeconds(0.3f);
             ViewManager.Instance.SwitchToView(View.Default, false, false);
             yield break;
@@ -120,15 +106,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public int GetPassiveAttackBuff(PlayableCard target)
         {
-            if (this.Card.Slot != null && target.Slot != null)
+            if (Card.Slot != null && target.Slot != null)
             {
-                if (this.CurrentState == AlarmState.Up && target.Slot == this.Card.Slot.opposingSlot)
+                if (CurrentState == AlarmState.Up && target.Slot == Card.Slot.opposingSlot)
                     return 1;
-                if (this.CurrentState == AlarmState.Down && target == this.Card)
+                if (CurrentState == AlarmState.Down && target == Card)
                     return 1;
-                if (this.CurrentState == AlarmState.Left && target.Slot == BoardManager.Instance.GetAdjacent(this.Card.Slot, true))
+                if (CurrentState == AlarmState.Left && target.Slot == BoardManager.Instance.GetAdjacent(Card.Slot, true))
                     return 1;
-                if (this.CurrentState == AlarmState.Right && target.Slot == BoardManager.Instance.GetAdjacent(this.Card.Slot, false))
+                if (CurrentState == AlarmState.Right && target.Slot == BoardManager.Instance.GetAdjacent(Card.Slot, false))
                     return 1;
             }
             return 0;

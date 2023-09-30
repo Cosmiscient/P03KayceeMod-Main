@@ -5,12 +5,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
 {
     public class ForceRevolverAppearance : CardAppearanceBehaviour
     {
-        public static CardAppearanceBehaviour.Appearance ID { get; private set; }
+        public static Appearance ID { get; private set; }
 
         public override void ApplyAppearance()
         {
-			if (base.Card.Anim is DiskCardAnimationController dac)
-				dac.SetWeaponMesh(DiskCardWeapon.Revolver);
+            if (Card.Anim is DiskCardAnimationController dac)
+                dac.SetWeaponMesh(DiskCardWeapon.Revolver);
         }
 
         static ForceRevolverAppearance()

@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
@@ -13,7 +11,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
     public class PowerDrain : AbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -28,7 +26,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            PowerDrain.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(PowerDrain),
@@ -38,7 +36,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public static bool ShouldStopEnergyGain => BoardManager.Instance.playerSlots.Any(s => s.Card != null && s.Card.HasAbility(AbilityID));
 
-		[HarmonyPatch(typeof(ResourcesManager), nameof(ResourcesManager.AddEnergy))]
+        [HarmonyPatch(typeof(ResourcesManager), nameof(ResourcesManager.AddEnergy))]
         [HarmonyPostfix]
         private static IEnumerator StopAddEnergy(IEnumerator sequence, ResourcesManager __instance)
         {

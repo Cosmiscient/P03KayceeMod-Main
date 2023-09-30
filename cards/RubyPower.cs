@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
-using InscryptionAPI;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Triggers;
@@ -27,7 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.GainGemOrange).Info.colorOverride;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            RubyPower.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(RubyPower),
@@ -35,9 +33,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public int GetPassiveAttackBuff(PlayableCard target)
-        {
-            return this.Card.OnBoard && target.OpponentCard == this.Card.OpponentCard ? 1 : 0;
-        }
+        public int GetPassiveAttackBuff(PlayableCard target) => Card.OnBoard && target.OpponentCard == Card.OpponentCard ? 1 : 0;
     }
 }

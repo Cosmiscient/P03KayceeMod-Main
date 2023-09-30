@@ -1,9 +1,7 @@
-using System;
 using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
-using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -17,9 +15,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         static BatteryPower()
         {
-            var info = StatIconManager.New(P03Plugin.PluginGuid, 
-                "Energy Power", 
-                "The value represented with this sigil will be equal to the number of times the player has spent energy this turn", 
+            StatIconInfo info = StatIconManager.New(P03Plugin.PluginGuid,
+                "Energy Power",
+                "The value represented with this sigil will be equal to the number of times the player has spent energy this turn",
                 typeof(BatteryPower));
             info.appliesToAttack = true;
             info.appliesToHealth = false;
@@ -44,9 +42,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 EnergySpent = 0;
         }
 
-        public override int[] GetStatValues()
-        {
-            return new int[] { EnergySpent, 0 };
-        }
+        public override int[] GetStatValues() => new int[] { EnergySpent, 0 };
     }
 }

@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
-using InscryptionAPI;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -26,7 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            LatchDeathLatch.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(LatchDeathLatch),
@@ -34,14 +33,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToTurnEnd(bool playerTurnEnd)
-        {
-            return this.Card.OpponentCard != playerTurnEnd;
-        }
+        public override bool RespondsToTurnEnd(bool playerTurnEnd) => Card.OpponentCard != playerTurnEnd;
 
         public override IEnumerator OnTurnEnd(bool playerTurnEnd)
         {
-            yield return this.Card.Die(false, null, true);
+            yield return Card.Die(false, null, true);
         }
     }
 }

@@ -1,15 +1,15 @@
-using InscryptionAPI.Card;
 using DiskCardGame;
-using UnityEngine;
+using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
     public class EnergyConduitAppearnace : CardAppearanceBehaviour
     {
-        public static CardAppearanceBehaviour.Appearance ID { get; private set; }
+        public static Appearance ID { get; private set; }
 
-        private static Sprite[] PORTRAITS = new Sprite[] {
+        private static readonly Sprite[] PORTRAITS = new Sprite[] {
             TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("portrait_conduitenergy.png", typeof(EnergyConduitAppearnace).Assembly), TextureHelper.SpriteType.CardPortrait),
             TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("portrait_conduitenergy_1.png", typeof(EnergyConduitAppearnace).Assembly), TextureHelper.SpriteType.CardPortrait),
             TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("portrait_conduitenergy_2.png", typeof(EnergyConduitAppearnace).Assembly), TextureHelper.SpriteType.CardPortrait),
@@ -21,12 +21,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override void ApplyAppearance()
         {
-            if (this.Card is PlayableCard pCard)
+            if (Card is PlayableCard pCard)
             {
                 if (pCard.slot == null)
                     return;
 
-                NewConduitEnergy behaviour = this.Card.GetComponent<NewConduitEnergy>();
+                NewConduitEnergy behaviour = Card.GetComponent<NewConduitEnergy>();
                 if (behaviour == null)
                     return;
 
@@ -34,20 +34,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                 if (renderStackSize <= 2)
                 {
-                    if (!behaviour.CompletesCircuit())
-                        pCard.renderInfo.portraitOverride = PORTRAITS[0];
-                    else
-                        pCard.renderInfo.portraitOverride = PORTRAITS[behaviour.RemainingEnergy];
+                    pCard.renderInfo.portraitOverride = !behaviour.CompletesCircuit() ? PORTRAITS[0] : PORTRAITS[behaviour.RemainingEnergy];
                 }
-                
+
                 renderStackSize -= 1;
             }
         }
 
-        public override void OnPreRenderCard()
-        {
-            this.ApplyAppearance();
-        }
+        public override void OnPreRenderCard() => ApplyAppearance();
 
         static EnergyConduitAppearnace()
         {
