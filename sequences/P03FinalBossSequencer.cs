@@ -79,15 +79,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             if (playerWon)
             {
-                P03AscensionOpponent.ScreenArray.EndLoadingFaces(P03AnimationController.Face.SurrenderFlag);
-                yield return new WaitForSeconds(1.5f);
-
-                //Turn off the boss music
-                // GameObject bossMusic = GameObject.Find("P03BossMusicAudioObject");
-                // GameObject.Destroy(bossMusic);
-                AudioController.Instance.StopAllLoops();
-                yield return new WaitForSeconds(0.1f);
-
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03BeatFinalBoss", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 ViewManager.Instance.SwitchToView(View.Default, false, false);
@@ -133,17 +124,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 P03AscensionOpponent.ScreenArray.ShowFace(
                     P03AnimationController.Face.Angry,
-                    P03AnimationController.Face.Default,
                     P03AnimationController.Face.Choking,
-                    P03FinalBossExtraScreen.LOOKUP_FACE,
-                    P03AnimationController.Face.Dying
+                    P03FinalBossExtraScreen.LOOKUP_FACE
                 );
             }
             else
             {
                 P03AscensionOpponent.ScreenArray.ShowFace(
                     P03AnimationController.Face.Happy,
-                    P03AnimationController.Face.Default,
                     P03AnimationController.Face.Bored,
                     P03AnimationController.Face.Happy
                 );

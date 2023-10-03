@@ -544,7 +544,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             BuildSpecialNode(HoloMapNode.NodeDataType.BuildACard, 0, Zone.Neutral, nodeParent, sceneryParent, -1.5f, 1f);
             BuildSpecialNode(HoloMapNode.NodeDataType.AttachGem, 0, Zone.Neutral, nodeParent, sceneryParent, -1.5f, -1f);
             BuildSpecialNode(HoloMapNode.NodeDataType.AddCardAbility, 0, Zone.Neutral, nodeParent, sceneryParent, -2.5f, 0f);
-            BuildSpecialNode(HoloMapNode.NodeDataType.AddCardAbility, 0, Zone.Neutral, nodeParent, sceneryParent, 2.5f, 0f);
+            BuildSpecialNode(UnlockAscensionItemNodeData.UnlockItemsAscension, 0, Zone.Neutral, nodeParent, sceneryParent, 2.5f, 0f);
 
             HoloMapArea area = retval.GetComponent<HoloMapArea>();
             area.firstEnterDialogueId = "P03FinalShopNode";

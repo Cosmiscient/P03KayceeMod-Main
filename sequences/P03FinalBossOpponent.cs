@@ -62,7 +62,21 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             }
         }
 
-        public override IEnumerator PreDefeatedSequence() => base.PreDefeatedSequence();
+        public override IEnumerator PreDefeatedSequence()
+        {
+            ViewManager.Instance.SwitchToView(View.Default, false, false);
+            ScreenArray.EndLoadingFaces(P03AnimationController.Face.SurrenderFlag);
+            ScreenArray.ShowFaceImmediate(P03AnimationController.Face.SurrenderFlag);
+            yield return new WaitForSeconds(1.5f);
+
+            //Turn off the boss music
+            // GameObject bossMusic = GameObject.Find("P03BossMusicAudioObject");
+            // GameObject.Destroy(bossMusic);
+            AudioController.Instance.StopAllLoops();
+            yield return new WaitForSeconds(0.1f);
+            ScreenArray.Collapse();
+            yield return new WaitForSeconds(5f);
+        }
 
         [HarmonyPatch(typeof(BountyHunter), nameof(BountyHunter.OnDie))]
         [HarmonyPostfix]
@@ -363,6 +377,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Happy, true, true);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseThreeStartShowingOff", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Thinking, true, true);
+            yield return new WaitForSeconds(0.2f);
             yield return new WaitForSeconds(FasterEvents ? 1f : 2f);
             PhaseTwoEffects();
             yield return new WaitForSeconds(FasterEvents ? 1f : 2f);
@@ -371,6 +386,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             CameraEffects.Instance.Shake(0.05f, 100f); // Essentially just shake forever; I'll manually stop the shake later
             AudioSource source = AudioController.Instance.PlaySound2D("glitch_escalation", MixerGroup.TableObjectsSFX, volume: 0.4f);
+            yield return new WaitForSeconds(0.2f);
+            ScreenArray.ShowBigMoon();
+            yield return new WaitForSeconds(0.2f);
 
             // Tween each of the four things that need to move
             Transform itemTrans = ItemsManager.Instance.gameObject.transform;
