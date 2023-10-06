@@ -32,7 +32,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly StoryEvent ALL_ZONE_ENEMIES_KILLED = NewStory("AllZoneEnemiesKilled");
         public static readonly StoryEvent ALL_BOSSES_KILLED = NewStory("AllBossesKilled");
         public static readonly StoryEvent HAS_DRAFT_TOKEN = NewStory("HasDraftToken");
-        public static readonly StoryEvent SAW_P03_INTRODUCTION = NewStory("SawP03Introduction", save: true);
+        public static readonly StoryEvent SAW_P03_INTRODUCTION = NewStory("SawP03IntroductionB", save: true);
         public static readonly StoryEvent SAW_P03_PAIDRESPAWN_EXPLAIN = NewStory("SawP03PaidRespawnExplain", save: true);
         public static readonly StoryEvent SAW_P03_BOSSPAIDRESPAWN_EXPLAIN = NewStory("SawP03PaidRespawnExplain", save: true);
         public static readonly StoryEvent GOLLY_NFT = NewStory("GollyNFTIntro", save: true);
@@ -42,6 +42,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly StoryEvent TRANSFORMER_CHANGES = NewStory("P03AscensionTransformer", save: true);
         public static readonly StoryEvent HAS_DEFEATED_P03 = NewStory("HasDefeatedP03", save: true);
         public static readonly StoryEvent USED_LIFE_ITEM = NewStory("HasUsedLifeItem", save: true);
+        public static readonly StoryEvent SAW_STICKER_BOOK = NewStory("SawStickerBook", save: true);
         public static readonly StoryEvent SAW_NEW_ORB = NewStory("P03HammerOrb", save: true);
         public static readonly StoryEvent GOT_STICKER_INTRODUCTION = NewStory("P03GotStickerIntro", save: true);
 

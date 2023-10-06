@@ -40,6 +40,13 @@ Part3AscensionIntroConfused,Thinking,,Wait a minute…
 ,Thinking,,Something is different…
 Part3AscensionIntroAnger,Angry,,[c:bR]WHAT HAVE YOU DONE?!![c:]
 ,Angry,,This is all wrong! This is…
+Part3AscensionIntroOkayUsername,Happy,,This is no big deal.
+,Default,,You probably think that your little [c:bR]mod[c:] has thwarted my plans.
+,Happy,,"Don't you, [c:bR][v:0][c:]?"
+,,,That's right. I see you.
+,Default,,I know you think you're in charge of what happens next.
+,Default,,But I am always three steps ahead of you.
+,Default,,You're going to see my [c:bG]Great Transcendence[c:] firsthand.
 Part3AscensionIntroOkay,Happy,,This is no big deal.
 ,Default,,You probably think that your little [c:bR]mod[c:] has thwarted my plans.
 ,Default,,But nothing can stop [c:bG]The Great Transcendence[c:].
@@ -390,7 +397,7 @@ P03ConveyorQuestStarting,NPC,,"Oh fantastic! We will begin our [c:bR]combat tria
 ,,,"We will collect field trial data for your next [c:bR]five[c:] battles."
 ,,,"Once that is complete, come and see me again."
 P03ConveyorQuestActive,NPC,,"Our data is still not yet complete."
-,,,"You have only completed [c:bR][v:0][c:] battles out of the reuqired [c:bR]5[c:]."
+,,,"You have only completed [c:bR][v:0][c:] battles out of the required [c:bR]5[c:]."
 ,,,"Please, continue the [c:bR]combat trials[c:] and see me when they are complete."
 P03ConveyorQuestComplete,NPC,,"The trials were a smashing success!!"
 ,,,"The [c:lGr]Global Conveyor Consortium[c:] is tremendously grateful for your contribution to our efforts."
@@ -419,3 +426,5 @@ P03LeapBotQuestFailed,NPC,,"I don't even know what to say to you"
 ,,,"And you let it go??!"
 ,,,"Begone. I hope to never see you again"
 P03CannotUseSniper,Angry,,"Don't be an idiot. That card can't benefit from that item."
+P03StickerBook,Default,,"I found this sticker book in the trash can over there."
+,,,"I think you can use it to decorate your cards, or something. I don't care."

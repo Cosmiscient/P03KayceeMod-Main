@@ -16,8 +16,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         static GemOrangeFlying()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
-            info.rulebookName = "Airborne With Ruby";
-            info.rulebookDescription = "If you control a ruby, this card will ignore opposing cards and strike an opponent directly.";
+            info.rulebookName = "Orange Mox Airborne";
+            info.rulebookDescription = "If you control an Orange Mox, this card will ignore opposing cards and strike an opponent directly.";
             info.canStack = true;
             info.powerLevel = 1;
             info.opponentUsable = true;

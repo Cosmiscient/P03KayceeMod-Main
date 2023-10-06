@@ -16,8 +16,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         static GemBlueGift()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
-            info.rulebookName = "Gift With Sapphire";
-            info.rulebookDescription = "When [creature] perishes, if you control an Sapphire, gain a random card.";
+            info.rulebookName = "Blue Mox Gift";
+            info.rulebookDescription = "When [creature] perishes, if you control an Blue Mox, gain a random card.";
             info.canStack = true;
             info.powerLevel = 1;
             info.opponentUsable = true;

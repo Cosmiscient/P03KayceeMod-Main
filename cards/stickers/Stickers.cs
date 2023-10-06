@@ -456,6 +456,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
             Tween.LocalPosition(stickerButton.transform, targetPosition, 0.2f, 0f);
 
+            yield return EventManagement.SayDialogueOnce("P03StickerBook", EventManagement.SAW_STICKER_BOOK);
+
             yield break;
         }
 

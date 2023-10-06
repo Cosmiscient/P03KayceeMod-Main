@@ -17,8 +17,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         static GemGreenBuffEnemy()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
-            info.rulebookName = "Annoying Without Emerald";
-            info.rulebookDescription = "The creature opposing [creature] gains 1 power unless the owner of [creature] also controls an emerald.";
+            info.rulebookName = "Annoying Without Green";
+            info.rulebookDescription = "The creature opposing [creature] gains 1 power unless the owner of [creature] also controls a Green Mox.";
             info.canStack = true;
             info.powerLevel = 1;
             info.opponentUsable = true;

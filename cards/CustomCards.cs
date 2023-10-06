@@ -394,6 +394,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.New(P03Plugin.CardPrefx, GOLLYCOIN, "GollyCoin", 0, 3)
                 .SetAltPortrait(TextureHelper.GetImageAsTexture("portrait_gollycoin.png", typeof(CustomCards).Assembly, FilterMode.Trilinear))
+                .AddAbilities(Ability.Reach)
                 .AddAppearances(HighResAlternatePortrait.ID)
                 .temple = CardTemple.Tech;
 
@@ -427,6 +428,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     TextureHelper.GetImageAsTexture("portrait_virusscanner_decal.png", typeof(CustomCards).Assembly)
                 )
                 .temple = CardTemple.Tech;
+
+            CardInfo ch2 = CardManager.New(P03Plugin.CardPrefx, "AboveCurve2", "Curve Hopper Hopper", 3, 4)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_abovecurve_2.png", typeof(CustomCards).Assembly))
+                .AddAppearances(RareDiscCardAppearance.ID);
+            ch2.temple = CardTemple.Tech;
+            CardManager.BaseGameCards.CardByName("AboveCurve").SetEvolve(ch2, 1);
+
 
             // CardManager.New(P03Plugin.CardPrefx, PROGRAMMER, "Programmer", 0, 2)
             //     .SetPortrait(TextureHelper.GetImageAsTexture("portrait_codemonkey.png", typeof(CustomCards).Assembly))

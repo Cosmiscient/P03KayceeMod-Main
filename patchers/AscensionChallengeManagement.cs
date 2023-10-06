@@ -6,6 +6,7 @@ using DiskCardGame;
 using DiskCardGame.CompositeRules;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Quests;
 using InscryptionAPI.Ascension;
 using InscryptionAPI.Card;
@@ -686,6 +687,63 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 BoardManager.Instance.AllSlotsCopy.ForEach(s => s.ResetSlot());
             }
+        }
+
+        [HarmonyPatch(typeof(Part3DeckReviewSequencer), nameof(Part3DeckReviewSequencer.Start))]
+        [HarmonyPostfix]
+        private static void AddLeepBot(Part3DeckReviewSequencer __instance)
+        {
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                if (__instance.vesselFigurine.transform.Find("LeepBot") == null)
+                {
+                    GameObject lpBot = UnityEngine.Object.Instantiate(AssetBundleManager.Prefabs["LeepBot"], __instance.vesselFigurine.transform);
+                    lpBot.transform.localPosition = new(-.4f, .6f, -.2f);
+                    lpBot.transform.localEulerAngles = new(0f, 261f, 350f);
+                    lpBot.name = "LeepBot";
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(CardPile), nameof(CardPile.SetFigurineShown))]
+        [HarmonyPrefix]
+        private static void AddLeepBotToBattle(CardPile __instance)
+        {
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                if (__instance.figurine != null)
+                {
+                    Transform lpBot = __instance.figurine.transform.Find("LeepBot");
+
+                    if (lpBot == null)
+                    {
+                        lpBot = UnityEngine.Object.Instantiate(AssetBundleManager.Prefabs["LeepBot"], __instance.figurine.transform).transform;
+                        lpBot.localPosition = new(1.5f, 0f, 0f);
+                        __instance.defaultFigurinePos = lpBot.localPosition;
+                        lpBot.localEulerAngles = new(0f, 287f, 350f);
+                        lpBot.gameObject.name = "LeepBot";
+                    }
+
+                    __instance.figurine.transform.Find("Anim").gameObject.SetActive(!AscensionSaveData.Data.ChallengeIsActive(LEEPBOT_SIDEDECK));
+                    lpBot.gameObject.SetActive(AscensionSaveData.Data.ChallengeIsActive(LEEPBOT_SIDEDECK));
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Part3DeckReviewSequencer), nameof(Part3DeckReviewSequencer.SpawnDeckPiles))]
+        [HarmonyPostfix]
+        private static IEnumerator ToggleLeepBot(IEnumerator sequence, Part3DeckReviewSequencer __instance)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            __instance.vesselFigurine.transform.Find("Anim").gameObject.SetActive(!AscensionSaveData.Data.ChallengeIsActive(LEEPBOT_SIDEDECK));
+            __instance.vesselFigurine.transform.Find("LeepBot").gameObject.SetActive(AscensionSaveData.Data.ChallengeIsActive(LEEPBOT_SIDEDECK));
+
+            yield return sequence;
         }
     }
 }

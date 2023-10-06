@@ -83,11 +83,16 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return ClearQueue();
             yield return ClearBoard();
 
-            yield return BoardManager.Instance.CreateCardInSlot(CardLoader.GetCardByName(CustomCards.VIRUS_SCANNER), BoardManager.Instance.OpponentSlotsCopy[0]);
+            int spiderLoc = EventManagement.CompletedZones.Count - 1;
+            if (spiderLoc < 0)
+                spiderLoc = 0;
+            yield return BoardManager.Instance.CreateCardInSlot(CardLoader.GetCardByName(CustomCards.VIRUS_SCANNER), BoardManager.Instance.OpponentSlotsCopy[spiderLoc]);
             yield return new WaitForSeconds(0.25f);
 
-            for (int i = 1; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
+                if (BoardManager.Instance.OpponentSlotsCopy[i].Card != null)
+                    continue;
                 yield return BoardManager.Instance.CreateCardInSlot(GetPhaseTwoBlocker(), BoardManager.Instance.OpponentSlotsCopy[i]);
                 yield return new WaitForSeconds(0.25f);
             }

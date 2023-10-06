@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 435269309
+CRC: 4245095011
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 7f245ac0b15fdb88725d1d710c9e1c28
+    Hash: 4ba9d1b3d625006d58a7557572702b43
   TypeTreeHash:
     serializedVersion: 2
     Hash: 15080e466337a84c34f3f4dffc413d78
@@ -58,5 +58,6 @@ Assets:
 - Assets/Prefabs/LaserRifle.prefab
 - Assets/Prefabs/polaroid_model.prefab
 - Assets/Models/missile_model.dae
+- Assets/Prefabs/LeepBot.prefab
 - Assets/Effects/Fire_Material_Additive.mat
 Dependencies: []

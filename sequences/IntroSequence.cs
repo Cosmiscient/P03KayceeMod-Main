@@ -2,6 +2,7 @@ using System.Collections;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Steamworks;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
@@ -22,6 +23,18 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return true;
         }
 
+        private static string GetUserName()
+        {
+            try
+            {
+                return SteamFriends.GetPersonaName().Trim();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
         public static IEnumerator ReplaceIntroSequenceForAscension()
         {
             PauseMenu.pausingDisabled = false;
@@ -29,7 +42,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             if (!StoryEventsData.EventCompleted(EventManagement.SAW_P03_INTRODUCTION))
             {
-	            ViewManager.Instance.SwitchToView(View.Default, true, false);
+                ViewManager.Instance.SwitchToView(View.Default, true, false);
                 P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Thinking, false, false);
             }
 
@@ -56,7 +69,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield return new WaitForSeconds(0.5f);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("Part3AscensionIntroAnger", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
-                yield return TextDisplayer.Instance.PlayDialogueEvent("Part3AscensionIntroOkay", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+
+                string username = GetUserName();
+                P03Plugin.Log.LogInfo($"Username is {username}");
+                yield return string.IsNullOrEmpty(username)
+                    ? TextDisplayer.Instance.PlayDialogueEvent("Part3AscensionIntroOkay", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null)
+                    : TextDisplayer.Instance.PlayDialogueEvent("Part3AscensionIntroOkayUsername", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, new string[] { username }, null);
 
                 ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
                 ViewManager.Instance.SwitchToView(View.Default, false, false);
@@ -79,7 +97,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.SwitchToView(View.MapDefault, false, true);
             Part3GameFlowManager.Instance.StartGameStateDirect(GameState.Map);
             yield return new WaitUntil(() => !HoloGameMap.Instance.FullyUnrolled);
-	        yield return new WaitUntil(() => HoloGameMap.Instance.FullyUnrolled);
+            yield return new WaitUntil(() => HoloGameMap.Instance.FullyUnrolled);
 
             if (!StoryEventsData.EventCompleted(EventManagement.SAW_P03_INTRODUCTION))
             {
@@ -89,7 +107,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             StoryEventsData.SetEventCompleted(EventManagement.SAW_P03_INTRODUCTION);
 
             if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOUNTY_HUNTER))
-                ChallengeActivationUI.Instance.ShowActivation(AscensionChallengeManagement.BOUNTY_HUNTER );
+                ChallengeActivationUI.Instance.ShowActivation(AscensionChallengeManagement.BOUNTY_HUNTER);
         }
     }
 }

@@ -17,8 +17,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         static GemBlueLoot()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
-            info.rulebookName = "Looter With Sapphire";
-            info.rulebookDescription = "When [creature] deals damage directly, if you control a Sapphire, draw a card for each damage dealt.";
+            info.rulebookName = "Blue Mox Looter";
+            info.rulebookDescription = "When [creature] deals damage directly, if you control a Blue Mox, draw a card for each damage dealt.";
             info.canStack = true;
             info.powerLevel = 1;
             info.opponentUsable = true;
