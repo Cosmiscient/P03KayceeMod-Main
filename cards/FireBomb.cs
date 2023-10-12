@@ -171,7 +171,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public IEnumerator OnPostSingularSlotAttackSlot(CardSlot attackingSlot, CardSlot targetSlot)
         {
-            AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, targetSlot.transform.position, .7f);
+            //AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, targetSlot.transform.position, .7f);
             // The fireball should play and then delete itself, but we'll destroy it after some time anyway
             GameObject fireball = Instantiate(AssetBundleManager.Prefabs["Fire_Ball"], targetSlot.transform);
             CustomCoroutine.WaitThenExecute(3f, delegate ()

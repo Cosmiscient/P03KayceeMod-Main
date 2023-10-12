@@ -26,6 +26,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         internal static QuestDefinition PowerUpTheTower { get; private set; }
         internal static QuestDefinition Pyromania { get; private set; }
         internal static QuestDefinition Conveyors { get; private set; }
+        internal static QuestDefinition BombBattles { get; private set; }
         internal static QuestDefinition BountyTarget { get; private set; }
         internal static QuestDefinition LeapBotNeo { get; private set; }
 
@@ -282,6 +283,17 @@ namespace Infiniscryption.P03KayceeRun.Quests
                      .AddDynamicMonetaryReward()
                      .AddGainItemReward("PocketWatch");
 
+            // Bombs
+            BombBattles = QuestManager.Add(P03Plugin.PluginGuid, "BombBattles");
+            BombBattles.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOMB_CHALLENGE.challengeType))
+                     .AddDialogueState("BOOM BOOM BOOM", "P03BombQuestStart")
+                     .AddDialogueState("LET'S BLOW IT UP", "P03BombQuestStarting")
+                     .AddDefaultActiveState("KEEP UP THE BOOM", "P03BombQuestActive")
+                     .WaitForQuestCounter(5)
+                     .AddDialogueState("TRULY EXPLOSIVE", "P03BombQuestComplete")
+                     .AddDynamicMonetaryReward()
+                     .AddGainItemReward("BombRemote");
+
             // Bounty
             BountyTarget = QuestManager.Add(P03Plugin.PluginGuid, "BountyTarget");
             BountyTarget.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3)
@@ -293,7 +305,11 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
             // LeapBot Neo
             LeapBotNeo = QuestManager.Add(P03Plugin.PluginGuid, "LeapBotNeo");
-            static bool generateLBNQuest() => LeapBotNeo.GetQuestCounter() > 7 && Part3SaveData.Data.deck.Cards.Any(c => c.name == "LeapBot");
+            static bool generateLBNQuest()
+            {
+                return LeapBotNeo.GetQuestCounter() > 7 && Part3SaveData.Data.deck.Cards.Any(c => c.name == "LeapBot");
+            }
+
             QuestState dummyState = LeapBotNeo.SetGenerateCondition(generateLBNQuest)
                                        .SetMustBeGeneratedCondition(generateLBNQuest)
                                        .GenerateAwayFromStartingArea()

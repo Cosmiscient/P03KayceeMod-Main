@@ -169,7 +169,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             { HoloMapNode.NodeDataType.AddCardAbility, 0f },
             { HoloMapNode.NodeDataType.BuildACard, 1f },
-            { UnlockAscensionItemNodeData.UnlockItemsAscension, 0.3f },
+            { UnlockAscensionItemNodeData.UnlockItemsAscension, 0.5f },
             { HoloMapNode.NodeDataType.CreateTransformer, -1f },
             { HoloMapNode.NodeDataType.OverclockCard, -1f },
             { AscensionRecycleCardNodeData.AscensionRecycleCard, -2f }

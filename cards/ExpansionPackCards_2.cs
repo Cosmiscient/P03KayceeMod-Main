@@ -238,7 +238,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gopher.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 1)
                 .SetRegionalP03Card(CardTemple.Nature)
-                .AddAbilities(Miner.AbilityID);
+                .AddAbilities(Ability.BuffEnemy, Miner.AbilityID);
 
             // P00dl3
             CardManager.New(EXP_2_PREFIX, "Poodle", "P00dl3", 0, 2)

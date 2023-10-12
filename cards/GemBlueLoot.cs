@@ -25,7 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.SetExtendedProperty(AbilityIconBehaviours.BLUE_CELL, true);
             info.passive = false;
             info.hasColorOverride = true;
-            info.colorOverride = GameColors.Instance.darkPurple;
+            info.colorOverride = GameColors.Instance.purple;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
             AbilityID = AbilityManager.Add(

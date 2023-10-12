@@ -48,6 +48,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 || DefaultQuestDefinitions.Conveyors.IsDefaultActive())
             && TurnManager.Instance.opponent is not Part3BossOpponent;
 
+        public static bool ExplosiveIsActive =>
+            SaveFile.IsAscension
+            && (AscensionSaveData.Data.ChallengeIsActive(BOMB_CHALLENGE.challengeType)
+                || DefaultQuestDefinitions.BombBattles.IsDefaultActive())
+            && TurnManager.Instance.opponent is not Part3BossOpponent;
+
         internal static bool TurboVesselsUIPlayed
         {
             get => ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "TurboVesselsUIPlayed");
@@ -551,7 +557,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static void ShowExplosiveEffect(ref PlayableCard __instance)
         {
-            if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(BOMB_CHALLENGE.challengeType) && __instance.CardShouldExplode())
+            if (ExplosiveIsActive && __instance.CardShouldExplode())
             {
                 __instance.Anim.SetExplosive(!__instance.Dead);
             }
@@ -561,7 +567,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static IEnumerator AttachExplosivesToCard(IEnumerator sequence, PlayableCard card)
         {
-            if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(BOMB_CHALLENGE.challengeType) && card.CardShouldExplode())
+            if (ExplosiveIsActive && card.CardShouldExplode())
             {
                 // Make sure the card has the explosive trigger receiver
                 ExplodeOnDeath[] comps = card.gameObject.GetComponentsInChildren<ExplodeOnDeath>();

@@ -108,6 +108,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     __result.baseHealth = 3;
                 }
+                else if (compName.Equals("leapbot"))
+                {
+                    __result.specialAbilities = new() { LeepBotCounter.AbilityID };
+                }
                 else if (compName.Equals("energyroller"))
                 {
                     __result.abilities = new() { ExpensiveActivatedRandomPowerEnergy.AbilityID };
@@ -747,7 +751,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.SetExtendedProperty("BorderColor", "gold");
             info.SetExtendedProperty("EnergyColor", "gold");
             info.SetExtendedProperty("NameTextColor", "black");
-            info.SetExtendedProperty("NameBannerColor", "white");
+            //info.SetExtendedProperty("NameBannerColor", "gold");
+            info.SetColorProperty("NameBannerColor", GameColors.Instance.gold * 0.5f);
             info.SetExtendedProperty("AttackColor", "gold");
             info.SetExtendedProperty("HealthColor", "gold");
             info.SetExtendedProperty("DefaultAbilityColor", "gold");

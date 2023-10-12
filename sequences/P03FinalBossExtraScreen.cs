@@ -57,33 +57,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             { BIG_MOON_FACE, new() { BigMoonSprite() }}
         };
 
-        private static List<List<P03AnimationController.Face>> GetMoonFaces()
-        {
-            Texture2D moonTex = TextureHelper.GetImageAsTexture("moon_small_red.png", typeof(P03FinalBossExtraScreen).Assembly);
-            List<List<P03AnimationController.Face>> retval = new();
-            for (int x = 0; x < 3; x++)
-            {
-                List<P03AnimationController.Face> colList = new();
-
-                for (int y = 0; y < 3; y++)
-                {
-                    int xPos = (101 * x) + (6 * (x + 1)) - (x == 0 ? 1 : 0);
-                    int yPos = (78 * y) + (6 * (y + 1));
-
-                    P03AnimationController.Face newFace = GuidManager.GetEnumValue<P03AnimationController.Face>(P03Plugin.PluginGuid, $"Moon_{x}_{y}");
-                    colList.Add(newFace);
-
-                    Sprite newSprite = Sprite.Create(moonTex, new Rect(xPos, yPos, 101, 78), new Vector2(0.5f, 0.5f));
-                    PreparedSprites.Add(newFace, new() { newSprite });
-                }
-
-                retval.Add(colList);
-            }
-            return retval;
-        }
-
-        public static readonly List<List<P03AnimationController.Face>> MOON_FACES = GetMoonFaces();
-
         private SpriteRenderer SpriteRenderer;
         public Renderer FrameRenderer;
 

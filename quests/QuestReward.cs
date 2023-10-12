@@ -39,6 +39,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
     public class QuestRewardDynamicCoins : QuestRewardCoins
     {
+        public bool Low = false;
+
         public override int Amount
         {
             get
@@ -47,7 +49,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     return base.Amount;
 
                 Tuple<int, int> range = EventManagement.CurrencyGainRange;
-                return (range.Item1 + range.Item2) / 2;
+
+                return Low ? range.Item1 : (range.Item1 + range.Item2) / 2;
             }
             set => base.Amount = value;
         }

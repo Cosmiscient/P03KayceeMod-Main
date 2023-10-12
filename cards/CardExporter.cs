@@ -7,6 +7,7 @@ using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
+using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using Pixelplacement;
 using UnityEngine;
@@ -71,6 +72,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     skipBulkRender = true;
                     StartCardExport();
+                }
+                else if (Input.GetKey(KeyCode.S))
+                {
+                    ExportAllSigils();
                 }
             }
         }
@@ -195,6 +200,32 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
 
             yield return new WaitForEndOfFrame();
+        }
+
+        private void ExportAllSigils()
+        {
+            if (!Directory.Exists("cardexports"))
+            {
+                Directory.CreateDirectory("cardexports");
+            }
+
+            List<AbilityManager.FullAbility> mySigils = GuidManager.GetValues<Ability>()
+                                      .Select(a => AbilityManager.AllAbilities.FirstOrDefault(f => f.Info.ability == a))
+                                      .Where(ai => ai != null && ai.Info != null && !string.IsNullOrEmpty(ai.Info.name))
+                                      .Where(ai => ai.Info.name.StartsWith(P03Plugin.PluginGuid))
+                                      .OrderBy(ai => ai.Info.rulebookName)
+                                      .ToList();
+
+            P03Plugin.Log.LogInfo($"Running sigil export for {mySigils.Count} sigils");
+
+            string mdTable = "|Icon|Name|Power Level|Description|\n|---|---|---|---|\n";
+            foreach (AbilityManager.FullAbility item in mySigils)
+            {
+                mdTable += $"|[[https://github.com/Cosmiscient/P03KayceeMod-Main/blob/main/assets/{item.Texture.name}.png]]";
+                mdTable += $"|{item.Info.rulebookName}|{item.Info.powerLevel}|{item.Info.rulebookDescription}|\n";
+            }
+
+            File.WriteAllText("cardexports/sigil_table.md", mdTable);
         }
 
         public IEnumerator ExportAllCards()
@@ -511,6 +542,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
 
             Destroy(screenshot);
+
+            ExportAllSigils();
+
             ExplorableAreaManager.Instance.SetHangingLightColors(originalHangingLightColor, originalHangingLightCardColor);
 
             GameOptions.optionsData.noiseEnabled = noiseEnabled;

@@ -324,11 +324,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(EmeraldPower.AbilityID);
 
             // I'm sorry gem rotator you don't work
-            CardManager.New(EXP_1_PREFIX, "GemRotator", "Gem Cycler", 1, 2)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gemcycler.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetCost(energyCost: 5)
-                //.SetRegionalP03Card(CardTemple.Wizard)
-                .AddAbilities(GemRotator.AbilityID);
+            // CardManager.New(EXP_1_PREFIX, "GemRotator", "Gem Cycler", 1, 2)
+            //     .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gemcycler.png", typeof(ExpansionPackCards_1).Assembly))
+            //     .SetCost(energyCost: 5)
+            //     //.SetRegionalP03Card(CardTemple.Wizard)
+            //     .AddAbilities(GemRotator.AbilityID);
 
             // Seed
             CardManager.New(EXP_1_PREFIX, "SEED", "Seed", 0, 1)

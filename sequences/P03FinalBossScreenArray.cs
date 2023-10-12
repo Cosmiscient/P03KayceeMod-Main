@@ -171,31 +171,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return !showingLoadingFaces || !screen.RespondsToDownloading;
         }
 
-        private IEnumerator ShowMoonSequence(float delay)
-        {
-            if (!_initialized)
-                yield return new WaitUntil(() => _initialized);
-
-            yield return new WaitUntil(() => !_inFaceDisplay);
-
-            _inFaceDisplay = true;
-
-            for (int y = 0; y < 3; y++)
-            {
-                for (int x = -1; x < 2; x++)
-                {
-                    AllScreens.FirstOrDefault(s => s.xIndex == x && s.yIndex == y)?.ShowFace(P03FinalBossExtraScreen.MOON_FACES[x + 1][y]);
-                }
-                yield return new WaitForSeconds(delay);
-            }
-
-            foreach (P03FinalBossExtraScreen s in AllScreens.Where(s => s.xIndex is < (-1) or > 1))
-            {
-                yield return new WaitForSeconds(delay);
-                s.StartRotation(transform);
-            }
-        }
-
         public void Collapse()
         {
             for (int i = 0; i < AllScreens.Count; i++)
@@ -269,28 +244,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public void ShowFace(params P03AnimationController.Face[] face) => StartCoroutine(ShowFaceSequence(0.04f, null, face));
 
         public void ShowFaceImmediate(params P03AnimationController.Face[] face) => StartCoroutine(ShowFaceSequence(0.00f, null, face));
-
-        public void ShowMoonFace()
-        {
-            showingMoonFace = true;
-            StartCoroutine(ShowMoonSequence(0.2f));
-        }
-
-        public void EndMoonFace(params P03AnimationController.Face[] face)
-        {
-            try
-            {
-                showingMoonFace = false;
-                if (face.Length == 0)
-                    StartCoroutine(ShowFaceSequence(0.04f, null, P03AnimationController.Face.Happy, P03AnimationController.Face.Bored, P03AnimationController.Face.Default));
-                else
-                    StartCoroutine(ShowFaceSequence(0.04f, null, face));
-            }
-            catch
-            {
-                // Do nothing for now
-            }
-        }
 
         public void StartLoadingFaces()
         {

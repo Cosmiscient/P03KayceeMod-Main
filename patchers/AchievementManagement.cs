@@ -58,7 +58,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Beat \"P03 in Kaycee's Mod\" for the first time",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_first_win.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [🚫] sticker
 
             SKULLSTORM = ModdedAchievementManager.New(
@@ -76,7 +76,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Take ownership of one of G0lly!'s beloved trinkets",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_nft.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [an ages dead cat meme, like 2010] sticker
 
             SURVIVE_SIX_ARCHIVIST = ModdedAchievementManager.New(
@@ -85,7 +85,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "During The Archivist's boss fight, survive 6 turns during phase 2",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_six.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [101010 strip] sticker
 
             DONT_USE_CAMERA = ModdedAchievementManager.New(
@@ -94,7 +94,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Defeat the Photographer without using the camera",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_camera.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [broken camera] sticker
 
             CANVAS_ENOUGH = ModdedAchievementManager.New(
@@ -103,7 +103,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Create an infinite loop in the Unfinished Boss fight",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_loop.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [P03's annoyed face as an a rageface] sticker
 
             KILL_30_BOUNTY_HUNTERS = ModdedAchievementManager.New(
@@ -112,7 +112,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Destroy 30 Bounty Hunters in your lifetime",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_bounty.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [cowboy hat] sticker
 
             ALL_QUESTS_COMPLETED = ModdedAchievementManager.New(
@@ -121,7 +121,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Complete all NPC quests that appear in a single run",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_quests.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [smiley face with a wink and thumbs up] sticker
 
             KILL_QUEST_CARD = ModdedAchievementManager.New(
@@ -130,7 +130,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Skeleclock and destroy a card given to you by an NPC",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_kill_quest_card.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [scorched companion cube] sticker
 
             TURBO_RAMP = ModdedAchievementManager.New(
@@ -139,7 +139,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Have six energy available on turn two",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_six_energy.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [leaky battery] sticker
 
             MASSIVE_OVERKILL = ModdedAchievementManager.New(
@@ -148,7 +148,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Earn 15 Robobucks in a single battle",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_money.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [tophat and monocle] sticker
 
             FULLY_UPGRADED = ModdedAchievementManager.New(
@@ -157,7 +157,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Have a card in your deck that is gemified, skeleclocked, transformable, and can complete a circuit",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_plus_four.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [💪] sticker
 
             MAX_SP_CARD = ModdedAchievementManager.New(
@@ -166,7 +166,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Give a card with the maximum amount of SP to the Bot Builder",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_bab.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [Sir Fire, Esquire] sticker
 
             SIX_SHOOTER = ModdedAchievementManager.New(
@@ -175,7 +175,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Strike P03 six separate times in a single turn",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_six_shooter.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [smoking revolver] sticker
 
             SCALES_TILTED_3X = ModdedAchievementManager.New(
@@ -184,7 +184,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Have the scales tiled 4 points against you on three different turns",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_scales.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [that one "hang in there!" cat poster] sticker
 
             AVOID_BOUNTY_HUNTERS = ModdedAchievementManager.New(
@@ -193,7 +193,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Win five battles with bounty hunters without killing them",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_crime.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [a pig with an apple in its mouth] sticker
 
             PLASMA_JIMMY_CRAZY = ModdedAchievementManager.New(
@@ -211,7 +211,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Skeleclock every card in your deck",
                 false,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_brittle.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [guillotine] sticker
 
             MYCOLOGISTS_COMPLETED = ModdedAchievementManager.New(
@@ -220,7 +220,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Complete the Mycologist's experiment and create an abomination of science",
                 true,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_mushroom.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [trippy rainbow shrooms] sticker
 
             FAST_GENERATOR = ModdedAchievementManager.New(
@@ -229,7 +229,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 "Repair the generator in three turns or less",
                 true,
                 grp.ID,
-                TextureHelper.GetImageAsTexture("achievement_locked.png", typeof(P03AchievementManagement).Assembly)
+                TextureHelper.GetImageAsTexture("achievement_generator.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [hermes boots, shoe with wings on it] sticker
         }
 

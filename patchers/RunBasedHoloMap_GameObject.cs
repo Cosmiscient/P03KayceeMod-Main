@@ -1046,7 +1046,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 GameObject mapArea = BuildMapAreaPrefab(regionCode, bp);
 
                 if (regionCode != Zone.Neutral)
-                    Minimap.CreateMinimap(mapArea.transform, blueprints, $"ProceduralMapArea_{regionCode}");
+                    Minimap.CreateMinimap(mapArea.transform, blueprints, $"ProceduralMapArea_{regionCode}", GetAscensionWorldID(regionCode), bp.x, bp.y);
 
                 data.areas[bp.x, bp.y] = new() { prefab = mapArea };
             }

@@ -87,11 +87,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static void ExtraPunishmentForExcessDamage(int excessDamage)
         {
-            if (excessDamage > 5)
-                Part3SaveData.Data.IncreaseBounty(excessDamage - 5);
+            if (excessDamage > 3)
+                Part3SaveData.Data.IncreaseBounty(excessDamage - 3);
 
-            if (excessDamage > 20) // wow you're *really* trying hard here
-                Part3SaveData.Data.IncreaseBounty(excessDamage - 20);
+            if (excessDamage > 10) // wow you're *really* trying hard here
+                Part3SaveData.Data.IncreaseBounty(excessDamage - 10);
         }
 
         [HarmonyPatch(typeof(HoloBountyIcons), nameof(HoloBountyIcons.ManagedUpdate))]

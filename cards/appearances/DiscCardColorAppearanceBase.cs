@@ -45,7 +45,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         internal static Texture2D GoldTexture { get; set; }
         internal static Texture2D BlueTexture { get; set; }
         internal static Texture2D WhiteTextTexture { get; set; }
-        internal Texture2D currentTexture { get; set; }
+        internal Texture2D CurrentTexture { get; set; }
 
         private static Dictionary<string, Color> GameColorsCache;
 
@@ -60,16 +60,19 @@ namespace Infiniscryption.P03KayceeRun.Cards
             byte[] imgBytes = TextureHelper.GetResourceBytes("FloppyDisc_AlbedoTransparency_Gold_2048.png", typeof(DiscCardColorAppearance).Assembly);
             bool isLoaded = GoldTexture.LoadImage(imgBytes);
             GoldTexture.filterMode = FilterMode.Point;
+            GoldTexture.name = "GoldDiskTexture";
 
             RedTexture = new Texture2D(2, 2, TextureFormat.DXT1, false);
             imgBytes = TextureHelper.GetResourceBytes("FloppyDisc_AlbedoTransparency_Red_2048.png", typeof(DiscCardColorAppearance).Assembly);
             isLoaded = RedTexture.LoadImage(imgBytes);
             RedTexture.filterMode = FilterMode.Point;
+            RedTexture.name = "RedDiskTexture";
 
             BlueTexture = new Texture2D(2, 2, TextureFormat.DXT1, false);
             imgBytes = TextureHelper.GetResourceBytes("FloppyDisc_AlbedoTransparency_2048.png", typeof(DiscCardColorAppearance).Assembly);
             isLoaded = BlueTexture.LoadImage(imgBytes);
             BlueTexture.filterMode = FilterMode.Point;
+            BlueTexture.name = "BlueDiskTexture";
 
             WhiteTextTexture = new Texture2D(2, 2, TextureFormat.DXT1, false);
             imgBytes = TextureHelper.GetResourceBytes("heavyweight-white.png", typeof(DiscCardColorAppearance).Assembly);
@@ -116,7 +119,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             if (!BorderColor.HasValue)
             {
-                currentTexture = BlueTexture;
+                CurrentTexture = BlueTexture;
                 return;
             }
 
@@ -124,7 +127,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             float gold = ColorDistance(GameColors.Instance.darkGold, BorderColor.Value);
             float blue = ColorDistance(GameColors.Instance.blue, BorderColor.Value);
 
-            currentTexture = red < gold && red < blue ? RedTexture : gold < red && gold < blue ? GoldTexture : BlueTexture;
+            CurrentTexture = red < gold && red < blue ? RedTexture : gold < red && gold < blue ? GoldTexture : BlueTexture;
         }
 
         internal static Color? GetColorFromString(string colorKey)
@@ -163,6 +166,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             "Anim/CardBase/Rails",
             "Anim/CardBase/Top",
+            "Anim/CardBase/Top/MetalSlider",
             "Anim/CardBase/Bottom"
         };
 
@@ -181,7 +185,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             "_DetailAlbedoMap",
         };
 
-        private void ApplyColorSafe(string path, Color color, bool emission, bool holofy = false)
+        private void ApplyColorSafe(string path, Color color, bool emission, bool holofy = false, Texture retexture = null)
         {
             try
             {
@@ -190,17 +194,26 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     if (holofy)
                     {
-                        OnboardDynamicHoloPortrait.HolofyGameObject(tComp.gameObject, color);
+                        OnboardDynamicHoloPortrait.HolofyGameObject(tComp.gameObject, color, inChildren: false);
                         return;
                     }
                     GameObject component = tComp.gameObject;
                     MeshRenderer renderer = component.GetComponent<MeshRenderer>();
                     Material material = renderer.material;
                     material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+
+                    if (retexture != null)
+                    {
+                        material.mainTexture = retexture;
+                    }
+
                     if (emission)
                     {
                         material.EnableKeyword("_EMISSION");
                         material.SetColor("_EmissionColor", color);
+
+                        if (retexture != null)
+                            material.SetColor("_Color", Color.black);
                     }
                     else
                     {
@@ -217,11 +230,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override void ApplyAppearance()
         {
             // Swap out textures as appropriate
-            if (currentTexture == null)
+            if (CurrentTexture == null)
                 CalcRareTexture();
 
-            if (!HolofyBorder)
-                MaterialHelper.RetextureAllRenderers(gameObject, currentTexture, originalTextureKey: "floppydisc");
+            MaterialHelper.RetextureAllRenderers(gameObject, CurrentTexture, originalTextureKey: "floppydisc");
 
             // Apply the color to the border
             if (BorderColor.HasValue)
@@ -234,7 +246,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (NameBannerColor.HasValue)
             {
                 foreach (string key in StickerObjectPaths)
-                    ApplyColorSafe(key, NameBannerColor.Value, false);
+                    ApplyColorSafe(key, NameBannerColor.Value, true, retexture: BlueTexture);
             }
 
             if (NameTextColor.HasValue && Card.StatsLayer is DiskRenderStatsLayer drsl)

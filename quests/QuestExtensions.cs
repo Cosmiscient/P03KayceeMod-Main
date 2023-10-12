@@ -257,9 +257,9 @@ namespace Infiniscryption.P03KayceeRun.Quests
             return state;
         }
 
-        public static QuestState AddDynamicMonetaryReward(this QuestState state)
+        public static QuestState AddDynamicMonetaryReward(this QuestState state, bool low = false)
         {
-            state.Rewards.Add(new QuestRewardDynamicCoins());
+            state.Rewards.Add(new QuestRewardDynamicCoins() { Low = low });
             return state;
         }
 

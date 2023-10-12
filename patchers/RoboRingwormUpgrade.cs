@@ -60,6 +60,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 allBustedAbilities.Add(Ability.Evolve);
                 allBustedAbilities.Add(GuidManager.GetEnumValue<Ability>("extraVoid.inscryption.voidSigils", "Electric"));
                 allBustedAbilities.Add(GuidManager.GetEnumValue<Ability>("extraVoid.inscryption.voidSigils", "Coin Finder"));
+                allBustedAbilities.Remove(Ability.Transformer);
                 allBustedAbilities = allBustedAbilities.Distinct().ToList();
 
                 allBustedAbilities.RemoveAll((Ability x) => selectedCard.HasAbility(x));
@@ -134,6 +135,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield return new WaitForSeconds(0.5f);
                 GameObject fireObj = Object.Instantiate(AssetBundleManager.Prefabs["Fire_Parent"], abilityMachine.diskDrive.transform);
                 fireObj.transform.localPosition = new(-1.3f, 0.46f, 2.17f);
+                fireObj.transform.SetParent(abilityMachine.diskDrive.anim.transform, true);
                 AudioController.Instance.PlaySound3D("fireball", MixerGroup.TableObjectsSFX, fireObj.transform.position, 0.35f);
                 yield return new WaitForSeconds(1.0f);
                 P03AnimationController.Instance.UnplugInputCable(delegate

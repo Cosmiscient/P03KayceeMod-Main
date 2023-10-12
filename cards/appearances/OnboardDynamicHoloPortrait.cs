@@ -54,7 +54,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                                float.Parse(offsetSplit[2], CultureInfo.InvariantCulture));
         }
 
-        public static void HolofyGameObject(GameObject obj, Color color, string shaderKey = "SFHologram/HologramShader")
+        public static void HolofyGameObject(GameObject obj, Color color, string shaderKey = "SFHologram/HologramShader", bool inChildren = true)
         {
             List<Component> compsToDestroy = new();
             compsToDestroy.AddRange(obj.GetComponentsInChildren<Rigidbody>());
@@ -69,7 +69,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Get reference material
             Material refMat = CardLoader.GetCardByName("BridgeRailing").holoPortraitPrefab.GetComponentInChildren<Renderer>().material;
 
-            foreach (Renderer renderer in obj.GetComponentsInChildren<Renderer>())
+            var allRenderers = inChildren ? obj.GetComponentsInChildren<Renderer>() : obj.GetComponents<Renderer>();
+            foreach (Renderer renderer in allRenderers)
             {
                 foreach (Material material in renderer.materials)
                 {

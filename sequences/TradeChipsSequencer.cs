@@ -20,6 +20,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private static bool activating = false;
 
+        private int currentChipPrice = 0;
+
         public TradeChipsSequencer()
         {
             Traverse handlerTraverse = Traverse.Create(SpecialNodeHandler.Instance);
@@ -53,6 +55,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield break;
             }
 
+            InstantiateCoinPurchaser();
+            CoinPurchaser.SetActive(false);
+
             activating = true;
 
             P03Plugin.Log.LogInfo("Starting trade sequencer");
@@ -76,6 +81,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 foreach (List<CardInfo> tier in tradingTiers)
                 {
                     P03Plugin.Log.LogInfo("Clearing");
+                    CoinPurchaser.SetActive(false);
                     tradeCards.Clear();
                     tokenCards.Clear();
 
@@ -86,6 +92,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     P03Plugin.Log.LogInfo("Creating trade cards");
                     yield return new WaitForSeconds(0.15f);
                     yield return CreateTradeCards(GetTradeCardInfos(tier[0]), CARDS_PER_ROW, tier[0].name.Equals(CustomCards.RARE_DRAFT_TOKEN));
+                    if (currentChipPrice > 0)
+                        CoinPurchaser.SetActive(true);
 
                     P03Plugin.Log.LogInfo("Adding rulebook");
                     TableRuleBook.Instance.SetOnBoard(true);
@@ -108,7 +116,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
                     EnableViewDeck(ViewController.ControlMode.TradePelts, transform.position);
 
-                    yield return new WaitUntil(() => tokenCards.Count == 0);
+                    yield return new WaitUntil(() => tokenCards.Count <= 0);
 
                     ViewManager.Instance.Controller.LockState = ViewLockState.Locked;
                     DisableViewDeck();
@@ -139,6 +147,31 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             GameFlowManager.Instance?.TransitionToGameState(GameState.Map, null);
             yield break;
+        }
+
+        private IEnumerator PlayCoinSounds(int amount)
+        {
+            for (int i = 0; i < amount; i++)
+            {
+                yield return new WaitForSeconds(0.05f);
+                AudioController.Instance.PlaySound3D(
+                    "robo_scale_tick",
+                    MixerGroup.TableObjectsSFX,
+                    P03AnimationController.Instance.HeadParent.position,
+                    1f, 0f,
+                    new AudioParams.Pitch(1f + (float)(amount - i) * -0.01f)
+                );
+            }
+        }
+
+        private void OnTokenSold()
+        {
+            if (tokenCards.Count > 0)
+            {
+                RemoveLastToken();
+                Part3SaveData.Data.currency += currentChipPrice;
+                StartCoroutine(PlayCoinSounds(currentChipPrice));
+            }
         }
 
         private void OnCardSelected(SelectableCard card)
@@ -368,8 +401,49 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 }
             }
 
+            currentChipPrice = 0;
+            if (token.Abilities.Count > 0)
+                currentChipPrice = 7 + token.Abilities.Select(AbilitiesUtil.GetInfo).Select(ai => ai.powerLevel).Sum();
+
             return result;
         }
+
+        private void InstantiateCoinPurchaser()
+        {
+            if (CoinPurchaser != null)
+                return;
+
+            CoinPurchaser = GameObject.Instantiate(RunBasedHoloMap.SpecialNodePrefabs[HoloMapNode.NodeDataType.GainCurrency], transform);
+            CoinPurchaser.transform.Find("RendererParent").localEulerAngles = new(60f, 180f, 180f);
+            CoinPurchaser.transform.localPosition = new(-2.5f, 4.6f, -4.15f);
+            CoinPurchaser.transform.localScale = new(2f, 2f, 2f);
+            GameObject.Destroy(CoinPurchaser.GetComponentInChildren<SineWaveMovement>());
+            GameObject.Destroy(CoinPurchaser.GetComponentInChildren<HoloMapGainCurrencyNode>());
+
+            // Label
+            GameObject sampleObject = RunBasedHoloMap.SpecialNodePrefabs[HoloMapNode.NodeDataType.BuildACard].transform.Find("HoloFloatingLabel").gameObject;
+            GameObject labelObject = UnityEngine.Object.Instantiate(sampleObject, transform);
+            labelObject.transform.localPosition = new(-2.3f, 5.34f, -4.45f);
+            labelObject.transform.localEulerAngles = new(90f, 0f, 0f);
+            HoloFloatingLabel label = labelObject.GetComponent<HoloFloatingLabel>();
+            label.line.gameObject.SetActive(false);
+            label.line = null;
+
+            GenericMainInputInteractable mii = CoinPurchaser.AddComponent<GenericMainInputInteractable>();
+            mii.SetCursorType(CursorType.Sacrifice);
+            mii.CursorEntered = delegate (MainInputInteractable mii)
+            {
+                AudioController.Instance.PlaySound2D("holomap_node_mouseover", MixerGroup.TableObjectsSFX, 0.5f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.VerySmall), null, new AudioParams.Randomization(true), null, false);
+                label.gameObject.SetActive(true);
+                label.SetText(Localization.Translate($"Sell Token: {currentChipPrice} Robobucks"));
+            };
+
+            mii.CursorExited = (mii) => label.gameObject.SetActive(false);
+
+            mii.CursorSelectEnded = (mii) => OnTokenSold();
+        }
+
+        private GameObject CoinPurchaser = null;
 
         private readonly List<SelectableCard> tradeCards = new();
 

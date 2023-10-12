@@ -1,9 +1,10 @@
-using UnityEngine;
-using DiskCardGame;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Helpers;
-using System;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -61,16 +62,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static bool AdjacentHasEncounter(List<HoloMapBlueprint> map, HoloMapBlueprint bp, int encounterType)
         {
-            foreach(var adj in AdjacentTo(map, bp))
+            foreach (var adj in AdjacentTo(map, bp))
                 if (adj.specialDirectionType == encounterType && adj.GetAdjacentNode(map, adj.specialDirection) == bp)
                     return true;
 
             return false;
         }
 
-        private static GameObject BuildGameObject(HoloMapBlueprint bp, List<HoloMapBlueprint> map, Transform parent)
+        private static GameObject BuildGameObject(HoloMapBlueprint bp, List<HoloMapBlueprint> map, Transform parent, string worldId, int homeX, int homeY)
         {
-            GameObject mapNode = new GameObject($"minimapnode({bp.KeyCode})");
+            GameObject mapNode = new($"minimapnode({bp.KeyCode})");
             mapNode.transform.SetParent(parent, false);
             mapNode.transform.localPosition = new Vector3(bp.x * SQUARE_SIZE, 0f, -bp.y * SQUARE_SIZE);
             mapNode.transform.localScale = new Vector3(SCALE, SCALE, SCALE);
@@ -79,7 +80,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (bp.upgrade != HoloMapNode.NodeDataType.MoveArea)
             {
-                P03Plugin.Log.LogInfo($"Creating minimap icon for {bp.upgrade.ToString()}");
+                P03Plugin.Log.LogInfo($"Creating minimap icon for {bp.upgrade}");
                 GameObject icon = GameObject.Instantiate(FindRendererParent(RunBasedHoloMap.SpecialNodePrefabs[bp.upgrade]).gameObject, mapNode.transform, false);
                 icon.name = "icon";
                 icon.transform.localScale = new Vector3(3f, 3f, 3f);
@@ -88,7 +89,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (AdjacentHasEncounter(map, bp, HoloMapBlueprint.BATTLE))
             {
-                P03Plugin.Log.LogInfo($"Creating skull icon for {bp.KeyCode.ToString()}");
+                P03Plugin.Log.LogInfo($"Creating skull icon for {bp.KeyCode}");
                 GameObject refObject = RunBasedHoloMap.GetGameObject("neutralwestmain_2", "Nodes/MoveArea_W");
                 P03Plugin.Log.LogInfo($"ref object");
                 GameObject skullIcon = refObject.transform.Find("RendererParent/AdditionalIcon").gameObject;
@@ -103,7 +104,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (AdjacentHasEncounter(map, bp, HoloMapBlueprint.TRADE))
             {
-                P03Plugin.Log.LogInfo($"Creating trade icon for {bp.KeyCode.ToString()}");
+                P03Plugin.Log.LogInfo($"Creating trade icon for {bp.KeyCode}");
                 GameObject refObject = RunBasedHoloMap.GetGameObject("neutralwestmain_2", "Nodes/MoveArea_W");
                 P03Plugin.Log.LogInfo($"ref object");
                 GameObject skullIcon = refObject.transform.Find("RendererParent/TradeIcon").gameObject;
@@ -118,23 +119,36 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 icon.transform.localEulerAngles = new Vector3(53f, 57.0029f, 57.1122f);
             }
 
+            if (bp.x != homeX || bp.y != homeY)
+            {
+                BoxCollider coll = mapNode.AddComponent<BoxCollider>();
+                coll.extents = ball.GetComponentInChildren<Renderer>().bounds.extents / SCALE;
+
+                var ft = mapNode.AddComponent<HoloMinimapFastTravel>();
+                ft.WorldId = worldId;
+                ft.XPos = bp.x;
+                ft.YPos = bp.y;
+            }
+
             return mapNode;
         }
 
-        public static GameObject CreateMinimap(Transform parent, List<HoloMapBlueprint> blueprint, string prefix)
+        public static GameObject CreateMinimap(Transform parent, List<HoloMapBlueprint> blueprint, string prefix, string worldId, int posX, int posY)
         {
-            GameObject minimapContainer = new GameObject("minimapContainer");
+            GameObject minimapContainer = new("minimapContainer");
             minimapContainer.transform.SetParent(parent, false);
             minimapContainer.transform.localPosition = new(0f, 0f, 0f);
 
-            GameObject minimap = new GameObject("minimap");
+            GameObject minimap = new("minimap");
             minimap.transform.SetParent(minimapContainer.transform, false);
             minimap.transform.localPosition = new Vector3(2.5f, 0.5f, -2.25f);
             //minimap.transform.rotation = Quaternion.LookRotation(-Vector3.up);
 
             Minimap map = minimap.AddComponent<Minimap>();
+            map.xPosition = posX;
+            map.yPosition = posY;
             map.mapPrefix = prefix;
-            map.minimapNodes = blueprint.ToDictionary(bp => bp.KeyCode, bp => BuildGameObject(bp, blueprint, minimap.transform));
+            map.minimapNodes = blueprint.ToDictionary(bp => bp.KeyCode, bp => BuildGameObject(bp, blueprint, minimap.transform, worldId, posX, posY));
             map.bossRooms = blueprint.Where(bp => bp.opponent != Opponent.Type.Default || bp.specialTerrain == HoloMapBlueprint.LOWER_TOWER_ROOM).Select(bp => bp.KeyCode).ToArray();
             map.bossRoomTrigger = blueprint.Where(bp => bp.blockedDirections != 0).Select(bp => bp.KeyCode).ToArray();
             map.nodeKeys = map.minimapNodes.Keys.ToArray();
@@ -183,7 +197,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private bool HasVisitedRoom(string key)
         {
-            if (key == $"{Part3SaveData.Data.playerPos.gridX},{Part3SaveData.Data.playerPos.gridY}")
+            if (key == $"{xPosition},{yPosition}")
                 return true;
 
             var areaData = Part3SaveData.Data.areaData;
@@ -199,19 +213,18 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (HasVisitedRoom(key))
                 return false;
-            
+
             int index = Array.IndexOf(encounterRooms, key);
             return HasVisitedRoom(encounterVisibilityRooms[index]);
         }
 
         void OnEnable()
-	    {
+        {
             //P03Plugin.Log.LogInfo($"Enabled. Minimapnodes: {minimapNodes}");
 
-            if (minimapNodes == null)
-                minimapNodes = nodeKeys.ToDictionary(k => k, k => this.gameObject.transform.Find($"minimapnode({k})").gameObject);
+            minimapNodes ??= nodeKeys.ToDictionary(k => k, k => this.gameObject.transform.Find($"minimapnode({k})").gameObject);
 
-            string playerPosId = $"{Part3SaveData.Data.playerPos.gridX},{Part3SaveData.Data.playerPos.gridY}";
+            string playerPosId = $"{xPosition},{yPosition}";
 
             bool hasSeenBossRoom = bossRoomTrigger.Any(k => HasVisitedRoom(k));
 
@@ -220,28 +233,27 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 bool isBossRoom = bossRooms.Contains(item.Key);
                 bool showSpecialIcon = ShowSpecialIcon(item.Key);
                 bool shouldBeActive = item.Key == playerPosId || HasVisitedRoom(item.Key) || showSpecialIcon || (isBossRoom && hasSeenBossRoom);
-                item.Value.SetActive(shouldBeActive);                
-                
+                item.Value.SetActive(shouldBeActive);
+
                 Transform iconTransform = item.Value.transform.Find("icon");
-                GameObject iconObject = iconTransform == null ? null : iconTransform.gameObject;
+                GameObject iconObject = iconTransform?.gameObject;
                 Transform skullTransform = item.Value.transform.Find("skull");
-                GameObject skullObject = skullTransform == null ? null : skullTransform.gameObject;
+                GameObject skullObject = skullTransform?.gameObject;
                 Transform tradeTransform = item.Value.transform.Find("trade");
-                GameObject tradeObject = tradeTransform == null ? null : tradeTransform.gameObject;
+                GameObject tradeObject = tradeTransform?.gameObject;
                 GameObject ballObject = item.Value.transform.Find("ball").gameObject;
-                
+
                 var areaData = Part3SaveData.Data.areaData;
                 var saveData = areaData == null ? null : Part3SaveData.Data.areaData.FirstOrDefault(a => a.id.StartsWith(mapPrefix) && a.id.EndsWith($"({item.Key})"));
                 bool shouldShowBall = iconObject == null || ((saveData == null && item.Key != playerPosId) || (saveData != null && saveData.completedNodesIds.Where(i => i >= 10).Count() > 0));
                 shouldShowBall = shouldShowBall && !showSpecialIcon;
 
                 ballObject.SetActive(shouldShowBall);
-                if (skullObject != null)
-                    skullObject.SetActive(showSpecialIcon);
-                if (tradeObject != null)
-                    tradeObject.SetActive(showSpecialIcon);
-                if (iconObject != null)
-                    iconObject.SetActive(!shouldShowBall && !showSpecialIcon);
+                skullObject?.SetActive(showSpecialIcon);
+                tradeObject?.SetActive(showSpecialIcon);
+                iconObject?.SetActive(!shouldShowBall && !showSpecialIcon);
+
+                item.Value.GetComponentInChildren<MainInputInteractable>()?.SetEnabled(HasVisitedRoom(item.Key));
 
                 if (shouldBeActive)
                 {
@@ -285,6 +297,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         }
 
         [SerializeField]
+        private int xPosition;
+
+        [SerializeField]
+        private int yPosition;
+
+        [SerializeField]
         private string mapPrefix;
 
         [SerializeField]
@@ -315,42 +333,64 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        public class HoloMinimapFastTravel : MainInputInteractable
+        {
+            public override CursorType CursorType => CursorType.Pickup;
 
-        // Modified version of HoloLineSegment specifically that enables itself when either end is active,
-        // not just when both ends are active
-        public class HoloLinePartialSegment : ManagedBehaviour 
-	    {
-            private void UpdateLine()
+            [SerializeField]
+            public string WorldId;
+
+            [SerializeField]
+            public int XPos;
+
+            [SerializeField]
+            public int YPos;
+
+            private Part3SaveData.WorldPosition Position => new(WorldId, XPos, YPos);
+
+            public override void OnCursorSelectEnd()
             {
-                if (this.line != null && this.point1 != null && this.point2 != null && (this.point1.gameObject.activeInHierarchy || this.point2.gameObject.activeInHierarchy))
-                {
-                    this.linePositions[0] = this.point1.position;
-                    this.linePositions[1] = CustomMath.MidPoint(this.point1.position, this.point2.position);
-                    this.linePositions[2] = this.point2.position;
-                    this.line.SetPositions(this.linePositions);
-                }
-                else
-                {
-                    this.linePositions[0] = (this.linePositions[1] = (this.linePositions[2] = Vector3.zero));
-                    this.line.SetPositions(this.linePositions);
-                }
+                P03Plugin.Log.LogDebug($"Moving to {Position.worldId} [{Position.gridX}, {Position.gridY}]");
+                HoloMapAreaManager.Instance.StartCoroutine(FastTravelManagement.ReturnToLocation(Position));
             }
-
-            public override void ManagedUpdate()
-            {
-                this.UpdateLine();
-            }
-
-            [SerializeField]
-            internal LineRenderer line = null;
-
-            [SerializeField]
-            internal Transform point1 = null;
-
-            [SerializeField]
-            internal Transform point2 = null;
-
-            internal Vector3[] linePositions = new Vector3[3];
         }
+    }
+
+
+    // Modified version of HoloLineSegment specifically that enables itself when either end is active,
+    // not just when both ends are active
+    public class HoloLinePartialSegment : ManagedBehaviour
+    {
+        private void UpdateLine()
+        {
+            if (this.line != null && this.point1 != null && this.point2 != null && (this.point1.gameObject.activeInHierarchy || this.point2.gameObject.activeInHierarchy))
+            {
+                this.linePositions[0] = this.point1.position;
+                this.linePositions[1] = CustomMath.MidPoint(this.point1.position, this.point2.position);
+                this.linePositions[2] = this.point2.position;
+                this.line.SetPositions(this.linePositions);
+            }
+            else
+            {
+                this.linePositions[0] = (this.linePositions[1] = (this.linePositions[2] = Vector3.zero));
+                this.line.SetPositions(this.linePositions);
+            }
+        }
+
+        public override void ManagedUpdate()
+        {
+            this.UpdateLine();
+        }
+
+        [SerializeField]
+        internal LineRenderer line = null;
+
+        [SerializeField]
+        internal Transform point1 = null;
+
+        [SerializeField]
+        internal Transform point2 = null;
+
+        internal Vector3[] linePositions = new Vector3[3];
     }
 }

@@ -13,11 +13,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
     public static class AbilityIconBehaviours
     {
         public const string CELL_INVERSE = "InverseCell";
-        public const string ORANGE_CELL = "FromRuby";
-        public const string GREEN_CELL = "FromEmerald";
-        public const string BLUE_CELL = "FromSapphire";
+        public const string ORANGE_CELL = "FromOrange";
+        public const string GREEN_CELL = "FromGreen";
+        public const string BLUE_CELL = "FromBlue";
         public const string GEM_CELL = "FromGem";
-        public const string ORANGE_CELL_INVERSE = "FromRubyInverse";
+        public const string ORANGE_CELL_INVERSE = "FromOrangeInverse";
         public const string GREEN_CELL_INVERSE = "FromEmeraldInverse";
         public const string BLUE_CELL_INVERSE = "FromSapphireInverse";
         public const string GEM_CELL_INVERSE = "FromGemInverse";
