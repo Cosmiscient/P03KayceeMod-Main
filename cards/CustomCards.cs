@@ -351,8 +351,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.BaseGameCards.CardByName("PlasmaGunner").AddAppearances(ForceRevolverAppearance.ID);
 
             CardManager.BaseGameCards.CardByName("TechMoxTriple").AddDecal(
-                TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly),
-                TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly),
+                DUMMY_DECAL,
+                DUMMY_DECAL,
                 TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_2.png", typeof(CustomCards).Assembly)
             );
 
@@ -427,8 +427,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_virusscanner.png", typeof(CustomCards).Assembly))
                 .AddAbilities(Ability.Deathtouch, Ability.StrafeSwap)
                 .AddDecal(
-                    TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly),
-                    TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly),
+                    DUMMY_DECAL,
+                    DUMMY_DECAL,
                     TextureHelper.GetImageAsTexture("portrait_virusscanner_decal.png", typeof(CustomCards).Assembly)
                 )
                 .temple = CardTemple.Tech;
@@ -679,6 +679,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 return cards;
             };
         }
+
+        public static CardInfo AddPart3Decal(this CardInfo info, Texture2D texture) => info.AddDecal(DUMMY_DECAL, DUMMY_DECAL, texture);
 
         public static CardInfo SetFlippedPortrait(this CardInfo info)
         {

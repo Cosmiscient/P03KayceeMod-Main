@@ -20,6 +20,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
     {
         #region Sticker Textures
 
+        internal static bool DebugStickers => P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("sticker");
+
         internal static readonly Color TRANSPARENT_COLOR = new(0f, 0f, 0f, 0f);
         internal static readonly Texture2D CARBOARD_TEXTURE = TextureHelper.GetImageAsTexture("cardboard_texture.png", typeof(Stickers).Assembly);
 
@@ -78,7 +80,11 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         internal static Dictionary<string, Achievement> StickerRewards = new() {
             { "sticker_null", P03AchievementManagement.FIRST_WIN },
             { "sticker_skull", P03AchievementManagement.SKULLSTORM },
-            { "sticker_altcat", P03AchievementManagement.SCALES_TILTED_3X }
+            { "sticker_altcat", P03AchievementManagement.SCALES_TILTED_3X },
+            { "sticker_muscles", P03AchievementManagement.FULLY_UPGRADED },
+            { "sticker_tophat", P03AchievementManagement.MASSIVE_OVERKILL },
+            { "sticker_wizardhat", P03AchievementManagement.PLASMA_JIMMY_CRAZY },
+            { "sticker_mushroom", P03AchievementManagement.MYCOLOGISTS_COMPLETED }
         };
 
         internal static readonly List<string> AllStickerKeys = new(StickerRewards.Keys);
@@ -426,7 +432,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 yield break;
             }
 
-            if (StickerRewards.Where(kvp => ModdedAchievementManager.AchievementById(kvp.Value).IsUnlocked).Count() == 0)
+            if (!DebugStickers && StickerRewards.Where(kvp => ModdedAchievementManager.AchievementById(kvp.Value).IsUnlocked).Count() == 0)
             {
                 yield break;
             }

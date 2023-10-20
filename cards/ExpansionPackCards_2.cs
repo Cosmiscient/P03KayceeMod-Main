@@ -226,14 +226,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetRegionalP03Card(CardTemple.Tech)
                 .AddAbilities(CellExplodonate.AbilityID);
 
-            // Kindness Giver
-            CardManager.New(EXP_2_PREFIX, "KindnessGiver", "Kindness Giver", 0, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_kindness_giver.png", typeof(ExpansionPackCards_2).Assembly))
+            // Bedazzling Conduit
+            CardManager.New(EXP_2_PREFIX, "KindnessGiver", "Bedazzling Conduit", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_bedazzled_conduit.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
+                .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_bedazzled_conduit.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetRegionalP03Card(CardTemple.Tech)
                 .AddAbilities(ConduitGemify.AbilityID, Ability.GainGemBlue);
 
-            // Kindness Giver
+            // Gopher
             CardManager.New(EXP_2_PREFIX, "Gopher", "G0ph3r", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gopher.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 1)
@@ -374,18 +375,32 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(GemBlueGift.AbilityID, GemGreenGift.AbilityID);
 
-            // Orlu's Acolyte
-            CardManager.New(EXP_2_PREFIX, "OrluAcolyte", "Orlu's Acolyte", 1, 1)
+            // Orlu's Replica
+            CardManager.New(EXP_2_PREFIX, "OrluAcolyte", "Orlu's Replica", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_orlu_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 3)
                 .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAppearances(ReplicaAppearanceBehavior.ID)
+                .SetExtendedProperty(ReplicaAppearanceBehavior.REPLICA_TYPE, "orlu")
+                .AddDecal(
+                    TextureHelper.GetImageAsTexture("decal_orlu_acolyte_orange.png", typeof(ExpansionPackCards_2).Assembly),
+                    TextureHelper.GetImageAsTexture("decal_orlu_acolyte_blue.png", typeof(ExpansionPackCards_2).Assembly),
+                    TextureHelper.GetImageAsTexture("decal_orlu_acolyte_orlu.png", typeof(ExpansionPackCards_2).Assembly)
+                )
                 .AddAbilities(GemOrangeFlying.AbilityID, GemBlueLoot.AbilityID);
 
-            // Goranj's Acolyte
-            CardManager.New(EXP_2_PREFIX, "GoranjAcolyte", "Goranj's Acolyte", 2, 4)
+            // Goranj's Replica
+            CardManager.New(EXP_2_PREFIX, "GoranjAcolyte", "Goranj's Replica", 2, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_goranj_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAppearances(ReplicaAppearanceBehavior.ID)
+                .SetExtendedProperty(ReplicaAppearanceBehavior.REPLICA_TYPE, "goranj")
+                .AddDecal(
+                    TextureHelper.GetImageAsTexture("decal_goranj_acolyte_green.png", typeof(ExpansionPackCards_2).Assembly),
+                    TextureHelper.GetImageAsTexture("decal_goranj_acolyte_orange.png", typeof(ExpansionPackCards_2).Assembly),
+                    TextureHelper.GetImageAsTexture("decal_goranj_acolyte_goranj.png", typeof(ExpansionPackCards_2).Assembly)
+                )
                 .AddAbilities(GemOrangeBrittle.AbilityID, GemGreenBuffEnemy.AbilityID);
 
             // Gem Augur

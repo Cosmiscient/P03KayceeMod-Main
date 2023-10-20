@@ -184,7 +184,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 this.buttonText.transform.parent.gameObject.SetActive(true);
                 this.buttonText.SetText(Localization.Translate("RECALL"));
             }
-            else if (!stickerAchievemnent.IsUnlocked)
+            else if (!Stickers.DebugStickers && !stickerAchievemnent.IsUnlocked)
             {
                 this.buttonText.transform.parent.gameObject.SetActive(false);
             }
@@ -211,7 +211,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             {
                 style = Stickers.StickerStyle.Faded;
             }
-            else if (!stickerAchievemnent.IsUnlocked)
+            else if (!Stickers.DebugStickers && !stickerAchievemnent.IsUnlocked)
             {
                 style = Stickers.StickerStyle.Shadow;
             }

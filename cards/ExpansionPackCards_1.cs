@@ -178,6 +178,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             gravestone.SetEvolve(zombie, 3);
             gravestone.holoPortraitPrefab = CardManager.BaseGameCards.CardByName("TombStone").holoPortraitPrefab;
 
+            CardManager.BaseGameCards.CardByName("TombStone").SetEvolve(zombie, 1);
+
             // Recycle Angel
             CardManager.New(EXP_1_PREFIX, "RoboAngel", "AngelBot", 1, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_recyclenangel.png", typeof(ExpansionPackCards_1).Assembly))
@@ -290,11 +292,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(EXP_1_PREFIX, "RubyTitan", "Ruby Titan", 1, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ruby_titan.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 6)
-                .AddDecal(
-                    TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly),
-                    TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly),
-                    TextureHelper.GetImageAsTexture("decal_ruby_titan.png", typeof(CustomCards).Assembly)
-                )
+                .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_ruby_titan.png", typeof(CustomCards).Assembly))
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .SetRare()
                 .AddAbilities(RubyPower.AbilityID);
@@ -302,11 +300,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(EXP_1_PREFIX, "SapphireTitan", "Sapphire Titan", 1, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_sapphire_titan.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 4)
-                .AddDecal(
-                    TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly),
-                    TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly),
-                    TextureHelper.GetImageAsTexture("decal_sapphire_titan.png", typeof(CustomCards).Assembly)
-                )
+                .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_sapphire_titan.png", typeof(CustomCards).Assembly))
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .SetRare()
                 .AddAbilities(SapphirePower.AbilityID);
@@ -314,11 +308,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(EXP_1_PREFIX, "EmeraldTitan", "Emerald Titan", 1, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_emerald_titan.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 5)
-                .AddDecal(
-                    TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly),
-                    TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly),
-                    TextureHelper.GetImageAsTexture("decal_emerald_titan.png", typeof(CustomCards).Assembly)
-                )
+                .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_emerald_titan.png", typeof(CustomCards).Assembly))
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .SetRare()
                 .AddAbilities(EmeraldPower.AbilityID);
