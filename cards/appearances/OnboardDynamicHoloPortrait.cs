@@ -4,6 +4,7 @@ using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
+using Sirenix.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -17,6 +18,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string SCALE_KEY = "HoloPortrait.Transform.LocalScale";
         public const string COLOR = "HoloPortrait.Color";
         public const string SHADER_KEY = "HoloPortrait.ShaderKey";
+        public const string IN_HAND = "HoloPortrait.InHand";
 
         private bool portraitSpawned = false;
 
@@ -60,8 +62,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
             compsToDestroy.AddRange(obj.GetComponentsInChildren<Rigidbody>());
             compsToDestroy.AddRange(obj.GetComponentsInChildren<AutoRotate>());
             compsToDestroy.AddRange(obj.GetComponentsInChildren<Animator>());
+            compsToDestroy.AddRange(obj.GetComponentsInChildren<InteractableBase>());
+            compsToDestroy.AddRange(obj.GetComponentsInChildren<Item>());
 
-            foreach (Component c in compsToDestroy.Where(c => c != null))
+            foreach (Component c in compsToDestroy.Where(c => !c.SafeIsUnityNull()))
                 Destroy(c);
 
             Color halfMain = new(color.r, color.g, color.b, 0.5f);
@@ -139,7 +143,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override void ApplyAppearance()
         {
-            if (Card.Anim is DiskCardAnimationController dcac && Card is PlayableCard pCard && pCard.OnBoard && !portraitSpawned)
+            bool showInHand = Card.Info.GetExtendedPropertyAsBool(IN_HAND).GetValueOrDefault(false);
+            if (Card.Anim is DiskCardAnimationController dcac && Card is PlayableCard pCard && (pCard.OnBoard || showInHand) && !portraitSpawned)
             {
                 SpawnHoloPortrait(dcac);
                 Card.renderInfo.hidePortrait = portraitSpawned;

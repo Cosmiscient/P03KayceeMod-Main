@@ -80,11 +80,17 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         internal static Dictionary<string, Achievement> StickerRewards = new() {
             { "sticker_null", P03AchievementManagement.FIRST_WIN },
             { "sticker_skull", P03AchievementManagement.SKULLSTORM },
+            { "sticker_binary_ribbon", P03AchievementManagement.SURVIVE_SIX_ARCHIVIST },
+            { "sticker_camera_photog", P03AchievementManagement.DONT_USE_CAMERA },
+            { "sticker_annoy_face", P03AchievementManagement.CANVAS_ENOUGH },
+            { "sticker_cowboy_hat", P03AchievementManagement.KILL_30_BOUNTY_HUNTERS },
             { "sticker_altcat", P03AchievementManagement.SCALES_TILTED_3X },
             { "sticker_muscles", P03AchievementManagement.FULLY_UPGRADED },
+            { "sticker_battery", P03AchievementManagement.TURBO_RAMP },
             { "sticker_tophat", P03AchievementManagement.MASSIVE_OVERKILL },
             { "sticker_wizardhat", P03AchievementManagement.PLASMA_JIMMY_CRAZY },
-            { "sticker_mushroom", P03AchievementManagement.MYCOLOGISTS_COMPLETED }
+            { "sticker_mushroom", P03AchievementManagement.MYCOLOGISTS_COMPLETED },
+            { "sticker_winged_shoes", P03AchievementManagement.FAST_GENERATOR }
         };
 
         internal static readonly List<string> AllStickerKeys = new(StickerRewards.Keys);

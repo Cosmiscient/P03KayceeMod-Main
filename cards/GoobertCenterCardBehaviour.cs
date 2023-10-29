@@ -45,7 +45,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private float GetArmEntrySpeed() => IsInMycoBoss ? 2f : 0.7f;
 
-        private CardModificationInfo GetExperimentModInfo()
+        internal static CardModificationInfo GetExperimentModInfo()
         {
             CardModificationInfo info = new();
             int randomAbilityCount = 0;
@@ -172,7 +172,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             Tween.LocalScale(gameObject.transform.Find("Anim/CardBase/HoloportraitParent"), new Vector3(.8f / 2.5f, 1f, 1f), 0.3f, 0f);
             Tween.LocalScale(gameObject.transform.Find("Anim/CardBase/Top/Name"), new Vector3(0.5f, -1f, 1f), 0.3f, 0f);
 
-            PlayableCard.temporaryMods.Add(GetExperimentModInfo());
+            if (TurnManager.Instance.opponent is MycologistAscensionBossOpponent)
+                PlayableCard.temporaryMods.Add(GetExperimentModInfo());
+
             PlayableCard.SetInfo(PlayableCard.Info);
 
             AudioController.Instance.PlaySound3D("mushroom_large_appear", MixerGroup.TableObjectsSFX, gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);

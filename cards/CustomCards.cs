@@ -620,6 +620,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             AbilityManager.ModifyAbilityList += delegate (List<AbilityManager.FullAbility> abilities)
             {
                 List<Ability> allP3Abs = CardManager.AllCardsCopy.Where(c => c.temple == CardTemple.Tech).SelectMany(c => c.abilities).Distinct().ToList();
+                allP3Abs.Add(Ability.GemDependant);
 
                 foreach (AbilityManager.FullAbility ab in abilities)
                 {
@@ -646,6 +647,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     if (ab.Id == Ability.DrawCopy && P03AscensionSaveData.IsP03Run)
                     {
                         ab.Info.canStack = true;
+                    }
+
+                    if (P03AscensionSaveData.IsP03Run)
+                    {
+                        ab.Info.rulebookDescription = ab.Info.rulebookDescription.Replace("Spell", "Command").Replace("spell", "command");
                     }
                 }
 

@@ -69,8 +69,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(ConduitNeighbor.AbilityID);
 
             // Shovester
-            CardManager.New(EXP_2_PREFIX, "Shovester", "Shovester", 0, 3)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_shovester.png", typeof(ExpansionPackCards_2).Assembly))
+            CardManager.New(EXP_2_PREFIX, "Shovester", "Billdozer", 0, 3)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_billdozer.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetNeutralP03Card()
                 .AddAbilities(Shove.AbilityID);
@@ -210,6 +210,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 0)
                 .SetGlobalSpell()
                 .SetSpellAppearanceP03()
+                // .AddAppearances(OnboardDynamicHoloPortrait.ID)
+                // .SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/items/BatteryItem")
+                // .SetExtendedProperty(OnboardDynamicHoloPortrait.IN_HAND, true)
                 .AddAbilities(RefillBattery.AbilityID);
 
             // Weeper
@@ -271,7 +274,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(MissileStrike.AbilityID);
 
             // Hellfire Droid
-            CardManager.New(EXP_2_PREFIX, "HellfireDroid", "Hellfire Droid", 1, 1)
+            CardManager.New(EXP_2_PREFIX, "HellfireDroid", "Hellfire Commando", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_hellfire_droid.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 5)
                 .SetRegionalP03Card(CardTemple.Undead)
@@ -286,15 +289,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(AbsorbShield.AbilityID);
 
             // Orange Moxduster
-            CardManager.New(EXP_2_PREFIX, "OrangeMoxduster", "Orange Moxduster", 0, 3)
+            CardManager.New(EXP_2_PREFIX, "OrangeMoxduster", "Orange Juicer", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_orange_moxduster.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Wizard)
+                .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_orange_moxduster.png", typeof(ExpansionPackCards_2).Assembly))
                 .AddTraits(Trait.Gem)
                 .AddAbilities(Ability.GainGemOrange, MagicDust.AbilityID);
 
             // Charge!
-            CardManager.New(EXP_2_PREFIX, "FORCED_UPGRADE", "Forced Upgrade", 0, 0)
+            CardManager.New(EXP_2_PREFIX, "FORCED_UPGRADE", "Upgrade!", 0, 0)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_forced_upgrade.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetTargetedSpell()
@@ -369,14 +373,21 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(Ability.Reach, CellSteelTrap.AbilityID);
 
             // Bleene's Acolyte
-            CardManager.New(EXP_2_PREFIX, "BleeneAcolyte", "Bleene's Acolyte", 0, 2)
+            CardManager.New(EXP_2_PREFIX, "BleeneAcolyte", "Replica Bleene", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_bleene_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAppearances(ReplicaAppearanceBehavior.ID)
+                .SetExtendedProperty(ReplicaAppearanceBehavior.REPLICA_TYPE, "bleene")
+                .AddDecal(
+                    TextureHelper.GetImageAsTexture("decal_bleene_acolyte_blue.png", typeof(ExpansionPackCards_2).Assembly),
+                    TextureHelper.GetImageAsTexture("decal_bleene_acolyte_green.png", typeof(ExpansionPackCards_2).Assembly),
+                    TextureHelper.GetImageAsTexture("decal_bleene_acolyte_bleene.png", typeof(ExpansionPackCards_2).Assembly)
+                )
                 .AddAbilities(GemBlueGift.AbilityID, GemGreenGift.AbilityID);
 
             // Orlu's Replica
-            CardManager.New(EXP_2_PREFIX, "OrluAcolyte", "Orlu's Replica", 1, 1)
+            CardManager.New(EXP_2_PREFIX, "OrluAcolyte", "Replica Orlu", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_orlu_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 3)
                 .SetRegionalP03Card(CardTemple.Wizard)
@@ -390,7 +401,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(GemOrangeFlying.AbilityID, GemBlueLoot.AbilityID);
 
             // Goranj's Replica
-            CardManager.New(EXP_2_PREFIX, "GoranjAcolyte", "Goranj's Replica", 2, 4)
+            CardManager.New(EXP_2_PREFIX, "GoranjAcolyte", "Replica Goranj", 2, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_goranj_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Wizard)
