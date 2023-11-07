@@ -13,6 +13,38 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     public static class StarterDecks
     {
         public static string DEFAULT_STARTER_DECK { get; private set; }
+        private static string[] PREFIXES = {
+            P03Plugin.CardPrefx,
+            ExpansionPackCards_1.EXP_1_PREFIX,
+            ExpansionPackCards_2.EXP_2_PREFIX
+        };
+
+        private static CardInfo FriendlyGet(string name)
+        {
+            try
+            {
+                return CardLoader.GetCardByName(name);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static CardInfo FixCardName(string name)
+        {
+            var nextCard = FriendlyGet(name);
+            if (nextCard != null)
+                return nextCard;
+
+            foreach (var prefix in PREFIXES)
+            {
+                nextCard = FriendlyGet($"{prefix}_{name}");
+                if (nextCard != null)
+                    return nextCard;
+            }
+            throw new KeyNotFoundException($"Cannot find a card named {name}");
+        }
 
         private static StarterDeckInfo CreateStarterDeckInfo(string title, string iconKey, string[] cards)
         {
@@ -22,7 +54,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 name = $"P03_{title}",
                 title = title,
                 iconSprite = Sprite.Create(icon, new Rect(0f, 0f, 35f, 44f), new Vector2(0.5f, 0.5f)),
-                cards = cards.Select(CardLoader.GetCardByName).ToList()
+                cards = cards.Select(FixCardName).ToList()
             };
 
 
@@ -39,6 +71,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Gems", "starterdeck_icon_gems", new string[] { "SentinelBlue", "SentinelGreen", "SentinelOrange" }), unlockLevel: 8);
             StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("FullDraft", "starterdeck_icon_token", new string[] { CustomCards.UNC_TOKEN, CustomCards.DRAFT_TOKEN, CustomCards.DRAFT_TOKEN }), unlockLevel: 8);
 
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Fire", "starterdeck_icon_fire", new string[] { "PyroBot", "Molotov", "StreetSweeper" }), unlockLevel: 8);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Bomb", "starterdeck_icon_bomb", new string[] { "Bombbot", "LatcherBomb", "Suicell" }), unlockLevel: 8);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Annoying", "starterdeck_icon_annoying", new string[] { "AlarmBot", "Clockbot", "Gopher" }), unlockLevel: 8);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Recharge", "starterdeck_icon_recharge", new string[] { "Weeper", "Encapsulator", "BatteryTentacle" }), unlockLevel: 8);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Helpers", "starterdeck_icon_helpers", new string[] { "AmmoBot", "GlowBot", "PitySeeker" }), unlockLevel: 8);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Animals", "starterdeck_icon_animals", new string[] { "BoltHound", "RobotRam", "Poodle" }), unlockLevel: 8);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Latchers", "starterdeck_icon_latchers", new string[] { "ConveyorLatcher", "FlyingLatcher", "SwapperLatcher" }), unlockLevel: 8);
+
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Replicas", "starterdeck_icon_replicas", new string[] { "BleeneAcolyte", "OrluAcolyte", "GoranjAcolyte" }), unlockLevel: 8);
+
+
             StarterDeckManager.ModifyDeckList += delegate (List<StarterDeckManager.FullStarterDeck> decks)
             {
                 CardTemple acceptableTemple = ScreenManagement.ScreenState;
@@ -51,3 +94,4 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         }
     }
 }
+

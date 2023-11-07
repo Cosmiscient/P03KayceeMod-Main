@@ -16,9 +16,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         static EmeraldExtraction()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
-            info.rulebookName = "Emerald Extraction";
-            info.rulebookDescription = "When [creature] is played, it gains health if its owner controls at least 2 Emerald Providers.";
-            info.canStack = true;
+            info.rulebookName = "Green Mox Buff";
+            info.rulebookDescription = "When [creature] is played, it gains one health for each Green Mox its owner controls.";
+            info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = true;
             info.hasColorOverride = true;
@@ -34,14 +34,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToResolveOnBoard() => BoardManager.Instance.GetSlots(!Card.OpponentCard).Where(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemGreen) || s.Card.HasAbility(Ability.GainGemTriple))).Count() >= 2;
+        public override bool RespondsToResolveOnBoard() => BoardManager.Instance.GetSlots(!Card.OpponentCard).Where(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemGreen) || s.Card.HasAbility(Ability.GainGemTriple))).Count() > 0;
 
         public override IEnumerator OnResolveOnBoard()
         {
             if (Card.TemporaryMods.Any(m => m.singletonId.Equals(nameof(EmeraldExtraction))))
                 yield break;
 
-            int healthBuff = Card.AllAbilities().Where(ab => ab == AbilityID).Count();
+            int healthBuff = BoardManager.Instance.GetSlots(!Card.OpponentCard).Where(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemGreen) || s.Card.HasAbility(Ability.GainGemTriple))).Count();
             CardModificationInfo mod = new(0, healthBuff)
             {
                 singletonId = nameof(EmeraldExtraction)

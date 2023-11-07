@@ -3,12 +3,13 @@
 		_ShadowTex ("Cookie", 2D) = "white" {}
 		_FalloffTex ("FallOff", 2D) = "white" {}
 		_ClipTex ("Clipper", 2D) = "white" {}
+		_StencilNumber ("StencilNumber", Int) = 1
 	}
 	Subshader {
 		Tags {"Queue"="Transparent"}
 		
 		Stencil {
-			Ref 1
+			Ref [_StencilNumber]
 			Comp Equal
 		}
 		

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
+using Infiniscryption.Spells.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Triggers;
@@ -77,17 +78,23 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         }
 
+        private static List<PlayableCard> ShreddableCards => PlayerHand.Instance.CardsInHand.Where(
+            c => !c.Info.HasTrait(Trait.Uncuttable) &&
+                 !c.HasAbility(Ability.MadeOfStone) &&
+                 !c.HasAnyOfSpecialAbilities(TargetedSpellAbility.ID, GlobalSpellAbility.ID)
+        ).ToList();
+
         public override IEnumerator Activate()
         {
             // If the player has no cards, do nothing
-            if (PlayerHand.Instance.CardsInHand.Count == 0)
+            if (ShreddableCards.Count == 0)
                 yield break;
 
             SelectableCard selectedCard = null;
 
             ViewManager.Instance.SwitchToView(View.DeckSelection, false, true);
             yield return BoardManager.Instance.CardSelector.SelectCardFrom(
-                PlayerHand.Instance.CardsInHand.Select(FromPlayable).ToList(),
+                ShreddableCards.Select(FromPlayable).ToList(),
                 null,
                 s => selectedCard = s
             );

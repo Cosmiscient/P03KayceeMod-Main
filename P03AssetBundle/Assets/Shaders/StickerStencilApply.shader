@@ -1,5 +1,8 @@
 ﻿Shader "P03/Projector/StickerStencilApply"
 {
+	Properties {
+		_StencilNumber ("StencilNumber", Int) = 1
+	}
 	SubShader 
 	{
 		Tags 
@@ -14,7 +17,7 @@
 		
 			Stencil 
 			{
-				Ref 1
+				Ref [_StencilNumber]
 				Comp Always
 				Pass Replace
 			}

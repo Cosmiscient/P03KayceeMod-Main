@@ -94,7 +94,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_emerald_guardian.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 5)
                 .SetRegionalP03Card(CardTemple.Wizard)
-                .AddAbilities(EmeraldExtraction.AbilityID, EmeraldExtraction.AbilityID, EmeraldExtraction.AbilityID);
+                .AddAbilities(EmeraldExtraction.AbilityID);
+
+            // Sapphire Guardian
+            CardManager.New(EXP_2_PREFIX, "SapphireGuardian", "Sapphire Guardian", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_sapphire_guardian.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 3)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(SapphireEnergy.AbilityID);
 
             // PyroBot
             CardManager.New(EXP_2_PREFIX, "PyroBot", "Ignitron", 1, 1)
@@ -140,7 +147,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(FireBomb.AbilityID, Ability.Strafe);
 
             // Give-A-Way
-            CardManager.New(EXP_2_PREFIX, "GiveAWay", "Give-A-Way", 2, 4)
+            CardManager.New(EXP_2_PREFIX, "GiveAWay", "Shield Smuggler", 2, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_giveaway.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetNeutralP03Card()
@@ -314,7 +321,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(DrawUpgrade.AbilityID);
 
             // Trash Compactor
-            CardManager.New(EXP_2_PREFIX, "TrashCompactor", "Trash Compactor", 0, 3)
+            CardManager.New(EXP_2_PREFIX, "TrashCompactor", "Chippy", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_disposal_bot.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Undead)

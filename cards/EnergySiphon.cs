@@ -18,7 +18,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Energy Siphon";
-            info.rulebookDescription = "Whenever another card you own dies in combat, [creature] creates a Charge in your hand. Charge is defined as a spell that refills 1 Energy when played.";
+            info.rulebookDescription = "Whenever another card you own dies in combat, [creature] creates a Charge in your hand. Charge is a spell that refills 1 Energy when played.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;

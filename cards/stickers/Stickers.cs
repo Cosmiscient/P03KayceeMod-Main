@@ -11,6 +11,7 @@ using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Saves;
 using Pixelplacement;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards.Stickers
@@ -80,15 +81,20 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         internal static Dictionary<string, Achievement> StickerRewards = new() {
             { "sticker_null", P03AchievementManagement.FIRST_WIN },
             { "sticker_skull", P03AchievementManagement.SKULLSTORM },
+            { "sticker_ceiling_cat_border", P03AchievementManagement.CONTROL_NFT },
             { "sticker_binary_ribbon", P03AchievementManagement.SURVIVE_SIX_ARCHIVIST },
             { "sticker_camera_photog", P03AchievementManagement.DONT_USE_CAMERA },
             { "sticker_annoy_face", P03AchievementManagement.CANVAS_ENOUGH },
             { "sticker_cowboy_hat", P03AchievementManagement.KILL_30_BOUNTY_HUNTERS },
+            { "sticker_pokerchips", P03AchievementManagement.ALL_QUESTS_COMPLETED },
+            { "sticker_companion_cube", P03AchievementManagement.KILL_QUEST_CARD },
             { "sticker_altcat", P03AchievementManagement.SCALES_TILTED_3X },
             { "sticker_muscles", P03AchievementManagement.FULLY_UPGRADED },
+            { "sticker_dr_fire_esq_2", P03AchievementManagement.MAX_SP_CARD },
             { "sticker_battery", P03AchievementManagement.TURBO_RAMP },
             { "sticker_tophat", P03AchievementManagement.MASSIVE_OVERKILL },
             { "sticker_wizardhat", P03AchievementManagement.PLASMA_JIMMY_CRAZY },
+            { "sticker_guillotine", P03AchievementManagement.FULLY_OVERCLOCKED },
             { "sticker_mushroom", P03AchievementManagement.MYCOLOGISTS_COMPLETED },
             { "sticker_winged_shoes", P03AchievementManagement.FAST_GENERATOR }
         };
@@ -344,7 +350,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             textureRenderer.material.renderQueue = 3000;
         }
 
-        internal static GameObject GetSticker(string stickerName, bool interactable, bool project, StickerStyle style)
+        internal static GameObject GetSticker(string stickerName, bool interactable, bool project, StickerStyle style, int stencilNumber = 1)
         {
             Texture2D texture = AllStickerTypes[style].FirstOrDefault(t => t.name.Equals(stickerName));
             if (texture == null)
@@ -372,7 +378,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
                 GameObject projectorObject = new("Projector");
                 projectorObject.transform.SetParent(sticker.transform);
-                projectorObject.transform.localPosition = new(0f, 0f, -1.25f);
+                projectorObject.transform.localPosition = new(0f, 0f, -0.35f);
 
                 Projector projector = projectorObject.AddComponent<Projector>();
                 string shaderName = interactable ? "P03/Projector/UnStenciledSticker" : "P03/Projector/StenciledSticker";
@@ -380,12 +386,19 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 projector.material = new(lightShader);
                 projector.material.SetColor("_Color", Color.white);
                 projector.material.SetTexture("_ShadowTex", texture);
+                if (!interactable)
+                    projector.material.SetInt("_StencilNumber", stencilNumber);
                 projector.farClipPlane = interactable ? 1.3121f : 1.26f;
                 projector.nearClipPlane = interactable ? 0f : 1.23f;
                 projector.fieldOfView = 25;
                 projector.ignoreLayers = 1 << 2;
                 projector.orthographic = true;
                 projector.orthographicSize = 0.25f;
+
+                // GameObject projectorSphere = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                // projectorSphere.transform.SetParent(sticker.transform);
+                // projectorSphere.transform.localPosition = projector.transform.localPosition;
+                // projectorSphere.transform.localScale = new(0.05f, 0.05f, 0.05f);
 
                 if (!interactable)
                 {
@@ -485,6 +498,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             yield return sequence;
         }
 
+        private static int LAST_STENCIL_NUMBER = 2;
+
         [HarmonyPatch(typeof(Card), nameof(Card.RenderCard))]
         [HarmonyPostfix]
         private static void ApplyStickersToCard(ref Card __instance)
@@ -504,6 +519,11 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 UnityEngine.Object.Destroy(proj.transform.parent.gameObject);
             }
 
+            if (LAST_STENCIL_NUMBER == 255)
+                LAST_STENCIL_NUMBER = 2;
+            else
+                LAST_STENCIL_NUMBER++;
+
             string cardKey = GetCardKey(__instance.Info);
             Dictionary<string, Dictionary<string, Vector3>> positions = AppliedStickerPositions;
             Dictionary<string, Dictionary<string, Vector3>> scales = AppliedStickerScales;
@@ -514,19 +534,25 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             {
                 if (!activeInterface)
                 {
+                    foreach (Transform child in __instance.StatsLayer.transform)
+                        if (child.gameObject.name.Equals("Stencil"))
+                            GameObject.Destroy(child.gameObject);
+
                     GameObject stencil = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     stencil.name = "Stencil";
                     stencil.transform.SetParent(__instance.StatsLayer.transform);
                     stencil.transform.localScale = new(1.945f, 1.385f, 0.055f);
                     stencil.transform.localPosition = new(0f, -0.05f, 0f);
                     stencil.transform.localEulerAngles = new(0f, 0f, 0f);
-                    stencil.GetComponent<Renderer>().material = new Material(STENCIL_SHADER);
+                    var material = new Material(STENCIL_SHADER);
+                    material.SetInt("_StencilNumber", LAST_STENCIL_NUMBER);
+                    stencil.GetComponent<Renderer>().material = material;
                     UnityEngine.Object.Destroy(stencil.GetComponent<Collider>());
                 }
 
                 foreach (string stickerKey in positions[cardKey].Keys)
                 {
-                    GameObject sticker = GetSticker(stickerKey, activeInterface, true, StickerStyle.Standard);
+                    GameObject sticker = GetSticker(stickerKey, activeInterface, true, StickerStyle.Standard, LAST_STENCIL_NUMBER);
                     sticker.transform.SetParent(__instance.StatsLayer.transform);
                     sticker.transform.localPosition = positions[cardKey][stickerKey];
                     sticker.transform.localEulerAngles = new(0f, 180f, 90f);
@@ -542,7 +568,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                     }
 
                     // Reparent
-                    sticker.transform.SetParent(__instance.StatsLayer.transform.Find(sticker.transform.localPosition.x > 0 ? "Top" : "Bottom"), true);
+                    if ((__instance is PlayableCard pCard && pCard.OnBoard) || __instance is SelectableCard)
+                        sticker.transform.SetParent(__instance.StatsLayer.transform.Find(sticker.transform.localPosition.x > 0 ? "Top" : "Bottom"), true);
                 }
             }
         }

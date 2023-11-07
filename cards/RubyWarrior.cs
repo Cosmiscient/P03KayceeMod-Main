@@ -16,8 +16,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         static RubyWarrior()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
-            info.rulebookName = "Ruby Warrior";
-            info.rulebookDescription = "When [creature] is played, it attacks all enemy cards opposite Ruby Providers its owner controls.";
+            info.rulebookName = "Orange Mox Warrior";
+            info.rulebookDescription = "When [creature] is played, it attacks all enemy cards opposite Orange Mox providers its owner controls.";
             info.canStack = true;
             info.powerLevel = 1;
             info.opponentUsable = true;
