@@ -74,10 +74,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Fire", "starterdeck_icon_fire", new string[] { "PyroBot", "Molotov", "StreetSweeper" }), unlockLevel: 8);
             StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Bomb", "starterdeck_icon_bomb", new string[] { "Bombbot", "LatcherBomb", "Suicell" }), unlockLevel: 8);
             StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Annoying", "starterdeck_icon_annoying", new string[] { "AlarmBot", "Clockbot", "Gopher" }), unlockLevel: 8);
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Recharge", "starterdeck_icon_recharge", new string[] { "Weeper", "Encapsulator", "BatteryTentacle" }), unlockLevel: 8);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Recharge", "starterdeck_icon_recharge", new string[] { "Weeper", "Encapsulator", "RoboMice" }), unlockLevel: 8);
             StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Helpers", "starterdeck_icon_helpers", new string[] { "AmmoBot", "GlowBot", "PitySeeker" }), unlockLevel: 8);
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Animals", "starterdeck_icon_animals", new string[] { "BoltHound", "RobotRam", "Poodle" }), unlockLevel: 8);
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Latchers", "starterdeck_icon_latchers", new string[] { "ConveyorLatcher", "FlyingLatcher", "SwapperLatcher" }), unlockLevel: 8);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Cheapo", "starterdeck_icon_cheap", new string[] { "Librarian", "BoxBot", "JimmyJr" }), unlockLevel: 8);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Latchers", "starterdeck_icon_latchers", new string[] { "ConveyorLatcher", "LatcherBrittle", "SwapperLatcher" }), unlockLevel: 8);
 
             StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Replicas", "starterdeck_icon_replicas", new string[] { "BleeneAcolyte", "OrluAcolyte", "GoranjAcolyte" }), unlockLevel: 8);
 

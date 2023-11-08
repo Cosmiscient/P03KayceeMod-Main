@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
@@ -21,7 +22,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;
+            info.conduit = true;
             info.passive = false;
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_latch_conduit.png", typeof(LatchNullConduit).Assembly));
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
             AbilityID = AbilityManager.Add(

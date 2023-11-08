@@ -82,6 +82,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_conveyorlatcher.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 1)
                 .SetRegionalP03Card(CardTemple.Undead)
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_conveyor_latcher.png", typeof(ExpansionPackCards_1).Assembly))
                 .AddAbilities(Ability.StrafeSwap, LatchRampage.AbilityID);
 
             // flying Latcher

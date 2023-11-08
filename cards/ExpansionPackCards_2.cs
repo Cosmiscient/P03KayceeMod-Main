@@ -108,6 +108,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ignitron.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 3)
                 .SetNeutralP03Card()
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_ignitron.png", typeof(ExpansionPackCards_2).Assembly))
                 .AddAbilities(FireBomb.AbilityID);
 
             // GlowBot
@@ -123,6 +124,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_m010t0v.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 1)
                 .SetNeutralP03Card()
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_molotov.png", typeof(ExpansionPackCards_2).Assembly))
                 .AddAbilities(Molotov.AbilityID);
 
             // Flaming Exeskeleton
@@ -144,6 +146,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_streetcleaner.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 6)
                 .SetNeutralP03Card()
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("portrait_street_sweeper.png", typeof(ExpansionPackCards_2).Assembly))
                 .AddAbilities(FireBomb.AbilityID, Ability.Strafe);
 
             // Give-A-Way
@@ -158,7 +161,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_pity_seeker.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 1)
                 .SetRegionalP03Card(CardTemple.Tech, CardTemple.Undead)
-                .AddAbilities(Ability.ConduitNull, LatchNullConduit.AbilityID);
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_pity_seeker.png", typeof(ExpansionPackCards_2).Assembly))
+                .AddAbilities(LatchNullConduit.AbilityID);
 
             // Urch1n Cell
             CardManager.New(EXP_2_PREFIX, "UrchinCell", "Urch1n Cell", 0, 3)
@@ -195,6 +199,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_jimmy_jr.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 1)
                 .SetNeutralP03Card()
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_jimmy_jr.png", typeof(ExpansionPackCards_2).Assembly))
                 .AddAbilities(DrawTwoZap.AbilityID);
 
             // OP Bot

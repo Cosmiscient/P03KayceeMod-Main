@@ -47,6 +47,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.powerLevel = 1;
             info.opponentUsable = true;
             info.passive = false;
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_solar_heart.png", typeof(SolarHeart).Assembly));
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
             SolarHeart.AbilityID = AbilityManager.Add(
