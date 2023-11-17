@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
+using Infiniscryption.P03KayceeRun.BattleMods;
 using Infiniscryption.P03KayceeRun.Quests;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
@@ -39,6 +42,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public int battleTerrainIndex;
         public int encounterDifficulty;
         public bool isSecretRoom;
+        public List<BattleModManager.ID> battleMods = new();
 
         public SpecialEvent dialogueEvent;
 
@@ -47,7 +51,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public int distance; // used only for generation - doesn't get saved or parsed
         public int color;
 
-        public override string ToString() => $"[{randomSeed},{x},{y},{arrowDirections},{specialDirection},{specialDirectionType},{encounterDifficulty},{(int)opponent},{(int)upgrade},{specialTerrain},{blockedDirections},{(int)blockEvent},{battleTerrainIndex},{color},{(int)dialogueEvent},{secretDirection},{isSecretRoom},{encounterIndex}]";
+        private string GetBattleModString() => String.Join("#", battleMods.Select(i => i.ToString()));
+
+        public override string ToString() => $"[{randomSeed},{x},{y},{arrowDirections},{specialDirection},{specialDirectionType},{encounterDifficulty},{(int)opponent},{(int)upgrade},{specialTerrain},{blockedDirections},{(int)blockEvent},{battleTerrainIndex},{color},{(int)dialogueEvent},{secretDirection},{isSecretRoom},{encounterIndex},{GetBattleModString()}]";
 
         public HoloMapBlueprint(int randomSeed) { this.randomSeed = randomSeed; encounterIndex = -1; upgrade = HoloMapNode.NodeDataType.MoveArea; }
 
@@ -75,6 +81,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             secretDirection = split.Length > 15 ? int.Parse(split[15]) : 0;
             isSecretRoom = split.Length > 16 && bool.Parse(split[16]);
             encounterIndex = split.Length > 17 ? int.Parse(split[17]) : -1;
+
+            battleMods = new();
+            if (split.Length > 18)
+            {
+                var allMods = split[18].Split('#');
+                foreach (string p in allMods)
+                    if (int.TryParse(p, out int id))
+                        battleMods.Add((BattleModManager.ID)id);
+            }
         }
 
         public bool EligibleForUpgrade
@@ -89,6 +104,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         }
 
         public bool EligibleForDialogue => dialogueEvent == SpecialEvent.None;
+
+        public bool IsBattleRoom => (specialDirectionType is BATTLE or NEUTRAL_BATTLE) && specialDirection != 0;
 
         public bool IsDeadEnd
         {

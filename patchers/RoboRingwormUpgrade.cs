@@ -5,8 +5,8 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Helpers;
+using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Saves;
 using UnityEngine;
 
@@ -31,7 +31,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         [HarmonyPostfix]
         private static IEnumerator WhineAboutNewModifier(IEnumerator sequence, DiskDriveModSequencer __instance)
         {
-            if (__instance is AddCardAbilitySequencer && HasEatenRingworm && !HasIntroducedNewDiskDrive)
+            if (P03AscensionSaveData.IsP03Run && __instance is AddCardAbilitySequencer && HasEatenRingworm && !HasIntroducedNewDiskDrive)
             {
                 HasIntroducedNewDiskDrive = true;
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03RingwormNew", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
@@ -45,6 +45,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         [HarmonyPrefix]
         private static bool UpdateChoicesForRingworm(AddCardAbilitySequencer __instance, CardInfo selectedCard)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
             if (!HasEatenRingworm)
                 return true;
 
@@ -58,8 +61,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                                                               .ToList();
                 allBustedAbilities.Add(Ability.TriStrike);
                 allBustedAbilities.Add(Ability.Evolve);
-                allBustedAbilities.Add(GuidManager.GetEnumValue<Ability>("extraVoid.inscryption.voidSigils", "Electric"));
-                allBustedAbilities.Add(GuidManager.GetEnumValue<Ability>("extraVoid.inscryption.voidSigils", "Coin Finder"));
                 allBustedAbilities.Remove(Ability.Transformer);
                 allBustedAbilities = allBustedAbilities.Distinct().ToList();
 
@@ -85,7 +86,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         [HarmonyPostfix]
         private static IEnumerator RingwormCheckSequence(IEnumerator sequence, DiskDriveModSequencer __instance)
         {
-            if (__instance is not AddCardAbilitySequencer abilityMachine)
+            if (!P03AscensionSaveData.IsP03Run || __instance is not AddCardAbilitySequencer abilityMachine)
             {
                 yield return sequence;
                 yield break;

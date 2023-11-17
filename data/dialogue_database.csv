@@ -441,3 +441,6 @@ P03BombQuestActive,NPC,,"I'm just buzzing with anticipation to see what happens 
 P03BombQuestComplete,NPC,,"That was some truly explosive gameplay!"
 ,,,"Here's a little something for your trouble."
 P03NoMoneyToReroll,Default,,"You can't afford that"
+P03FastTravelKaycee,Default,,"That [c:bR]warp node[c:] will unlock when you defeat the [c:bG]Uberbot[c:] on this map"
+,,,"And by the way, I upgraded that [c:bR]minimap[c:] recently"
+,,,"You can click any room you've visited before to travel there instantly"

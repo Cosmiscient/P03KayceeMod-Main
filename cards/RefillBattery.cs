@@ -1,12 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
+using HarmonyLib;
+using Infiniscryption.Spells;
+using Infiniscryption.Spells.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
+    [HarmonyPatch]
     public class RefillBattery : AbilityBehaviour
     {
         public override Ability Ability => AbilityID;
@@ -36,6 +41,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override IEnumerator OnResolveOnBoard()
         {
             yield return ResourcesManager.Instance.AddEnergy(1);
+        }
+
+        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.CanPlay))]
+        [HarmonyPrefix]
+        private static bool OnlyPlayIfNeedsEnergy(PlayableCard __instance, ref bool __result)
+        {
+            if (__instance.HasAbility(RefillBattery.AbilityID) && __instance.Info.IsSpell() && ResourcesManager.Instance.PlayerEnergy == ResourcesManager.Instance.PlayerMaxEnergy)
+            {
+                __result = false;
+                return false;
+            }
+            return true;
         }
     }
 }

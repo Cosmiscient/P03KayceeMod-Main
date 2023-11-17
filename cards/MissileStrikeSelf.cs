@@ -8,7 +8,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class MissileStrikeSelf : MissileStrike
     {
         public static new Ability AbilityID { get; private set; }

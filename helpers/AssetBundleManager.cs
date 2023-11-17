@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BepInEx;
+using InscryptionAPI.Resource;
+using Sirenix.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Helpers
@@ -21,6 +23,7 @@ namespace Infiniscryption.P03KayceeRun.Helpers
             Shaders = new(bundle.LoadAllAssets<Shader>());
 
             Prefabs = bundle.LoadAllAssets<GameObject>().ToDictionary(o => o.name);
+            Prefabs.ForEach(kvp => ResourceBankManager.Add(P03Plugin.PluginGuid, $"p03kcm/prefabs/{kvp.Key}", kvp.Value, true));
 
             bundle.Unload(false);
         }

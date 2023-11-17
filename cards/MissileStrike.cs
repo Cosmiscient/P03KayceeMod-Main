@@ -110,6 +110,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 public int AttackValue { get; set; }
                 public PlayableCard Attacker { get; set; }
                 public GameObject Target { get; set; }
+                public bool PlayerUpkeep { get; set; }
+                public int TurnNumber { get; set; }
             }
 
             protected List<StrikeInfo> PendingAttacks = new();
@@ -147,7 +149,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             internal void QueueMissileStrike(PlayableCard attacker, int value, CardSlot target)
             {
                 GameObject aimIcon = Instantiate(ResourceBank.Get<GameObject>("Prefabs/Cards/SpecificCardModels/SniperTargetIcon"), target.transform);
-                aimIcon.transform.localPosition = new Vector3(0f, 0.01f, 0f);
+                aimIcon.transform.localPosition = new Vector3(0f, 0.15f, 0f);
                 aimIcon.transform.localRotation = Quaternion.identity;
                 aimIcon.transform.localScale = new(2f, 1f, 2f);
                 OnboardDynamicHoloPortrait.HolofyGameObject(aimIcon, GameColors.Instance.brightBlue);
@@ -161,20 +163,41 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     }
                 }
 
-                PendingAttacks.Add(new() { Attacker = attacker, AttackValue = value, Slot = target, Target = aimIcon });
+                PendingAttacks.Add(new() { Attacker = attacker, AttackValue = value, Slot = target, Target = aimIcon, PlayerUpkeep = TurnManager.Instance.IsPlayerTurn, TurnNumber = TurnManager.Instance.TurnNumber + 1 });
             }
 
             public override bool RespondsToUpkeep(bool playerUpkeep) => PendingAttacks.Any(t => t.Slot.IsPlayerSlot != playerUpkeep);
 
+            private static IEnumerator OverkillSimulator(int damage, PlayableCard attacker, CardSlot opposingSlot)
+            {
+                PlayableCard queuedCard = BoardManager.Instance.GetCardQueuedForSlot(opposingSlot);
+                if (queuedCard != null)
+                {
+                    yield return new WaitForSeconds(0.1f);
+                    ViewManager.Instance.SwitchToView(BoardManager.Instance.QueueView, false, false);
+                    yield return new WaitForSeconds(0.3f);
+                    if (queuedCard.HasAbility(Ability.PreventAttack) && attacker != null)
+                    {
+                        yield return TurnManager.Instance.CombatPhaseManager.ShowCardBlocked(attacker);
+                    }
+                    else
+                    {
+                        yield return TurnManager.Instance.CombatPhaseManager.PreOverkillDamage(queuedCard);
+                        yield return queuedCard.TakeDamage(damage, attacker);
+                        yield return TurnManager.Instance.CombatPhaseManager.PostOverkillDamage(queuedCard);
+                    }
+                }
+            }
+
             public override IEnumerator OnUpkeep(bool playerUpkeep)
             {
-                List<StrikeInfo> strikeQueue = PendingAttacks.Where(t => t.Slot.IsPlayerSlot != playerUpkeep).ToList();
+                List<StrikeInfo> strikeQueue = PendingAttacks.Where(t => t.PlayerUpkeep == playerUpkeep && t.TurnNumber == TurnManager.Instance.TurnNumber).ToList();
                 while (strikeQueue.Count > 0)
                 {
                     StrikeInfo atkDefn = strikeQueue[0];
 
                     bool setCardSlot = false;
-                    if (atkDefn.Attacker.Dead)
+                    if (atkDefn.Attacker != null && atkDefn.Attacker.Dead)
                     {
                         BoardManager.Instance.GetSlots(playerUpkeep).Add(DummyCardSlot);
                         DummyCardSlot.opposingSlot = atkDefn.Slot;
@@ -210,7 +233,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     {
                         if (slot == null)
                         {
-                            yield return TurnManager.Instance.CombatPhaseManager.DealOverkillDamage(atkDefn.AttackValue, atkDefn.Attacker.Slot, atkDefn.Slot);
+                            yield return OverkillSimulator(atkDefn.AttackValue, atkDefn.Attacker, atkDefn.Slot);
                             continue;
                         }
                         yield return CustomTriggerFinder.TriggerAll<IOnPreSlotAttackSequence>(false, x => x.RespondsToPreSlotAttackSequence(slot), x => x.OnPreSlotAttackSequence(slot));
@@ -222,7 +245,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                             yield return slot.Card.TakeDamage(atkDefn.AttackValue, atkDefn.Attacker);
                         }
 
-                        yield return CustomTriggerFinder.TriggerAll<IOnPostSingularSlotAttackSlot>(false, x => x.RespondsToPostSingularSlotAttackSlot(atkDefn.Attacker.Slot, slot), x => x.OnPostSingularSlotAttackSlot(atkDefn.Attacker.Slot, slot));
+                        if (atkDefn.Attacker != null)
+                            yield return CustomTriggerFinder.TriggerAll<IOnPostSingularSlotAttackSlot>(false, x => x.RespondsToPostSingularSlotAttackSlot(atkDefn.Attacker.Slot, slot), x => x.OnPostSingularSlotAttackSlot(atkDefn.Attacker.Slot, slot));
+
                         yield return CustomTriggerFinder.TriggerAll<IOnPostSlotAttackSequence>(false, x => x.RespondsToPostSlotAttackSequence(slot), x => x.OnPostSlotAttackSequence(slot));
                     }
 
@@ -239,6 +264,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 }
             }
         }
+
+        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.SetupPhase))]
+        [HarmonyPostfix]
+        private static void EnsureSetup() => _ = MissileStrikeManager.Instance;
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
         [HarmonyPostfix]
@@ -259,18 +288,33 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return true;
         }
 
-        private IEnumerator BombCard(CardSlot target, PlayableCard attacker)
+        public static IEnumerator LaunchMissile(CardSlot target, Transform source, int amount, PlayableCard attacker, Vector3? initialOffset = null, float? scale = null)
         {
-            GameObject missile = Instantiate(AssetBundleManager.Prefabs["Missile"], attacker.Slot.transform);
-            OnboardDynamicHoloPortrait.HolofyGameObject(missile, GameColors.instance.glowRed);
-            missile.transform.localPosition = Vector3.down;
+            ViewManager.Instance.SwitchToView(View.Default);
+            yield return new WaitForSeconds(0.5f);
+            GameObject missile = Instantiate(ResourceBank.Get<GameObject>("p03kcm/prefabs/Missile"), source.transform);
 
-            Tween.LocalPosition(missile.transform, Vector3.up * 5, .4f, 0f);
-            AudioController.Instance.PlaySound3D("missile_launch", MixerGroup.TableObjectsSFX, attacker.Slot.transform.position);
+            OnboardDynamicHoloPortrait.HolofyGameObject(missile, GameColors.instance.glowRed);
+            missile.transform.localPosition = initialOffset ?? Vector3.down;
+            if (scale.HasValue)
+                missile.transform.localScale *= scale.Value;
+
+            float flyDuration = scale.HasValue ? scale.Value * 10f : 10f;
+
+            Tween.LocalPosition(missile.transform, Vector3.up * flyDuration, .4f, 0f, completeCallback: () => GameObject.Destroy(missile));
+            AudioController.Instance.PlaySound3D("missile_launch", MixerGroup.TableObjectsSFX, source.position);
             yield return new WaitForSeconds(1f);
 
-            MissileStrikeManager.Instance.QueueMissileStrike(attacker, attacker.Attack, target);
+            MissileStrikeManager.Instance.QueueMissileStrike(attacker, amount, target);
             yield break;
+        }
+
+        public static IEnumerator LaunchMissile(CardSlot target, CardSlot source)
+        {
+            if (source.Card != null)
+                yield return LaunchMissile(target, source.transform, source.Card.Attack, source.Card);
+            else
+                yield return LaunchMissile(target, source.transform, 1, null);
         }
 
         public override IEnumerator Activate()
@@ -343,7 +387,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             foreach (CardSlot opposingSlot in opposingSlots)
             {
                 ViewManager.Instance.SwitchToView(BoardManager.Instance.DefaultView, false, false);
-                yield return BombCard(opposingSlot, Card);
+                yield return LaunchMissile(opposingSlot, this.Card.Slot);
             }
 
             ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
@@ -353,8 +397,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             if (ShotsRemaining == 0)
             {
-                CardModificationInfo noMoreMissiles = new() { negateAbilities = new() { AbilityID } };
-                Card.AddTemporaryMod(noMoreMissiles);
+                Card.Status.hiddenAbilities.Add(AbilityID);
+                Card.RenderCard();
+                // CardModificationInfo noMoreMissiles = new() { negateAbilities = new() { AbilityID } };
+                // Card.AddTemporaryMod(noMoreMissiles);
             }
             else
             {

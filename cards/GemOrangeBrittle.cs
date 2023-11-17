@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class GemOrangeBrittle : Brittle
     {
         public override Ability Ability => AbilityID;

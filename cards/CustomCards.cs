@@ -6,6 +6,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.Spells.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
@@ -27,8 +28,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public static readonly Trait UpgradeVirus = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "UpgradeMachineVirus");
         public static readonly Trait Unrotateable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "Unrotateable");
         public static readonly Trait QuestCard = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "QuestCard");
+        public static readonly Trait FastGlobalSpell = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "FastGlobalSpell");
 
         public static readonly Texture2D DUMMY_DECAL = TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly);
+        public static readonly Texture2D DUMMY_DECAL_2 = TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly);
+        //private static readonly Texture2D CELL_GIFT_TEXTURE = TextureHelper.GetImageAsTexture("pixelability_cell_gift.png", typeof(CustomCards).Assembly);
 
         public const string DRAFT_TOKEN = "P03KCM_Draft_Token";
         public const string UNC_TOKEN = "P03KCM_Draft_Token_Uncommon";
@@ -65,114 +69,112 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private static readonly List<CardMetaCategory> GBC_RARE_PLAYABLES = new() { CardMetaCategory.GBCPack, CardMetaCategory.GBCPlayable, CardMetaCategory.Rare, CardMetaCategory.ChoiceNode };
 
-        [HarmonyPatch(typeof(CardLoader), nameof(CardLoader.Clone))]
-        [HarmonyPostfix]
-        private static void ModifyCardForAscension(ref CardInfo __result)
+        private static void ModifyCardForAscension(CardInfo cardToModify)
         {
-            if (P03AscensionSaveData.IsP03Run || ScreenManagement.ScreenState == CardTemple.Tech)
+            // This used to be a patch on CardLoader.Clone; I'm no longer doing it that way
+            // But rather than completely rewrite it, I'm just converting the old patch method to
+            // run inside the CardManager event. Less can go wrong that way
+            string compName = cardToModify.name.ToLowerInvariant();
+            if (compName.StartsWith("sentinel") || cardToModify.name == "TechMoxTriple")
             {
-                string compName = __result.name.ToLowerInvariant();
-                if (compName.StartsWith("sentinel") || __result.name == "TechMoxTriple")
+                if (compName.StartsWith("sentinel"))
                 {
-                    if (compName.StartsWith("sentinel"))
-                    {
-                        __result.energyCost = 3;
-                    }
-                    else
-                    {
-                        __result.baseHealth = 1;
-                    }
+                    cardToModify.energyCost = 3;
+                }
+                else
+                {
+                    cardToModify.baseHealth = 1;
+                }
 
-                    if (!__result.Gemified)
-                    {
-                        __result.mods.Add(new() { gemify = true });
-                    }
-                }
-                else if (compName.Equals("abovecurve"))
+                if (!cardToModify.Gemified)
                 {
-                    __result.energyCost = 3;
+                    cardToModify.mods.Add(new() { gemify = true });
                 }
-                else if (compName.Equals("automaton"))
-                {
-                    __result.energyCost = 2;
-                }
-                else if (compName.Equals("thickbot"))
-                {
-                    __result.baseHealth = 5;
-                }
-                else if (compName.Equals("steambot"))
-                {
-                    __result.abilities = new() { Ability.DeathShield };
-                }
-                else if (compName.Equals("bolthound"))
-                {
-                    __result.baseHealth = 3;
-                }
-                else if (compName.Equals("leapbot"))
-                {
-                    __result.specialAbilities = new() { LeepBotCounter.AbilityID };
-                }
-                else if (compName.Equals("energyroller"))
-                {
-                    __result.abilities = new() { ExpensiveActivatedRandomPowerEnergy.AbilityID };
-                }
-                else if (compName.Equals("amoebot"))
-                {
-                    __result.energyCost = 3;
-                }
-                else if (compName.Equals("factoryconduit"))
-                {
-                    __result.energyCost = 2;
-                }
-                else if (compName.Equals("cellbuff"))
-                {
-                    __result.baseHealth = 1;
-                }
-                else if (compName.Equals("celltri"))
-                {
-                    __result.baseHealth = 1;
-                }
-                else if (compName.Equals("attackconduit"))
-                {
-                    __result.energyCost = 3;
-                }
-                else if (compName.Equals("gemshielder"))
-                {
-                    __result.baseAttack = 0;
-                }
-                else if (compName.Equals("gemexploder"))
-                {
-                    __result.baseHealth = 1;
-                }
-                else if (compName.Equals("insectodrone"))
-                {
-                    __result.energyCost = 2;
-                }
-                else if (compName.Equals("gemripper"))
-                {
-                    __result.mods.Add(new() { gemify = true, abilities = new() { Ability.GemDependant } });
-                    __result.energyCost = 6;
-                }
-                else if (compName.Equals("sentinelblue"))
-                {
-                    __result.energyCost = 4;
-                }
-                else if (compName.Equals("sentinelorange"))
-                {
-                    __result.energyCost = 2;
-                }
-                else if (compName.Equals("robomice"))
-                {
-                    __result.abilities = new() { Ability.DrawCopy, Ability.DrawCopy };
-                }
-                else if (compName.Equals("energyconduit"))
-                {
-                    __result.baseAttack = 0;
-                    __result.abilities = new() { NewConduitEnergy.AbilityID };
-                    __result.appearanceBehaviour = new(__result.appearanceBehaviour) {
-                        EnergyConduitAppearnace.ID
-                    };
-                }
+            }
+            else if (compName.Equals("abovecurve"))
+            {
+                cardToModify.energyCost = 3;
+            }
+            else if (compName.Equals("automaton"))
+            {
+                cardToModify.energyCost = 2;
+            }
+            else if (compName.Equals("thickbot"))
+            {
+                cardToModify.baseHealth = 5;
+            }
+            else if (compName.Equals("steambot"))
+            {
+                cardToModify.abilities = new() { Ability.DeathShield };
+            }
+            else if (compName.Equals("bolthound"))
+            {
+                cardToModify.baseHealth = 3;
+            }
+            else if (compName.Equals("leapbot"))
+            {
+                cardToModify.specialAbilities = new() { LeepBotCounter.AbilityID };
+            }
+            else if (compName.Equals("energyroller"))
+            {
+                cardToModify.abilities = new() { ExpensiveActivatedRandomPowerEnergy.AbilityID };
+            }
+            else if (compName.Equals("amoebot"))
+            {
+                cardToModify.energyCost = 3;
+            }
+            else if (compName.Equals("factoryconduit"))
+            {
+                cardToModify.energyCost = 2;
+            }
+            else if (compName.Equals("cellbuff"))
+            {
+                cardToModify.baseHealth = 1;
+            }
+            else if (compName.Equals("celltri"))
+            {
+                cardToModify.baseHealth = 1;
+            }
+            else if (compName.Equals("attackconduit"))
+            {
+                cardToModify.energyCost = 3;
+            }
+            else if (compName.Equals("gemshielder"))
+            {
+                cardToModify.baseAttack = 0;
+            }
+            else if (compName.Equals("gemexploder"))
+            {
+                cardToModify.baseHealth = 1;
+            }
+            else if (compName.Equals("insectodrone"))
+            {
+                cardToModify.energyCost = 2;
+            }
+            else if (compName.Equals("gemripper"))
+            {
+                cardToModify.mods.Add(new() { gemify = true, abilities = new() { Ability.GemDependant } });
+                cardToModify.energyCost = 6;
+            }
+            else if (compName.Equals("sentinelblue"))
+            {
+                cardToModify.energyCost = 4;
+            }
+            else if (compName.Equals("sentinelorange"))
+            {
+                cardToModify.energyCost = 2;
+            }
+            else if (compName.Equals("robomice"))
+            {
+                cardToModify.abilities = new() { Ability.DrawCopy, Ability.DrawCopy };
+            }
+            else if (compName.Equals("energyconduit"))
+            {
+                cardToModify.baseAttack = 0;
+                cardToModify.abilities = new() { NewConduitEnergy.AbilityID };
+                cardToModify.appearanceBehaviour = new(cardToModify.appearanceBehaviour) {
+                    EnergyConduitAppearnace.ID
+                };
             }
         }
 
@@ -279,7 +281,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static IEnumerator OnlyIfDiedInCombat(IEnumerator sequence, PlayableCard killer)
         {
-            if (SaveFile.IsAscension && SaveManager.SaveFile.IsPart3 && killer == null)
+            if (P03AscensionSaveData.IsP03Run && killer == null)
             {
                 yield return EventManagement.SayDialogueOnce("P03HammerOrb", EventManagement.SAW_NEW_ORB);
                 SaveManager.SaveFile.OuroborosDeaths = SaveManager.SaveFile.OuroborosDeaths - 1;
@@ -287,14 +289,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return sequence;
         }
 
-        private static void UpdateExistingCard(string name, string textureKey, string pixelTextureKey, string regionCode, string decalTextureKey, string colorPortraitKey, bool isPackCard)
+        private static void UpdateExistingCard(List<CardInfo> allCards, string name, string textureKey, string pixelTextureKey, string regionCode, string decalTextureKey, string colorPortraitKey, bool isPackCard)
         {
             if (string.IsNullOrEmpty(name))
             {
                 return;
             }
 
-            CardInfo card = CardManager.BaseGameCards.FirstOrDefault(c => c.name == name);
+            CardInfo card = allCards.FirstOrDefault(c => c.name == name);
             if (card == null)
             {
                 P03Plugin.Log.LogInfo($"COULD NOT MODIFY CARD {name} BECAUSE I COULD NOT FIND IT");
@@ -338,37 +340,50 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         internal static void RegisterCustomCards(Harmony harmony)
         {
-            // Load the custom cards from the CSV database
-            string database = DataHelper.GetResourceString("card_database", "csv");
-            string[] lines = database.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (string line in lines.Skip(1))
-            {
-                string[] cols = line.Split(new char[] { ',' }, StringSplitOptions.None);
-                //InfiniscryptionP03Plugin.Log.LogInfo($"I see line {string.Join(";", cols)}");
-                UpdateExistingCard(cols[0], cols[1], cols[2], cols[3], cols[4], cols[6], cols[5] == "Y");
-            }
-
-            CardManager.BaseGameCards.CardByName("PlasmaGunner").AddAppearances(ForceRevolverAppearance.ID);
-
-            CardManager.BaseGameCards.CardByName("TechMoxTriple").AddDecal(
-                DUMMY_DECAL,
-                DUMMY_DECAL,
-                TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_2.png", typeof(CustomCards).Assembly)
+            AbilityManager.BaseGameAbilities.AbilityByID(Ability.Transformer).Info.SetPixelAbilityIcon(
+                TextureHelper.GetImageAsTexture("pixelability_transform.png", typeof(CustomCards).Assembly)
             );
 
             // This creates all the sprites behind the scenes so we're ready to go
             RandomStupidAssApePortrait.RandomApePortrait.GenerateApeSprites();
 
-            // Update the librarian to display its size
-            CardManager.BaseGameCards.CardByName("Librarian").AddAppearances(LibrarianSizeTitle.ID);
-
             CardManager.ModifyCardList += delegate (List<CardInfo> cards)
             {
                 if (P03AscensionSaveData.IsP03Run)
                 {
+                    // Load the custom cards from the CSV database
+                    string database = DataHelper.GetResourceString("card_database", "csv");
+                    string[] lines = database.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string line in lines.Skip(1))
+                    {
+                        string[] cols = line.Split(new char[] { ',' }, StringSplitOptions.None);
+                        //InfiniscryptionP03Plugin.Log.LogInfo($"I see line {string.Join(";", cols)}");
+                        UpdateExistingCard(cards, cols[0], cols[1], cols[2], cols[3], cols[4], cols[6], cols[5] == "Y");
+                    }
+
+                    cards.ForEach(ModifyCardForAscension);
                     cards.CardByName("EnergyConduit").AddMetaCategories(TechRegion);
                     cards.CardByName("TechMoxTriple").AddMetaCategories(WizardRegion);
                     cards.CardByName("EnergyRoller").AddMetaCategories(CardMetaCategory.Rare);
+                    cards.CardByName("Librarian").AddAppearances(LibrarianSizeTitle.ID);
+                    cards.CardByName("TechMoxTriple").AddDecal(
+                        DUMMY_DECAL,
+                        DUMMY_DECAL_2,
+                        TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_2.png", typeof(CustomCards).Assembly)
+                    );
+                    cards.CardByName("PlasmaGunner").AddAppearances(ForceRevolverAppearance.ID);
+                }
+
+                foreach (CardInfo ci in cards.Where(ci => ci.temple == CardTemple.Tech))
+                {
+                    if (ci.metaCategories.Contains(CardMetaCategory.Rare))
+                        ci.AddAppearances(RareDiscCardAppearance.ID);
+
+                    for (int i = 0; i < ci.abilities.Count; i++)
+                    {
+                        if (ci.abilities[i] == Ability.SteelTrap)
+                            ci.abilities[i] = BetterSteelTrap.AbilityID;
+                    }
                 }
 
                 return cards;
@@ -423,12 +438,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(Ability.Brittle)
                 .temple = CardTemple.Tech;
 
-            CardManager.New(P03Plugin.CardPrefx, VIRUS_SCANNER, "VIRSCAN.EXE", 1, 7)
+            CardManager.New(P03Plugin.CardPrefx, VIRUS_SCANNER, "Virus Scanner", 1, 7)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_virusscanner.png", typeof(CustomCards).Assembly))
                 .AddAbilities(Ability.Deathtouch, Ability.StrafeSwap)
                 .AddDecal(
                     DUMMY_DECAL,
-                    DUMMY_DECAL,
+                    DUMMY_DECAL_2,
                     TextureHelper.GetImageAsTexture("portrait_virusscanner_decal.png", typeof(CustomCards).Assembly)
                 )
                 .temple = CardTemple.Tech;
@@ -438,17 +453,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAppearances(RareDiscCardAppearance.ID);
             ch2.temple = CardTemple.Tech;
             CardManager.BaseGameCards.CardByName("AboveCurve").SetEvolve(ch2, 1);
-
-
-            // CardManager.New(P03Plugin.CardPrefx, PROGRAMMER, "Programmer", 0, 2)
-            //     .SetPortrait(TextureHelper.GetImageAsTexture("portrait_codemonkey.png", typeof(CustomCards).Assembly))
-            //     .AddAbilities(Programmer.AbilityID)
-            //     .temple = CardTemple.Tech;
-
-            // CardManager.New(ARTIST, "Artist", 1, 2)
-            //     .SetPortrait(TextureHelper.GetImageAsTexture("portrait_artist"))
-            //     .AddAbilities(Artist.AbilityID)
-            //     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL, "Turbo Vessel", 0, 2)
                     .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
@@ -516,14 +520,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddTraits(QuestCard)
                 .temple = CardTemple.Tech;
 
-            //NEW BEAST CARDS
-
-            //CardManager.New(P03Plugin.CardPrefx, "CXformerRiverSnapper", "R!V3R 5N4PP3R", 1, 6)
-            //    .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_riversnapper.png", typeof(CustomCards).Assembly))
-            //    .SetCost(energyCost: 4)
-            //    .AddMetaCategories(NewBeastTransformers)
-            //    .temple = CardTemple.Tech;
-
             CardManager.New(P03Plugin.CardPrefx, "CXformerRiverSnapper", "R!V3R 5N4PP3R", 1, 6)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_riversnapper.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 4)
@@ -556,6 +552,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_opossum.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 2)
                 .SetNewBeastTransformer(0, -1);
+
+            CardInfo cTower = CardManager.New(P03Plugin.CardPrefx, "StarterConduitTower", "Tower Conduit", 0, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_conduit_tower.png", typeof(CustomCards).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("syntax_conduittower.png", typeof(CustomCards).Assembly))
+                .AddAppearances(OnboardDynamicHoloPortrait.ID)
+                .AddAbilities(Ability.ConduitNull)
+                .SetCost(energyCost: 1);
+            cTower.temple = CardTemple.Tech;
+            cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/specialnodesequences/teslacoil");
+            cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "0,-.39,0");
+            cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, ".6,.6,.6");
 
             CardInfo radio = CardManager.New(P03Plugin.CardPrefx, RADIO_TOWER, "Radio Tower", 0, 3);
             radio.AddSpecialAbilities(ListenToTheRadio.AbilityID, RerenderOnBoard.AbilityID);
@@ -612,13 +619,19 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAppearances(RareDiscCardAppearance.ID)
                 .temple = CardTemple.Tech;
 
-            // CardManager.New(P03Plugin.CardPrefx, MYCO_CONSTRUCT_PONTOON, "PONTOON", 0, 1)
-            //     .AddAppearances(InvisibleCard.ID)
-            //     .temple = CardTemple.Tech;
-
             // This should patch the rulebook. Also fixes a little bit of the game balance
             AbilityManager.ModifyAbilityList += delegate (List<AbilityManager.FullAbility> abilities)
             {
+                // Might as well put the spells back
+                StatIconManager.FullStatIcon globalSpell = StatIconManager.AllStatIcons.FirstOrDefault(i => i.Id == GlobalSpellAbility.Icon);
+                StatIconManager.FullStatIcon targetedSpell = StatIconManager.AllStatIcons.FirstOrDefault(i => i.Id == TargetedSpellAbility.Icon);
+
+                globalSpell?.Info.rulebookDescription.Replace("Command", "Spell").Replace("Command", "Spell");
+                targetedSpell?.Info.rulebookDescription.Replace("Command", "Spell").Replace("Command", "Spell");
+
+                if (!P03AscensionSaveData.IsP03Run)
+                    return abilities;
+
                 List<Ability> allP3Abs = CardManager.AllCardsCopy.Where(c => c.temple == CardTemple.Tech).SelectMany(c => c.abilities).Distinct().ToList();
                 allP3Abs.Add(Ability.GemDependant);
 
@@ -629,7 +642,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook);
                     }
 
-                    if (P03AscensionSaveData.IsP03Run && (ab.Id == Ability.GainGemBlue || ab.Id == Ability.GainGemOrange || ab.Id == Ability.GainGemGreen))
+                    if (ab.Id is Ability.GainGemBlue or Ability.GainGemOrange or Ability.GainGemGreen)
                     {
                         ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Modular);
                     }
@@ -639,20 +652,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         ab.Info.powerLevel += 2;
                     }
 
-                    if (ab.Id == Ability.ActivatedRandomPowerEnergy && P03AscensionSaveData.IsP03Run)
+                    if (ab.Id == Ability.ActivatedRandomPowerEnergy)
                     {
                         ab.Info.metaCategories = new();
                     }
 
-                    if (ab.Id == Ability.DrawCopy && P03AscensionSaveData.IsP03Run)
+                    if (ab.Id == Ability.DrawCopy)
                     {
                         ab.Info.canStack = true;
                     }
 
-                    if (P03AscensionSaveData.IsP03Run)
-                    {
-                        ab.Info.rulebookDescription = ab.Info.rulebookDescription.Replace("Spell", "Command").Replace("spell", "command");
-                    }
+                    ab.Info.rulebookDescription = ab.Info.rulebookDescription.Replace("Spell", "Command").Replace("spell", "command");
+
                 }
 
                 // Might as well do the stat icons here
@@ -665,28 +676,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     }
                 }
 
+                globalSpell?.Info.rulebookDescription.Replace("Spell", "Command").Replace("Spell", "Command");
+                targetedSpell?.Info.rulebookDescription.Replace("Spell", "Command").Replace("Spell", "Command");
+
                 return abilities;
-            };
-
-            CardManager.ModifyCardList += delegate (List<CardInfo> cards)
-            {
-                foreach (CardInfo ci in cards.Where(ci => ci.temple == CardTemple.Tech))
-                {
-                    if (ci.metaCategories.Contains(CardMetaCategory.Rare))
-                        ci.AddAppearances(RareDiscCardAppearance.ID);
-
-                    for (int i = 0; i < ci.abilities.Count; i++)
-                    {
-                        if (ci.abilities[i] == Ability.SteelTrap)
-                            ci.abilities[i] = BetterSteelTrap.AbilityID;
-                    }
-                }
-
-                return cards;
             };
         }
 
-        public static CardInfo AddPart3Decal(this CardInfo info, Texture2D texture) => info.AddDecal(DUMMY_DECAL, DUMMY_DECAL, texture);
+        public static CardInfo AddPart3Decal(this CardInfo info, Texture2D texture) => info.AddDecal(DUMMY_DECAL, DUMMY_DECAL_2, texture);
 
         public static CardInfo SetFlippedPortrait(this CardInfo info)
         {
@@ -759,7 +756,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.SetExtendedProperty("BorderColor", "gold");
             info.SetExtendedProperty("EnergyColor", "gold");
             info.SetExtendedProperty("NameTextColor", "black");
-            //info.SetExtendedProperty("NameBannerColor", "gold");
             info.SetColorProperty("NameBannerColor", GameColors.Instance.gold * 0.5f);
             info.SetExtendedProperty("AttackColor", "gold");
             info.SetExtendedProperty("HealthColor", "gold");
@@ -889,8 +885,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             List<CardSlot> container = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
 
-            return (slot.Index > 0 && container[slot.Index - 1].SlotHasTripleCard())
-|| (slot.Index + 1 < container.Count && container[slot.Index + 1].SlotHasTripleCard());
+            return (slot.Index > 0 && container[slot.Index - 1].SlotHasTripleCard()) || (slot.Index + 1 < container.Count && container[slot.Index + 1].SlotHasTripleCard());
         }
 
         public static bool SlotCanHoldTripleCard(this CardSlot slot, PlayableCard existingCard = null)

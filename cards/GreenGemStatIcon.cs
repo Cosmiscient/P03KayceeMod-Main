@@ -6,7 +6,6 @@ using InscryptionAPI.Helpers;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class GreenGemPower : VariableStatBehaviour
     {
         public static SpecialStatIcon AbilityID { get; private set; }

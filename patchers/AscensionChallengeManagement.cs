@@ -7,7 +7,6 @@ using DiskCardGame.CompositeRules;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Helpers;
-using Infiniscryption.P03KayceeRun.Quests;
 using InscryptionAPI.Ascension;
 using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
@@ -42,18 +41,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             && AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.LessLives) > 0
             && AscensionSaveData.Data.GetNumChallengesOfTypeActive(BOUNTY_HUNTER) >= 2;
 
-        public static bool ConveyorIsActive =>
-            SaveFile.IsAscension
-            && (AscensionSaveData.Data.ChallengeIsActive(ALL_CONVEYOR.challengeType)
-                || DefaultQuestDefinitions.Conveyors.IsDefaultActive())
-            && TurnManager.Instance.opponent is not Part3BossOpponent;
-
-        public static bool ExplosiveIsActive =>
-            SaveFile.IsAscension
-            && (AscensionSaveData.Data.ChallengeIsActive(BOMB_CHALLENGE.challengeType)
-                || DefaultQuestDefinitions.BombBattles.IsDefaultActive())
-            && TurnManager.Instance.opponent is not Part3BossOpponent;
-
         internal static bool TurboVesselsUIPlayed
         {
             get => ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "TurboVesselsUIPlayed");
@@ -79,8 +66,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         }
 
         private static CanvasBossOpponent CanvasBoss => Singleton<TurnManager>.Instance.Opponent as CanvasBossOpponent;
-        private static CompositeRuleTriggerHandler rulesHandler;
-        private static CompositeBattleRule currentRule;
+        private static readonly CompositeRuleTriggerHandler rulesHandler;
+        private static readonly CompositeBattleRule currentRule;
         private static readonly CompositeRuleDisplayer ruleDisplayer;
 
         public static Part3BossOpponent dummyCanvasBoss;
@@ -309,76 +296,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             };
         }
 
-        //Runs after the part 3 boss intro sequence
-        public static IEnumerator RandomCanvasRule(IEnumerator sequence)
-        {
-            if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(PAINTING_CHALLENGE))
-            {
-                dummyCanvasBoss = (Part3BossOpponent)Singleton<TurnManager>.Instance.Opponent;
-
-                //If the canvas boss exists, delete it. Then, either way, create a new one.
-                dummyCanvasBoss.DestroyScenery();
-                dummyCanvasBoss.SpawnScenery("LightQuadTableEffect");
-                GameObject CanvasBackground = GameObject.Find("LightQuadTableEffect(Clone)");
-                Renderer renderer = CanvasBackground.GetComponentInChildren<Renderer>();
-                renderer.enabled = false;
-
-                //Singleton<RulePaintingManager>.Instance.SetPaintingsShown(shown: false);
-                //Part3BossOpponent boss = (Part3BossOpponent)Singleton<Part3BossOpponent>.Instance;
-                //if (Singleton<TurnManager>.Instance.Opponent is CanvasBossOpponent canvasBoss)
-                {
-                    //ruleDisplayer = P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.CreateRule).GetComponentInChildren<CompositeRuleDisplayer>();
-                    //ruleDisplayer.ResetPainting();
-
-                    ChallengeActivationUI.Instance.ShowActivation(PAINTING_CHALLENGE);
-
-                    rulesHandler = dummyCanvasBoss.gameObject.AddComponent<CompositeRuleTriggerHandler>();
-                    //Debug.Log("rulesHandler is fine");
-                    currentRule = new CompositeBattleRule();
-                    int randomEffectID = UnityEngine.Random.Range(0, CompositeBattleRule.AVAILABLE_EFFECTS.Count);
-                    int randomTriggerID = UnityEngine.Random.Range(0, CompositeBattleRule.AVAILABLE_TRIGGERS.Count);
-                    //Debug.Log("Effects: "+ CompositeBattleRule.AVAILABLE_EFFECTS.Count);
-                    //Debug.Log("Triggers: " + CompositeBattleRule.AVAILABLE_TRIGGERS.Count);
-
-                    //Get rid of damage effects for archivist
-                    if (Singleton<TurnManager>.Instance.Opponent is ArchivistBossOpponent archivistBossOpponent)
-                    {
-                        // The player is facing the Archivist boss
-                        Debug.Log("Facing Archivist boss");
-                        Debug.Log("EffectID: " + randomEffectID);
-                        //1 is 5 damage to random card, 4 is all cards damaged by 1
-                        if (randomEffectID is 1 or 4)
-                        {
-                            //Player take damage, 1 damage on scales
-                            randomEffectID = 0;
-                        }
-                    }
-                    else if (Singleton<TurnManager>.Instance.Opponent is Part3BossOpponent anotherBossOpponent)
-                    {
-                        // The player is facing another boss
-                        Debug.Log("Facing another boss");
-                    }
-                    else
-                    {
-                        // The player is not facing any boss
-                        Debug.Log("Not facing a boss");
-                    }
-
-                    currentRule.effect = CompositeBattleRule.AVAILABLE_EFFECTS.ElementAt(randomEffectID);
-                    currentRule.trigger = CompositeBattleRule.AVAILABLE_TRIGGERS.ElementAt(randomTriggerID);
-
-                    //ruleDisplayer.DisplayRule(currentRule);
-                    //ruleDisplayer.MovingPaintingOffscreen();
-                    //Singleton<RulePaintingManager>.Instance.SetPaintingsShown(shown: true);
-                    yield return Singleton<RulePaintingManager>.Instance.SpawnPainting(currentRule);
-                    rulesHandler.AddRule(currentRule);
-                    Singleton<RulePaintingManager>.Instance.SetPaintingsShown(shown: true);
-                }
-            }
-
-            yield return sequence;
-        }
-
         [HarmonyPatch(typeof(AscensionChallengeScreen), nameof(AscensionChallengeScreen.OnEnable))]
         [HarmonyPostfix]
         private static void HideLockedBossIcon(AscensionChallengeScreen __instance) => __instance.gameObject.GetComponentInChildren<ChallengeIconGrid>().Start();
@@ -395,6 +312,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static void DynamicSwapSize(ChallengeIconGrid __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (!AscensionUnlockSchedule.ChallengeIsUnlockedForLevel(AscensionChallenge.FinalBoss, AscensionSaveData.Data.challengeLevel))
             {
                 __instance.finalBossIcon.SetActive(false);
@@ -492,6 +412,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPriority(Priority.High)]
         private static bool BuildPart3SideDeck(ref List<CardInfo> __result)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
             if (SaveFile.IsAscension)
             {
                 if (AscensionSaveData.Data.ChallengeIsActive(LEEPBOT_SIDEDECK))
@@ -534,6 +457,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static bool ReplaceBuildSideDeck(Part3DeckReviewSequencer __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
             __instance.sideDeck.Clear();
             __instance.sideDeck.AddRange(Part3CardDrawPiles.CreateVesselDeck());
             return false;
@@ -543,41 +469,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static bool ReplaceAddSideDeck(CardInfo cardInfo)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
             string currentAbilityString = String.Join(", ", cardInfo.Abilities);
             P03Plugin.Log.LogDebug($"Before applying side deck abilities card {cardInfo.DisplayedNameEnglish} has {currentAbilityString}");
             Part3CardDrawPiles.AddModsToVessel(cardInfo);
             currentAbilityString = String.Join(", ", cardInfo.Abilities);
             P03Plugin.Log.LogDebug($"After applying side deck abilities card {cardInfo.DisplayedNameEnglish} has {currentAbilityString}");
             return false;
-        }
-
-        private static bool CardShouldExplode(this PlayableCard card) => !card.Info.name.ToLowerInvariant().Contains("vessel") && !card.Info.HasTrait(Trait.Terrain);
-
-        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.UpdateFaceUpOnBoardEffects))]
-        [HarmonyPostfix]
-        private static void ShowExplosiveEffect(ref PlayableCard __instance)
-        {
-            if (ExplosiveIsActive && __instance.CardShouldExplode())
-            {
-                __instance.Anim.SetExplosive(!__instance.Dead);
-            }
-        }
-
-        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.AssignCardToSlot))]
-        [HarmonyPostfix]
-        private static IEnumerator AttachExplosivesToCard(IEnumerator sequence, PlayableCard card)
-        {
-            if (ExplosiveIsActive && card.CardShouldExplode())
-            {
-                // Make sure the card has the explosive trigger receiver
-                ExplodeOnDeath[] comps = card.gameObject.GetComponentsInChildren<ExplodeOnDeath>();
-                if (comps == null || !comps.Any(c => c.GetType() == typeof(ExplodeOnDeath)))
-                {
-                    //CardTriggerHandler.AddReceiverToGameObject<AbilityBehaviour>(Ability.ExplodeOnDeath.ToString(), card.gameObject);
-                    card.TriggerHandler.AddAbility(Ability.ExplodeOnDeath);
-                }
-            }
-            yield return sequence;
         }
 
         [HarmonyPatch(typeof(TargetSlotItem), nameof(TargetSlotItem.ActivateSequence))]
@@ -589,7 +489,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             [HarmonyPostfix]
             private static IEnumerator Postfix(IEnumerator sequence, TargetSlotItem __state)
             {
-                if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(ENERGY_HAMMER) && __state is HammerItem && TurnManager.Instance.IsPlayerTurn)
+                if (P03AscensionSaveData.IsP03Run && AscensionSaveData.Data.ChallengeIsActive(ENERGY_HAMMER) && __state is HammerItem && TurnManager.Instance.IsPlayerTurn)
                 {
                     if (ResourcesManager.Instance.PlayerEnergy < HAMMER_ENERGY_COST)
                     {
@@ -613,7 +513,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             [HarmonyPostfix]
             private static IEnumerator SpendHammerEnergy(IEnumerator sequence, HammerItem __state)
             {
-                if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(ENERGY_HAMMER) && TurnManager.Instance.IsPlayerTurn)
+                if (P03AscensionSaveData.IsP03Run && AscensionSaveData.Data.ChallengeIsActive(ENERGY_HAMMER) && TurnManager.Instance.IsPlayerTurn)
                 {
                     if (ResourcesManager.Instance.PlayerEnergy < HAMMER_ENERGY_COST)
                     {
@@ -628,70 +528,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
 
                 yield return sequence;
-            }
-        }
-
-        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.DoUpkeepPhase))]
-        [HarmonyPostfix]
-        private static IEnumerator RotateCards(IEnumerator sequence, bool playerUpkeep)
-        {
-            yield return sequence;
-
-            if (ConveyorIsActive)
-            {
-                if (TurnManager.Instance.TurnNumber > 0 && playerUpkeep)
-                {
-                    if (TurnManager.Instance.TurnNumber == 1 && AscensionSaveData.Data.ChallengeIsActive(ALL_CONVEYOR.challengeType))
-                        ChallengeActivationUI.Instance.ShowActivation(ALL_CONVEYOR.challengeType);
-
-                    yield return BoardManager.Instance.MoveAllCardsClockwise();
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(BoardStateSimulator), nameof(BoardStateSimulator.SimulateCombatPhase))]
-        [HarmonyPrefix]
-        private static void MakeAIRecognizeRotation(BoardState board, bool playerIsAttacker)
-        {
-            if (ConveyorIsActive)
-            {
-                // We need to rotate the board
-                BoardState.CardState anchorCard = board.playerSlots[0].card;
-                for (int i = 1; i < board.playerSlots.Count; i++)
-                    board.playerSlots[i - 1].card = board.playerSlots[i].card;
-                board.playerSlots[board.playerSlots.Count - 1].card = board.opponentSlots[board.opponentSlots.Count - 1].card;
-                for (int i = board.opponentSlots.Count - 1; i > 0; i--)
-                    board.opponentSlots[i].card = board.opponentSlots[i - 1].card;
-                board.opponentSlots[0].card = anchorCard;
-            }
-        }
-
-        [HarmonyPatch(typeof(BoardStateEvaluator), nameof(BoardStateEvaluator.EvaluateCard))]
-        [HarmonyPostfix]
-        private static void MakeAIPreferLeftmostBountyHunters(BoardState.CardState card, BoardState board, ref int __result)
-        {
-            if (ConveyorIsActive)
-            {
-                if (board.opponentSlots.Contains(card.slot))
-                {
-                    if (card.info.mods.Any(m => m.bountyHunterInfo != null))
-                    {
-                        int bestSlot = card.HasAbility(Ability.SplitStrike) ? 1 : 0;
-                        __result -= Math.Abs(board.opponentSlots.IndexOf(card.slot) - bestSlot);
-                    }
-                }
-            }
-        }
-
-        public static readonly Texture2D UP_CONVEYOR_SLOT = TextureHelper.GetImageAsTexture("cadslot_up.png", typeof(AscensionChallengeManagement).Assembly);
-
-        [HarmonyPatch(typeof(BoardManager3D), nameof(BoardManager3D.ShowSlots))]
-        [HarmonyPrefix]
-        private static void SetRotationSlotTextures()
-        {
-            if (ConveyorIsActive)
-            {
-                BoardManager.Instance.AllSlotsCopy.ForEach(s => s.ResetSlot());
             }
         }
 

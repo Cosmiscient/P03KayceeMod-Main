@@ -140,6 +140,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield return NoPeltsSequence();
             }
 
+            CoinPurchaser.SetActive(false);
             TableRuleBook.Instance.SetOnBoard(false);
             ViewManager.Instance.SwitchToView(View.Default, false, false);
 

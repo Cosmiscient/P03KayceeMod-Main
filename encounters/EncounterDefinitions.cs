@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
-using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 
 namespace Infiniscryption.P03KayceeRun.Encounters
 {
-    [HarmonyPatch]
     public static class EncounterHelper
     {
         /// <summary>

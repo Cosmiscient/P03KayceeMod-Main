@@ -18,9 +18,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return Emotion.Anger;
             if (face == P03AnimationController.Face.Thinking)
                 return Emotion.Curious;
-            if (face == P03AnimationController.Face.Bored)
-                return Emotion.Anger;
-            return face == P03AnimationController.Face.Happy
+            return face == P03AnimationController.Face.Bored
+                ? Emotion.Anger
+                : face == P03AnimationController.Face.Happy
                 ? Emotion.Neutral
                 : face == P03AnimationController.Face.MycologistAngry
                 ? Emotion.Anger
@@ -142,8 +142,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return retval;
         }
 
-        //[HarmonyPatch(typeof(DialogueDataUtil), "ReadDialogueData")]
-        //[HarmonyPostfix]
         public static void AddSequenceDialogue()
         {
             string database = DataHelper.GetResourceString("dialogue_database", "csv");

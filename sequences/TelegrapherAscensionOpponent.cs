@@ -92,7 +92,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         [HarmonyPrefix]
         private static void MakeEarlierRoundsEasier(ref int statPoints)
         {
-            if (SaveFile.IsAscension)
+            if (P03AscensionSaveData.IsP03Run)
             {
                 int zoneCount = EventManagement.CompletedZones.Count;
                 statPoints = statPoints - 3 + EventManagement.CompletedZones.Count;

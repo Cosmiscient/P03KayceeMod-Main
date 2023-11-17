@@ -106,6 +106,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void ResetBuffedSlots()
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             SlotModification.Clear();
             foreach (List<CardSlot> slotList in AllModifiedSlots.Values)
             {
@@ -117,6 +120,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static IEnumerator CleanUpBuffedSlots(IEnumerator sequence)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
             foreach (CardSlot slot in BoardManager.Instance.AllSlots)
             {
                 if (slot.GetSlotModification() != ModificationType.NoModification)
@@ -133,35 +142,46 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return sequence;
         }
 
+        private static Dictionary<CardTemple, Texture> DefaultSlotTextures = new()
+        {
+            { CardTemple.Nature, ResourceBank.Get<Texture>("Art/Cards/card_slot") },
+            { CardTemple.Tech, ResourceBank.Get<Texture>("Art/Cards/card_slot_tech") },
+            { CardTemple.Wizard, ResourceBank.Get<Texture>("Art/Cards/card_slot_undead") },
+            { CardTemple.Undead, ResourceBank.Get<Texture>("Art/Cards/card_slot_wizard") }
+        };
+
+        private static Dictionary<CardTemple, List<Texture>> PlayerOverrideSlots = new();
+        private static Dictionary<CardTemple, List<Texture>> OpponentOverrideSlots = new();
+
+        internal static void OverrideDefaultSlotTexture(CardTemple temple, List<Texture> playerSlots, List<Texture> opponentSlots)
+        {
+            PlayerOverrideSlots[temple] = playerSlots;
+            OpponentOverrideSlots[temple] = opponentSlots;
+        }
+
+        internal static void ResetDefaultSlotTexture(CardTemple temple)
+        {
+            if (PlayerOverrideSlots.ContainsKey(temple))
+                PlayerOverrideSlots.Remove(temple);
+            if (OpponentOverrideSlots.ContainsKey(temple))
+                OpponentOverrideSlots.Remove(temple);
+        }
+
         public static void ResetSlot(this CardSlot slot)
         {
+            CardTemple temple = CardTemple.Tech;
             if (SaveManager.SaveFile.IsPart1)
-                slot.SetTexture(ResourceBank.Get<Texture>("Art/Cards/card_slot"));
-            if (SaveManager.SaveFile.IsPart3)
-            {
-                slot.SetTexture(ResourceBank.Get<Texture>("Art/Cards/card_slot_tech"));
-                if (AscensionChallengeManagement.ConveyorIsActive)
-                {
-                    if (slot.IsOpponentSlot())
-                    {
-                        if (slot.Index == BoardManager.Instance.opponentSlots.Count - 1)
-                            slot.SetTexture(AscensionChallengeManagement.UP_CONVEYOR_SLOT);
-                        else
-                            slot.SetTexture(Resources.Load<Texture2D>("art/cards/card_slot_left"));
-                    }
-                    else
-                    {
-                        if (slot.Index == 0)
-                            slot.SetTexture(AscensionChallengeManagement.UP_CONVEYOR_SLOT);
-                        else
-                            slot.SetTexture(Resources.Load<Texture2D>("art/cards/card_slot_left"));
-                    }
-                }
-            }
+                temple = CardTemple.Nature;
             if (SaveManager.SaveFile.IsGrimora)
-                slot.SetTexture(ResourceBank.Get<Texture>("Art/Cards/card_slot_undead"));
+                temple = CardTemple.Undead;
             if (SaveManager.SaveFile.IsMagnificus)
-                slot.SetTexture(ResourceBank.Get<Texture>("Art/Cards/card_slot_wizard"));
+                temple = CardTemple.Wizard;
+
+            var lookup = slot.IsOpponentSlot() ? OpponentOverrideSlots : PlayerOverrideSlots;
+            if (lookup.ContainsKey(temple))
+                slot.SetTexture(lookup[temple][slot.Index]);
+            else
+                slot.SetTexture(DefaultSlotTextures[temple]);
         }
     }
 }

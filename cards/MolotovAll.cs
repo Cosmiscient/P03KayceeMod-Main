@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class MolotovAll : AbilityBehaviour
     {
         public static Ability AbilityID { get; private set; }

@@ -26,6 +26,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.hasColorOverride = true;
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.CellDrawRandomCardOnDeath).Info.colorOverride;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_cell_evolve.png", typeof(CellEvolve).Assembly));
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,

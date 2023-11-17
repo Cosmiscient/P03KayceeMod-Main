@@ -1,11 +1,11 @@
-using HarmonyLib;
+using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
+using GBC;
+using HarmonyLib;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-using GBC;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -20,7 +20,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static readonly Sprite WIN_BACKGROUND = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascension_endscreen_victory.png", typeof(StatManagement).Assembly));
         private static readonly Sprite LOSE_BACKGROUND = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascension_endscreen_defeat.png", typeof(StatManagement).Assembly));
 
-        private static readonly List<AscensionStat.Type> InvalidP03Stats = new ()
+        private static readonly List<AscensionStat.Type> InvalidP03Stats = new()
         {
             AscensionStat.Type.MantisGodsPicked,
             AscensionStat.Type.MostBones,
@@ -51,14 +51,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static void TrackSpendEnergy(int amount)
         {
-            AscensionStatsData.TryIncreaseStat(ENERGY_SPENT, amount);
+            if (P03AscensionSaveData.IsP03Run)
+                AscensionStatsData.TryIncreaseStat(ENERGY_SPENT, amount);
         }
 
         [HarmonyPatch(typeof(HammerItem), nameof(HammerItem.OnValidTargetSelected))]
         [HarmonyPostfix]
         private static void TrackUseHammer()
         {
-            AscensionStatsData.TryIncrementStat(HAMMER_USES);
+            if (P03AscensionSaveData.IsP03Run)
+                AscensionStatsData.TryIncrementStat(HAMMER_USES);
         }
 
         [HarmonyPatch(typeof(AscensionRunEndScreen), nameof(AscensionRunEndScreen.Initialize))]
@@ -67,7 +69,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (P03AscensionSaveData.IsP03Run)
             {
-                __instance.backgroundSpriteRenderer.sprite = (victory ? WIN_BACKGROUND : LOSE_BACKGROUND);
+                __instance.backgroundSpriteRenderer.sprite = victory ? WIN_BACKGROUND : LOSE_BACKGROUND;
             }
         }
 
@@ -75,6 +77,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static void P03Stats(AscensionStatsScreen __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (__instance.gameObject.GetComponent<AscensionRunEndScreen>() != null)
             {
                 __instance.displayedStatTypes.RemoveAll(st => InvalidP03Stats.Contains(st));
@@ -92,7 +97,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             GameObject template = statScreen.statsText[0].gameObject.transform.parent.gameObject;
             for (int i = 0; i < 4; i++)
             {
-                GameObject newItem = GameObject.Instantiate(template, template.transform.parent);
+                GameObject newItem = Object.Instantiate(template, template.transform.parent);
                 float newY = statScreen.statsText.Last().gameObject.transform.parent.localPosition.y + yGap;
                 newItem.transform.localPosition = new(newItem.transform.localPosition.x, newY, newItem.transform.localPosition.z);
                 statScreen.statsText.Add(newItem.GetComponentInChildren<PixelText>());
@@ -116,7 +121,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static void HideUnusedStats(AscensionStatsScreen __instance)
         {
-            foreach(PixelText obj in __instance.statsText)
+            foreach (PixelText obj in __instance.statsText)
             {
                 P03Plugin.Log.LogInfo(obj.Text);
                 if (obj.Text.ToLowerInvariant().StartsWith("statistic"))

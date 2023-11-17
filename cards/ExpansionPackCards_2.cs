@@ -8,7 +8,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public static class ExpansionPackCards_2
     {
         internal const string EXP_2_PREFIX = "P03KCMXP2";
@@ -27,6 +26,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Swapper Latcher
             CardManager.New(EXP_2_PREFIX, "SwapperLatcher", "Swapper Latcher", 2, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_swapper_latcher.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_swapper_latcher.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Undead)
                 .AddAbilities(LatchSwapper.AbilityID);
@@ -34,6 +34,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Box Bot
             CardManager.New(EXP_2_PREFIX, "BoxBot", "Box Bot", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_boxbot.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_boxbot.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 1)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(Ability.Brittle, VesselHeart.AbilityID);
@@ -56,6 +57,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Robot Ram
             CardManager.New(EXP_2_PREFIX, "RobotRam", "R4M", 2, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ram.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_ram.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .AddAbilities(Overheat.AbilityID);
@@ -78,6 +80,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Librarian
             CardManager.New(EXP_2_PREFIX, "Librarian", "Librarian", 1, 2)
                 .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_librarian").ConvertTexture(TextureHelper.SpriteType.CardPortrait))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("syntax_librarian.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 1)
                 .SetRegionalP03Card(CardTemple.Undead)
                 .AddAbilities(Ability.Reach, DeadByte.AbilityID);
@@ -114,9 +117,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // GlowBot
             CardManager.New(EXP_2_PREFIX, "GlowBot", "GlowBot", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_glowbot.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_glowbot.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 3)
                 .SetRegionalP03Card(CardTemple.Tech)
-                .SetRare()
                 .AddAbilities(SolarHeart.AbilityID);
 
             // M0l0t0v
@@ -130,6 +133,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Flaming Exeskeleton
             CardManager.New(EXP_2_PREFIX, "FlamingExeskeleton", "Revignite", 2, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_flaming_exeskeleton.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_flaming_exeskeleton.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetRegionalP03Card(CardTemple.Undead)
                 .AddAbilities(Ability.Brittle, FireBomb.AbilityID, BurntOut.AbilityID);
@@ -146,12 +150,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_streetcleaner.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 6)
                 .SetNeutralP03Card()
-                .SetPixelPortrait(TextureHelper.GetImageAsTexture("portrait_street_sweeper.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_street_sweeper.png", typeof(ExpansionPackCards_2).Assembly))
                 .AddAbilities(FireBomb.AbilityID, Ability.Strafe);
 
             // Give-A-Way
             CardManager.New(EXP_2_PREFIX, "GiveAWay", "Shield Smuggler", 2, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_giveaway.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_giveaway.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetNeutralP03Card()
                 .AddAbilities(EnemyGainShield.AbilityID);
@@ -192,7 +197,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 2)
                 .SetTargetedSpell()
                 .SetSpellAppearanceP03()
-                .AddAbilities(DirectDamage.AbilityID);
+                .AddAbilities(Zap.AbilityID);
 
             // Jimmy Jr
             CardManager.New(EXP_2_PREFIX, "JimmyJr", "Jimmy Jr.", 0, 1)
@@ -222,6 +227,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 0)
                 .SetGlobalSpell()
                 .SetSpellAppearanceP03()
+                .AddTraits(CustomCards.FastGlobalSpell)
                 // .AddAppearances(OnboardDynamicHoloPortrait.ID)
                 // .SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/items/BatteryItem")
                 // .SetExtendedProperty(OnboardDynamicHoloPortrait.IN_HAND, true)
@@ -230,6 +236,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Weeper
             CardManager.New(EXP_2_PREFIX, "Weeper", "Weeper", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_weeper.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_weeper.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetRegionalP03Card(CardTemple.Undead)
                 .AddAbilities(EnergySiphon.AbilityID);
@@ -237,6 +244,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Suicell
             CardManager.New(EXP_2_PREFIX, "Suicell", "Sui-Cell", 1, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_suicell.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_suicell.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 3)
                 .SetRegionalP03Card(CardTemple.Tech)
                 .AddAbilities(CellExplodonate.AbilityID);
@@ -252,6 +260,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Gopher
             CardManager.New(EXP_2_PREFIX, "Gopher", "G0ph3r", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gopher.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_gopher.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 1)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .AddAbilities(Ability.BuffEnemy, Miner.AbilityID);
@@ -259,6 +268,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // P00dl3
             CardManager.New(EXP_2_PREFIX, "Poodle", "P00dl3", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_poodle.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_poodle.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 3)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .AddAbilities(Ability.MoveBeside, Ability.BuffNeighbours);
@@ -296,6 +306,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Energy Vampire
             CardManager.New(EXP_2_PREFIX, "EnergyVampire", "Energy Vampire", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_energy_vampire.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_energy_vampire.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetRegionalP03Card(CardTemple.Undead)
                 .AddAbilities(AbsorbShield.AbilityID);
@@ -320,6 +331,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Dr Zambot
             CardManager.New(EXP_2_PREFIX, "DrZambot", "Dr Zambot", 1, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_dr_zambot.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_dr_zambot.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .SetRare()
@@ -358,6 +370,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Encapsulator
             CardManager.New(EXP_2_PREFIX, "Encapsulator", "Encapsulator", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_encapsulator.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_encapsulator.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetNeutralP03Card()
                 .AddAbilities(ActivatedStoreCharge.AbilityID);
@@ -372,6 +385,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.New(EXP_2_PREFIX, "RoboRingworm", "R1ngw0rm", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_roboringworm.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_ringworm.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetTraits(CustomCards.UpgradeVirus)
                 .SetNeutralP03Card();
@@ -387,6 +401,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Bleene's Acolyte
             CardManager.New(EXP_2_PREFIX, "BleeneAcolyte", "Replica Bleene", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_bleene_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_bleene_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAppearances(ReplicaAppearanceBehavior.ID)
@@ -401,6 +416,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Orlu's Replica
             CardManager.New(EXP_2_PREFIX, "OrluAcolyte", "Replica Orlu", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_orlu_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_orlu_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 3)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAppearances(ReplicaAppearanceBehavior.ID)
@@ -415,6 +431,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Goranj's Replica
             CardManager.New(EXP_2_PREFIX, "GoranjAcolyte", "Replica Goranj", 2, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_goranj_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_goranj_acolyte.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAppearances(ReplicaAppearanceBehavior.ID)
@@ -427,11 +444,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(GemOrangeBrittle.AbilityID, GemGreenBuffEnemy.AbilityID);
 
             // Gem Augur
-            CardManager.New(EXP_2_PREFIX, "GemAugur", "Gem Augur", 2, 1)
+            CardManager.New(EXP_2_PREFIX, "GemAugur", "Gem Auger", 2, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gem_augur.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 6)
                 .SetRegionalP03Card(CardTemple.Wizard)
-                .SetRare()
                 .AddAbilities(GemStrike.AbilityID);
 
             // Sparkplug Cell

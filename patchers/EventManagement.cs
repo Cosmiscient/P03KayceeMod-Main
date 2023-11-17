@@ -56,8 +56,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         internal static bool SawCredits
         {
-            get => ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "SawCreditsB");
-            set => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "SawCreditsB", value);
+            get => ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "SawCreditsC");
+            set => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "SawCreditsC", value);
+        }
+
+        internal static bool SawMapInfo
+        {
+            get => ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "SawMapInfo");
+            set => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "SawMapInfo", value);
         }
 
         public static Part3SaveData.WorldPosition MycologistReturnPosition
@@ -199,7 +205,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         public static bool AscensionDifficultyModifierWorksDifferently(ref int __result)
         {
-            if (SaveFile.IsAscension)
+            if (P03AscensionSaveData.IsP03Run)
             {
                 __result = 0;
                 return false;
@@ -331,7 +337,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         public static bool ForceMechanicsLearnd(MechanicsConcept mechanic, ref bool __result)
         {
-            if (SaveFile.IsAscension && P03_MECHANICS.Contains(mechanic))
+            if (P03AscensionSaveData.IsP03Run && P03_MECHANICS.Contains(mechanic))
             {
                 __result = true;
                 return false;
@@ -439,7 +445,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         public static void TrackVictories(ref TurnManager __instance)
         {
-            if (!SaveFile.IsAscension)
+            if (!P03AscensionSaveData.IsP03Run)
                 return;
 
             // NOTE! In the prefix, the calculation for 'player won' hasn't happened yet
@@ -485,7 +491,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             yield return sequence;
 
-            if (SaveFile.IsAscension)
+            if (P03AscensionSaveData.IsP03Run)
             {
                 if (DefaultQuestDefinitions.TippedScales.IsDefaultActive())
                 {

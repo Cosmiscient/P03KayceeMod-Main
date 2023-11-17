@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class ForcedUpgrade : AbilityBehaviour
     {
         public static Ability AbilityID { get; private set; }

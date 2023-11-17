@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class VesselHeart : AbilityBehaviour
     {
         public override Ability Ability => AbilityID;
@@ -26,6 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.opponentUsable = true;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_vessel_heart.png", typeof(VesselHeart).Assembly));
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,

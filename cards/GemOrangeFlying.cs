@@ -36,14 +36,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
         }
 
         [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.HasAbility))]
-        [HarmonyPostfix]
-        private static void IncludeOrangeFlying(PlayableCard __instance, Ability ability, ref bool __result)
+        [HarmonyPrefix]
+        private static bool IncludeOrangeFlying(PlayableCard __instance, Ability ability, ref bool __result)
         {
-            if (!__result && ability == Ability.Flying)
+            if (ability == Ability.Flying && __instance.HasAbility(AbilityID) && __instance.EligibleForGemBonus(GemType.Orange))
             {
-                if (__instance.HasAbility(AbilityID) && __instance.EligibleForGemBonus(GemType.Orange))
-                    __result = true;
+                __result = true;
+                return false;
             }
+            return true;
         }
     }
 }

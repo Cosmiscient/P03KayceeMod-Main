@@ -73,6 +73,29 @@ namespace Infiniscryption.P03KayceeRun.Helpers
             }
         }
 
+        [HarmonyPatch(typeof(AudioController), nameof(AudioController.TrySetLoop))]
+        [HarmonyPrefix]
+        internal static void LoadMyLoops(string loopName, AudioController __instance)
+        {
+            AudioClip loop = __instance.GetLoop(loopName);
+            if (loop == null && loopName.StartsWith("P03"))
+            {
+                // Please dont' break anything...
+                foreach (string clipName in new string[] { "P03_Phase1", "P03_Phase2", "P03_Phase3" })
+                {
+                    if (!__instance.Loops.Any(ac => ac.name.Equals(clipName, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        AudioClip expl = SoundManager.LoadAudioClip(P03Plugin.PluginGuid, $"{clipName}.mp3");
+                        if (expl != null)
+                        {
+                            expl.name = clipName;
+                            __instance.Loops.Add(expl);
+                        }
+                    }
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(AudioController), nameof(AudioController.Awake))]
         [HarmonyPostfix]
         internal static void LoadMyCustomAudio(ref AudioController __instance)
@@ -87,20 +110,6 @@ namespace Infiniscryption.P03KayceeRun.Helpers
                     {
                         expl.name = clipName;
                         __instance.SFX.Add(expl);
-                    }
-                }
-            }
-
-            // Please dont' break anything...
-            foreach (string clipName in new string[] { "P03_Phase1", "P03_Phase2", "P03_Phase3" })
-            {
-                if (!__instance.Loops.Any(ac => ac.name.Equals(clipName, StringComparison.InvariantCultureIgnoreCase)))
-                {
-                    AudioClip expl = SoundManager.LoadAudioClip(P03Plugin.PluginGuid, $"{clipName}.mp3");
-                    if (expl != null)
-                    {
-                        expl.name = clipName;
-                        __instance.Loops.Add(expl);
                     }
                 }
             }

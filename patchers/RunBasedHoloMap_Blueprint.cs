@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.BattleMods;
 using Infiniscryption.P03KayceeRun.Quests;
 using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Saves;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -13,6 +15,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     public static partial class RunBasedHoloMap
     {
         private static readonly int[][] NSEW = new int[][] { new int[] { 0, -1 }, new int[] { 0, 1 }, new int[] { 1, 0 }, new int[] { -1, 0 } };
+
+        private static CardTemple ToTemple(this Zone zone)
+        {
+            if (zone == Zone.Magic)
+                return CardTemple.Wizard;
+            if (zone == Zone.Nature)
+                return CardTemple.Nature;
+            if (zone == Zone.Undead)
+                return CardTemple.Undead;
+            return CardTemple.Tech;
+        }
 
         private static IEnumerable<HoloMapBlueprint> AdjacentToQuadrant(this HoloMapBlueprint[,] map, int x, int y)
         {
@@ -868,6 +881,74 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        private static List<BattleModManager.BattleModDefinition> SelectMods(List<BattleModManager.BattleModDefinition> mods, int difficulty, int randomSeed)
+        {
+            // For 1 and 2, just pick a single mod
+            if (difficulty <= 2)
+                return mods.Where(d => d.Difficulty == difficulty).OrderBy(d => SeededRandom.Value(randomSeed++)).Take(1).ToList();
+
+            int totalDiffulty = 0;
+            List<BattleModManager.BattleModDefinition> retval = new();
+            var remaining = new List<BattleModManager.BattleModDefinition>(mods.OrderBy(d => SeededRandom.Value(randomSeed++)));
+
+            // The first two mods are purely randomly selected
+            while (retval.Count < 2 && totalDiffulty < difficulty)
+            {
+                var next = remaining.FirstOrDefault(d => d.Difficulty <= (difficulty - totalDiffulty));
+
+                if (next == null)
+                    break;
+
+                totalDiffulty += next.Difficulty;
+                retval.Add(next);
+                remaining.Remove(next);
+            }
+
+            // If we still have to make up room, add the last mod that gets us
+            // closest to the total we want.
+            if (totalDiffulty < difficulty && remaining.Count > 0)
+                retval.Add(remaining.OrderBy(d => Mathf.Abs(d.Difficulty - (difficulty - totalDiffulty))).First());
+
+            return retval;
+        }
+
+        private static void BuildBattleModifiers(List<HoloMapBlueprint> rooms, Zone region, int order, int seed)
+        {
+            // The goal is to create modded battles with a total difficulty matching:
+            // Which map this is (1-4) and number of difficulty challenges
+            // So if you have one "extra difficulty" on, and this is map 2, the total difficulty is 3
+            int difficultyKey = order + 1 + AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.BaseDifficulty);
+
+            var validMods = BattleModManager.AllBattleMods.Where(d => d.Regions == null || d.Regions.Contains(region.ToTemple())).ToList();
+            int randomSeed = seed + 10;
+
+            // Only one battle gets modded per map by default
+            int numberOfModdedBattles = 1;
+
+            // But starting with difficulty 4, we add another battle.
+            // So the table looks like this:
+            // Difficulty 1-3: 1 battle
+            // Difficulty 4: 2 battles
+            // Difficulty 5: 3 battles
+            // Difficulty 6: 4 battles
+            // Note that EACH of these have the difficulty.
+            // So with both difficulty challenges on, in map four ALL FOUR battles
+            // have a +6 battle mod on them.
+            if (difficultyKey > 3)
+                numberOfModdedBattles += difficultyKey - 2;
+            numberOfModdedBattles = numberOfModdedBattles > 4 ? 4 : numberOfModdedBattles;
+            var targets = rooms.Where(bp => bp.IsBattleRoom && (order > 0 || bp.color != 1)).OrderBy(x => SeededRandom.Value(randomSeed++)).Take(numberOfModdedBattles).ToList();
+
+            // And now we move the difficulty key down by 1 if it's above 3
+            // Basically, at the difficult 4 step, the difficulty increases by the count
+            // of modded battles more so than the difficulty of the battles themselves
+            if (difficultyKey > 3)
+                difficultyKey -= 1;
+
+            foreach (var bp in targets)
+                bp.battleMods.AddRange(SelectMods(validMods, difficultyKey, randomSeed++).Select(d => d.ID));
+        }
+
         private static List<HoloMapBlueprint> BuildBlueprint(int order, Zone region, int seed, int stackDepth = 0)
         {
             string blueprintKey = $"ascensionBlueprint{order}{region}";
@@ -953,6 +1034,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             P03Plugin.Log.LogInfo($"I have created {numberOfEncountersAdded} enemy encounters");
 
+            BuildBattleModifiers(retval, region, order, seed);
+
+            P03Plugin.Log.LogInfo($"I have set up battle modifiers");
+
             // Add one trade node
             bool traded = DiscoverAndCreateTrade(bpBlueprint, retval);
             P03Plugin.Log.LogInfo($"Created a trade node? {traded}");
@@ -1018,6 +1103,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             savedBlueprint = string.Join("|", retval.Select(b => b.ToString()));
             ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, blueprintKey, savedBlueprint);
+            if (order >= 1)
+                EventManagement.SawMapInfo = true;
             SaveManager.SaveToFile();
             return retval;
         }

@@ -102,7 +102,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         public static bool AscensionChoiceGeneration(CardChoicesNodeData data, int randomSeed, ref List<CardChoice> __result)
         {
-            if (SaveFile.IsAscension && HoloMapAreaManager.Instance != null)
+            if (P03AscensionSaveData.IsP03Run && HoloMapAreaManager.Instance != null)
             {
                 RunBasedHoloMap.Zone region = RunBasedHoloMap.GetRegionCodeFromWorldID(HoloMapAreaManager.Instance.CurrentWorld.name);
 
@@ -162,7 +162,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(CardSingleChoicesSequencer), nameof(CardSingleChoicesSequencer.CardSelectionSequence))]
         [HarmonyPostfix]
-        private static IEnumerator EnsureHoloClover(IEnumerator sequence, CardSingleChoicesSequencer __instance)
+        private static IEnumerator EnsureHoloClover(IEnumerator sequence, CardSingleChoicesSequencer __instance, SpecialNodeData nodeData)
         {
             if (!P03AscensionSaveData.IsP03Run || __instance.rerollInteractable != null)
             {
@@ -170,13 +170,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 yield break;
             }
 
-            var cardClicker = GameObject.Instantiate(RunBasedHoloMap.SpecialNodePrefabs[HoloMapNode.NodeDataType.CardChoice], __instance.transform);
+            if (nodeData is Part3RareCardChoicesNodeData)
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            GameObject cardClicker = UnityEngine.Object.Instantiate(RunBasedHoloMap.SpecialNodePrefabs[HoloMapNode.NodeDataType.CardChoice], __instance.transform);
             OnboardDynamicHoloPortrait.HolofyGameObject(cardClicker, GameColors.Instance.gold);
             cardClicker.transform.Find("RendererParent").localEulerAngles = new(60f, 180f, 180f);
             cardClicker.transform.localPosition = new(0f, 5f, -1.5f);
             cardClicker.transform.localScale = new(1f, 1f, 1f);
-            GameObject.Destroy(cardClicker.GetComponentInChildren<SineWaveMovement>());
-            GameObject.Destroy(cardClicker.GetComponentInChildren<HoloMapNode>());
+            UnityEngine.Object.Destroy(cardClicker.GetComponentInChildren<SineWaveMovement>());
+            UnityEngine.Object.Destroy(cardClicker.GetComponentInChildren<HoloMapNode>());
 
             // Label
             GameObject sampleObject = RunBasedHoloMap.SpecialNodePrefabs[HoloMapNode.NodeDataType.BuildACard].transform.Find("HoloFloatingLabel").gameObject;
@@ -228,19 +234,26 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static bool AllowNullAnimCleanup(CardSingleChoicesSequencer __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
             if (__instance.rerollInteractable != null && __instance.rerollInteractable.gameObject.activeSelf)
             {
                 __instance.rerollInteractable.SetEnabled(false);
 
                 if (__instance.rerollAnim == null)
+                {
                     Tween.LocalPosition(
                         __instance.rerollInteractable.transform,
                         __instance.rerollInteractable.transform.localPosition + Vector3.down,
                         0.25f,
                         0f
                     );
+                }
                 else
+                {
                     __instance.rerollAnim.Play("exit", 0, 0f);
+                }
 
                 CustomCoroutine.WaitThenExecute(0.25f, delegate
                 {

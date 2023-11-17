@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -56,22 +57,22 @@ namespace Infiniscryption.P03KayceeRun.Cards
                                float.Parse(offsetSplit[2], CultureInfo.InvariantCulture));
         }
 
-        public static void HolofyGameObject(GameObject obj, Color color, string shaderKey = "SFHologram/HologramShader", bool inChildren = true)
+        public static void HolofyGameObject(GameObject obj, Color color, string shaderKey = "SFHologram/HologramShader", bool inChildren = true, Material reference = null, bool destroyComponents = false)
         {
-            List<Component> compsToDestroy = new();
-            compsToDestroy.AddRange(obj.GetComponentsInChildren<Rigidbody>());
-            compsToDestroy.AddRange(obj.GetComponentsInChildren<AutoRotate>());
-            compsToDestroy.AddRange(obj.GetComponentsInChildren<Animator>());
-            compsToDestroy.AddRange(obj.GetComponentsInChildren<InteractableBase>());
-            compsToDestroy.AddRange(obj.GetComponentsInChildren<Item>());
+            if (destroyComponents)
+            {
+                List<Component> compsToDestroy = new();
+                foreach (var c in new List<Type>() { typeof(Rigidbody), typeof(AutoRotate), typeof(Animator), typeof(InteractableBase), typeof(Item) })
+                    compsToDestroy.AddRange(inChildren ? obj.GetComponentsInChildren(c) : obj.GetComponents(c));
 
-            foreach (Component c in compsToDestroy.Where(c => !c.SafeIsUnityNull()))
-                Destroy(c);
+                foreach (Component c in compsToDestroy.Where(c => !c.SafeIsUnityNull()))
+                    Destroy(c);
+            }
 
             Color halfMain = new(color.r, color.g, color.b, 0.5f);
 
             // Get reference material
-            Material refMat = CardLoader.GetCardByName("BridgeRailing").holoPortraitPrefab.GetComponentInChildren<Renderer>().material;
+            Material refMat = reference ?? CardLoader.GetCardByName("BridgeRailing").holoPortraitPrefab.GetComponentInChildren<Renderer>().material;
 
             var allRenderers = inChildren ? obj.GetComponentsInChildren<Renderer>() : obj.GetComponents<Renderer>();
             foreach (Renderer renderer in allRenderers)

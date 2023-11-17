@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 using InscryptionAPI.Guid;
@@ -22,6 +23,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void AttachExporter(ref CardRenderCamera __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (__instance.gameObject.GetComponent<CardExporter>() == null)
             {
                 P03Plugin.Log.LogDebug("Adding Card Exporter!");
@@ -562,6 +566,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void EnsureOverclocked(ref PlayableCard __result)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (!inRender)
             {
                 return;

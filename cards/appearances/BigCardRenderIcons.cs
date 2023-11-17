@@ -1,6 +1,7 @@
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
+using Infiniscryption.P03KayceeRun.Patchers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -79,6 +80,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static void UpdateCard(ref Card __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             Transform cardBase = __instance.gameObject.transform;
             if (__instance.Info.specialAbilities.Contains(GoobertCenterCardBehaviour.AbilityID))
             {
@@ -113,6 +117,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static void UpdateCamera(ref DiskScreenCardDisplayer __instance, CardRenderInfo renderInfo, PlayableCard playableCard)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             Transform cardBase = __instance.gameObject.transform;
             if (renderInfo.baseInfo.specialAbilities.Contains(GoobertCenterCardBehaviour.AbilityID))
             {

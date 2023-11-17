@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class Overheat : AbilityBehaviour, InscryptionAPI.Triggers.IPassiveAttackBuff
     {
         public override Ability Ability => AbilityID;
@@ -23,6 +22,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.opponentUsable = true;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_overheat.png", typeof(Overheat).Assembly));
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,

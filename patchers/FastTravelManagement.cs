@@ -163,17 +163,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             yield return ReturnToLocation(worldPosition);
         }
 
-        [HarmonyPatch(typeof(HoloGameMap), "ToggleFastTravelActive")]
-        [HarmonyPrefix]
-        public static void LogThisStupidError(ref HoloGameMap __instance)
-        {
-            Traverse mapTraverse = Traverse.Create(__instance);
-            P03Plugin.Log.LogInfo($"Fast travel map {mapTraverse.Field("fastTravelMap").GetValue<HoloFastTravelMap>()}");
-            P03Plugin.Log.LogInfo($"Current area {HoloMapAreaManager.Instance.CurrentArea}");
-            P03Plugin.Log.LogInfo($"Current area gameobject {HoloMapAreaManager.Instance.CurrentArea.gameObject}");
-            P03Plugin.Log.LogInfo($"Current area marker {HoloMapPlayerMarker.Instance}");
-            P03Plugin.Log.LogInfo($"Current area marker gameobject {HoloMapPlayerMarker.Instance.gameObject}");
-        }
+        // [HarmonyPatch(typeof(HoloGameMap), "ToggleFastTravelActive")]
+        // [HarmonyPrefix]
+        // public static void LogThisStupidError(ref HoloGameMap __instance)
+        // {
+        //     Traverse mapTraverse = Traverse.Create(__instance);
+        //     P03Plugin.Log.LogInfo($"Fast travel map {mapTraverse.Field("fastTravelMap").GetValue<HoloFastTravelMap>()}");
+        //     P03Plugin.Log.LogInfo($"Current area {HoloMapAreaManager.Instance.CurrentArea}");
+        //     P03Plugin.Log.LogInfo($"Current area gameobject {HoloMapAreaManager.Instance.CurrentArea.gameObject}");
+        //     P03Plugin.Log.LogInfo($"Current area marker {HoloMapPlayerMarker.Instance}");
+        //     P03Plugin.Log.LogInfo($"Current area marker gameobject {HoloMapPlayerMarker.Instance.gameObject}");
+        // }
 
         [HarmonyPatch(typeof(MoveHoloMapAreaNode), nameof(MoveHoloMapAreaNode.WillResetBots), MethodType.Getter)]
         [HarmonyPrefix]

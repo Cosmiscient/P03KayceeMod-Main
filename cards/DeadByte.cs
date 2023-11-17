@@ -13,7 +13,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
     public class DeadByte : AbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -28,6 +28,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.opponentUsable = false;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_deadbyte.png", typeof(DeadByte).Assembly));
 
             DeadByte.AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
@@ -54,6 +55,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
 
-        
+
     }
 }

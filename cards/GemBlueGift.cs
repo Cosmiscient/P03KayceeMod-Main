@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class GemBlueGift : DrawRandomCardOnDeath
     {
         public override Ability Ability => AbilityID;

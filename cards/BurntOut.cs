@@ -25,6 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.opponentUsable = false;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, FireBomb.FlamingAbility };
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_burnt_out.png", typeof(Molotov).Assembly));
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,

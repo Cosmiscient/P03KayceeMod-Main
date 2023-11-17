@@ -8,7 +8,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class GemBlueLoot : Loot
     {
         public override Ability Ability => AbilityID;

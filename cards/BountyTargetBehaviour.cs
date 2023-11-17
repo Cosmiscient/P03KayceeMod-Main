@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Quests;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
@@ -125,7 +126,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             dummyCard.decals = new()
             {
                 CustomCards.DUMMY_DECAL,
-                CustomCards.DUMMY_DECAL,
+                CustomCards.DUMMY_DECAL_2,
                 DECAL
             };
 
@@ -190,6 +191,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static bool AddBountyTargetInstead(List<List<CardInfo>> turnPlan, ref List<List<CardInfo>> __result)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
             if (!Quest.IsDefaultActive() || (Part3SaveData.Data.battlesSinceBountyHunter >= 3 && Part3SaveData.Data.BountyTier >= 1))
                 return true;
 
@@ -213,6 +217,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void MakeAIPreferLeftmostBountyTarget(BoardState.CardState card, BoardState board, ref int __result)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (Quest.IsDefaultActive())
             {
                 if (board.opponentSlots.Contains(card.slot))

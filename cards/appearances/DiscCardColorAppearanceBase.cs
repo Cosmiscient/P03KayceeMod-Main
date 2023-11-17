@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
+using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -194,7 +195,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     if (holofy)
                     {
-                        OnboardDynamicHoloPortrait.HolofyGameObject(tComp.gameObject, color, inChildren: false);
+                        OnboardDynamicHoloPortrait.HolofyGameObject(tComp.gameObject, color, inChildren: false, destroyComponents: false);
                         return;
                     }
                     GameObject component = tComp.gameObject;
@@ -279,7 +280,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static IEnumerator FixMiddleColor(IEnumerator sequence, CardRenderCamera __instance, RenderStatsLayer layer, CardRenderInfo info, PlayableCard playableCard, bool updateMain, bool updateEmission)
         {
-            if (layer is not DiskRenderStatsLayer drsl)
+            if (!P03AscensionSaveData.IsP03Run || layer is not DiskRenderStatsLayer drsl)
             {
                 yield return sequence;
                 yield break;
@@ -334,7 +335,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static void RenderDiscCardAdjustColors(ref RenderStatsLayer __instance, CardRenderInfo info)
         {
-            if (__instance is not DiskRenderStatsLayer drsl)
+            if (!P03AscensionSaveData.IsP03Run || __instance is not DiskRenderStatsLayer drsl)
                 return;
 
             DiscCardColorAppearance appearance = drsl.gameObject.transform.parent.parent.gameObject.GetComponent<DiscCardColorAppearance>();

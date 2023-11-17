@@ -38,6 +38,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static IEnumerator MoveAllCardsClockwiseAccountForUnrotateable(IEnumerator sequence)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
             if (BoardManager.Instance.AllSlots.Any((CardSlot x) => x.Card != null && x.Card.Info.HasTrait(CustomCards.Unrotateable)))
             {
                 Dictionary<PlayableCard, CardSlot> cardDestinations = new();

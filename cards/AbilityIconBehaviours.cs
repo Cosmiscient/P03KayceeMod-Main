@@ -112,6 +112,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void ColorizeConduitAbilities(CardDisplayer3D __instance, PlayableCard playableCard)
         {
+            if (!SaveManager.SaveFile.IsPart3)
+                return;
+
             if (__instance.AbilityIcons == null || playableCard == null || playableCard.TemporaryMods == null)
                 return;
 
@@ -168,7 +171,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static IEnumerator GemsAddSwitch(IEnumerator sequence)
         {
             yield return sequence;
-            ReRenderCards();
+
+            if (SaveManager.SaveFile.IsPart3)
+                ReRenderCards();
+
             yield break;
         }
 
@@ -177,12 +183,19 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static IEnumerator GemsRemoveSwitch(IEnumerator sequence)
         {
             yield return sequence;
-            ReRenderCards();
+
+            if (SaveManager.SaveFile.IsPart3)
+                ReRenderCards();
+
             yield break;
         }
 
         [HarmonyPatch(typeof(ResourcesManager), nameof(ResourcesManager.Instance.ForceGemsUpdate))]
         [HarmonyPostfix]
-        private static void GemsForceSwitch() => ReRenderCards();
+        private static void GemsForceSwitch()
+        {
+            if (SaveManager.SaveFile.IsPart3)
+                ReRenderCards();
+        }
     }
 }

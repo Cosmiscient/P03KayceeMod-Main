@@ -246,6 +246,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     prevEvolveMod.attackAdjustment += 1;
                     prevEvolveMod.healthAdjustment += 1;
 
+                    if (cardInfo.name.ToLowerInvariant().Contains("ringworm"))
+                        prevEvolveMod.healthAdjustment += 1;
+
                     if (prevEvolveMod.nameReplacement.EndsWith(".0"))
                     {
                         int prevVersion = int.Parse(prevEvolveMod.nameReplacement
@@ -264,7 +267,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     CardModificationInfo evolveMod = new(1, 1)
                     {
                         fromEvolve = true,
-                        nameReplacement = cardInfo.name + " 2.0",
+                        nameReplacement = cardInfo.DisplayedNameEnglish + " 2.0",
                         nonCopyable = false
                     };
                     cardInfo.mods.Add(evolveMod);
@@ -298,6 +301,32 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (!__result.activeSelf)
                 __result.SetActive(true);
+        }
+
+        private static bool ResolvingForFastSpellTrait = false;
+
+        [HarmonyPatch(typeof(PlayerHand), nameof(PlayerHand.SelectSlotForCard))]
+        [HarmonyPostfix]
+        [HarmonyPriority(Priority.VeryLow)]
+        private static IEnumerator WrapSpellEnumeratorAndFlagIt(IEnumerator sequence, PlayableCard card)
+        {
+            ResolvingForFastSpellTrait = card.HasTrait(CustomCards.FastGlobalSpell);
+            yield return sequence;
+            ResolvingForFastSpellTrait = false;
+        }
+
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.ChooseSlot))]
+        [HarmonyPostfix]
+        private static IEnumerator SkipIfFastSpell(IEnumerator sequence, BoardManager __instance, List<CardSlot> validSlots)
+        {
+            if (validSlots != null && validSlots.Count > 0 && ResolvingForFastSpellTrait)
+            {
+                __instance.LastSelectedSlot = validSlots[0];
+                __instance.ChoosingSlot = false;
+                __instance.cancelledPlacementWithInput = false;
+                yield break;
+            }
+            yield return sequence;
         }
     }
 }

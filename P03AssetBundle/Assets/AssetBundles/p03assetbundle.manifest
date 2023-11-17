@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 94955314
+CRC: 1911563270
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 95490da53ccc8814d49897338c97e27d
+    Hash: c62f8aa4d1c3fa3dd8937255b56c7d42
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 15080e466337a84c34f3f4dffc413d78
+    Hash: 8c5b7327d4a845eb9a034ee9c89524e4
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -27,6 +27,8 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 95
   Script: {instanceID: 0}
+- Class: 136
+  Script: {instanceID: 0}
 - Class: 198
   Script: {instanceID: 0}
 - Class: 199
@@ -38,25 +40,32 @@ Assets:
 - Assets/Prefabs/Molotov.prefab
 - Assets/Prefabs/UFO.prefab
 - Assets/Textures/UFO_Black_Down.mat
+- Assets/Prefabs/arrow-repeat.prefab
 - Assets/Shaders/LightProjectorShader.shader
+- Assets/Prefabs/latcher-claw.prefab
 - Assets/Effects/Fire_Flamethrower.prefab
 - Assets/Effects/Fire_Ball.prefab
 - Assets/Effects/Fire_Glow.mat
 - Assets/Shaders/StickerStencilApply.shader
 - Assets/Models/bottle.fbx
 - Assets/Textures/UFO_Fire.mat
+- Assets/Prefabs/mantrap.prefab
 - Assets/Effects/Fire_Material.mat
+- Assets/Prefabs/Launcher.prefab
 - Assets/Shaders/ProjectStickerShader.shader
 - Assets/Textures/UFO_Middle.mat
+- Assets/Prefabs/rocket-bomb.prefab
 - Assets/Textures/PolaroidMaterial.mat
 - Assets/Shaders/MultiplyProjectorShader.shader
 - Assets/Effects/Fire_Particles.png
 - Assets/Effects/Fire_Parent.prefab
 - Assets/Textures/UFO_Base.mat
 - Assets/Effects/UFO_Particles.png
+- Assets/Prefabs/Unlit-Bomb.prefab
 - Assets/Prefabs/Missile.prefab
 - Assets/Prefabs/LaserRifle.prefab
 - Assets/Prefabs/polaroid_model.prefab
+- Assets/Prefabs/Frame.prefab
 - Assets/Models/missile_model.dae
 - Assets/Prefabs/LeepBot.prefab
 - Assets/Effects/Fire_Material_Additive.mat

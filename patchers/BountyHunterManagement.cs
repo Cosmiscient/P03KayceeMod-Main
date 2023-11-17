@@ -25,7 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         public static IEnumerator AcquireBrain(IEnumerator sequence)
         {
-            if (SaveFile.IsAscension)
+            if (P03AscensionSaveData.IsP03Run)
             {
                 if (BoardManager.Instance.AllSlotsCopy.Any(SlotHasBrain))
                 {
@@ -47,7 +47,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             yield return sequence;
 
-            if (!SaveFile.IsAscension || TurnManager.Instance.Opponent is P03AscensionOpponent) // don't do this on the final boss
+            if (!P03AscensionSaveData.IsP03Run || TurnManager.Instance.Opponent is P03AscensionOpponent) // don't do this on the final boss
                 yield break;
 
             P03AnimationController.Face currentFace = P03AnimationController.Instance.CurrentFace;
@@ -87,6 +87,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static void ExtraPunishmentForExcessDamage(int excessDamage)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (excessDamage > 3)
                 Part3SaveData.Data.IncreaseBounty(excessDamage - 3);
 
@@ -98,6 +101,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static void AddBountyTiersThroughSix(HoloBountyIcons __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (__instance.bountyTierObjects.Length == 3)
             {
                 GameObject tierFour = Object.Instantiate(__instance.bountyTierObjects[1], __instance.bountyTierObjects[1].transform.parent);

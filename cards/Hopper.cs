@@ -10,7 +10,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class Hopper : AbilityBehaviour
     {
         public override Ability Ability => AbilityID;

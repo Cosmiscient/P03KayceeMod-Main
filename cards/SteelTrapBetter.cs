@@ -13,8 +13,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private DiskCardAnimationController DiskAnim => Card.Anim as DiskCardAnimationController;
 
-        private static GameObject _holoTrapCopy;
-        private static GameObject HoloTrapCopy
+        internal static GameObject _holoTrapCopy;
+        internal static GameObject HoloTrapCopy
         {
             get
             {

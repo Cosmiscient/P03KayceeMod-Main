@@ -11,13 +11,12 @@ using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Saves;
 using Pixelplacement;
-using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 {
     [HarmonyPatch]
-    internal static class Stickers
+    public static class Stickers
     {
         #region Sticker Textures
 
@@ -98,6 +97,26 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             { "sticker_mushroom", P03AchievementManagement.MYCOLOGISTS_COMPLETED },
             { "sticker_winged_shoes", P03AchievementManagement.FAST_GENERATOR }
         };
+
+        /// <summary>
+        /// Adds a new sticker to the sticker book
+        /// </summary>
+        /// <param name="pluginGuid">Plugin/mod guid</param>
+        /// <param name="stickerName">Name of the sticker</param>
+        /// <param name="stickerTexture">Sticker texture (500x500 pixels please!)</param>
+        /// <param name="achievement">The associated achievement that unlocks the sticker</param>
+        public static void Add(string pluginGuid, string stickerName, Texture2D stickerTexture, Achievement achievement)
+        {
+            string newName = $"{pluginGuid}_{stickerName}";
+            if (StickerRewards.ContainsKey(newName))
+                return;
+            stickerTexture.name = newName;
+            StickerRewards[newName] = achievement;
+            AllStickerKeys.Add(newName);
+            AllStickers.Add(stickerTexture);
+            AllFadedStickers.Add(MakeFadedTexture(stickerTexture));
+            AllShadowStickers.Add(MakeShadowTexture(stickerTexture));
+        }
 
         internal static readonly List<string> AllStickerKeys = new(StickerRewards.Keys);
 
@@ -490,6 +509,12 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         [HarmonyPostfix]
         private static IEnumerator CleanUpStickerBook(IEnumerator sequence, SelectableCardArray __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
             Transform tablet = __instance.transform.Find("StickerBook");
             if (tablet != null)
             {
@@ -504,6 +529,9 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         [HarmonyPostfix]
         private static void ApplyStickersToCard(ref Card __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (__instance.StatsLayer is not DiskRenderStatsLayer)
             {
                 return;
@@ -535,16 +563,18 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 if (!activeInterface)
                 {
                     foreach (Transform child in __instance.StatsLayer.transform)
+                    {
                         if (child.gameObject.name.Equals("Stencil"))
-                            GameObject.Destroy(child.gameObject);
+                            UnityEngine.Object.Destroy(child.gameObject);
+                    }
 
                     GameObject stencil = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     stencil.name = "Stencil";
                     stencil.transform.SetParent(__instance.StatsLayer.transform);
-                    stencil.transform.localScale = new(1.945f, 1.385f, 0.055f);
+                    stencil.transform.localScale = new(1.945f, 1.2f, 0.055f);
                     stencil.transform.localPosition = new(0f, -0.05f, 0f);
                     stencil.transform.localEulerAngles = new(0f, 0f, 0f);
-                    var material = new Material(STENCIL_SHADER);
+                    Material material = new Material(STENCIL_SHADER);
                     material.SetInt("_StencilNumber", LAST_STENCIL_NUMBER);
                     stencil.GetComponent<Renderer>().material = material;
                     UnityEngine.Object.Destroy(stencil.GetComponent<Collider>());

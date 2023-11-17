@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Helpers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -27,6 +27,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void ReplaceDecalsForReplicas(CardDisplayer3D __instance, CardRenderInfo renderInfo, PlayableCard playableCard)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (renderInfo.baseInfo.appearanceBehaviour.Contains(ID))
             {
                 if (playableCard is null)
@@ -35,7 +38,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     return;
                 }
 
-                List<Texture> decals = new() { CustomCards.DUMMY_DECAL, CustomCards.DUMMY_DECAL };
+                List<Texture> decals = new() { CustomCards.DUMMY_DECAL, CustomCards.DUMMY_DECAL_2 };
 
                 string key = renderInfo.baseInfo.GetExtendedProperty(REPLICA_TYPE);
                 int matchCount = 0;

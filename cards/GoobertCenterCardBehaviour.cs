@@ -279,7 +279,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static bool GetAdjacentAccountingForTripleCard(CardSlot slot, ref List<CardSlot> __result)
         {
-            if (!SaveManager.SaveFile.IsPart3)
+            if (!P03AscensionSaveData.IsP03Run)
                 return true;
 
             if (IsInsideCombatPhase)
@@ -382,7 +382,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void FilterOutCoveredSlots(ref List<CardSlot> __result)
         {
-            if (!SaveManager.SaveFile.IsPart3)
+            if (!P03AscensionSaveData.IsP03Run)
                 return;
 
             // This is a bit of a hacky coverup to deal with the fact that when you ask the table manager
@@ -399,7 +399,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static bool EnsureRoomForTripleCard(PlayableCard card, ref bool __result)
         {
-            if (!SaveManager.SaveFile.IsPart3)
+            if (!P03AscensionSaveData.IsP03Run)
                 return true;
 
             if (card.Info.specialAbilities.Contains(AbilityID))
@@ -465,7 +465,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static void EnsureSlotsOnUpkeep()
         {
-            if (!SaveManager.SaveFile.IsPart3)
+            if (!P03AscensionSaveData.IsP03Run)
                 return;
 
             ResolveOpposingSlotsForTripleCard();
@@ -475,6 +475,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static IEnumerator EnsureSlotsOnCombat(IEnumerator sequence)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
             IsInsideCombatPhase = true;
             ResolveOpposingSlotsForTripleCard(reset: true);
             yield return sequence;
@@ -486,7 +491,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static void EnsureSlotsOnCleanup()
         {
-            if (!SaveManager.SaveFile.IsPart3)
+            if (!P03AscensionSaveData.IsP03Run)
                 return;
 
             ResolveOpposingSlotsForTripleCard(reset: true);
@@ -496,7 +501,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static IEnumerator HackyTripleCardReassignmentStrategy(IEnumerator sequence, PlayableCard card, CardSlot slot, float transitionDuration = 0.1f, Action tweenCompleteCallback = null, bool resolveTriggers = true)
         {
-            if (SaveManager.SaveFile.IsPart3)
+            if (P03AscensionSaveData.IsP03Run)
             {
                 // If this is a triple card we might actually change which slot its being assigned to:
                 if (card.Info.specialAbilities.Contains(AbilityID))
@@ -563,7 +568,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyAfter("cyantist.inscryption.api")]
         private static void ReplaceAttacksOnOverlap(PlayableCard __instance, ref List<CardSlot> __result)
         {
-            if (!SaveManager.SaveFile.IsPart3)
+            if (!P03AscensionSaveData.IsP03Run)
                 return;
 
             // If you attack a slot we overlap, you should attack us
@@ -583,7 +588,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static bool QueuedCardIsBlocked(PlayableCard queuedCard, ref bool __result)
         {
-            if (!SaveManager.SaveFile.IsPart3)
+            if (!P03AscensionSaveData.IsP03Run)
                 return true;
 
             // You can't put a queued card into a slot we overlap
@@ -597,7 +602,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void WouldHaveRespondedInAnotherSlot(CardTriggerHandler __instance, ref bool __result, Trigger trigger, object[] otherArgs)
         {
-            if (!SaveManager.SaveFile.IsPart3)
+            if (!P03AscensionSaveData.IsP03Run)
                 return;
 
             if (InVirtualSlot)
@@ -682,7 +687,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static IEnumerator HandleTripleCardTrigger(IEnumerator sequence, CardTriggerHandler __instance, Trigger trigger, object[] otherArgs)
         {
-            if (!SaveManager.SaveFile.IsPart3)
+            if (!P03AscensionSaveData.IsP03Run)
             {
                 yield return sequence;
                 yield break;

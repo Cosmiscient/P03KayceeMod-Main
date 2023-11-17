@@ -39,6 +39,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Viperbot
             CardInfo viperBot = CardManager.New(EXP_1_PREFIX, "ViperBot", "V1P3R", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_viperbot.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 5)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .AddAbilities(Ability.Transformer);
@@ -66,6 +67,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Seedbot
             CardManager.New(EXP_1_PREFIX, "SeedBot", "SeedBot", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_seedbot.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_seedbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 1)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .AddAbilities(TreeStrafe.AbilityID);
@@ -116,7 +118,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             // Salmon and beastmaster
             CardManager.New(EXP_1_PREFIX, "Salmon", "S4LM0N", 0, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_salmon.png", typeof(ExpansionPackCards_1).Assembly));
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_salmon.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_salmon.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetCost(energyCost: 1)
+                .SetEvolve("Angler_Fish_More", 1);
+
+            CardManager.BaseGameCards.CardByName("Angler_Fish_More").SetEvolve("Angler_Fish_Good", 1);
 
             CardManager.New(EXP_1_PREFIX, "BeastMaster", "B3A5T M4ST3R", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_beastmaster.png", typeof(ExpansionPackCards_1).Assembly))
@@ -144,6 +151,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Ammo Bot
             CardManager.New(EXP_1_PREFIX, "AmmoBot", "AmmoBot", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ammobot.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_ammobot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
                 .SetNeutralP03Card()
                 .AddAbilities(FullyLoaded.AbilityID);
@@ -220,6 +228,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Skyplane
             CardManager.New(EXP_1_PREFIX, "Spyplane", "Spyplane", 3, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_skyplane.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_spyplane.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 6)
                 .SetNeutralP03Card()
                 .AddAbilities(Ability.Flying);
@@ -242,6 +251,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Frankenbot
             CardInfo frankenBot = CardManager.New(EXP_1_PREFIX, "FrankenBot", "FrankenCell", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_frankenbot.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_frankenbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .AddMetaCategories(CustomCards.TechRegion)
@@ -249,7 +259,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardInfo frankenBeast = CardManager.New(EXP_1_PREFIX, "FrankenBeast", "FrankenCell", 3, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_frankenbeast.png", typeof(ExpansionPackCards_1).Assembly))
-                .AddAbilities(CellDeEvolve.AbilityID, GuidManager.GetEnumValue<Ability>("extraVoid.inscryption.voidSigils", "Electric"));
+                .AddAbilities(CellDeEvolve.AbilityID, Electric.AbilityID);
 
             frankenBot.SetEvolve(frankenBeast, 1);
             frankenBeast.SetEvolve(frankenBot, 1);
@@ -259,6 +269,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Clock man
             CardManager.New(EXP_1_PREFIX, "Clockbot", "Mr:Clock", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
                 .SetNeutralP03Card()
                 .AddAbilities(RotatingAlarm.AbilityID);
@@ -325,18 +336,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(EXP_1_PREFIX, "SEED", "Seed", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_seed.png", typeof(ExpansionPackCards_1).Assembly))
                 .AddSpecialAbilities(SeedBehaviour.AbilityID);
-        }
-
-        [HarmonyPatch(typeof(CardLoader), nameof(CardLoader.Clone))]
-        [HarmonyPostfix]
-        private static void ModifyCardForAscension(ref CardInfo __result)
-        {
-            string compName = __result.name.ToLowerInvariant();
-            if (compName.StartsWith($"{EXP_1_PREFIX}_gemrotator"))
-            {
-                if (!__result.Gemified)
-                    __result.mods.Add(new() { gemify = true });
-            }
         }
     }
 }

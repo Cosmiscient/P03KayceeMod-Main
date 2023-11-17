@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
+using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using UnityEngine;
-using HarmonyLib;
 using InscryptionAPI.Encounters;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Encounters
 {
@@ -16,14 +16,14 @@ namespace Infiniscryption.P03KayceeRun.Encounters
     {
         internal static List<string> P03OnlyEncounters = new();
 
-        internal static Dictionary<string, EncounterBlueprintData> HolyHackerole = new ();
+        internal static Dictionary<string, EncounterBlueprintData> HolyHackerole = new();
 
         private static void MatchMods(CardInfo orig, CardInfo copy)
         {
             if (orig == null || copy == null || orig.mods == null || orig.mods.Count == 0)
                 return;
 
-            copy.mods = new ();
+            copy.mods = new();
             foreach (var m in orig.mods)
                 copy.mods.Add((CardModificationInfo)m.Clone());
         }
@@ -32,7 +32,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         {
             // Screw your stupid copying of stuff killing my card mods.
             // I'll fix it myself. The hard way.
-            EncounterManager.ModifyEncountersList += delegate(List<EncounterBlueprintData> allEncounters)
+            EncounterManager.ModifyEncountersList += delegate (List<EncounterBlueprintData> allEncounters)
             {
                 foreach (var ebd in allEncounters)
                 {
@@ -55,7 +55,8 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                                 MatchMods(originalTurns[t][c].replacement, ebd.turns[t][c].replacement);
                             }
                         }
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         P03Plugin.Log.LogError($"Failed to repair encounter {ebd.name}");
                         P03Plugin.Log.LogError(ex);
@@ -77,7 +78,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 return RunBasedHoloMap.Zone.Undead;
             else if (temple.Value == CardTemple.Wizard)
                 return RunBasedHoloMap.Zone.Magic;
-            
+
             return RunBasedHoloMap.Zone.Neutral;
         }
 
@@ -149,6 +150,9 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         [HarmonyPrefix]
         private static bool P03EncountersNeverHavePrerequisitesMet(ref EncounterBlueprintData __instance, ref bool __result)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
             if (P03OnlyEncounters.Contains(__instance.name))
             {
                 __result = false;
@@ -161,8 +165,11 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         [HarmonyPostfix]
         private static void EnsureOverclocked(ref PlayableCard card)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (card.Info != null && card.Info.Mods != null && card.Info.Mods.Any(m => m.fromOverclock))
                 card.Anim.SetOverclocked(true);
-        }        
+        }
     }
 }

@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
-using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Items;
@@ -13,7 +12,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
-    [HarmonyPatch]
     public class RifleItem : TargetSlotItem
     {
         public static ConsumableItemData ItemData { get; private set; }

@@ -49,6 +49,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.flipYIfOpponent = false;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_rotating_clock.png", typeof(RotatingAlarm).Assembly));
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,

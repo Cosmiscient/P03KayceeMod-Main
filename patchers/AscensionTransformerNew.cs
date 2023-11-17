@@ -1,14 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
-using InscryptionAPI.Card;
-using InscryptionAPI.Helpers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
@@ -17,9 +12,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     public class AscensionTransformerNew
     {
         private static bool allBeastTransformersAssigned = false;
-        private static List<CardInfo> allBeastTransformers = new List<CardInfo>();
+        private static List<CardInfo> allBeastTransformers = new();
 
-        public static BeastInfoList beastInfoList = new BeastInfoList();
+        public static BeastInfoList beastInfoList = new();
 
         public class BeastInfo
         {
@@ -44,7 +39,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             public void Add(string id, int healthChange, int energyChange)
             {
-                BeastInfo newNode = new BeastInfo(id, healthChange, energyChange);
+                BeastInfo newNode = new(id, healthChange, energyChange);
 
                 if (head == null)
                 {
@@ -93,7 +88,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static void HealthAndCostChangesDisplay(CreateTransformerSequencer __instance)
         {
-            if (SaveFile.IsAscension)
+            if (P03AscensionSaveData.IsP03Run)
             {
                 P03AddModFace component = P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.AddBeastMod, showEffects: false).GetComponent<P03AddModFace>();
                 component.DisplayCardWithMod(__instance.selectedCard.Info, __instance.currentValidModChoices[__instance.currentModIndex]);
@@ -108,7 +103,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static void PostfixAwake(CreateTransformerSequencer __instance)
         {
-            if (SaveFile.IsAscension)
+            if (P03AscensionSaveData.IsP03Run)
             {
                 // Iterate through each card that's tech and has the beast transformer metacategory
                 foreach (CardInfo ci in CardLoader.AllData.Where(ci => ci.temple == CardTemple.Tech && ci.metaCategories.Contains(CustomCards.NewBeastTransformers)))
@@ -135,7 +130,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     //}
                 }
 
-                List<int> uniqueIndexes = new List<int>();
+                List<int> uniqueIndexes = new();
                 int maxIndex = allBeastTransformers.Count - 1;
 
                 for (int i = 0; i < 3; i++)
@@ -165,31 +160,23 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
-        //[HarmonyPatch(typeof(CreateTransformerSequencer))]
-        //[HarmonyPatch("OnEndModSelection")]
-        //[HarmonyPrefix]
-        //private static void HealthEnergyFix(CreateTransformerSequencer __instance)
-        //{
-
-        //}
-
         [HarmonyPatch(typeof(CreateTransformerSequencer))]
         [HarmonyPatch("UpdateModChoices")]
         [HarmonyPrefix]
         private static bool PrefixUpdateModChoices(CreateTransformerSequencer __instance, CardInfo selectedCard)
         {
             //If P03 KCM is active, randomize the beast node
-            if (SaveFile.IsAscension)
+            if (P03AscensionSaveData.IsP03Run)
             {
                 //if (__instance.beastMods == null)
                 {
-                    CardModificationInfo cardModificationInfo = new CardModificationInfo();
+                    CardModificationInfo cardModificationInfo = new();
                     cardModificationInfo.abilities.Add(Ability.Transformer);
                     cardModificationInfo.transformerBeastCardId = __instance.beastCards[0].name;
-                    CardModificationInfo cardModificationInfo2 = new CardModificationInfo();
+                    CardModificationInfo cardModificationInfo2 = new();
                     cardModificationInfo2.abilities.Add(Ability.Transformer);
                     cardModificationInfo2.transformerBeastCardId = __instance.beastCards[1].name;
-                    CardModificationInfo cardModificationInfo3 = new CardModificationInfo();
+                    CardModificationInfo cardModificationInfo3 = new();
                     cardModificationInfo3.abilities.Add(Ability.Transformer);
                     cardModificationInfo3.transformerBeastCardId = __instance.beastCards[2].name;
 
@@ -227,11 +214,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (mod.healthAdjustment != 0 || mod.attackAdjustment != 0 || mod.energyCostAdjustment != 0)
                 {
                     // Split the mod into two mods, where the mod effects that would stack are not copyable
-                    CardModificationInfo newMod = new();
-                    newMod.healthAdjustment = mod.healthAdjustment;
-                    newMod.attackAdjustment = mod.attackAdjustment;
-                    newMod.energyCostAdjustment = mod.energyCostAdjustment;
-                    newMod.nonCopyable = true;
+                    CardModificationInfo newMod = new()
+                    {
+                        healthAdjustment = mod.healthAdjustment,
+                        attackAdjustment = mod.attackAdjustment,
+                        energyCostAdjustment = mod.energyCostAdjustment,
+                        nonCopyable = true
+                    };
 
                     mod.healthAdjustment = 0;
                     mod.attackAdjustment = 0;
@@ -247,26 +236,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return true;
         }
 
-        //[HarmonyPatch(typeof(Transformer), nameof(Transformer.GetBeastModeStatsMod))]
-        //[HarmonyPostfix]
-        //private static void FixModAdjustments(CardInfo beastModeCard, CardInfo botModeCard, CardModificationInfo __result)
-        //{
-        //    // Calculate the energy adjustments and health adjustments specifically from the mods on the botmodecard
-        //    int energyCostAdjustment = botModeCard.Mods.Select(m => m.energyCostAdjustment).Sum();
-        //    int healthAdjustment = botModeCard.Mods.Select(m => m.healthAdjustment).Sum();
-
-        //    __result.healthAdjustment -= healthAdjustment;
-        //    __result.energyCostAdjustment -= energyCostAdjustment;
-        //}
-
         [HarmonyPatch(typeof(Transformer), nameof(Transformer.GetTransformCardInfo))]
         [HarmonyPostfix]
         private static void ReverseStatsFromCopyableMods(ref Transformer __instance, ref CardInfo __result)
         {
             CardModificationInfo statReversingMod = null;
-            foreach (var myMod in __instance.Card.Info.Mods.Where(m => m != null && !m.nonCopyable))
+            foreach (CardModificationInfo myMod in __instance.Card.Info.Mods.Where(m => m != null && !m.nonCopyable))
             {
-                foreach (var targetMod in __result.Mods.Where(m => m != null && !m.nonCopyable))
+                foreach (CardModificationInfo targetMod in __result.Mods.Where(m => m != null && !m.nonCopyable))
                 {
                     if (myMod.attackAdjustment == targetMod.attackAdjustment
                         && myMod.healthAdjustment == targetMod.healthAdjustment
@@ -334,86 +311,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         cardHealthChange = 1;
                         break;
                     }
+
+                default:
+                    break;
             }
 
-            if (energyChange)
-            {
-                return cardEnergyChange;
-            }
-            else
-                return cardHealthChange;
+            return energyChange ? cardEnergyChange : cardHealthChange;
         }
-
-        //private static int getCardAdjustment(bool energyChange, string beastCardName)
-        //{
-        //    int cardEnergyChange = 0;
-        //    int cardHealthChange = 0;
-
-        //    switch (beastCardName)
-        //    {
-        //        case "CXformerWolf":
-        //            {
-        //                cardEnergyChange = 1;
-        //                cardHealthChange = 0;
-        //                break;
-        //            }
-
-        //        case "CXformerRaven":
-        //            {
-        //                cardEnergyChange = 0;
-        //                cardHealthChange = 0;
-        //                break;
-        //            }
-
-        //        case "CXformerAdder":
-        //            {
-        //                cardEnergyChange = 0;
-        //                cardHealthChange = 1;
-        //                break;
-        //            }
-
-        //        case "P03KCM_CXformerRiverSnapper":
-        //            {
-        //                cardEnergyChange = 1;
-        //                cardHealthChange = 4;
-        //                break; 
-        //            }
-
-        //        case "P03KCM_CXformerMole":
-        //            {
-        //                cardEnergyChange = 1;
-        //                cardHealthChange = 2;
-        //                break;
-        //            }
-
-        //        case "P03KCM_CXformerRabbit":
-        //            {
-        //                cardEnergyChange = -2;
-        //                cardHealthChange = 0;
-        //                break;
-        //            }
-
-        //        case "P03KCM_CXformerMantis":
-        //            {
-        //                cardEnergyChange = 0;
-        //                cardHealthChange = 0;
-        //                break;
-        //            }
-
-        //        case "P03KCM_CXformerAlpha":
-        //            {
-        //                cardEnergyChange = 1;
-        //                cardHealthChange = 0;
-        //                break;
-        //            }
-        //    }
-
-        //    if (energyChange)
-        //    {
-        //        return cardEnergyChange;
-        //    }
-        //    else
-        //    return cardHealthChange;
-        //}
     }
 }

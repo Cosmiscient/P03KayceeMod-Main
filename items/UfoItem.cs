@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
-using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
@@ -14,7 +13,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
-    [HarmonyPatch]
     public class UfoItem : TargetSlotItem
     {
         public static ConsumableItemData ItemData { get; private set; }

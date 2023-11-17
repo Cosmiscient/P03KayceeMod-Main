@@ -53,10 +53,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                 if (slot.Card.AllAbilities().Any(ab => AbilityManager.AllAbilities.AbilityByID(ab).AbilityBehavior.IsSubclassOf(typeof(Latch))))
                 {
-                    if (slot.Card.HasAbility(LatchDeathLatch.AbilityID))
-                        return 20;
-
-                    return slot.Card.HasAbility(Ability.LatchBrittle) ? 15 : 10;
+                    return slot.Card.HasAbility(LatchDeathLatch.AbilityID) ? 20 : slot.Card.HasAbility(Ability.LatchBrittle) ? 15 : 10;
                 }
 
                 if (slot.Card.HasAbility(Ability.ExplodeOnDeath))

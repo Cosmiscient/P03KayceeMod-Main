@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
@@ -48,7 +47,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         public static void NoRecursionForAscension(ref List<Ability> __result)
         {
-            if (SaveFile.IsAscension)
+            if (P03AscensionSaveData.IsP03Run)
             {
                 __result.Remove(Ability.DrawCopyOnDeath);
                 __result.Remove(Ability.GainBattery);
@@ -105,7 +104,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static void SetupManualEntry(BuildACardScreen __instance)
         {
-            foreach (var btn in __instance.nameButtons)
+            foreach (UpDownScreenButtons btn in __instance.nameButtons)
             {
                 btn.upButton.gameObject.SetActive(!P03AscensionSaveData.IsP03Run);
                 btn.downButton.gameObject.SetActive(!P03AscensionSaveData.IsP03Run);
@@ -122,8 +121,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             __instance.nameTexts[2].gameObject.SetActive(!P03AscensionSaveData.IsP03Run);
 
-            var nameScreen = __instance.stageInteractableParents[(int)BuildACardScreen.Stage.Name];
-            var handler = nameScreen.GetComponent<BuildACardNameInputHandler>();
+            GameObject nameScreen = __instance.stageInteractableParents[(int)BuildACardScreen.Stage.Name];
+            BuildACardNameInputHandler handler = nameScreen.GetComponent<BuildACardNameInputHandler>();
             if (handler == null)
             {
                 handler = nameScreen.AddComponent<BuildACardNameInputHandler>();
@@ -142,7 +141,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static void TurnOffUpDownNameButtons(BuildACardScreen __instance)
         {
-            foreach (var btn in __instance.nameButtons)
+            foreach (UpDownScreenButtons btn in __instance.nameButtons)
             {
                 btn.upButton.gameObject.SetActive(!P03AscensionSaveData.IsP03Run);
                 btn.downButton.gameObject.SetActive(!P03AscensionSaveData.IsP03Run);

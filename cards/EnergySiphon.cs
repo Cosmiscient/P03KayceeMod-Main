@@ -24,6 +24,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.opponentUsable = false;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_drawcharge.png", typeof(EnergySiphon).Assembly));
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,

@@ -92,38 +92,38 @@ namespace Infiniscryption.P03KayceeRun
                 FixDeckEditor();
         }
 
-        private class DummyPatchTarget
-        {
-            private List<Ability> DummyMethod() => null;
-        }
+        // private class DummyPatchTarget
+        // {
+        //     private List<Ability> DummyMethod() => null;
+        // }
 
-        [HarmonyPatch]
-        private class DeckEditorCompatPatch
-        {
-            public static MethodBase TargetMethod()
-            {
-                foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies().Reverse())
-                {
-                    Type testType = assembly.GetType("DeckEditor");
-                    if (testType != null)
-                    {
-                        MethodInfo meth = AccessTools.FirstMethod(testType, m => m.Name.Contains("GetAllAbilities"));
-                        if (meth != null)
-                            return meth;
-                    }
-                }
-                return typeof(DummyPatchTarget).GetMethod("DummyMethod");
-            }
+        // [HarmonyPatch]
+        // private class DeckEditorCompatPatch
+        // {
+        //     public static MethodBase TargetMethod()
+        //     {
+        //         foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies().Reverse())
+        //         {
+        //             Type testType = assembly.GetType("DeckEditor");
+        //             if (testType != null)
+        //             {
+        //                 MethodInfo meth = AccessTools.FirstMethod(testType, m => m.Name.Contains("GetAllAbilities"));
+        //                 if (meth != null)
+        //                     return meth;
+        //             }
+        //         }
+        //         return typeof(DummyPatchTarget).GetMethod("DummyMethod");
+        //     }
 
-            public static bool Prefix(ref List<Ability> __result)
-            {
-                __result = GuidManager.GetValues<Ability>()
-                                      .Select(AbilitiesUtil.GetInfo)
-                                      .Where(ai => ai != null)
-                                      .Select(ai => ai.ability)
-                                      .ToList();
-                return false;
-            }
-        }
+        //     public static bool Prefix(ref List<Ability> __result)
+        //     {
+        //         __result = GuidManager.GetValues<Ability>()
+        //                               .Select(AbilitiesUtil.GetInfo)
+        //                               .Where(ai => ai != null)
+        //                               .Select(ai => ai.ability)
+        //                               .ToList();
+        //         return false;
+        //     }
+        // }
     }
 }

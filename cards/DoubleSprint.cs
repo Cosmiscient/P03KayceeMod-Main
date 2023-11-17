@@ -40,14 +40,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnTurnEnd(bool playerTurnEnd)
         {
-            CardSlot toLeft = Singleton<BoardManager>.Instance.GetAdjacent(Card.Slot, adjacentOnLeft: true);
-            CardSlot toRight = Singleton<BoardManager>.Instance.GetAdjacent(Card.Slot, adjacentOnLeft: false);
-            Singleton<ViewManager>.Instance.SwitchToView(View.Board);
+            CardSlot toLeft = BoardManager.Instance.GetAdjacent(Card.Slot, adjacentOnLeft: true);
+            CardSlot toRight = BoardManager.Instance.GetAdjacent(Card.Slot, adjacentOnLeft: false);
+            ViewManager.Instance.SwitchToView(View.Board);
             yield return new WaitForSeconds(0.25f);
             yield return DoStrafe(toLeft, toRight);
 
-            toLeft = Singleton<BoardManager>.Instance.GetAdjacent(Card.Slot, adjacentOnLeft: true);
-            toRight = Singleton<BoardManager>.Instance.GetAdjacent(Card.Slot, adjacentOnLeft: false);
+            toLeft = BoardManager.Instance.GetAdjacent(Card.Slot, adjacentOnLeft: true);
+            toRight = BoardManager.Instance.GetAdjacent(Card.Slot, adjacentOnLeft: false);
             yield return new WaitForSeconds(0.25f);
             yield return DoStrafe(toLeft, toRight);
         }
@@ -82,7 +82,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (destination != null && destinationValid)
             {
                 CardSlot oldSlot = Card.Slot;
-                yield return Singleton<BoardManager>.Instance.AssignCardToSlot(Card, destination);
+                yield return BoardManager.Instance.AssignCardToSlot(Card, destination);
                 yield return PostSuccessfulMoveSequence(oldSlot);
                 yield return new WaitForSeconds(0.25f);
             }
@@ -97,7 +97,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             if (Card.Info.name == "Snelk" && oldSlot.Card == null)
             {
-                yield return Singleton<BoardManager>.Instance.CreateCardInSlot(CardLoader.GetCardByName("Snelk_Neck"), oldSlot);
+                yield return BoardManager.Instance.CreateCardInSlot(CardLoader.GetCardByName("Snelk_Neck"), oldSlot);
             }
         }
     }

@@ -1,12 +1,11 @@
-using HarmonyLib;
-using DiskCardGame;
 using System.Collections;
-using UnityEngine;
-using Infiniscryption.P03KayceeRun.Sequences;
-using Infiniscryption.P03KayceeRun.Faces;
-using InscryptionAPI.Encounters;
 using System.Collections.Generic;
-using System.Linq;
+using DiskCardGame;
+using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Faces;
+using Infiniscryption.P03KayceeRun.Sequences;
+using InscryptionAPI.Encounters;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -34,7 +33,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         public static IEnumerator ReduceLivesOnBossNode(IEnumerator sequence)
         {
-            if (!SaveFile.IsAscension)
+            if (!P03AscensionSaveData.IsP03Run)
             {
                 yield return sequence;
                 yield break;
@@ -67,9 +66,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
                 yield return sequence.Current;
             }
-            
-
-            yield return AscensionChallengeManagement.RandomCanvasRule(sequence);
 
             yield break;
         }
@@ -78,16 +74,22 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         public static IEnumerator CanvasResetLives(IEnumerator sequence)
         {
-             yield return ReduceLivesOnBossNode(sequence);
+            yield return ReduceLivesOnBossNode(sequence);
 
-             ViewManager.Instance.SwitchToView(View.Default, false, false);
+            ViewManager.Instance.SwitchToView(View.Default, false, false);
         }
 
         [HarmonyPatch(typeof(Part3BossOpponent), nameof(Part3BossOpponent.BossDefeatedSequence))]
         [HarmonyPostfix]
         public static IEnumerator AscensionP03ResetLives(IEnumerator sequence, Part3BossOpponent __instance)
         {
-            if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TRADITIONAL_LIVES))
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            if (P03AscensionSaveData.IsP03Run && AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TRADITIONAL_LIVES))
             {
                 // Reset lives to maximum
                 if (EventManagement.NumberOfLivesRemaining < AscensionSaveData.Data.currentRun.maxPlayerLives)
@@ -99,12 +101,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
             }
 
-            if (__instance is not P03AscensionOpponent && __instance is not MycologistAscensionBossOpponent)
+            if (__instance is not P03AscensionOpponent and not MycologistAscensionBossOpponent)
             {
-                if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoBossRares))
-                    TurnManager.Instance.PostBattleSpecialNode = new CardChoicesNodeData();
-                else
-                    TurnManager.Instance.PostBattleSpecialNode = new CardChoiceGenerator.Part3RareCardChoicesNodeData();
+                TurnManager.Instance.PostBattleSpecialNode = AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoBossRares)
+                    ? new CardChoicesNodeData()
+                    : (SpecialNodeData)new CardChoiceGenerator.Part3RareCardChoicesNodeData();
             }
 
             yield return sequence;
@@ -181,7 +182,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             // The game doesn't play the normal boss defeated sequence when you beat the mycologists because
             // they are a different sort of boss. We need mycologists to behave more normally, hence this patch
-            if (SaveFile.IsAscension)
+            if (P03AscensionSaveData.IsP03Run)
             {
                 if (__instance.bossDefeatedStoryEvent == StoryEvent.MycologistsDefeated)
                 {
@@ -203,7 +204,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         public static IEnumerator AscensionP03BossDefeatedSequence(IEnumerator sequence, StoryEvent bossDefeatedStoryEvent)
         {
-            if (!SaveFile.IsAscension)
+            if (!P03AscensionSaveData.IsP03Run)
             {
                 yield return sequence;
                 yield break;
@@ -252,18 +253,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     //    yield return new WaitForSeconds(0.4f);
                     //}
 
-                    List<string> dialogueOptions = new List<string>();
-                    dialogueOptions.Add("Part3AscensionPayBoss");
-                    dialogueOptions.Add("Part3AscensionPayBoss2");
-                    dialogueOptions.Add("Part3AscensionPayBoss3");
-                    dialogueOptions.Add("Part3AscensionPayBoss4");
-                    dialogueOptions.Add("Part3AscensionPayBoss5");
-                    dialogueOptions.Add("Part3AscensionPayBoss6");
-                    dialogueOptions.Add("Part3AscensionPayBoss7");
-                    dialogueOptions.Add("Part3AscensionPayBoss8");
-                    dialogueOptions.Add("Part3AscensionPayBoss9");
+                    List<string> dialogueOptions = new() {
+                        "Part3AscensionPayBoss",
+                        "Part3AscensionPayBoss2",
+                        "Part3AscensionPayBoss3",
+                        "Part3AscensionPayBoss4",
+                        "Part3AscensionPayBoss5",
+                        "Part3AscensionPayBoss6",
+                        "Part3AscensionPayBoss7",
+                        "Part3AscensionPayBoss8",
+                        "Part3AscensionPayBoss9"
+                    };
 
-                    string finalDialogue = dialogueOptions[UnityEngine.Random.Range(0, dialogueOptions.Count)];
+                    string finalDialogue = dialogueOptions[Random.Range(0, dialogueOptions.Count)];
 
                     yield return TextDisplayer.Instance.PlayDialogueEvent(finalDialogue, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                     yield return new WaitForSeconds(0.4f);
@@ -310,7 +312,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static IEnumerator CleanupBossEffects(IEnumerator sequence)
         {
             //Debug.Log("Boss cleanup initiated!!!");
-            if (!SaveFile.IsAscension)
+            if (!P03AscensionSaveData.IsP03Run)
             {
                 yield break;
             }

@@ -10,7 +10,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class Molotov : AbilityBehaviour
     {
         public static Ability AbilityID { get; private set; }
@@ -26,6 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.opponentUsable = false;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular, FireBomb.FlamingAbility };
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_molotov.png", typeof(Molotov).Assembly));
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,

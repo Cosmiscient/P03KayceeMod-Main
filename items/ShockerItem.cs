@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using DigitalRuby.LightningBolt;
 using DiskCardGame;
-using HarmonyLib;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Items;
 using InscryptionAPI.Items.Extensions;
@@ -12,7 +11,6 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
-    [HarmonyPatch]
     public class ShockerItem : ConsumableItem
     {
         public static ConsumableItemData ItemData { get; private set; }

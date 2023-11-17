@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.BattleMods;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Quests;
@@ -805,6 +806,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     node.encounterDifficulty = bp.encounterDifficulty;
                     node.bridgeBattle = (bp.specialTerrain & HoloMapBlueprint.FULL_BRIDGE) != 0;
 
+                    foreach (var id in bp.battleMods)
+                        BattleModManager.SetBlueprintRule(node.blueprintData.name, id);
+
                     if (bp.battleTerrainIndex > 0 && (bp.specialTerrain & HoloMapBlueprint.FULL_BRIDGE) == 0)
                     {
                         string[] terrain = genData.terrain[bp.battleTerrainIndex - 1];
@@ -981,6 +985,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             int nodeId = 10;
             foreach (MapNode node in area.GetComponentsInChildren<MapNode>())
                 node.nodeId = node is MoveHoloMapAreaNode ? nodeId++ - 10 : nodeId++;
+
+            if ((bp.specialTerrain & HoloMapBlueprint.FAST_TRAVEL_NODE) != 0)
+                if (!EventManagement.SawMapInfo)
+                    areaData.firstEnterDialogueId = "P03FastTravelKaycee";
 
             area.SetActive(false);
             return area;
