@@ -69,7 +69,11 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         public IEnumerator OnBattleModSetup()
         {
             SlotModificationManager.OverrideDefaultSlotTexture(CardTemple.Tech, PLAYER_CONVEYOR_SLOTS, OPPONENT_CONVEYOR_SLOTS);
-            BoardManager.Instance.AllSlotsCopy.ForEach(s => s.ResetSlot());
+            foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
+            {
+                slot.ResetSlotTexture();
+                yield return new WaitForSeconds(0.1f);
+            }
             yield return BattleModManager.GiveOneTimeIntroduction(ID, View.Board);
             yield break;
         }
@@ -77,7 +81,11 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         public IEnumerator OnBattleModCleanup()
         {
             SlotModificationManager.ResetDefaultSlotTexture(CardTemple.Tech);
-            BoardManager.Instance.AllSlotsCopy.ForEach(s => s.ResetSlot());
+            foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
+            {
+                slot.ResetSlotTexture();
+                yield return new WaitForSeconds(0.1f);
+            }
             yield break;
         }
 

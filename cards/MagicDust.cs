@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
-using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -26,7 +25,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             private static CardModificationInfo GetGemMod(PlayableCard card, bool create = false)
             {
-                CardModificationInfo mod = card.TemporaryMods.FirstOrDefault(m => m.singletonId.Equals(MOD_ID));
+                card.temporaryMods ??= new();
+                CardModificationInfo mod = card.TemporaryMods.FirstOrDefault(m => m != null && !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(MOD_ID));
                 if (mod == null && create)
                     mod = new() { singletonId = MOD_ID };
 
@@ -35,7 +35,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             public override IEnumerator OnOtherCardAssignedToSlot(PlayableCard otherCard)
             {
-                if (otherCard.Slot == null)
+                if (otherCard == null || otherCard.Slot == null)
                     yield break;
 
                 SlotModificationManager.ModificationType slotMod = otherCard.Slot.GetSlotModification();

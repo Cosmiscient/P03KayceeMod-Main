@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
-using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Quests;
-using InscryptionAPI.Guid;
+using InscryptionAPI.Card;
 using UnityEngine.SceneManagement;
 
 namespace Infiniscryption.P03KayceeRun
@@ -90,6 +86,10 @@ namespace Infiniscryption.P03KayceeRun
         {
             if (Chainloader.PluginInfos.ContainsKey("inscryption_deckeditor"))
                 FixDeckEditor();
+
+            // Need to *guarantee* that all of our card mod patches take hold
+            CardManager.SyncCardList();
+            AbilityManager.SyncAbilityList();
         }
 
         // private class DummyPatchTarget

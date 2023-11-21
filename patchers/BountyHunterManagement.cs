@@ -141,5 +141,71 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 __instance.bountyTierObjects = newStars.ToArray();
             }
         }
+
+        [HarmonyPatch(typeof(BountyHunter), nameof(BountyHunter.IntroductionSequence))]
+        [HarmonyPrefix]
+        private static void ResetBountyHunterTurns()
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
+            Part3SaveData.Data.battlesSinceBountyHunter = 0;
+        }
+
+        [HarmonyPatch(typeof(BountyHunterGenerator), nameof(BountyHunterGenerator.TryAddBountyHunterToTurnPlan))]
+        [HarmonyPrefix]
+        private static bool NewGeneratorLogic(List<List<CardInfo>> turnPlan, ref List<List<CardInfo>> __result)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
+            int currentRandomSeed = P03AscensionSaveData.RandomSeed;
+            int bounty = Part3SaveData.Data.bounty;
+            if (ProgressionData.LearnedMechanic(MechanicsConcept.Part3Bounty) && Part3SaveData.Data.BountyTier >= 1 && SeededRandom.Value(currentRandomSeed++) < Part3SaveData.Data.battlesSinceBountyHunter * 0.4f)
+            {
+                List<CardModificationInfo> list = Part3SaveData.Data.bountyHunterMods.FindAll((CardModificationInfo x) => x.bountyHunterInfo.tier == Part3SaveData.Data.BountyTier);
+                CardModificationInfo cardModificationInfo;
+                int turn;
+                if (list.Count > 0 && SeededRandom.Value(currentRandomSeed++) < list.Count * 0.33f)
+                {
+                    cardModificationInfo = list[SeededRandom.Range(0, list.Count, currentRandomSeed++)];
+                    turn = cardModificationInfo.energyCostAdjustment;
+                }
+                else
+                {
+                    turn = SeededRandom.Range(3, 6, currentRandomSeed++) - 1;
+                    cardModificationInfo = BountyHunterGenerator.GenerateMod(turn, bounty);
+                }
+                turn = Mathf.Clamp(turn, 0, turnPlan.Count - 1);
+                if (turn > 0 && Part3SaveData.Data.battlesSinceBountyHunter > 4)
+                    turn--;
+                if (turn > 0 && Part3SaveData.Data.battlesSinceBountyHunter > 6)
+                    turn--;
+                CardInfo cardInfo = null;
+                while (cardInfo == null && turn > 0)
+                {
+                    if (turnPlan.Count > 0)
+                    {
+                        cardInfo = turnPlan[turn].Find((CardInfo x) => x.PowerLevel < BountyHunterGenerator.GetStatPoints(turn, bounty));
+                    }
+                    if (cardInfo == null)
+                    {
+                        turn--;
+                    }
+                }
+                if (cardInfo != null)
+                {
+                    turnPlan[turn].Remove(cardInfo);
+                    turnPlan[turn].Add(BountyHunterGenerator.GenerateCardInfo(cardModificationInfo));
+                    if (!Part3SaveData.Data.bountyHunterMods.Contains(cardModificationInfo))
+                    {
+                        Part3SaveData.Data.bountyHunterMods.Add(cardModificationInfo);
+                    }
+                }
+            }
+            Part3SaveData.Data.battlesSinceBountyHunter++;
+            __result = turnPlan;
+            return false;
+        }
     }
 }

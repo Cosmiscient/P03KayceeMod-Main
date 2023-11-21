@@ -9,7 +9,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     [HarmonyPatch]
     public static class AnalyticsPatches
     {
-        private static readonly HttpClient client = new HttpClient();
+        private static readonly HttpClient client = new();
 
         [HarmonyPatch(typeof(AnalyticsManager), nameof(AnalyticsManager.SendFailedEncounterEvent))]
         [HarmonyPrefix]

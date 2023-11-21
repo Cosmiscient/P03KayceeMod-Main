@@ -53,11 +53,11 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 if (CardWouldDie(adj))
                 {
                     cardsThatWouldDie.Add(adj);
-                    if (adj.HasAbility(Ability.ExplodeOnDeath))
+                    if (adj.HasAbility(Ability.ExplodeOnDeath) && slot.Card != null)
                         cardsThatWouldDie.Add(slot.Card);
                 }
             }
-            return cardsThatWouldDie.Distinct().Select(c => c.PowerLevel).Sum() + (2 * adjacentCards.Count()) + (slot.Card != null ? 2 : 0);
+            return cardsThatWouldDie.Where(c => c != null).Distinct().Select(c => c.PowerLevel).Sum() + (2 * adjacentCards.Count()) + (slot.Card != null ? 2 : 0);
         }
 
         public override IEnumerator OnUpkeep(bool playerUpkeep)

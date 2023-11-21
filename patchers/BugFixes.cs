@@ -6,6 +6,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using InscryptionAPI.Card;
+using InscryptionAPI.Regions;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
@@ -303,30 +304,26 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 __result.SetActive(true);
         }
 
-        private static bool ResolvingForFastSpellTrait = false;
-
-        [HarmonyPatch(typeof(PlayerHand), nameof(PlayerHand.SelectSlotForCard))]
+        [HarmonyPatch(typeof(Part3ResourcesManager), nameof(Part3ResourcesManager.CleanUp))]
         [HarmonyPostfix]
-        [HarmonyPriority(Priority.VeryLow)]
-        private static IEnumerator WrapSpellEnumeratorAndFlagIt(IEnumerator sequence, PlayableCard card)
+        private static IEnumerator Part3BonesReset(IEnumerator sequence, Part3ResourcesManager __instance)
         {
-            ResolvingForFastSpellTrait = card.HasTrait(CustomCards.FastGlobalSpell);
             yield return sequence;
-            ResolvingForFastSpellTrait = false;
+
+            if (__instance.PlayerBones > 0)
+            {
+                yield return __instance.ShowSpendBones(__instance.PlayerBones);
+                __instance.PlayerBones = 0;
+            }
         }
 
-        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.ChooseSlot))]
-        [HarmonyPostfix]
-        private static IEnumerator SkipIfFastSpell(IEnumerator sequence, BoardManager __instance, List<CardSlot> validSlots)
+        [HarmonyPatch(typeof(AscensionMenuScreens), nameof(AscensionMenuScreens.SwitchToScreen))]
+        [HarmonyPrefix]
+        private static void EnsureEverythingSyncs()
         {
-            if (validSlots != null && validSlots.Count > 0 && ResolvingForFastSpellTrait)
-            {
-                __instance.LastSelectedSlot = validSlots[0];
-                __instance.ChoosingSlot = false;
-                __instance.cancelledPlacementWithInput = false;
-                yield break;
-            }
-            yield return sequence;
+            CardManager.SyncCardList();
+            AbilityManager.SyncAbilityList();
+            RegionManager.SyncRegionList();
         }
     }
 }

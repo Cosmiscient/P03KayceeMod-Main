@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
-using Infiniscryption.Core.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -13,7 +12,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
-        public static void Register()
+        static Zap()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Zap";
@@ -21,9 +20,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.canStack = true;
             info.powerLevel = 1;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part1Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            Zap.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(Zap),
@@ -31,21 +30,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToSlotTargetedForAttack(CardSlot slot, PlayableCard attacker)
-        {
-            if (slot.Card == null)
-                return false;
-
-            if (slot.IsPlayerSlot)
-                return false;
-
-            return true;
-        }
+        public override bool RespondsToSlotTargetedForAttack(CardSlot slot, PlayableCard attacker) => slot.Card != null;
 
         public override IEnumerator OnSlotTargetedForAttack(CardSlot slot, PlayableCard attacker)
         {
             if (slot.Card != null)
-                yield return slot.Card.TakeDamage(1, attacker);
+                yield return Electric.ShockCard(slot.Card, attacker, 1, slot.Card.transform.position + (Vector3.up * 3));
         }
     }
 }

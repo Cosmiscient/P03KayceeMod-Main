@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 1911563270
+CRC: 191935651
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: c62f8aa4d1c3fa3dd8937255b56c7d42
+    Hash: 7ebde1180465ee97cf3f7241c902bb3f
   TypeTreeHash:
     serializedVersion: 2
     Hash: 8c5b7327d4a845eb9a034ee9c89524e4
@@ -64,7 +64,6 @@ Assets:
 - Assets/Prefabs/Unlit-Bomb.prefab
 - Assets/Prefabs/Missile.prefab
 - Assets/Prefabs/LaserRifle.prefab
-- Assets/Prefabs/polaroid_model.prefab
 - Assets/Prefabs/Frame.prefab
 - Assets/Models/missile_model.dae
 - Assets/Prefabs/LeepBot.prefab

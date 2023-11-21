@@ -14,7 +14,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     public static class StarterDecks
     {
         public static string DEFAULT_STARTER_DECK { get; private set; }
-        private static string[] PREFIXES = {
+        private static readonly string[] PREFIXES = {
             P03Plugin.CardPrefx,
             ExpansionPackCards_1.EXP_1_PREFIX,
             ExpansionPackCards_2.EXP_2_PREFIX
@@ -24,9 +24,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             try
             {
-                if (CardManager.AllCardsCopy.Any(c => c.name.Equals(name)))
-                    return CardLoader.GetCardByName(name);
-                return null;
+                return CardManager.AllCardsCopy.Any(c => c.name.Equals(name)) ? CardLoader.GetCardByName(name) : null;
             }
             catch
             {
@@ -36,11 +34,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static CardInfo FixCardName(string name)
         {
-            var nextCard = FriendlyGet(name);
+            CardInfo nextCard = FriendlyGet(name);
             if (nextCard != null)
                 return nextCard;
 
-            foreach (var prefix in PREFIXES)
+            foreach (string prefix in PREFIXES)
             {
                 nextCard = FriendlyGet($"{prefix}_{name}");
                 if (nextCard != null)
@@ -52,7 +50,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static StarterDeckInfo CreateStarterDeckInfo(string title, string iconKey, string[] cards)
         {
             Texture2D icon = TextureHelper.GetImageAsTexture($"{iconKey}.png", typeof(StarterDecks).Assembly);
-            var retval = ScriptableObject.CreateInstance<StarterDeckInfo>();
+            StarterDeckInfo retval = ScriptableObject.CreateInstance<StarterDeckInfo>();
             retval.name = $"P03_{title}";
             retval.title = title;
             retval.iconSprite = Sprite.Create(icon, new Rect(0f, 0f, 35f, 44f), new Vector2(0.5f, 0.5f));
@@ -88,7 +86,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 CardTemple acceptableTemple = ScreenManagement.ScreenState;
 
                 // Only keep decks where at least one card belongs to this temple
-                decks.RemoveAll(info => info.Info.cards.FirstOrDefault(ci => ci.temple == acceptableTemple) == null);
+                if (acceptableTemple <= CardTemple.NUM_TEMPLES)
+                    decks.RemoveAll(info => info.Info.cards.FirstOrDefault(ci => ci.temple == acceptableTemple) == null);
 
                 return decks;
             };

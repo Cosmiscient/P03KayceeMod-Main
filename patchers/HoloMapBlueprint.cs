@@ -85,10 +85,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             battleMods = new();
             if (split.Length > 18)
             {
-                var allMods = split[18].Split('#');
+                string[] allMods = split[18].Split('#');
                 foreach (string p in allMods)
+                {
                     if (int.TryParse(p, out int id))
                         battleMods.Add((BattleModManager.ID)id);
+                }
             }
         }
 

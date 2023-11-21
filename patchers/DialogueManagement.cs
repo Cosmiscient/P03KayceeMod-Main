@@ -14,11 +14,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     {
         private static Emotion FaceEmotion(this P03AnimationController.Face face)
         {
-            if (face == P03AnimationController.Face.Angry)
-                return Emotion.Anger;
-            if (face == P03AnimationController.Face.Thinking)
-                return Emotion.Curious;
-            return face == P03AnimationController.Face.Bored
+            return face == P03AnimationController.Face.Angry
+                ? Emotion.Anger
+                : face == P03AnimationController.Face.Thinking
+                ? Emotion.Curious
+                : face == P03AnimationController.Face.Bored
                 ? Emotion.Anger
                 : face == P03AnimationController.Face.Happy
                 ? Emotion.Neutral
@@ -221,6 +221,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 int findex = SeededRandom.Range(0, words.Count, P03AscensionSaveData.RandomSeed + offset++);
                 if (words[findex].ToLowerInvariant() is "the" or "a")
                     profanity = "fucking";
+                words.Insert(findex, profanity);
                 message = String.Join(" ", words);
             }
         }

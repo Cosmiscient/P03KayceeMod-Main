@@ -1,30 +1,61 @@
-using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using BepInEx.Bootstrap;
 using DiskCardGame;
+using GBC;
+using HarmonyLib;
 using InscryptionAPI.Saves;
 using UnityEngine;
-using System;
-using GBC;
-using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
     [HarmonyPatch]
     public static class ScreenManagement
     {
-        public static CardTemple ScreenState 
-        { 
+        private const string GRIMORA_MOD = "arackulele.inscryption.grimoramod";
+        private const string MAGNIFICUS_MOD = "silenceman.inscryption.magnificusmod";
+
+        internal static Dictionary<string, string> AcceptedScreenStates = new()
+        {
+            { P03Plugin.PluginGuid, P03Plugin.PluginGuid },
+            { GRIMORA_MOD, GRIMORA_MOD },
+            { MAGNIFICUS_MOD, $"{MAGNIFICUS_MOD}starterdecks" }
+        };
+
+        internal static CardTemple ScreenState
+        {
             get
             {
-                string value = ModdedSaveManager.SaveData.GetValue(P03Plugin.PluginGuid, "ScreenState");
-                if (string.IsNullOrEmpty(value))
-                    return CardTemple.Nature;
+                Scene activeScene = SceneManager.GetActiveScene();
+                if (activeScene != null && !string.IsNullOrEmpty(activeScene.name))
+                {
+                    string sceneName = activeScene.name.ToLowerInvariant();
+                    if (sceneName.Contains("magnificus"))
+                        return CardTemple.Wizard;
+                    if (sceneName.Contains("part3"))
+                        return CardTemple.Tech;
+                    if (sceneName.Contains("grimora"))
+                        return CardTemple.Undead;
+                    if (sceneName.Contains("part1"))
+                        return CardTemple.Nature;
+                }
 
-                return (CardTemple)Enum.Parse(typeof(CardTemple), value);
+                foreach (string guid in AcceptedScreenStates.Keys)
+                {
+                    if (!Chainloader.PluginInfos.ContainsKey(guid))
+                        continue;
+
+                    string value = ModdedSaveManager.SaveData.GetValue(AcceptedScreenStates[guid], "ScreenState");
+                    if (string.IsNullOrEmpty(value))
+                        continue;
+
+                    return (CardTemple)Enum.Parse(typeof(CardTemple), value);
+                }
+
+                return CardTemple.Nature;
             }
-            set
-            {
-                ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "ScreenState", value);
-            }
+            set => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "ScreenState", value);
         }
 
         [HarmonyPatch(typeof(AscensionMenuScreens), "TransitionToGame")]
@@ -47,22 +78,22 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
             }
             if (P03AscensionSaveData.IsP03Run)
-                ScreenManagement.ScreenState = CardTemple.Tech;
+                ScreenState = CardTemple.Tech;
         }
 
         [HarmonyPatch(typeof(MenuController), "LoadGameFromMenu")]
         [HarmonyPrefix]
         public static bool LoadGameFromMenu(bool newGameGBC)
         {
-			if (!newGameGBC && SaveFile.IsAscension && P03AscensionSaveData.IsP03Run)
-			{
+            if (!newGameGBC && SaveFile.IsAscension && P03AscensionSaveData.IsP03Run)
+            {
 
                 SaveManager.LoadFromFile();
-				LoadingScreenManager.LoadScene("Part3_Cabin");
+                LoadingScreenManager.LoadScene("Part3_Cabin");
                 SaveManager.savingDisabled = false;
                 return false;
-			}
-			return true;
+            }
+            return true;
         }
 
         private static void ClearP03Data()
@@ -85,10 +116,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(AscensionMenuScreens), "Start")]
         [HarmonyPrefix]
-        public static void ClearScreenStatePrefix()
-        {
-            ClearP03Data();
-        }
+        public static void ClearScreenStatePrefix() => ClearP03Data();
 
         private static readonly string[] menuItems = new string[] { "Menu_New", "Continue", "Menu_Stats", "Menu_Unlocks", "Menu_Exit", "Menu_QuitApp" };
         [HarmonyPatch(typeof(AscensionMenuScreens), "Start")]
@@ -113,11 +141,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             // Clone the new button
-            GameObject newP03Button = GameObject.Instantiate(newButton, newButton.transform.parent);
+            GameObject newP03Button = UnityEngine.Object.Instantiate(newButton, newButton.transform.parent);
             newP03Button.transform.localPosition = newP03RunPos;
             newP03Button.name = "Menu_New_P03";
             AscensionMenuInteractable newP03ButtonController = newP03Button.GetComponent<AscensionMenuInteractable>();
-            newP03ButtonController.CursorSelectStarted = delegate (MainInputInteractable i) {
+            newP03ButtonController.CursorSelectStarted = delegate (MainInputInteractable i)
+            {
                 ScreenState = CardTemple.Tech;
                 newButtonController.CursorSelectStart();
             };

@@ -1,9 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.Spells;
 using Infiniscryption.Spells.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
@@ -47,9 +45,23 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static bool OnlyPlayIfNeedsEnergy(PlayableCard __instance, ref bool __result)
         {
-            if (__instance.HasAbility(RefillBattery.AbilityID) && __instance.Info.IsSpell() && ResourcesManager.Instance.PlayerEnergy == ResourcesManager.Instance.PlayerMaxEnergy)
+            if (__instance.HasAbility(AbilityID) && __instance.Info.IsSpell() && ResourcesManager.Instance.PlayerEnergy == ResourcesManager.Instance.PlayerMaxEnergy)
             {
                 __result = false;
+                return false;
+            }
+            return true;
+        }
+
+        internal static HintsHandler.Hint FullEnergyHint = new("P03NoBatteryRoom", 3);
+
+        [HarmonyPatch(typeof(HintsHandler), nameof(HintsHandler.OnNonplayableCardClicked))]
+        [HarmonyPrefix]
+        private static bool HandleFullEnergy(PlayableCard card)
+        {
+            if (card.Info.IsSpell() && card.HasAbility(AbilityID) && ResourcesManager.Instance.PlayerEnergy == ResourcesManager.Instance.PlayerMaxEnergy)
+            {
+                FullEnergyHint.TryPlayDialogue();
                 return false;
             }
             return true;

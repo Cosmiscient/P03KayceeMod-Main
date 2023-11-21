@@ -8,6 +8,7 @@ using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers.Extensions;
 using InscryptionAPI.Triggers;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -77,22 +78,27 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             Info defn = AllSlotModifications.FirstOrDefault(m => m.ModificationType == modType);
             if (defn == null || defn.Texture == null)
-                ResetSlot(slot);
+                ResetSlotTexture(slot);
             else
                 slot.SetTexture(defn.Texture);
 
-            if (defn != null && defn.SlotBehaviour != null)
-            {
-                Component triggerComponent = BoardManager.Instance.gameObject.GetComponent(defn.SlotBehaviour);
-                if (triggerComponent == null)
-                    BoardManager.Instance.gameObject.AddComponent(defn.SlotBehaviour);
-            }
+            // if (defn != null && defn.SlotBehaviour != null)
+            // {
+            //     Component triggerComponent = BoardManager.Instance.gameObject.GetComponent(defn.SlotBehaviour);
+            //     if (triggerComponent == null)
+            //         BoardManager.Instance.gameObject.AddComponent(defn.SlotBehaviour);
+            // }
 
-            yield return CustomTriggerFinder.TriggerAll<ISlotModificationChanged>(
+            yield return CustomTriggerFinder.TriggerAll(
                 false,
-                t => t.RespondsToSlotModificationChanged(slot, oldModification, modType),
+                delegate (ISlotModificationChanged t)
+                {
+                    P03Plugin.Log.LogInfo($"About to trigger {t}");
+                    return t.RespondsToSlotModificationChanged(slot, oldModification, modType);
+                },
                 t => t.OnSlotModificationChanged(slot, oldModification, modType)
             );
+            P03Plugin.Log.LogInfo("Finished triggering for slot modification changes");
         }
 
         public static ModificationType GetSlotModification(this CardSlot slot)
@@ -114,35 +120,43 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 slotList.Clear();
             }
+
+            // Ensure all of the various receivers are set up
+            foreach (Info item in AllSlotModifications.Where(m => m.SlotBehaviour != null))
+            {
+                if (BoardManager.Instance.GetComponent(item.SlotBehaviour).SafeIsUnityNull())
+                    BoardManager.Instance.gameObject.AddComponent(item.SlotBehaviour);
+            }
         }
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
         [HarmonyPostfix]
-        private static IEnumerator CleanUpBuffedSlots(IEnumerator sequence)
+        private static IEnumerator ResetSlots(IEnumerator sequence)
         {
-            if (!P03AscensionSaveData.IsP03Run)
-            {
-                yield return sequence;
-                yield break;
-            }
-
             foreach (CardSlot slot in BoardManager.Instance.AllSlots)
             {
                 if (slot.GetSlotModification() != ModificationType.NoModification)
                     yield return slot.SetSlotModification(ModificationType.NoModification);
             }
 
+            yield return sequence;
+        }
+
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.CleanUp))]
+        [HarmonyPostfix]
+        private static IEnumerator CleanUpBuffedSlots(IEnumerator sequence)
+        {
             foreach (Info defn in AllSlotModifications.Where(m => m.SlotBehaviour != null))
             {
                 Component comp = BoardManager.Instance.gameObject.GetComponent(defn.SlotBehaviour);
-                if (comp != null)
+                if (!comp.SafeIsUnityNull())
                     UnityEngine.Object.Destroy(comp);
             }
 
             yield return sequence;
         }
 
-        private static Dictionary<CardTemple, Texture> DefaultSlotTextures = new()
+        private static readonly Dictionary<CardTemple, Texture> DefaultSlotTextures = new()
         {
             { CardTemple.Nature, ResourceBank.Get<Texture>("Art/Cards/card_slot") },
             { CardTemple.Tech, ResourceBank.Get<Texture>("Art/Cards/card_slot_tech") },
@@ -150,8 +164,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             { CardTemple.Undead, ResourceBank.Get<Texture>("Art/Cards/card_slot_wizard") }
         };
 
-        private static Dictionary<CardTemple, List<Texture>> PlayerOverrideSlots = new();
-        private static Dictionary<CardTemple, List<Texture>> OpponentOverrideSlots = new();
+        private static readonly Dictionary<CardTemple, List<Texture>> PlayerOverrideSlots = new();
+        private static readonly Dictionary<CardTemple, List<Texture>> OpponentOverrideSlots = new();
 
         internal static void OverrideDefaultSlotTexture(CardTemple temple, List<Texture> playerSlots, List<Texture> opponentSlots)
         {
@@ -167,7 +181,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 OpponentOverrideSlots.Remove(temple);
         }
 
-        public static void ResetSlot(this CardSlot slot)
+        public static void ResetSlotTexture(this CardSlot slot)
         {
             CardTemple temple = CardTemple.Tech;
             if (SaveManager.SaveFile.IsPart1)
@@ -177,7 +191,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (SaveManager.SaveFile.IsMagnificus)
                 temple = CardTemple.Wizard;
 
-            var lookup = slot.IsOpponentSlot() ? OpponentOverrideSlots : PlayerOverrideSlots;
+            Dictionary<CardTemple, List<Texture>> lookup = slot.IsOpponentSlot() ? OpponentOverrideSlots : PlayerOverrideSlots;
             if (lookup.ContainsKey(temple))
                 slot.SetTexture(lookup[temple][slot.Index]);
             else

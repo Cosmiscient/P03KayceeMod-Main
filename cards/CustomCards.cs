@@ -178,6 +178,23 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         }
 
+        private static void SpellCommand(StatIconManager.FullStatIcon info, bool revert)
+        {
+            if (info == null)
+                return;
+
+            if (revert)
+            {
+                info.Info.rulebookDescription = info.Info.rulebookDescription.Replace("command", "spell").Replace("Command", "Spell");
+                info.Info.rulebookName = info.Info.rulebookName.Replace("command", "spell").Replace("Command", "Spell");
+            }
+            else
+            {
+                info.Info.rulebookDescription = info.Info.rulebookDescription.Replace("spell", "command").Replace("Spell", "Command");
+                info.Info.rulebookName = info.Info.rulebookName.Replace("spell", "command").Replace("Spell", "Command");
+            }
+        }
+
         public static void printAllCards()
         {
             List<string> cardDataList = new();
@@ -289,7 +306,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return sequence;
         }
 
-        private static void UpdateExistingCard(List<CardInfo> allCards, string name, string textureKey, string pixelTextureKey, string regionCode, string decalTextureKey, string colorPortraitKey, bool isPackCard)
+        private static void UpdateExistingCard(IEnumerable<CardInfo> allCards, string name, string textureKey, string pixelTextureKey, string regionCode, string decalTextureKey, string colorPortraitKey, bool isPackCard)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -347,20 +364,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // This creates all the sprites behind the scenes so we're ready to go
             RandomStupidAssApePortrait.RandomApePortrait.GenerateApeSprites();
 
+            // Load the custom cards from the CSV database
+            string database = DataHelper.GetResourceString("card_database", "csv");
+            string[] lines = database.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string line in lines.Skip(1))
+            {
+                string[] cols = line.Split(new char[] { ',' }, StringSplitOptions.None);
+                //InfiniscryptionP03Plugin.Log.LogInfo($"I see line {string.Join(";", cols)}");
+                UpdateExistingCard(CardManager.BaseGameCards, cols[0], cols[1], cols[2], cols[3], cols[4], cols[6], cols[5] == "Y");
+            }
+
             CardManager.ModifyCardList += delegate (List<CardInfo> cards)
             {
                 if (P03AscensionSaveData.IsP03Run)
                 {
-                    // Load the custom cards from the CSV database
-                    string database = DataHelper.GetResourceString("card_database", "csv");
-                    string[] lines = database.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (string line in lines.Skip(1))
-                    {
-                        string[] cols = line.Split(new char[] { ',' }, StringSplitOptions.None);
-                        //InfiniscryptionP03Plugin.Log.LogInfo($"I see line {string.Join(";", cols)}");
-                        UpdateExistingCard(cards, cols[0], cols[1], cols[2], cols[3], cols[4], cols[6], cols[5] == "Y");
-                    }
-
                     cards.ForEach(ModifyCardForAscension);
                     cards.CardByName("EnergyConduit").AddMetaCategories(TechRegion);
                     cards.CardByName("TechMoxTriple").AddMetaCategories(WizardRegion);
@@ -623,11 +640,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             AbilityManager.ModifyAbilityList += delegate (List<AbilityManager.FullAbility> abilities)
             {
                 // Might as well put the spells back
-                StatIconManager.FullStatIcon globalSpell = StatIconManager.AllStatIcons.FirstOrDefault(i => i.Id == GlobalSpellAbility.Icon);
-                StatIconManager.FullStatIcon targetedSpell = StatIconManager.AllStatIcons.FirstOrDefault(i => i.Id == TargetedSpellAbility.Icon);
-
-                globalSpell?.Info.rulebookDescription.Replace("Command", "Spell").Replace("Command", "Spell");
-                targetedSpell?.Info.rulebookDescription.Replace("Command", "Spell").Replace("Command", "Spell");
+                SpellCommand(StatIconManager.AllStatIcons.FirstOrDefault(i => i.Id == GlobalSpellAbility.Icon), true);
+                SpellCommand(StatIconManager.AllStatIcons.FirstOrDefault(i => i.Id == InstaGlobalSpellAbility.Icon), true);
+                SpellCommand(StatIconManager.AllStatIcons.FirstOrDefault(i => i.Id == TargetedSpellAbility.Icon), true);
 
                 if (!P03AscensionSaveData.IsP03Run)
                     return abilities;
@@ -676,8 +691,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     }
                 }
 
-                globalSpell?.Info.rulebookDescription.Replace("Spell", "Command").Replace("Spell", "Command");
-                targetedSpell?.Info.rulebookDescription.Replace("Spell", "Command").Replace("Spell", "Command");
+                SpellCommand(StatIconManager.AllStatIcons.FirstOrDefault(i => i.Id == GlobalSpellAbility.Icon), false);
+                SpellCommand(StatIconManager.AllStatIcons.FirstOrDefault(i => i.Id == InstaGlobalSpellAbility.Icon), false);
+                SpellCommand(StatIconManager.AllStatIcons.FirstOrDefault(i => i.Id == TargetedSpellAbility.Icon), false);
 
                 return abilities;
             };
@@ -762,6 +778,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.SetExtendedProperty("DefaultAbilityColor", "gold");
             info.SetExtendedProperty("PortraitColor", "gold");
             info.SetExtendedProperty("Holofy", true);
+            info.hideAttackAndHealth = true;
             return info;
         }
 

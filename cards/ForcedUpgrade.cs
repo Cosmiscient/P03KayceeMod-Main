@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
-using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
@@ -33,7 +32,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToSlotTargetedForAttack(CardSlot slot, PlayableCard attacker) => slot.Card != null && slot.IsOpponentSlot() == attacker.OpponentCard;
+        public override bool RespondsToSlotTargetedForAttack(CardSlot slot, PlayableCard attacker) => slot.Card != null && slot.IsOpponentSlot() == Card.OpponentCard;
 
         private CardInfo GetEvolution(PlayableCard target)
         {

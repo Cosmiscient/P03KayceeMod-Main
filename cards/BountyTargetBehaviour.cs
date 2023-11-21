@@ -113,7 +113,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 nameReplacement = modData[0],
                 deathCardInfo = new((CompositeFigurine.FigurineType)int.Parse(modData[1]), int.Parse(modData[3]), int.Parse(modData[2]))
                 {
-                    lostEye = modData[5] == "Y"
+                    lostEye = modData[4] == "Y"
                 }
             };
         }

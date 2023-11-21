@@ -40,13 +40,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             List<CardSlot> cardSlots = BoardManager.Instance.GetSlots(!Card.OpponentCard);
 
-            DiskCardWeapon defaultWeapon = DiskCardWeapon.Default;
-            if (Card.Anim is DiskCardAnimationController dac)
-            {
-                defaultWeapon = (DiskCardWeapon)dac.weaponMeshes.FindIndex(m => m.name == dac.weaponMeshFilter.mesh.name);
-                dac.SetWeaponMesh(DiskCardWeapon.Revolver);
-            }
-
             foreach (CardSlot slot in cardSlots)
             {
                 if (slot.Card != null && (slot.Card.HasAbility(Ability.GainGemOrange) || slot.Card.HasAbility(Ability.GainGemTriple)))
@@ -64,11 +57,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     yield return slot.opposingSlot.Card.TakeDamage(Card.Attack, Card);
                     yield return new WaitForSeconds(0.25f);
                 }
-            }
-
-            if (Card.Anim is DiskCardAnimationController dac2)
-            {
-                dac2.SetWeaponMesh(defaultWeapon);
             }
 
             yield break;

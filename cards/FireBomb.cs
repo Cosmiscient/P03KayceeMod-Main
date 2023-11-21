@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
-using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Quests;
 using InscryptionAPI.Card;
@@ -51,31 +50,23 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             public IEnumerator OnSlotModificationChanged(CardSlot slot, SlotModificationManager.ModificationType previous, SlotModificationManager.ModificationType current)
             {
-                float scale = 0f;
-                if (current == OnFire[3])
-                    scale = 1f;
-                else if (current == OnFire[2])
-                    scale = 0.8f;
-                else if (current == OnFire[1])
-                    scale = 0.6f / 0.8f;
-                else if (current == OnFire[0])
-                    scale = 0.4f / 0.6f;
+                int fireIdx = OnFire.IndexOf(current);
 
                 Transform flames = slot.transform.Find("Flames");
-                if (flames != null && scale == 0f)
-                    Destroy(flames.gameObject);
+                if (flames != null && fireIdx == -1)
+                    CustomCoroutine.WaitOnConditionThenExecute(() => GlobalTriggerHandler.Instance.StackSize == 0, () => Destroy(flames.gameObject));
 
-                if (scale == 0f)
+                if (fireIdx == -1)
                     yield break;
 
                 GameObject newFlames = flames == null ? Instantiate(AssetBundleManager.Prefabs["Fire_Parent"], slot.transform) : flames.gameObject;
                 newFlames.name = "Flames";
                 newFlames.transform.localPosition = new(0f, 0f, -0.95f);
-                foreach (ParticleSystem particles in newFlames.GetComponentsInChildren<ParticleSystem>())
-                {
-                    ParticleSystem.ShapeModule shape = particles.shape;
-                    shape.radius *= scale;
-                }
+
+                // This bit sets the number that shows through the flames
+                for (int i = 1; i <= 4; i++)
+                    newFlames.transform.Find($"Fire_System_{i}").gameObject.SetActive(i == fireIdx + 1);
+
                 yield return new WaitForEndOfFrame();
             }
 
@@ -174,6 +165,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             //AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, targetSlot.transform.position, .7f);
             // The fireball should play and then delete itself, but we'll destroy it after some time anyway
             GameObject fireball = Instantiate(AssetBundleManager.Prefabs["Fire_Ball"], targetSlot.transform);
+            AudioController.Instance.PlaySound3D("fireball", MixerGroup.TableObjectsSFX, fireball.transform.position, 0.5f);
             CustomCoroutine.WaitThenExecute(3f, delegate ()
             {
                 if (fireball != null)

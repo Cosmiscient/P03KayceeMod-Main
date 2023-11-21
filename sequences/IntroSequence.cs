@@ -61,7 +61,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("Part3AscensionIntro", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
-                audio.Stop();
+                audio?.Stop();
                 yield return new WaitForSeconds(0.5f);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("Part3AscensionIntroConfused", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield return new WaitForSeconds(2f);

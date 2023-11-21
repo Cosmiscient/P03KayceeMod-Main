@@ -146,40 +146,43 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 yield break;
             }
 
-            bool isBossBattle = TurnManager.Instance.opponent is Part3BossOpponent;
+            List<Component> allMods = new();
             foreach (ID id in GetBlueprintMods(TurnManager.Instance.BattleNodeData))
             {
                 BattleModDefinition defn = AllBattleMods.FirstOrDefault(d => d.ID == id);
                 if (defn == null)
                     continue;
 
-                Component triggerComponent = BoardManager.Instance.gameObject.GetComponent(defn.Behavior);
-                if (triggerComponent == null)
-                    BoardManager.Instance.gameObject.AddComponent(defn.Behavior);
+                allMods.Add(BoardManager.Instance.gameObject.GetComponent(defn.Behavior)
+                            ?? BoardManager.Instance.gameObject.AddComponent(defn.Behavior));
             }
 
             yield return sequence;
 
-            yield return CustomTriggerFinder.TriggerAll<IBattleModSetup>(
-                false,
-                t => true,
-                t => t.OnBattleModSetup()
-            );
+            foreach (Component comp in allMods)
+            {
+                if (comp is not null and IBattleModSetup ibms)
+                    yield return ibms.OnBattleModSetup();
+            }
         }
 
-        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.CleanUp))]
         [HarmonyPostfix]
         private static IEnumerator DeleteBattleModReceivers(IEnumerator sequence)
         {
-            if (!P03AscensionSaveData.IsP03Run || TurnManager.Instance.opponent is Part3BossOpponent)
+            if (!P03AscensionSaveData.IsP03Run)
             {
                 yield return sequence;
                 yield break;
             }
 
-            yield return CustomTriggerFinder.TriggerAll<IBattleModCleanup>(
+            yield return CustomTriggerFinder.TriggerAll(
                 false,
-                t => true,
+                delegate (IBattleModCleanup t)
+                {
+                    P03Plugin.Log.LogInfo($"About to clean up {t}");
+                    return true;
+                },
                 t => t.OnBattleModCleanup()
             );
 
@@ -197,23 +200,37 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         [HarmonyPrefix]
         private static void MakeAIRecognizeBattleState(BoardState board, bool playerIsAttacker)
         {
-            CustomTriggerFinder.CallAll<IBattleModSimulator>(
-                false,
-                t => t.HasBoardStateAdjustment(board, playerIsAttacker),
-                t => t.DoBoardStateAdjustment(board, playerIsAttacker)
-            );
+            try
+            {
+                CustomTriggerFinder.CallAll<IBattleModSimulator>(
+                    false,
+                    t => t.HasBoardStateAdjustment(board, playerIsAttacker),
+                    t => t.DoBoardStateAdjustment(board, playerIsAttacker)
+                );
+            }
+            catch (Exception ex)
+            {
+                P03Plugin.Log.LogError(ex);
+            }
         }
 
         [HarmonyPatch(typeof(BoardStateEvaluator), nameof(BoardStateEvaluator.EvaluateCard))]
         [HarmonyPostfix]
         private static void MakeAIEvaluateBattleState(BoardState.CardState card, BoardState board, ref int __result)
         {
-            List<(TriggerReceiver, int)> result = CustomTriggerFinder.CollectDataAll<IBattleModSimulator, int>(
-                false,
-                t => t.HasCardEvaluationAdjustment(card, board),
-                t => t.DoCardEvaluationAdjustment(card, board)
-            );
-            __result += result.Sum(item => item.Item2);
+            try
+            {
+                List<(TriggerReceiver, int)> result = CustomTriggerFinder.CollectDataAll<IBattleModSimulator, int>(
+                    false,
+                    t => t.HasCardEvaluationAdjustment(card, board),
+                    t => t.DoCardEvaluationAdjustment(card, board)
+                );
+                __result += result.Sum(item => item.Item2);
+            }
+            catch (Exception ex)
+            {
+                P03Plugin.Log.LogError(ex);
+            }
         }
 
         internal const float X_OFFSET = 0.5f;

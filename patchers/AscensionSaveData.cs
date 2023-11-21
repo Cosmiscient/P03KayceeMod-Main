@@ -38,28 +38,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
-        public static int MaxNumberOfItems
-        {
-            get
-            {
-                return 3 - AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.LessConsumables);
-            }
-        }
+        public static int MaxNumberOfItems => 3 - AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.LessConsumables);
 
         private static string SaveKey
         {
             get
             {
-                if (SceneLoader.ActiveSceneName == "Ascension_Configure")
-                    return ASCENSION_SAVE_KEY;
-
-                if (SceneLoader.ActiveSceneName == SceneLoader.StartSceneName)
-                    return REGULAR_SAVE_KEY;
-
-                if (SaveFile.IsAscension)
-                    return ASCENSION_SAVE_KEY;
-
-                return REGULAR_SAVE_KEY;
+                return SceneLoader.ActiveSceneName == "Ascension_Configure"
+                    ? ASCENSION_SAVE_KEY
+                    : SceneLoader.ActiveSceneName == SceneLoader.StartSceneName
+                    ? REGULAR_SAVE_KEY
+                    : SaveFile.IsAscension ? ASCENSION_SAVE_KEY : REGULAR_SAVE_KEY;
             }
         }
 
@@ -67,70 +56,51 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             get
             {
-                if (SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part3"))
-                    return true;
-
-                if (ScreenManagement.ScreenState == CardTemple.Tech)
-                    return true;
-
-                if (SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part1"))
-                    return false;
-
-                if (AscensionSaveData.Data != null && AscensionSaveData.Data.currentRun != null && AscensionSaveData.Data.currentRun.playerLives > 0)
-                    return ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "IsP03Run");
-
-                return false;
+                return SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part3")
+|| ScreenManagement.ScreenState == CardTemple.Tech
+|| !SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part1")
+&& AscensionSaveData.Data != null && AscensionSaveData.Data.currentRun != null && AscensionSaveData.Data.currentRun.playerLives > 0
+&& ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "IsP03Run");
             }
-            set
-            {
-                ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "IsP03Run", value);
-            }
+            set => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "IsP03Run", value);
         }
 
         private static string ToCompressedJSON(object data)
         {
             if (data == null)
-                return default(string);
+                return default;
 
             string value = SaveManager.ToJSON(data);
             //InfiniscryptionP03Plugin.Log.LogInfo($"JSON SAVE: {value}");
-            var bytes = Encoding.Unicode.GetBytes(value);
-            using (MemoryStream input = new MemoryStream(bytes))
+            byte[] bytes = Encoding.Unicode.GetBytes(value);
+            using MemoryStream input = new(bytes);
+            using MemoryStream output = new();
+            using (GZipStream stream = new(output, CompressionLevel.Optimal))
             {
-                using (MemoryStream output = new MemoryStream())
-                {
-                    using (GZipStream stream = new GZipStream(output, CompressionLevel.Optimal))
-                    {
-                        input.CopyTo(stream);
-                        //stream.Flush();
-                    }
-                    string result = Convert.ToBase64String(output.ToArray());
-                    //InfiniscryptionP03Plugin.Log.LogInfo($"B64 SAVE: {result}");
-                    return result;
-                }
+                input.CopyTo(stream);
+                //stream.Flush();
             }
+            string result = Convert.ToBase64String(output.ToArray());
+            //InfiniscryptionP03Plugin.Log.LogInfo($"B64 SAVE: {result}");
+            return result;
         }
 
         private static T FromCompressedJSON<T>(string data)
         {
             if (string.IsNullOrEmpty(data))
-                return default(T);
+                return default;
 
-            var bytes = Convert.FromBase64String(data);
-            using (MemoryStream input = new MemoryStream(bytes))
+            byte[] bytes = Convert.FromBase64String(data);
+            using MemoryStream input = new(bytes);
+            using MemoryStream output = new();
+            using (GZipStream stream = new(input, CompressionMode.Decompress))
             {
-                using (MemoryStream output = new MemoryStream())
-                {
-                    using (GZipStream stream = new GZipStream(input, CompressionMode.Decompress))
-                    {
-                        stream.CopyTo(output);
-                        //output.Flush();            
-                    }
-                    string json = Encoding.Unicode.GetString(output.ToArray());
-                    //P03Plugin.Log.LogInfo($"SAVE JSON for {SaveKey}: {json}");
-                    return SaveManager.FromJSON<T>(json);
-                }
+                stream.CopyTo(output);
+                //output.Flush();            
             }
+            string json = Encoding.Unicode.GetString(output.ToArray());
+            //P03Plugin.Log.LogInfo($"SAVE JSON for {SaveKey}: {json}");
+            return SaveManager.FromJSON<T>(json);
         }
 
         public static void EnsureRegularSave()
@@ -138,16 +108,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // The only way there is not a copy of the regular save is because you went straight to a p03 ascension run
             // after installing the mod. This means that the current part3savedata is your actual act 3 save data
             // We don't want to lose that.
-            if (ModdedSaveManager.SaveData.GetValue(P03Plugin.PluginGuid, REGULAR_SAVE_KEY) == default(string))
+            if (ModdedSaveManager.SaveData.GetValue(P03Plugin.PluginGuid, REGULAR_SAVE_KEY) == default)
                 ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, REGULAR_SAVE_KEY, ToCompressedJSON(Part3SaveData.Data));
         }
 
         [HarmonyPatch(typeof(Part3SaveData), "Initialize")]
         [HarmonyPrefix]
-        private static void ClearSaveData(ref Part3SaveData __instance)
-        {
-            ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, SaveKey, default(string));
-        }
+        private static void ClearSaveData(ref Part3SaveData __instance) => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, SaveKey, default(string));
 
         [HarmonyPatch(typeof(SaveManager), "SaveToFile")]
         public static class Part3SaveDataFixImprovement
@@ -191,11 +158,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             [HarmonyPostfix]
-            public static void Postfix(Part3SaveData __state)
-            {
+            public static void Postfix(Part3SaveData __state) =>
                 // Now that we've saved the file, we swap back whatever we had before
                 SaveManager.SaveFile.part3Data = __state;
-            }
         }
 
 
@@ -243,7 +208,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (IsP03Run)
             {
-                Part3SaveData data = new Part3SaveData();
+                Part3SaveData data = new();
                 data.Initialize();
                 SaveManager.SaveFile.part3Data = data;
             }
@@ -274,7 +239,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (IsP03Run)
             {
-                __result = __result ?? new();
+                __result ??= new();
                 __result.regionTier = EventManagement.CompletedZones.Count;
             }
         }
@@ -313,8 +278,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 {
                     foreach (CardInfo info in __instance.deck.Cards)
                     {
-                        if (info.mods == null)
-                            info.mods = new();
+                        info.mods ??= new();
                         info.mods.Add(new(Ability.BuffEnemy));
                     }
                 }
@@ -348,8 +312,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (IsP03Run)
                 {
 
-                    if (__instance.items == null)
-                        __instance.items = new List<string>();
+                    __instance.items ??= new List<string>();
 
                     if (MaxNumberOfItems >= 1)
                         __instance.items.Add(ShockerItem.ItemData.name);
@@ -382,7 +345,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         public static bool ReplaceGenerateForP03(ref List<string> __result)
         {
-            if (P03AscensionSaveData.IsP03Run)
+            if (IsP03Run)
             {
                 __result = new List<string>() { null, null, CustomCards.VIRUS_SCANNER, CustomCards.VIRUS_SCANNER };
                 return false;

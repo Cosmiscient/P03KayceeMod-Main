@@ -1,13 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
-using InscryptionAPI.Triggers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -50,14 +46,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_solar_heart.png", typeof(SolarHeart).Assembly));
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            SolarHeart.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(SolarHeart),
                 TextureHelper.GetImageAsTexture("ability_solar_heart.png", typeof(SolarHeart).Assembly)
             ).Id;
 
-            SolarHeart.SlotModID = SlotModificationManager.New(
+            SlotModID = SlotModificationManager.New(
                 P03Plugin.PluginGuid,
                 "SolarHeart",
                 typeof(SolarHeartSlot),
@@ -67,7 +63,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
-            yield return this.Card.Slot.SetSlotModification(SlotModID);
+            yield return Card.Slot.SetSlotModification(SlotModID);
             yield break;
         }
 
@@ -77,7 +73,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void UpdateCircuitsForModdedSlots(List<CardSlot> slots)
         {
-            foreach (var slot in slots)
+            foreach (CardSlot slot in slots)
             {
                 if (slot.GetSlotModification() == SlotModID)
                 {
@@ -87,6 +83,26 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     slot.SetWithinConduitCircuit(true);
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(ConduitCircuitManager), nameof(ConduitCircuitManager.SlotIsWithinCircuit))]
+        [HarmonyPrefix]
+        private static bool SolarHeartWithin(CardSlot slot, ref bool __result)
+        {
+            if (slot.GetSlotModification() == SlotModID)
+            {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(ConduitCircuitManager), nameof(ConduitCircuitManager.GetConduitsForSlot))]
+        [HarmonyPostfix]
+        private static void UpdateWithSolarHeart(CardSlot slot, ref List<PlayableCard> __result)
+        {
+            if (slot.GetSlotModification() == SlotModID && slot.Card != null && !__result.Contains(slot.Card))
+                __result.Add(slot.Card);
         }
     }
 }

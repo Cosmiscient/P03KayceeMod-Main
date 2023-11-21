@@ -111,7 +111,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 public PlayableCard Attacker { get; set; }
                 public GameObject Target { get; set; }
                 public bool PlayerUpkeep { get; set; }
-                public int TurnNumber { get; set; }
+                public int QueuedTurnNumber { get; set; }
             }
 
             protected List<StrikeInfo> PendingAttacks = new();
@@ -163,7 +163,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     }
                 }
 
-                PendingAttacks.Add(new() { Attacker = attacker, AttackValue = value, Slot = target, Target = aimIcon, PlayerUpkeep = TurnManager.Instance.IsPlayerTurn, TurnNumber = TurnManager.Instance.TurnNumber + 1 });
+                PendingAttacks.Add(new() { Attacker = attacker, AttackValue = value, Slot = target, Target = aimIcon, PlayerUpkeep = TurnManager.Instance.IsPlayerTurn, QueuedTurnNumber = TurnManager.Instance.TurnNumber });
             }
 
             public override bool RespondsToUpkeep(bool playerUpkeep) => PendingAttacks.Any(t => t.Slot.IsPlayerSlot != playerUpkeep);
@@ -191,7 +191,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             public override IEnumerator OnUpkeep(bool playerUpkeep)
             {
-                List<StrikeInfo> strikeQueue = PendingAttacks.Where(t => t.PlayerUpkeep == playerUpkeep && t.TurnNumber == TurnManager.Instance.TurnNumber).ToList();
+                List<StrikeInfo> strikeQueue = PendingAttacks.Where(t => t.PlayerUpkeep == playerUpkeep && t.QueuedTurnNumber < TurnManager.Instance.TurnNumber).ToList();
                 while (strikeQueue.Count > 0)
                 {
                     StrikeInfo atkDefn = strikeQueue[0];
@@ -301,7 +301,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             float flyDuration = scale.HasValue ? scale.Value * 10f : 10f;
 
-            Tween.LocalPosition(missile.transform, Vector3.up * flyDuration, .4f, 0f, completeCallback: () => GameObject.Destroy(missile));
+            Tween.LocalPosition(missile.transform, Vector3.up * flyDuration, .4f, 0f, completeCallback: () => Destroy(missile));
             AudioController.Instance.PlaySound3D("missile_launch", MixerGroup.TableObjectsSFX, source.position);
             yield return new WaitForSeconds(1f);
 
@@ -311,10 +311,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public static IEnumerator LaunchMissile(CardSlot target, CardSlot source)
         {
-            if (source.Card != null)
-                yield return LaunchMissile(target, source.transform, source.Card.Attack, source.Card);
-            else
-                yield return LaunchMissile(target, source.transform, 1, null);
+            yield return source.Card != null
+                ? LaunchMissile(target, source.transform, source.Card.Attack, source.Card)
+                : (object)LaunchMissile(target, source.transform, 1, null);
         }
 
         public override IEnumerator Activate()
@@ -387,7 +386,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             foreach (CardSlot opposingSlot in opposingSlots)
             {
                 ViewManager.Instance.SwitchToView(BoardManager.Instance.DefaultView, false, false);
-                yield return LaunchMissile(opposingSlot, this.Card.Slot);
+                yield return LaunchMissile(opposingSlot, Card.Slot);
             }
 
             ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;

@@ -86,16 +86,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override bool RespondsToUpkeep(bool playerUpkeep) => ShouldExplode;
 
-        public override IEnumerator OnResolveOnBoard() { yield return Explodonate(); }
+        public override IEnumerator OnResolveOnBoard() { yield return Card.Die(false, null); }
 
-        public override IEnumerator OnOtherCardResolve(PlayableCard otherCard) { yield return Explodonate(); }
+        public override IEnumerator OnOtherCardResolve(PlayableCard otherCard) { yield return Card.Die(false, null); }
 
-        public override IEnumerator OnOtherCardAssignedToSlot(PlayableCard otherCard) { yield return Explodonate(); }
+        public override IEnumerator OnOtherCardAssignedToSlot(PlayableCard otherCard) { yield return Card.Die(false, null); }
 
-        public override IEnumerator OnTurnEnd(bool playerTurnEnd) { yield return Explodonate(); }
+        public override IEnumerator OnTurnEnd(bool playerTurnEnd) { yield return Card.Die(false, null); }
 
-        public override IEnumerator OnUpkeep(bool playerUpkeep) { yield return Explodonate(); }
+        public override IEnumerator OnUpkeep(bool playerUpkeep) { yield return Card.Die(false, null); }
 
-        public IEnumerator OnBellRung(bool playerCombatPhase) { yield return Explodonate(); }
+        public IEnumerator OnBellRung(bool playerCombatPhase) { yield return Card.Die(false, null); }
+
+        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
+
+        public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer) { yield return Explodonate(); }
     }
 }

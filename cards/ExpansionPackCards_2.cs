@@ -1,6 +1,5 @@
 using System.Linq;
 using DiskCardGame;
-using HarmonyLib;
 using Infiniscryption.Spells.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
@@ -225,9 +224,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(EXP_2_PREFIX, "CHARGE", "Charge!", 0, 0)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_charge.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 0)
-                .SetGlobalSpell()
+                .SetInstaGlobalSpell()
                 .SetSpellAppearanceP03()
-                .AddTraits(CustomCards.FastGlobalSpell)
+                //.AddTraits(CustomCards.FastGlobalSpell)
                 // .AddAppearances(OnboardDynamicHoloPortrait.ID)
                 // .SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/items/BatteryItem")
                 // .SetExtendedProperty(OnboardDynamicHoloPortrait.IN_HAND, true)
