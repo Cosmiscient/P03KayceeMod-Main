@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
-using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
-using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Encounters
 {
@@ -24,7 +21,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 return;
 
             copy.mods = new();
-            foreach (var m in orig.mods)
+            foreach (CardModificationInfo m in orig.mods)
                 copy.mods.Add((CardModificationInfo)m.Clone());
         }
 
@@ -34,12 +31,15 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             // I'll fix it myself. The hard way.
             EncounterManager.ModifyEncountersList += delegate (List<EncounterBlueprintData> allEncounters)
             {
-                foreach (var ebd in allEncounters)
+                if (!P03AscensionSaveData.IsP03Run)
+                    return allEncounters;
+
+                foreach (EncounterBlueprintData ebd in allEncounters)
                 {
                     if (!HolyHackerole.Keys.Contains(ebd.name))
                         continue;
 
-                    var originalTurns = HolyHackerole[ebd.name].turns;
+                    List<List<EncounterBlueprintData.CardBlueprint>> originalTurns = HolyHackerole[ebd.name].turns;
 
                     try
                     {
@@ -48,9 +48,9 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                             for (int c = 0; c < ebd.turns[t].Count; c++)
                             {
                                 if (originalTurns[t][c].card != null)
-                                    ebd.turns[t][c].card = CardLoader.Clone(originalTurns[t][c].card);
+                                    ebd.turns[t][c].card = CardLoader.GetCardByName(originalTurns[t][c].card.name);
                                 if (originalTurns[t][c].replacement != null)
-                                    ebd.turns[t][c].replacement = CardLoader.Clone(originalTurns[t][c].replacement);
+                                    ebd.turns[t][c].replacement = CardLoader.GetCardByName(originalTurns[t][c].replacement.name);
                                 MatchMods(originalTurns[t][c].card, ebd.turns[t][c].card);
                                 MatchMods(originalTurns[t][c].replacement, ebd.turns[t][c].replacement);
                             }
@@ -91,7 +91,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         public static List<List<EncounterBlueprintData.CardBlueprint>> AddTurn(this List<List<EncounterBlueprintData.CardBlueprint>> blueprint, params IEnumerable<EncounterBlueprintData.CardBlueprint>[] input)
         {
             List<EncounterBlueprintData.CardBlueprint> newTurn = new();
-            foreach (var subset in input)
+            foreach (IEnumerable<EncounterBlueprintData.CardBlueprint> subset in input)
                 newTurn.AddRange(subset);
             blueprint.Add(newTurn);
             return blueprint;
@@ -100,7 +100,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         public static List<List<EncounterBlueprintData.CardBlueprint>> AddTurn(this List<List<EncounterBlueprintData.CardBlueprint>> blueprint, IEnumerable<IEnumerable<EncounterBlueprintData.CardBlueprint>> input)
         {
             List<EncounterBlueprintData.CardBlueprint> newTurn = new();
-            foreach (var subset in input)
+            foreach (IEnumerable<EncounterBlueprintData.CardBlueprint> subset in input)
                 newTurn.AddRange(subset);
             blueprint.Add(newTurn);
             return blueprint;
@@ -109,7 +109,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         public static List<List<EncounterBlueprintData.CardBlueprint>> AddTurn(this List<List<EncounterBlueprintData.CardBlueprint>> blueprint, IEnumerable<List<EncounterBlueprintData.CardBlueprint>> input)
         {
             List<EncounterBlueprintData.CardBlueprint> newTurn = new();
-            foreach (var subset in input)
+            foreach (List<EncounterBlueprintData.CardBlueprint> subset in input)
                 newTurn.AddRange(subset);
             blueprint.Add(newTurn);
             return blueprint;

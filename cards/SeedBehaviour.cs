@@ -28,10 +28,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return new WaitForSeconds(0.15f);
             PlayableCard.SetFaceDown(false, false);
             PlayableCard.UpdateFaceUpOnBoardEffects();
+            yield return new WaitForEndOfFrame();
 
             CardInfo newCard = CardLoader.GetCardByName("Tree_Hologram");
             newCard.mods = new(Card.Info.Mods.Select(m => (CardModificationInfo)m.Clone()));
-            Card.SetInfo(newCard);
+            yield return PlayableCard.TransformIntoCard(newCard);
 
             yield return new WaitForSeconds(0.3f);
             triggerPriority = int.MinValue;

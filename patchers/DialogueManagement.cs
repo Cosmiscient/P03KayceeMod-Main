@@ -214,14 +214,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // the fuck are you doing here
             // this is a fucking easter egg
             // don't be a fucking narc
-            if (SaveFile.IsAscension && P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("fuck"))
+            if (P03AscensionSaveData.IsP03Run && P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("fuck"))
             {
-                string profanity = SeededRandom.Bool(P03AscensionSaveData.RandomSeed + offset++) ? "fucking" : "the fuck";
                 List<string> words = message.Split(' ').ToList();
                 int findex = SeededRandom.Range(0, words.Count, P03AscensionSaveData.RandomSeed + offset++);
-                if (words[findex].ToLowerInvariant() is "the" or "a")
-                    profanity = "fucking";
-                words.Insert(findex, profanity);
+                words.Insert(findex, "fucking");
                 message = String.Join(" ", words);
             }
         }

@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Patchers;
-using InscryptionAPI.Saves;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {
@@ -189,6 +188,19 @@ namespace Infiniscryption.P03KayceeRun.Quests
         }
 
         /// <summary>
+        /// Adds a passthrough dialogue state to a quest state.
+        /// </summary>
+        /// <param name="hoverText">The text that shows over the NPC's head when you hover over them</param>
+        /// <param name="dialogueId">The dialogue that the NPC will say</param>
+        /// <param name="status">The status of the parent state that will trigger this state. Usually this is "success"</param>
+        public static QuestState AddNamedState(this QuestState parent, string name, string hoverText, Func<string> dialogueId, QuestState.QuestStateStatus status = QuestState.QuestStateStatus.Success)
+        {
+            QuestState state = new(parent.ParentQuest, name, hoverText, dialogueId, autoComplete: false);
+            parent.SetNextState(status, state);
+            return state;
+        }
+
+        /// <summary>
         /// Adds a "default active" state. Most quests will fall into a default "active" state and wait until the player does something to advance. This creates one of those.
         /// </summary>
         /// <param name="hoverText">The text that shows over the NPC's head when you hover over them</param>
@@ -205,7 +217,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 string modGuid = parent.ParentQuest.ModGuid;
                 retval.DynamicStatus = () =>
                 {
-                    return ModdedSaveManager.RunState.GetValueAsInt(modGuid, saveKey) >= threshold
+                    return P03AscensionSaveData.RunStateData.GetValueAsInt(modGuid, saveKey) >= threshold
                         ? QuestState.QuestStateStatus.Success
                         : QuestState.QuestStateStatus.Active;
                 };
@@ -229,14 +241,14 @@ namespace Infiniscryption.P03KayceeRun.Quests
             }
 
             string saveKey = String.Format("{0}_Counter", defn.QuestName);
-            int curValue = ModdedSaveManager.RunState.GetValueAsInt(defn.ModGuid, saveKey);
-            ModdedSaveManager.RunState.SetValue(defn.ModGuid, saveKey, curValue + incrementBy);
+            int curValue = P03AscensionSaveData.RunStateData.GetValueAsInt(defn.ModGuid, saveKey);
+            P03AscensionSaveData.RunStateData.SetValue(defn.ModGuid, saveKey, curValue + incrementBy);
         }
 
         /// <summary>
         /// This convenience method gets the current value of the dummy count variable tracked alongside the quest
         /// </summary>
-        public static int GetQuestCounter(this QuestDefinition defn) => ModdedSaveManager.RunState.GetValueAsInt(defn.ModGuid, String.Format("{0}_Counter", defn.QuestName));
+        public static int GetQuestCounter(this QuestDefinition defn) => P03AscensionSaveData.RunStateData.GetValueAsInt(defn.ModGuid, String.Format("{0}_Counter", defn.QuestName));
 
         public static QuestState WaitForQuestCounter(this QuestState state, int threshold) => state.SetDynamicStatus(() => state.ParentQuest.GetQuestCounter() >= threshold ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Active);
 

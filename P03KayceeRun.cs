@@ -9,6 +9,7 @@ using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Quests;
 using InscryptionAPI.Card;
+using InscryptionAPI.Encounters;
 using UnityEngine.SceneManagement;
 
 namespace Infiniscryption.P03KayceeRun
@@ -90,6 +91,7 @@ namespace Infiniscryption.P03KayceeRun
             // Need to *guarantee* that all of our card mod patches take hold
             CardManager.SyncCardList();
             AbilityManager.SyncAbilityList();
+            EncounterManager.SyncEncounterList();
         }
 
         // private class DummyPatchTarget

@@ -9,7 +9,6 @@ using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
-using InscryptionAPI.Saves;
 using Pixelplacement;
 using UnityEngine;
 
@@ -311,24 +310,24 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         private static Dictionary<string, Dictionary<string, Vector3>> AppliedStickerPositions
         {
-            get => ParseVectorMapOfMaps(ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, "AppliedStickerPositions"));
-            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "AppliedStickerPositions", FormatVectorMapOfMaps(value));
+            get => ParseVectorMapOfMaps(P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "AppliedStickerPositions"));
+            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "AppliedStickerPositions", FormatVectorMapOfMaps(value));
         }
 
         internal static void UpdateStickerPosition(CardInfo card, string stickerName, Vector3? position) => AppliedStickerPositions = AppliedStickerPositions.UpdateVectorHelper(card, stickerName, position);
 
         private static Dictionary<string, Dictionary<string, Vector3>> AppliedStickerRotations
         {
-            get => ParseVectorMapOfMaps(ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, "AppliedStickerRotations"));
-            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "AppliedStickerRotations", FormatVectorMapOfMaps(value));
+            get => ParseVectorMapOfMaps(P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "AppliedStickerRotations"));
+            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "AppliedStickerRotations", FormatVectorMapOfMaps(value));
         }
 
         internal static void UpdateStickerRotation(CardInfo card, string stickerName, Vector3? eulerAngles) => AppliedStickerRotations = AppliedStickerRotations.UpdateVectorHelper(card, stickerName, eulerAngles);
 
         private static Dictionary<string, Dictionary<string, Vector3>> AppliedStickerScales
         {
-            get => ParseVectorMapOfMaps(ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, "AppliedStickerScales"));
-            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "AppliedStickerScales", FormatVectorMapOfMaps(value));
+            get => ParseVectorMapOfMaps(P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "AppliedStickerScales"));
+            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "AppliedStickerScales", FormatVectorMapOfMaps(value));
         }
 
         internal static void UpdateStickerScale(CardInfo card, string stickerName, Vector3? scale) => AppliedStickerScales = AppliedStickerScales.UpdateVectorHelper(card, stickerName, scale);
@@ -574,7 +573,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                     stencil.transform.localScale = new(1.945f, 1.2f, 0.055f);
                     stencil.transform.localPosition = new(0f, -0.05f, 0f);
                     stencil.transform.localEulerAngles = new(0f, 0f, 0f);
-                    Material material = new Material(STENCIL_SHADER);
+                    Material material = new(STENCIL_SHADER);
                     material.SetInt("_StencilNumber", LAST_STENCIL_NUMBER);
                     stencil.GetComponent<Renderer>().material = material;
                     UnityEngine.Object.Destroy(stencil.GetComponent<Collider>());

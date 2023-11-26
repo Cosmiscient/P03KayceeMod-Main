@@ -16,8 +16,45 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     [HarmonyPatch]
     public static class P03AscensionSaveData
     {
-        public const string ASCENSION_SAVE_KEY = "CopyOfPart3AscensionSave";
-        public const string REGULAR_SAVE_KEY = "CopyOfPart3Save";
+        internal const string ASCENSION_SAVE_KEY = "CopyOfPart3AscensionSave";
+        internal const string REGULAR_SAVE_KEY = "CopyOfPart3Save";
+
+        private static readonly string SaveFilePath = Path.Combine(BepInEx.Paths.GameRootPath, "P03SaveFile.gwsave");
+
+        internal static AscensionSaveData P03Data { get; private set; }
+
+        public static ModdedSaveData RunStateData { get; private set; }
+
+        internal static bool ReturningFromP03Run { get; set; }
+
+        internal static bool P03RunExists => P03Data != null && P03Data.currentRun != null && P03Data.currentRun.playerLives > 0;
+
+        [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.Data), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool GetP03SaveData(ref AscensionSaveData __result)
+        {
+            if (IsP03Run)
+            {
+                if (P03Data == null)
+                    SaveManager.LoadFromFile();
+                __result = P03Data;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(ModdedSaveManager), nameof(ModdedSaveManager.RunState), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool GetP03RunStateData(ref ModdedSaveData __result)
+        {
+            if (IsP03Run)
+            {
+                RunStateData ??= new();
+                __result = RunStateData;
+                return false;
+            }
+            return true;
+        }
 
         public static int RandomSeed
         {
@@ -38,31 +75,26 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
-        public static int MaxNumberOfItems => 3 - AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.LessConsumables);
+        internal static int MaxNumberOfItems => 3 - AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.LessConsumables);
 
         private static string SaveKey
         {
-            get
-            {
-                return SceneLoader.ActiveSceneName == "Ascension_Configure"
+            get => SceneLoader.ActiveSceneName == "Ascension_Configure"
                     ? ASCENSION_SAVE_KEY
                     : SceneLoader.ActiveSceneName == SceneLoader.StartSceneName
                     ? REGULAR_SAVE_KEY
                     : SaveFile.IsAscension ? ASCENSION_SAVE_KEY : REGULAR_SAVE_KEY;
-            }
         }
 
         public static bool IsP03Run
         {
-            get
-            {
-                return SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part3")
-|| ScreenManagement.ScreenState == CardTemple.Tech
-|| !SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part1")
-&& AscensionSaveData.Data != null && AscensionSaveData.Data.currentRun != null && AscensionSaveData.Data.currentRun.playerLives > 0
-&& ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "IsP03Run");
-            }
-            set => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "IsP03Run", value);
+            //             get => (SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part3") && SaveFile.IsAscension)
+            // || ScreenManagement.ScreenState == CardTemple.Tech
+            // || (!SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part1")
+            // && AscensionSaveData.Data != null && AscensionSaveData.Data.currentRun != null && AscensionSaveData.Data.currentRun.playerLives > 0
+            // && ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "IsP03Run"));
+            get => (SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part3") && SaveFile.IsAscension)
+                || ScreenManagement.ScreenState == CardTemple.Tech;
         }
 
         private static string ToCompressedJSON(object data)
@@ -103,7 +135,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return SaveManager.FromJSON<T>(json);
         }
 
-        public static void EnsureRegularSave()
+        internal static void EnsureRegularSave()
         {
             // The only way there is not a copy of the regular save is because you went straight to a p03 ascension run
             // after installing the mod. This means that the current part3savedata is your actual act 3 save data
@@ -116,8 +148,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static void ClearSaveData(ref Part3SaveData __instance) => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, SaveKey, default(string));
 
-        [HarmonyPatch(typeof(SaveManager), "SaveToFile")]
-        public static class Part3SaveDataFixImprovement
+        [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.SaveToFile))]
+        private static class Part3SaveDataFixImprovement
         {
             // Okay, I recognize that this is all kind of crazy.
 
@@ -133,6 +165,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // This fixes issues that arise when people unload the P03 KCM mod.
 
             [HarmonyPrefix]
+            [HarmonyBefore(new string[] { "cyantist.inscryption.api" })]
             public static void Prefix(ref Part3SaveData __state)
             {
                 // What this does is save a copy of the current part 3 save data somewhere else
@@ -143,7 +176,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 // And whenever creating a new ascension part 3 run, we check to see if there is a copy of part 3 save yet
                 // If not, we will end up creating one
 
-                P03Plugin.Log.LogInfo($"Saving {SaveKey}");
+                if (P03Data != null)
+                    ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "P03AscensionSaveDataProgress", ToCompressedJSON(P03Data));
+
+                P03Plugin.Log.LogInfo($"Saving P03 Save Data {SaveKey}");
                 ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, SaveKey, ToCompressedJSON(SaveManager.SaveFile.part3Data));
 
                 // Then, right before we actually save the data, we swap back in the original part3 data
@@ -158,16 +194,53 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             [HarmonyPostfix]
-            public static void Postfix(Part3SaveData __state) =>
+            public static void Postfix(Part3SaveData __state)
+            {
                 // Now that we've saved the file, we swap back whatever we had before
                 SaveManager.SaveFile.part3Data = __state;
+
+                // And we'll go ahead and save the current runstate to the custom save file
+                RunStateData ??= new();
+                string moddedSaveData = SaveManager.ToJSON(RunStateData);
+                File.WriteAllText(SaveFilePath, moddedSaveData);
+            }
         }
 
+        private static ModdedSaveData OldRunState { get; set; }
 
+        [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.NewRun))]
+        [HarmonyPrefix]
+        [HarmonyBefore(new string[] { "cyantist.inscryption.api" })]
+        private static void CacheOldRunStateIfP03Run()
+        {
+            if (IsP03Run)
+            {
+                OldRunState = ModdedSaveManager.RunState; ;
+                RunStateData = new();
+            }
+        }
+
+        [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.NewRun))]
+        [HarmonyPrefix]
+        [HarmonyAfter(new string[] { "cyantist.inscryption.api" })]
+        private static void ResetOldRunStateIfP03Run()
+        {
+            if (IsP03Run && OldRunState != null)
+            {
+                Traverse trav = Traverse.Create(OldRunState);
+                Dictionary<string, Dictionary<string, object>> saveData = trav.Field("SaveData").GetValue<Dictionary<string, Dictionary<string, object>>>();
+                foreach (string guid in saveData.Keys)
+                {
+                    foreach (string key in saveData[guid].Keys)
+                        RunStateData.SetValue(guid, key, saveData[guid][key]);
+                }
+            }
+            OldRunState = null;
+        }
 
         [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.TestSaveFileCorrupted))]
         [HarmonyPrefix]
-        public static void RepairMissingPart3Data(SaveFile file)
+        private static void RepairMissingPart3Data(SaveFile file)
         {
             if (file.part3Data == null)
             {
@@ -176,11 +249,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
-        [HarmonyPatch(typeof(SaveManager), "LoadFromFile")]
+        [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LoadFromFile))]
         [HarmonyPostfix]
         [HarmonyAfter(new string[] { "cyantist.inscryption.api" })]
-        public static void LoadPart3AscensionSaveData()
+        private static void LoadPart3AscensionSaveData()
         {
+            P03Plugin.Log.LogInfo($"Loading from the save file. Getting Part3 save [{SaveKey}]");
             string part3Data = ModdedSaveManager.SaveData.GetValue(P03Plugin.PluginGuid, SaveKey);
             Part3SaveData data = FromCompressedJSON<Part3SaveData>(part3Data);
 
@@ -191,6 +265,68 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             SaveManager.SaveFile.part3Data = data;
+
+            string part3AscensionData = ModdedSaveManager.SaveData.GetValue(P03Plugin.PluginGuid, "P03AscensionSaveDataProgress");
+            AscensionSaveData ascensionData = FromCompressedJSON<AscensionSaveData>(part3AscensionData);
+
+            if (ascensionData == default(AscensionSaveData))
+            {
+                ascensionData = new AscensionSaveData();
+                ascensionData.Initialize();
+                ascensionData.itemUnlockEvents = new() { EventManagement.P03_SAVE_MARKER };
+            }
+
+            P03Data = ascensionData;
+
+            if (File.Exists(SaveFilePath))
+            {
+                string json = File.ReadAllText(SaveFilePath);
+                RunStateData = SaveManager.FromJSON<ModdedSaveData>(json) ?? new();
+            }
+            else
+            {
+                RunStateData = new();
+            }
+        }
+
+        [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.IncrementChallengeLevel))]
+        [HarmonyPostfix]
+        private static void IncrementToMax(AscensionSaveData __instance)
+        {
+            if (__instance.itemUnlockEvents.Contains(EventManagement.P03_SAVE_MARKER))
+            {
+                if (__instance.challengeLevel > AscensionChallengeManagement.ChallengePointsPerLevel.Length)
+                    __instance.challengeLevel = 13;
+            }
+        }
+
+        [HarmonyPatch(typeof(AscensionUnlockSchedule), nameof(AscensionUnlockSchedule.NumStarterDecksUnlocked))]
+        [HarmonyPrefix]
+        private static bool GetP03NumStarterDecks(int level, ref int __result)
+        {
+            if (ScreenManagement.ScreenState == CardTemple.Tech)
+            {
+                __result = level == 1 ? 1 : 8;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.GetChallengePointsForLevel))]
+        [HarmonyPrefix]
+        private static bool GetP03ChallengePointsForLevel(int level, ref int __result)
+        {
+            if (ScreenManagement.ScreenState == CardTemple.Tech)
+            {
+                __result = level <= AscensionChallengeManagement.ChallengePointsPerLevel.Length
+                    ? AscensionChallengeManagement.ChallengePointsPerLevel[level - 1]
+                    : level < 0
+                    ? AscensionChallengeManagement.ChallengePointsPerLevel[0]
+                    : AscensionChallengeManagement.ChallengePointsPerLevel[AscensionChallengeManagement.ChallengePointsPerLevel.Length - 1] + (10 * (level - AscensionChallengeManagement.ChallengePointsPerLevel.Length));
+
+                return false;
+            }
+            return true;
         }
 
         [HarmonyPatch(typeof(AscensionMenuScreens), nameof(AscensionMenuScreens.TransitionToGame))]
@@ -204,8 +340,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.NewRun))]
         [HarmonyPostfix]
-        public static void InitializePart3Save()
+        private static void InitializePart3Save()
         {
+            P03Plugin.Log.LogInfo($"Asked to start new Ascension run. Is P03 Run? {IsP03Run}");
             if (IsP03Run)
             {
                 Part3SaveData data = new();
@@ -216,7 +353,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(Part3SaveData), "Initialize")]
         [HarmonyPrefix]
-        public static void EnsurePart3Saved()
+        private static void EnsurePart3Saved()
         {
             if (SaveFile.IsAscension)
             {
@@ -227,15 +364,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.EndRun))]
         [HarmonyPrefix]
-        public static void ClearP03SaveOnEndRun()
+        private static void ClearP03SaveOnEndRun(AscensionSaveData __instance)
         {
-            SaveManager.SaveFile.part3Data = null;
-            ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, ASCENSION_SAVE_KEY, default(string));
+            if (ReturningFromP03Run || ScreenManagement.ScreenState == CardTemple.Tech)
+            {
+                SaveManager.SaveFile.part3Data = null;
+                ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, ASCENSION_SAVE_KEY, default(string));
+                ReturningFromP03Run = false;
+            }
         }
 
         [HarmonyPatch(typeof(RunState), nameof(RunState.Run), MethodType.Getter)]
         [HarmonyPostfix]
-        public static void RunIsNullForP03(ref RunState __result)
+        private static void RunIsNullForP03(ref RunState __result)
         {
             if (IsP03Run)
             {
@@ -244,7 +385,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
-        [HarmonyPatch(typeof(Part3SaveData), "Initialize")]
+        [HarmonyPatch(typeof(Part3SaveData), nameof(Part3SaveData.Initialize))]
         [HarmonyPostfix]
         private static void RewritePart3IntroSequence(ref Part3SaveData __instance)
         {
@@ -343,7 +484,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         // This keeps the oil painting puzzle from breaking the game
         [HarmonyPatch(typeof(OilPaintingPuzzle), nameof(OilPaintingPuzzle.GenerateSolution))]
         [HarmonyPrefix]
-        public static bool ReplaceGenerateForP03(ref List<string> __result)
+        private static bool ReplaceGenerateForP03(ref List<string> __result)
         {
             if (IsP03Run)
             {

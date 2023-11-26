@@ -287,7 +287,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             // Ultra Bot
             CardManager.New(EXP_2_PREFIX, "UltraBot", "Ultra Bot", 1, 4)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ultra_bot.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ultra_droid.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 5)
                 .SetNeutralP03Card()
                 .SetRare()

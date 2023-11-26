@@ -7,7 +7,6 @@ using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Saves;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
@@ -17,14 +16,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     {
         public static bool HasEatenRingworm
         {
-            get => ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "HasEatenRingworm");
-            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "HasEatenRingworm", value);
+            get => P03AscensionSaveData.RunStateData.GetValueAsBoolean(P03Plugin.PluginGuid, "HasEatenRingworm");
+            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "HasEatenRingworm", value);
         }
 
         public static bool HasIntroducedNewDiskDrive
         {
-            get => ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, "HasIntroducedNewDiskDrive");
-            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "HasIntroducedNewDiskDrive", value);
+            get => P03AscensionSaveData.RunStateData.GetValueAsBoolean(P03Plugin.PluginGuid, "HasIntroducedNewDiskDrive");
+            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "HasIntroducedNewDiskDrive", value);
         }
 
         [HarmonyPatch(typeof(DiskDriveModSequencer), nameof(DiskDriveModSequencer.PreSelectionDialogueSequence))]
@@ -137,6 +136,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 GameObject fireObj = Object.Instantiate(AssetBundleManager.Prefabs["Fire_Parent"], abilityMachine.diskDrive.transform);
                 fireObj.transform.localPosition = new(-1.3f, 0.46f, 2.17f);
                 fireObj.transform.SetParent(abilityMachine.diskDrive.anim.transform, true);
+                for (int i = 1; i <= 4; i++)
+                    fireObj.transform.Find($"Fire_System_{i}").gameObject.SetActive(false);
+
                 AudioController.Instance.PlaySound3D("fireball", MixerGroup.TableObjectsSFX, fireObj.transform.position, 0.35f);
                 yield return new WaitForSeconds(1.0f);
                 P03AnimationController.Instance.UnplugInputCable(delegate

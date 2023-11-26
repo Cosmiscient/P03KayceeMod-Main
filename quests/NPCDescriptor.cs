@@ -3,7 +3,6 @@ using System.Collections;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Patchers;
-using InscryptionAPI.Saves;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Quests
@@ -33,7 +32,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// this run, it will reuse the same descriptor you saw before.</remarks>
         public static NPCDescriptor GetDescriptorForNPC(SpecialEvent se)
         {
-            string descriptorString = ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, $"NPC{se}");
+            string descriptorString = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, $"NPC{se}");
             if (!string.IsNullOrEmpty(descriptorString))
                 return new NPCDescriptor(descriptorString);
 
@@ -45,7 +44,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             CompositeFigurine.FigurineType body = (CompositeFigurine.FigurineType)SeededRandom.Range(0, (int)CompositeFigurine.FigurineType.NUM_FIGURINES, randomSeed++);
 
             string newDescriptor = $"{faceCode}|{head}|{arms}|{body}";
-            ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, $"NPC{se}", newDescriptor);
+            P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, $"NPC{se}", newDescriptor);
             return new NPCDescriptor(newDescriptor);
         }
 

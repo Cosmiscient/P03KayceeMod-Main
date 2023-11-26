@@ -57,7 +57,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return new WaitForSeconds(0.1f);
 
             // Need to play the dialogue associated with the current state of the quest
-            yield return TextDisplayer.Instance.PlayDialogueEvent(quest.CurrentState.DialogueId, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, new string[] { quest.GetQuestCounter().ToString() }, null);
+            string dialogueId = quest.CurrentState.DynamicDialogueId != null ? quest.CurrentState.DynamicDialogueId() : quest.CurrentState.DialogueId;
+            yield return TextDisplayer.Instance.PlayDialogueEvent(dialogueId, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, new string[] { quest.GetQuestCounter().ToString() }, null);
             yield return new WaitForSeconds(0.1f);
 
             // Now we advance the quest if necessary (if this is an autocomplete quest state)

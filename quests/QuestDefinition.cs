@@ -5,7 +5,6 @@ using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Guid;
-using InscryptionAPI.Saves;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {
@@ -57,8 +56,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// </summary>
         public bool QuestGenerated
         {
-            get => ModdedSaveManager.RunState.GetValueAsBoolean(ModGuid, $"{QuestName}_GENERATED");
-            set => ModdedSaveManager.RunState.SetValue(ModGuid, $"{QuestName}_GENERATED", value);
+            get => P03AscensionSaveData.RunStateData.GetValueAsBoolean(ModGuid, $"{QuestName}_GENERATED");
+            set => P03AscensionSaveData.RunStateData.SetValue(ModGuid, $"{QuestName}_GENERATED", value);
         }
 
         /// <summary>
@@ -134,7 +133,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     return false;
 
                 // If there's a special condition on this quest, figure that out now
-                return GenerateCondition != null ? GenerateCondition() : true;
+                return GenerateCondition == null || GenerateCondition();
             }
         }
 
@@ -151,8 +150,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     if (EventManagement.CompletedZones.Count == 0)
                         return true; // Always generated on map one
                     return EventManagement.CompletedZones.Count == 1
-                        ? DefaultQuestDefinitions.FindGoobert.CurrentState.Status == QuestState.QuestStateStatus.Active
-                        : false;
+&& DefaultQuestDefinitions.FindGoobert.CurrentState.Status == QuestState.QuestStateStatus.Active;
                 }
 
                 if (EventId == DefaultQuestDefinitions.BrokenGenerator.EventId)
@@ -205,9 +203,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
             get
             {
                 QuestState currentState = CurrentState;
-                return !currentState.IsEndState
-                    ? false
-                    : currentState.Status is QuestState.QuestStateStatus.Success or QuestState.QuestStateStatus.Failure;
+                return currentState.IsEndState
+&& currentState.Status is QuestState.QuestStateStatus.Success or QuestState.QuestStateStatus.Failure;
             }
         }
 

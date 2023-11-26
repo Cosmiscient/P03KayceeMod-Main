@@ -6,7 +6,6 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
-using InscryptionAPI.Saves;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {
@@ -43,12 +42,12 @@ namespace Infiniscryption.P03KayceeRun.Quests
         {
             get
             {
-                int retval = ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, "DeckSizeTarget");
+                int retval = P03AscensionSaveData.RunStateData.GetValueAsInt(P03Plugin.PluginGuid, "DeckSizeTarget");
                 if (retval > 0)
                     return retval;
 
                 retval = Part3SaveData.Data.deck.Cards.Count + 2;
-                ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "DeckSizeTarget", retval);
+                P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "DeckSizeTarget", retval);
                 return retval;
             }
         }
@@ -57,7 +56,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         {
             get
             {
-                string dropoff = ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, "Dropoff");
+                string dropoff = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "Dropoff");
                 if (!string.IsNullOrEmpty(dropoff))
                     return (RunBasedHoloMap.Zone)Enum.Parse(typeof(RunBasedHoloMap.Zone), dropoff);
 
@@ -67,7 +66,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 };
                 zones.Remove(EventManagement.CurrentZone);
                 RunBasedHoloMap.Zone assignedDropoff = zones[SeededRandom.Range(0, zones.Count, P03AscensionSaveData.RandomSeed)];
-                ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "Dropoff", assignedDropoff);
+                P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "Dropoff", assignedDropoff);
                 return assignedDropoff;
             }
         }
@@ -219,7 +218,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             waitingState.AddDialogueState("MY FRIEND IS LOST", "P03DidNotBuyGoobert", QuestState.QuestStateStatus.Failure);
 
             // When you buy goobert, you end up here
-            QuestState boughtState = waitingState.AddNamedState("CarryingGoobert", "YOU FOUND HIM!", $"P03FoundGoobert{GoobertDropoffZone}");
+            QuestState boughtState = waitingState.AddNamedState("CarryingGoobert", "YOU FOUND HIM!", () => $"P03FoundGoobert{GoobertDropoffZone}");
             boughtState.SetDynamicStatus(() =>
             {
                 return !Part3SaveData.Data.items.Any(item => GoobertHuh.ItemData.name.ToLowerInvariant() == item.ToLowerInvariant())

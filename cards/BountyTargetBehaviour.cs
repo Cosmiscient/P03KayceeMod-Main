@@ -8,7 +8,6 @@ using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Quests;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
-using InscryptionAPI.Saves;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -22,8 +21,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private static int DamageThisRun
         {
-            get => ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, "BountyDamageThisRun");
-            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "BountyDamageThisRun", value);
+            get => P03AscensionSaveData.RunStateData.GetValueAsInt(P03Plugin.PluginGuid, "BountyDamageThisRun");
+            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "BountyDamageThisRun", value);
         }
 
         static BountyTargetBehaviour()
@@ -95,7 +94,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private static CardModificationInfo GetCurrentMod()
         {
-            string currentCardMod = ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, "CurrentBountyMod");
+            string currentCardMod = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "CurrentBountyMod");
             if (string.IsNullOrEmpty(currentCardMod))
             {
                 CardModificationInfo info = GetFreshMod();
@@ -104,7 +103,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                                  + ";" + info.deathCardInfo.eyesIndex.ToString()
                                  + ";" + info.deathCardInfo.mouthIndex.ToString()
                                  + ";" + (info.deathCardInfo.lostEye ? "Y" : "N");
-                ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "CurrentBountyMod", saveValue);
+                P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "CurrentBountyMod", saveValue);
                 return info;
             }
             string[] modData = currentCardMod.Split(';');

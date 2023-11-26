@@ -45,6 +45,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly StoryEvent SAW_STICKER_BOOK = NewStory("SawStickerBook", save: true);
         public static readonly StoryEvent SAW_NEW_ORB = NewStory("P03HammerOrb", save: true);
         public static readonly StoryEvent GOT_STICKER_INTRODUCTION = NewStory("P03GotStickerIntro", save: true);
+        public static readonly StoryEvent P03_SAVE_MARKER = NewStory("P03SaveMarker", save: true);
 
         public const string GAME_OVER = "GameOverZone";
 
@@ -70,7 +71,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             get
             {
-                string key = ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, "MycologistReturnPosition");
+                string key = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "MycologistReturnPosition");
                 if (string.IsNullOrEmpty(key))
                     throw new InvalidOperationException("Trying to get the mycologist return position when it has never been set!");
 
@@ -80,7 +81,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             set
             {
                 string key = $"{value.worldId}|{value.gridX}|{value.gridY}";
-                ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "MycologistReturnPosition", key);
+                P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "MycologistReturnPosition", key);
             }
         }
 
@@ -90,7 +91,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 List<CardInfo> retval = new();
 
-                string key = ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, "MycologistTestSubjects");
+                string key = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "MycologistTestSubjects");
                 if (!string.IsNullOrEmpty(P03Plugin.Instance.SecretCardComponents) && P03Plugin.Instance.SecretCardComponents.StartsWith("@"))
                     key = P03Plugin.Instance.SecretCardComponents;
 
@@ -106,12 +107,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static void AddMycologistsTestSubject(CardInfo info)
         {
             string subjectCode = CustomCards.ConvertCardToCompleteCode(info);
-            string currentKey = ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, "MycologistTestSubjects");
+            string currentKey = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "MycologistTestSubjects");
             if (string.IsNullOrEmpty(currentKey))
                 currentKey = subjectCode;
             else
                 currentKey += "%" + subjectCode;
-            ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "MycologistTestSubjects", currentKey);
+            P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "MycologistTestSubjects", currentKey);
         }
 
         public static RunBasedHoloMap.Zone CurrentZone
@@ -254,14 +255,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         public static int NumberOfLivesRemaining
         {
-            get => ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, "NumberOfLivesRemaining");
-            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "NumberOfLivesRemaining", value);
+            get => P03AscensionSaveData.RunStateData.GetValueAsInt(P03Plugin.PluginGuid, "NumberOfLivesRemaining");
+            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "NumberOfLivesRemaining", value);
         }
 
         public static int NumberOfLosses
         {
-            get => ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, "NumberOfLosses");
-            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "NumberOfLosses", value);
+            get => P03AscensionSaveData.RunStateData.GetValueAsInt(P03Plugin.PluginGuid, "NumberOfLosses");
+            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "NumberOfLosses", value);
         }
 
         public const int ENEMIES_TO_UNLOCK_BOSS = 4;
@@ -270,12 +271,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             get
             {
                 string key = $"{CurrentZone}_EnemiesKilled";
-                return ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, key);
+                return P03AscensionSaveData.RunStateData.GetValueAsInt(P03Plugin.PluginGuid, key);
             }
             set
             {
                 string key = $"{CurrentZone}_EnemiesKilled";
-                ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, key, value);
+                P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, key, value);
             }
         }
 
@@ -283,7 +284,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             get
             {
-                string zoneCsv = ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, "CompletedZones");
+                string zoneCsv = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "CompletedZones");
                 return zoneCsv == default ? new List<string>() : zoneCsv.Split(',').ToList();
             }
         }
@@ -302,14 +303,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (!zones.Contains(id))
                 zones.Add(id);
 
-            ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "CompletedZones", string.Join(",", zones));
+            P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "CompletedZones", string.Join(",", zones));
         }
 
         public static List<string> VisitedZones
         {
             get
             {
-                string zoneCsv = ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, "VisitedZones");
+                string zoneCsv = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "VisitedZones");
                 return zoneCsv == default ? new List<string>() : zoneCsv.Split(',').ToList();
             }
         }
@@ -319,7 +320,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (!zones.Contains(id))
                 zones.Add(id);
 
-            ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "VisitedZones", string.Join(",", zones));
+            P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "VisitedZones", string.Join(",", zones));
         }
 
         public static StoryEvent GetStoryEventForOpponent(Opponent.Type opponent)
@@ -356,7 +357,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
             if (SaveFile.IsAscension && P03AscensionSaveData.IsP03Run && P03RunBasedStoryEvents.Contains(storyEvent))
             {
-                ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, $"StoryEvent{storyEvent}", true);
+                P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, $"StoryEvent{storyEvent}", true);
                 return false;
             }
             return true;
@@ -434,7 +435,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 if (P03RunBasedStoryEvents.Contains(storyEvent))
                 {
-                    __result = ModdedSaveManager.RunState.GetValueAsBoolean(P03Plugin.PluginGuid, $"StoryEvent{storyEvent}");
+                    __result = P03AscensionSaveData.RunStateData.GetValueAsBoolean(P03Plugin.PluginGuid, $"StoryEvent{storyEvent}");
                     return false;
                 }
             }
@@ -478,6 +479,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                     if (DefaultQuestDefinitions.Conveyors.IsDefaultActive())
                         DefaultQuestDefinitions.Conveyors.IncrementQuestCounter();
+
+                    if (DefaultQuestDefinitions.BombBattles.IsDefaultActive())
+                        DefaultQuestDefinitions.BombBattles.IncrementQuestCounter();
                 }
             }
 
@@ -539,11 +543,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (CompletedZones.Count > 0)
                 AscensionSaveData.Data.numRunsSinceReachedFirstBoss = 0;
-
-            // Let's no longer force this to false
-            // It should go false when the screen loads
-            // and leaving it 'as is' should help the restart work.
-            //P03AscensionSaveData.IsP03Run = false;
 
             Part3SaveData.Data.checkpointPos = new Part3SaveData.WorldPosition(GAME_OVER, 0, 0);
 

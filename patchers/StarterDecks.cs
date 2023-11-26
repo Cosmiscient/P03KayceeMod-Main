@@ -61,24 +61,24 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static void RegisterStarterDecks()
         {
             DEFAULT_STARTER_DECK = StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Vanilla", "starterdeck_icon_vanilla", new string[] { "BatteryBot", "Sniper", "Shieldbot", "CloserBot" })).Info.name;
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Bomb", "starterdeck_icon_bomb", new string[] { "Bombbot", "Bombbot", "LatcherBomb", "BombMaiden" }));
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Bomb", "starterdeck_icon_bomb", new string[] { "Bombbot", "Bombbot", "LatcherBomb", "BombMaiden" }), unlockLevel: 2);
             StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Shield", "starterdeck_icon_shield", new string[] { "LatcherShield", "Shieldbot", "Shieldbot", "Steambot" }), unlockLevel: 2);
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("FullDraft", "starterdeck_icon_token", new string[] { CustomCards.DRAFT_TOKEN, CustomCards.DRAFT_TOKEN, CustomCards.DRAFT_TOKEN, CustomCards.UNC_TOKEN }), unlockLevel: 4);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Random", "starterdeck_icon_random", new string[] { "GiftBot", "GiftBot", "Amoebot", CustomCards.DRAFT_TOKEN }), unlockLevel: 2);
 
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Movement", "starterdeck_icon_strafe", new string[] { "ConveyorLatcher", "SeedBot", "MineCart", "BoltHound" }));
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Annoying", "starterdeck_icon_annoying", new string[] { "AlarmBot", "AlarmBot", "Clockbot", "Clockbot" }));
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Conduit", "starterdeck_icon_conduit", new string[] { "StarterConduitTower", "CellGift", "FrankenBot", "HealerConduit" }), unlockLevel: 2);
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Evolve", "starterdeck_icon_evolve", new string[] { "XformerBatBot", "XformerPorcupineBot", "ViperBot", "XformerGrizzlyBot" }), unlockLevel: 4);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Conduit", "starterdeck_icon_conduit", new string[] { "StarterConduitTower", "CellGift", "FrankenBot", "HealerConduit" }), unlockLevel: 3);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Evolve", "starterdeck_icon_evolve", new string[] { "XformerBatBot", "XformerPorcupineBot", "ViperBot", "XformerGrizzlyBot" }), unlockLevel: 3);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Gems", "starterdeck_icon_gems", new string[] { "SentinelBlue", "SentinelGreen", "SentinelOrange", "BustedPrinter" }), unlockLevel: 3);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Stall", "starterdeck_icon_slowdown", new string[] { "SentryBot", "BustedPrinter", "RobotRam", "Spyplane" }), unlockLevel: 3);
 
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Fire", "starterdeck_icon_fire", new string[] { "Molotov", "FlamingExeskeleton", "PyroBot", "StreetSweeper" }), unlockLevel: 8);
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Stall", "starterdeck_icon_slowdown", new string[] { "SentryBot", "BustedPrinter", "RobotRam", "Spyplane" }), unlockLevel: 8);
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Recharge", "starterdeck_icon_recharge", new string[] { "Gopher", "Weeper", "Encapsulator", "RoboMice" }), unlockLevel: 8);
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("NoCharge", "starterdeck_icon_glow", new string[] { "GlowBot", "GlowBot", "CellBuff", "Suicell" }), unlockLevel: 8);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Annoying", "starterdeck_icon_annoying", new string[] { "AlarmBot", "AlarmBot", "Clockbot", "Clockbot" }), unlockLevel: 4);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Fire", "starterdeck_icon_fire", new string[] { "Molotov", "FlamingExeskeleton", "PyroBot", "StreetSweeper" }), unlockLevel: 4);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Recharge", "starterdeck_icon_recharge", new string[] { "Gopher", "Weeper", "Encapsulator", "RoboMice" }), unlockLevel: 4);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("NoCharge", "starterdeck_icon_glow", new string[] { "GlowBot", "GlowBot", "CellBuff", "Suicell" }), unlockLevel: 4);
 
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Swap", "starterdeck_icon_swap", new string[] { "AmmoBot", "Poodle", "SwapperLatcher", "SwapBot" }), unlockLevel: 8);
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Nefarious", "starterdeck_icon_combo", new string[] { "RoboSkeleton", "EnergyVampire", "LatcherBrittle", "GiveAWay" }), unlockLevel: 8);
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Cheapo", "starterdeck_icon_cheap", new string[] { "BoxBot", $"{ExpansionPackCards_2.EXP_2_PREFIX}_Librarian", "JimmyJr", "PitySeeker" }), unlockLevel: 8);
-            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Trash", "starterdeck_icon_doctor", new string[] { $"{ExpansionPackCards_1.EXP_1_PREFIX}_Salmon", "LeapBot", "RoboRingworm", "DrZambot" }), unlockLevel: 8);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Swap", "starterdeck_icon_swap", new string[] { "AmmoBot", "Poodle", "SwapperLatcher", "SwapBot" }), unlockLevel: 5);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Nefarious", "starterdeck_icon_combo", new string[] { "RoboSkeleton", "EnergyVampire", "LatcherBrittle", "GiveAWay" }), unlockLevel: 5);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("Cheapo", "starterdeck_icon_cheap", new string[] { "BoxBot", $"{ExpansionPackCards_2.EXP_2_PREFIX}_Librarian", "JimmyJr", "PitySeeker" }), unlockLevel: 5);
+            StarterDeckManager.Add(P03Plugin.PluginGuid, CreateStarterDeckInfo("FullDraft", "starterdeck_icon_token", new string[] { CustomCards.DRAFT_TOKEN, CustomCards.DRAFT_TOKEN, CustomCards.DRAFT_TOKEN, CustomCards.UNC_TOKEN }), unlockLevel: 5);
 
 
             StarterDeckManager.ModifyDeckList += delegate (List<StarterDeckManager.FullStarterDeck> decks)

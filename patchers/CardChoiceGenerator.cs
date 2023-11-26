@@ -6,7 +6,6 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Sequences;
-using InscryptionAPI.Saves;
 using Pixelplacement;
 using UnityEngine;
 
@@ -20,24 +19,24 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             get
             {
-                int val = ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, "CurrentRerollCost");
+                int val = P03AscensionSaveData.RunStateData.GetValueAsInt(P03Plugin.PluginGuid, "CurrentRerollCost");
                 if (val == 0)
                     CurrentRerollCost = 1;
                 return 1;
             }
-            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "CurrentRerollCost", value);
+            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "CurrentRerollCost", value);
         }
 
         public static int PriorRerollCost
         {
             get
             {
-                int val = ModdedSaveManager.RunState.GetValueAsInt(P03Plugin.PluginGuid, "PriorRerollCost");
+                int val = P03AscensionSaveData.RunStateData.GetValueAsInt(P03Plugin.PluginGuid, "PriorRerollCost");
                 if (val == 0)
                     PriorRerollCost = 1;
                 return 1;
             }
-            set => ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, "PriorRerollCost", value);
+            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "PriorRerollCost", value);
         }
 
         public class Part3RareCardChoicesNodeData : CardChoicesNodeData { }
@@ -164,14 +163,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static IEnumerator EnsureHoloClover(IEnumerator sequence, CardSingleChoicesSequencer __instance, SpecialNodeData nodeData)
         {
-            if (!P03AscensionSaveData.IsP03Run || __instance.rerollInteractable != null)
+            if (!P03AscensionSaveData.IsP03Run || nodeData is Part3RareCardChoicesNodeData)
             {
                 yield return sequence;
                 yield break;
             }
 
-            if (nodeData is Part3RareCardChoicesNodeData)
+            if (__instance.rerollInteractable != null)
             {
+                __instance.rerollInteractable.gameObject.SetActive(true);
                 yield return sequence;
                 yield break;
             }
@@ -258,6 +258,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 CustomCoroutine.WaitThenExecute(0.25f, delegate
                 {
                     __instance.rerollInteractable.gameObject.SetActive(false);
+                    if (__instance.rerollAnim == null)
+                        __instance.rerollInteractable.transform.localPosition -= Vector3.down;
                 }, false);
             }
             return false;

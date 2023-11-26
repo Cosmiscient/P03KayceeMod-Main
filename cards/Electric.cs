@@ -27,7 +27,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
-                typeof(EmeraldExtraction),
+                typeof(Electric),
                 TextureHelper.GetImageAsTexture("void_Electric.png", typeof(Electric).Assembly)
             ).Id;
         }
@@ -58,7 +58,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
         internal static IEnumerator ShockCard(PlayableCard target, PlayableCard attacker, int damage, Vector3? startPosition = null)
         {
             CardSlot centerSlot = target.slot;
-            bool flag = !SaveManager.SaveFile.IsPart2;
             if (!SaveManager.SaveFile.IsPart2)
             {
                 Singleton<TableVisualEffectsManager>.Instance.ThumpTable(0.3f);

@@ -77,11 +77,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public class BuildACardNameInputHandler : KeyboardInputHandler
         {
             public List<TextMeshPro> Target = new();
-            public BuildACardInfo Info;
+            public BuildACardScreen ScreenParent;
 
             private new void Awake()
             {
-                // Do nthing
+                // Do nothing
             }
 
             public override void OnEnable()
@@ -95,8 +95,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 base.ManagedUpdate();
                 Target.ForEach(t => t.SetText(KeyboardInput));
 
-                if (Info != null && Info.mod != null)
-                    Info.mod.nameReplacement = KeyboardInput;
+                if (ScreenParent.info != null && ScreenParent.info.mod != null)
+                    ScreenParent.info.mod.nameReplacement = KeyboardInput;
             }
         }
 
@@ -121,20 +121,22 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             __instance.nameTexts[2].gameObject.SetActive(!P03AscensionSaveData.IsP03Run);
 
-            GameObject nameScreen = __instance.stageInteractableParents[(int)BuildACardScreen.Stage.Name];
-            BuildACardNameInputHandler handler = nameScreen.GetComponent<BuildACardNameInputHandler>();
-            if (handler == null)
+            if (P03AscensionSaveData.IsP03Run)
             {
-                handler = nameScreen.AddComponent<BuildACardNameInputHandler>();
-                handler.EnterPressed = () => __instance.OnRightArrowPressed();
-                handler.Target.Add(__instance.nameTexts[1]);
-                handler.Target.Add(__instance.confirmScreenTitle);
-                handler.Info = __instance.info;
+                GameObject nameScreen = __instance.stageInteractableParents[(int)BuildACardScreen.Stage.Name];
+                BuildACardNameInputHandler handler = nameScreen.GetComponent<BuildACardNameInputHandler>();
+                if (handler == null)
+                {
+                    handler = nameScreen.AddComponent<BuildACardNameInputHandler>();
+                    handler.EnterPressed = () => __instance.OnRightArrowPressed();
+                    handler.Target.Add(__instance.nameTexts[1]);
+                    handler.Target.Add(__instance.confirmScreenTitle);
+                    handler.maxInputLength = 25;
+                    handler.ScreenParent = __instance;
+                }
                 handler.KeyboardInput = "ENTER NAME HERE";
-                handler.maxInputLength = 25;
+                __instance.info.nameIndices = new int[] { -1, -1, -1 };
             }
-
-            __instance.info.nameIndices = new int[] { -1, -1, -1 };
         }
 
         [HarmonyPatch(typeof(BuildACardScreen), nameof(BuildACardScreen.ShowStage))]

@@ -354,5 +354,17 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             if (__instance.blueprintData != null)
                 ActivateIconSet(__instance);
         }
+
+        [HarmonyPatch(typeof(MoveHoloMapAreaNode), nameof(MoveHoloMapAreaNode.SetAdditionalIconShown))]
+        [HarmonyPostfix]
+        private static void UpdateAdditionalSpecialModIcons(MoveHoloMapAreaNode __instance)
+        {
+            Transform parent = __instance.transform.Find("RendererParent");
+            foreach (Transform child in parent)
+            {
+                if (child.gameObject.name.StartsWith("BattleModIcons"))
+                    child.gameObject.SetActive(__instance.additionalIconRenderer.gameObject.activeSelf);
+            }
+        }
     }
 }

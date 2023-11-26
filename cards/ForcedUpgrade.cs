@@ -36,10 +36,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private CardInfo GetEvolution(PlayableCard target)
         {
-            CardInfo defaultCard = target.Info.evolveParams != null
-                                 ? CardLoader.Clone(target.Info.evolveParams.evolution)
-                                 : EvolveParams.GetDefaultEvolution(target.Info);
-            return defaultCard;
+            CardInfo baseInfo = (!target.HasAbility(Ability.Transformer) || target.Info.HasCardMetaCategory(CardMetaCategory.ChoiceNode)) && target.Info.evolveParams != null
+                        ? CardLoader.Clone(target.Info.evolveParams.evolution)
+                        : EvolveParams.GetDefaultEvolution(target.Info);
+
+            if (target.HasAbility(Ability.Transformer))
+                baseInfo.mods.Add(new() { negateAbilities = new() { Ability.Transformer } });
+
+            return baseInfo;
         }
 
         public override IEnumerator OnSlotTargetedForAttack(CardSlot slot, PlayableCard attacker)

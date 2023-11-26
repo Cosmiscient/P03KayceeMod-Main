@@ -21,40 +21,45 @@ namespace Infiniscryption.PackManagerP03Plugin
         public const string PackPluginGuid = "zorro.inscryption.infiniscryption.packmanager";
 
         public const string PluginGuid = "zorro.inscryption.infiniscryption.packmanager.p03plugin";
-		public const string PluginName = "Infiniscryption Pack Manager - P03 Plugin";
-		public const string PluginVersion = "2.0";
+        public const string PluginName = "Infiniscryption Pack Manager - P03 Plugin";
+        public const string PluginVersion = "2.0";
 
         internal static ManualLogSource Log;
 
-        public static CardTemple ScreenState 
-        { 
+        public static CardTemple ScreenState
+        {
             get
             {
                 string value = ModdedSaveManager.SaveData.GetValue(P03PluginGuid, "ScreenState");
-                if (string.IsNullOrEmpty(value))
-                    return CardTemple.Nature;
-
-                return (CardTemple)Enum.Parse(typeof(CardTemple), value);
+                return string.IsNullOrEmpty(value) ? CardTemple.Nature : (CardTemple)Enum.Parse(typeof(CardTemple), value);
             }
         }
 
         private void Awake()
         {
-            Log = base.Logger;
+            Log = Logger;
 
             // Start by creating the pack:
             PackInfo packInfo = PackManager.GetDefaultPackInfo(CardTemple.Tech);
             packInfo.ValidFor.Add(PackInfo.PackMetacategory.LeshyPack);
 
             // Awesome! Since there hasn't been an error, I can start modifying cards:
-            CardManager.ModifyCardList += delegate(List<CardInfo> cards)
+            CardManager.ModifyCardList += delegate (List<CardInfo> cards)
             {
                 if (ScreenState == CardTemple.Nature && PackManager.GetActivePacks().Contains(packInfo))
+                {
                     foreach (CardInfo card in cards)
+                    {
                         if (card.temple == CardTemple.Tech)
+                        {
                             if (!card.metaCategories.Contains(CardMetaCategory.Rare))
+                            {
                                 if (card.metaCategories.Contains(CardMetaCategory.TraderOffer))
                                     card.AddMetaCategories(CardMetaCategory.ChoiceNode);
+                            }
+                        }
+                    }
+                }
 
                 return cards;
             };
@@ -78,8 +83,8 @@ namespace Infiniscryption.PackManagerP03Plugin
             expPack1.SetTexture(TextureHelper.GetImageAsTexture("expansion1.png", typeof(PackPlugin).Assembly));
 
             PackInfo expPack2 = PackManager.GetPackInfo("P03KCMXP2");
-            expPack2.Title = "Kaycee's P03 Expansion Pack #2 [EARLY ACCESS]";
-            expPack2.Description = "Still in development! The second official expansion pack, with [count] new cards that are zanier than ever.";
+            expPack2.Title = "Kaycee's P03 Expansion Pack #2";
+            expPack2.Description = "The second official expansion pack, with [count] firey new cards that command an explosive reaction!";
             expPack2.ValidFor.Clear();
             expPack2.ValidFor.Add(PackInfo.PackMetacategory.P03Pack);
             expPack2.SetTexture(TextureHelper.GetImageAsTexture("PKCMexpansion2pack.png", typeof(PackPlugin).Assembly));

@@ -55,37 +55,111 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 return CardTemple.Nature;
             }
-            set => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "ScreenState", value);
+            set
+            {
+                CardTemple oldValue = ScreenState;
+
+                if (value == CardTemple.Nature)
+                    ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "ScreenState", default(string));
+                else
+                    ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "ScreenState", value);
+
+                P03Plugin.Log.LogInfo($"Changing screenstate from {oldValue} to {value}");
+
+                if (value != oldValue && SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("ascension"))
+                {
+                    P03Plugin.Log.LogInfo($"Reconfiguring the post game screens");
+                    AscensionMenuScreens.Instance.ConfigurePostGameScreens();
+                }
+            }
         }
 
-        [HarmonyPatch(typeof(AscensionMenuScreens), "TransitionToGame")]
+        [HarmonyPatch(typeof(AscensionMenuScreens), nameof(AscensionMenuScreens.ConfigurePostGameScreens))]
+        [HarmonyPrefix]
+        private static bool P03ConfigurePostGameScreens(AscensionMenuScreens __instance)
+        {
+            if (ScreenState == CardTemple.Tech || P03AscensionSaveData.ReturningFromP03Run)
+            {
+                if (AscensionMenuScreens.ReturningFromFailedRun || AscensionMenuScreens.ReturningFromSuccessfulRun)
+                {
+                    __instance.startScreen.gameObject.SetActive(false);
+                    __instance.runEndScreen.gameObject.SetActive(true);
+                    __instance.runEndScreen.GetComponent<AscensionRunEndScreen>().Initialize(AscensionMenuScreens.ReturningFromSuccessfulRun);
+                    __instance.runEndScreen.GetComponent<AscensionStatsScreen>().PreFillStatsText();
+                    if (AscensionStatsData.GetStatValue(AscensionStat.Type.Misplays, false) >= 10)
+                    {
+                        AchievementManager.Unlock(Achievement.KMOD_SPECIAL1);
+                    }
+                    if (AscensionMenuScreens.ReturningFromSuccessfulRun && AscensionSaveData.Data.ChallengeLevelIsMet() && AscensionSaveData.Data.challengeLevel <= 6)
+                    {
+                        //AscensionUnlockSchedule.UnlockTier unlocksForLevel = AscensionUnlockSchedule.GetUnlocksForLevel(AscensionSaveData.Data.challengeLevel);
+                        AscensionSaveData.Data.IncrementChallengeLevel();
+                    }
+                    AscensionMenuScreens.ReturningFromCredits = false;
+                    AscensionMenuScreens.ReturningFromSuccessfulRun = false;
+                    AscensionMenuScreens.ReturningFromFailedRun = false;
+                    AscensionSaveData.Data.EndRun();
+                }
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(AscensionMenuScreens), nameof(AscensionMenuScreens.TransitionToGame))]
         [HarmonyPrefix]
         [HarmonyBefore("zorro.inscryption.infiniscryption.packmanager")]
-        public static void InitializeP03SaveData(ref AscensionMenuScreens __instance, bool newRun)
+        private static void InitializeP03SaveData(ref AscensionMenuScreens __instance, bool newRun)
         {
+            P03Plugin.Log.LogInfo($"New Run? {newRun} Screen State {ScreenState} IsP03? {P03AscensionSaveData.IsP03Run}");
             if (newRun)
             {
                 if (ScreenState == CardTemple.Tech)
                 {
                     // Ensure the old part 3 save data gets saved if it needs to be
                     P03AscensionSaveData.EnsureRegularSave();
-                    P03AscensionSaveData.IsP03Run = true;
-                    SaveManager.SaveToFile();
+                    //P03AscensionSaveData.IsP03Run = true;
                 }
                 else
                 {
-                    P03AscensionSaveData.IsP03Run = false;
+                    //P03AscensionSaveData.IsP03Run = false;
                 }
             }
-            if (P03AscensionSaveData.IsP03Run)
-                ScreenState = CardTemple.Tech;
+            SaveManager.SaveToFile();
         }
 
-        [HarmonyPatch(typeof(MenuController), "LoadGameFromMenu")]
-        [HarmonyPrefix]
-        public static bool LoadGameFromMenu(bool newGameGBC)
+        [HarmonyPatch(typeof(AscensionChallengeScreen), nameof(AscensionChallengeScreen.OnEnable))]
+        [HarmonyPostfix]
+        private static void LogScreenInfo() => P03Plugin.Log.LogInfo($"Challenge screen. State {ScreenState}. Challenge level (P03) {P03AscensionSaveData.P03Data.challengeLevel} (Standard) {AscensionSaveData.Data.challengeLevel}");
+
+        [HarmonyPatch(typeof(AscensionStartScreen), nameof(AscensionStartScreen.ManagedUpdate))]
+        [HarmonyPostfix]
+        private static void UnlockEverything()
         {
-            if (!newGameGBC && SaveFile.IsAscension && P03AscensionSaveData.IsP03Run)
+            if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                && Input.GetKey(KeyCode.P)
+                && (Input.GetKey(KeyCode.Alpha0) || Input.GetKey(KeyCode.RightParen) || Input.GetKey(KeyCode.Keypad0))
+                && (Input.GetKey(KeyCode.Alpha3) || Input.GetKey(KeyCode.Hash) || Input.GetKey(KeyCode.Keypad3)))
+            {
+                P03Plugin.Log.LogInfo("Maxing out P03 Challenge Level");
+                P03AscensionSaveData.P03Data.challengeLevel = 13;
+            }
+            if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKey(KeyCode.P) && Input.GetKey(KeyCode.O) && Input.GetKey(KeyCode.E))
+            {
+                P03Plugin.Log.LogInfo("Maxing out P03 Challenge Level");
+                P03AscensionSaveData.P03Data.challengeLevel = 13;
+            }
+            if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKey(KeyCode.P) && Input.GetKey(KeyCode.R) && Input.GetKey(KeyCode.E))
+            {
+                P03Plugin.Log.LogInfo("Resetting P03 Challenge Level");
+                P03AscensionSaveData.P03Data.challengeLevel = 1;
+            }
+        }
+
+        [HarmonyPatch(typeof(MenuController), nameof(MenuController.LoadGameFromMenu))]
+        [HarmonyPrefix]
+        private static bool LoadGameFromMenu(bool newGameGBC)
+        {
+            if (!newGameGBC && P03AscensionSaveData.IsP03Run)
             {
 
                 SaveManager.LoadFromFile();
@@ -102,29 +176,35 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 ScreenState = CardTemple.Nature;
 
             RunBasedHoloMap.ClearWorldData();
+            SaveManager.SaveToFile();
         }
 
-        [HarmonyPatch(typeof(AscensionMenuScreens), "SwitchToScreen")]
+        [HarmonyPatch(typeof(AscensionStartScreen), nameof(AscensionStartScreen.OnEnable))]
         [HarmonyPrefix]
-        public static void ClearP03SaveOnNewRun(AscensionMenuScreens.Screen screen)
+        [HarmonyPriority(Priority.VeryHigh)]
+        private static void ClearP03SaveOnNewRun() => ClearP03Data();
+
+        [HarmonyPatch(typeof(AscensionMenuScreens), nameof(AscensionMenuScreens.Start))]
+        [HarmonyPrefix]
+        private static void ClearScreenStatePrefix() => ClearP03Data();
+
+        [HarmonyPatch(typeof(AscensionStartScreen), nameof(AscensionStartScreen.UpdateContinueTextEnabled))]
+        [HarmonyPostfix]
+        private static void P03ContinueButtons(AscensionStartScreen __instance)
         {
-            if (screen == AscensionMenuScreens.Screen.Start) // At the main screen, you can't be in any style of run. Not yet.
-            {
-                ClearP03Data();
-            }
+            Transform continueButton = __instance.transform.Find("Center/MenuItems/Menu_Continue_P03/Menu_Continue");
+            Transform disabledButton = __instance.transform.Find("Center/MenuItems/Menu_Continue_P03/Menu_Continue_DISABLED");
+            P03Plugin.Log.LogInfo($"Continue {continueButton}, disabled {disabledButton}, P03 Save {P03AscensionSaveData.P03Data}, Run exists {P03AscensionSaveData.P03RunExists}");
+            continueButton?.gameObject.SetActive(P03AscensionSaveData.P03RunExists);
+            disabledButton?.gameObject.SetActive(!P03AscensionSaveData.P03RunExists);
         }
-
-        [HarmonyPatch(typeof(AscensionMenuScreens), "Start")]
-        [HarmonyPrefix]
-        public static void ClearScreenStatePrefix() => ClearP03Data();
 
         private static readonly string[] menuItems = new string[] { "Menu_New", "Continue", "Menu_Stats", "Menu_Unlocks", "Menu_Exit", "Menu_QuitApp" };
-        [HarmonyPatch(typeof(AscensionMenuScreens), "Start")]
+        [HarmonyPatch(typeof(AscensionMenuScreens), nameof(AscensionMenuScreens.Start))]
         [HarmonyPostfix]
-        public static void AddP03StartOption()
+        private static void AddP03StartOption()
         {
-            Traverse menuScreens = Traverse.Create(AscensionMenuScreens.Instance);
-            GameObject startScreen = menuScreens.Field("startScreen").GetValue<GameObject>();
+            GameObject startScreen = AscensionMenuScreens.Instance.startScreen.gameObject;
 
             GameObject newButton = startScreen.transform.Find($"Center/MenuItems/{menuItems[0]}").gameObject;
             newButton.GetComponentInChildren<PixelText>().SetText("- NEW LESHY RUN -");
@@ -152,14 +232,44 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             };
             newP03Button.GetComponentInChildren<PixelText>().SetText("- NEW P03 RUN -");
 
+            // Setup continue button
+            GameObject continueButton = startScreen.transform.Find($"Center/MenuItems/{menuItems[1]}").gameObject;
+            continueButton.GetComponentInChildren<PixelText>().SetText("- CONTINUE LESHY RUN -");
+            AscensionMenuInteractable continueButtonController = continueButton.transform.Find("Menu_Continue").GetComponentInChildren<AscensionMenuInteractable>();
+
+            Vector3 continueP03RunPos = startScreen.transform.Find($"Center/MenuItems/{menuItems[2]}").localPosition;
+            ygap = continueP03RunPos.y - continueButton.transform.localPosition.y;
+
+            // Make room for the continue menu option
+            for (int i = 2; i < menuItems.Length; i++)
+            {
+                Transform item = startScreen.transform.Find($"Center/MenuItems/{menuItems[i]}");
+                item.localPosition = new Vector3(item.localPosition.x, item.localPosition.y + ygap, item.localPosition.z);
+            }
+
+            // Clone the continue button
+            GameObject continueP03Button = UnityEngine.Object.Instantiate(continueButton, continueButton.transform.parent);
+            continueP03Button.transform.localPosition = continueP03RunPos;
+            continueP03Button.name = "Menu_Continue_P03";
+            AscensionMenuInteractable continueP03ButtonController = continueP03Button.transform.Find("Menu_Continue").GetComponent<AscensionMenuInteractable>();
+            continueP03ButtonController.CursorSelectStarted = delegate (MainInputInteractable i)
+            {
+                ScreenState = CardTemple.Tech;
+                continueButtonController.CursorSelectStart();
+            };
+
+            continueP03Button.transform.Find("Menu_Continue").GetComponentInChildren<PixelText>().SetText("- CONTINUE P03 RUN -");
+            continueP03Button.transform.Find("Menu_Continue_DISABLED").GetComponentInChildren<PixelText>().SetText("- CONTINUE P03 RUN -");
+
             // Add to transition
             AscensionMenuScreenTransition transitionController = startScreen.GetComponent<AscensionMenuScreenTransition>();
-            Traverse transitionTraverse = Traverse.Create(transitionController);
-            List<GameObject> onEnableRevealedObjects = transitionTraverse.Field("onEnableRevealedObjects").GetValue<List<GameObject>>();
-            List<MainInputInteractable> screenInteractables = transitionTraverse.Field("screenInteractables").GetValue<List<MainInputInteractable>>();
 
-            onEnableRevealedObjects.Insert(onEnableRevealedObjects.IndexOf(newButton) + 1, newP03Button);
-            screenInteractables.Insert(screenInteractables.IndexOf(newButtonController) + 1, newP03ButtonController);
+            transitionController.onEnableRevealedObjects.Insert(transitionController.onEnableRevealedObjects.IndexOf(newButton) + 1, newP03Button);
+            transitionController.onEnableRevealedObjects.Insert(transitionController.onEnableRevealedObjects.IndexOf(continueButton) + 1, continueP03Button);
+            transitionController.screenInteractables.Insert(transitionController.screenInteractables.IndexOf(newButtonController) + 1, newP03ButtonController);
+            transitionController.screenInteractables.Insert(transitionController.screenInteractables.IndexOf(continueButtonController) + 1, continueP03ButtonController);
+
+            AscensionMenuScreens.Instance.startScreen.GetComponent<AscensionStartScreen>().UpdateContinueTextEnabled();
         }
     }
 }

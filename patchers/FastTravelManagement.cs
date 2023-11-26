@@ -11,13 +11,84 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     [HarmonyPatch]
     public static class FastTravelManagement
     {
+        private static readonly Gradient ActiveLine;
+        private static readonly Gradient InactiveLine;
+
+        static FastTravelManagement()
+        {
+            ActiveLine = new Gradient();
+            ActiveLine.SetKeys(new GradientColorKey[] {
+                new (GameColors.Instance.blue, 0f),
+                new (GameColors.Instance.brightBlue, 0.5f),
+                new (GameColors.Instance.blue, 1f),
+            },
+            new GradientAlphaKey[] {
+                new (0f, 0f),
+                new (1f, 0.5f),
+                new (0f, 1f),
+            });
+
+            InactiveLine = new Gradient();
+            InactiveLine.SetKeys(new GradientColorKey[] {
+                new (GameColors.Instance.darkBlue, 0f),
+                new (GameColors.Instance.blue, 0.5f),
+                new (GameColors.Instance.darkBlue, 1f),
+            },
+            new GradientAlphaKey[] {
+                new (0f, 0f),
+                new (1f, 0.5f),
+                new (0f, 1f),
+            });
+        }
+
         [HarmonyPatch(typeof(HoloMapWaypointNode), "OnEnable")]
         [HarmonyPostfix]
-        public static void AlwaysDisableHintUI(ref HoloMapWaypointNode __instance)
+        private static void AlwaysDisableHintUI(ref HoloMapWaypointNode __instance)
         {
             if (SaveFile.IsAscension)
-                Traverse.Create(__instance).Field("fastTravelHint").GetValue<GameObject>().SetActive(false);
+                __instance.fastTravelHint.gameObject.SetActive(false);
         }
+
+        private static List<RunBasedHoloMap.Zone> ForcedOrderZones
+        {
+            get
+            {
+                string forcedZoneKey = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "ForcedOrderZones");
+                if (string.IsNullOrEmpty(forcedZoneKey))
+                {
+                    List<RunBasedHoloMap.Zone> newZones = new() { RunBasedHoloMap.Zone.Magic, RunBasedHoloMap.Zone.Nature, RunBasedHoloMap.Zone.Tech, RunBasedHoloMap.Zone.Undead };
+                    int randomSeed = P03AscensionSaveData.RandomSeed;
+                    newZones = newZones.OrderBy(z => SeededRandom.Value(randomSeed++)).ToList();
+                    forcedZoneKey = String.Join(",", newZones.Select(z => z.ToString()));
+                    P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "ForcedOrderZones", forcedZoneKey);
+                    return newZones;
+                }
+                return forcedZoneKey.Split(',').Select(k => (RunBasedHoloMap.Zone)Enum.Parse(typeof(RunBasedHoloMap.Zone), k)).ToList();
+            }
+        }
+
+        private static readonly List<string> AlwaysOffObjects = new()
+        {
+            "LineEnd_StartArea",
+            "LineEnd_WizardTemple",
+            "LineEnd_UndeadTemple"
+        };
+
+        private static readonly List<string> SpecialBridgeNodes = new()
+        {
+            "FastTravelMapNode_EastPath",
+            "FastTravelMapNode_WestPath"
+        };
+
+        private static readonly Dictionary<string, List<RunBasedHoloMap.Zone>> LinesIndicators = new()
+        {
+            { "Line", new() { RunBasedHoloMap.Zone.Nature, RunBasedHoloMap.Zone.Undead }},
+            { "Line (1)", new() { RunBasedHoloMap.Zone.Nature }},
+            { "Line (3)", new() { RunBasedHoloMap.Zone.Undead }},
+            { "Line (5)", new() { RunBasedHoloMap.Zone.Tech, RunBasedHoloMap.Zone.Magic }},
+            { "Line (7)", new() { RunBasedHoloMap.Zone.Tech }},
+            { "Line (8)", new() { RunBasedHoloMap.Zone.Magic }},
+        };
 
         private static readonly Dictionary<string, RunBasedHoloMap.Zone> fastTravelNodes = new()
         {
@@ -45,11 +116,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 EventManagement.AddVisitedZone(__instance.gameObject.name);
 
-                Traverse nodeTraverse = Traverse.Create(__instance);
-                P03Plugin.Log.LogInfo($"SetHoveringEffectsShown");
-                nodeTraverse.Method("SetHoveringEffectsShown", new Type[] { typeof(bool) }).GetValue(false);
-                P03Plugin.Log.LogInfo($"OnSelected");
-                nodeTraverse.Method("OnSelected").GetValue();
+                __instance.SetHoveringEffectsShown(false);
+                __instance.OnSelected();
+
                 HoloGameMap.Instance.ToggleFastTravelActive(false, false);
                 HoloMapAreaManager.Instance.CurrentArea.OnAreaActive();
                 HoloMapAreaManager.Instance.CurrentArea.OnAreaEnabled();
@@ -61,40 +130,114 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 HoloMapAreaManager.Instance.StartCoroutine(HoloMapAreaManager.Instance.DroneFlyToArea(worldPosition, false));
                 Part3SaveData.Data.checkpointPos = worldPosition;
 
-                //EventManagement.NumberOfZoneEnemiesKilled = 0; Separate key per zone - don't need to reset anymore
-
                 return false;
             }
 
             return true;
         }
 
-        [HarmonyPatch(typeof(FastTravelNode), nameof(FastTravelNode.OnFastTravelActive))]
+        private static bool HasCompleted(RunBasedHoloMap.Zone zone) => HasCompleted(fastTravelNodes.First(kvp => kvp.Value == zone).Key);
+
+        private static bool CanVisit(RunBasedHoloMap.Zone zone) => CanVisit(fastTravelNodes.First(kvp => kvp.Value == zone).Key);
+
+        private static bool HasCompleted(string mapKey) => fastTravelNodes.Keys.Contains(mapKey) && EventManagement.CompletedZones.Contains(mapKey) && fastTravelNodes[mapKey] != EventManagement.CurrentZone;
+
+        private static bool CanVisit(string mapKey)
+        {
+            bool canBeActive = fastTravelNodes.Keys.Contains(mapKey);
+
+            if (canBeActive && AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BROKEN_BRIDGE) && fastTravelNodes[mapKey] != RunBasedHoloMap.Zone.Neutral)
+            {
+                if (!ForcedOrderZones.Take(Mathf.Min(4, EventManagement.CompletedZones.Count + 2)).Contains(fastTravelNodes[mapKey]))
+                    canBeActive = false;
+            }
+            return canBeActive;
+        }
+
+        [HarmonyPatch(typeof(HoloFastTravelMap), nameof(HoloFastTravelMap.SetMapActive))]
         [HarmonyPostfix]
-        public static void SetFastTravelNodeActive(ref FastTravelNode __instance)
+        private static void EnsureNodesDisabled(HoloFastTravelMap __instance)
+        {
+            if (SaveFile.IsAscension)
+                __instance.nodes.ForEach(f => f.OnFastTravelActive());
+        }
+
+        [HarmonyPatch(typeof(FastTravelNode), nameof(FastTravelNode.IsCurrentWorld), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool CalculateDifference(FastTravelNode __instance, ref bool __result)
         {
             if (SaveFile.IsAscension)
             {
-                __instance.gameObject.SetActive(
-                    fastTravelNodes.Keys.Contains(__instance.gameObject.name) &&
-                    (
-                        !EventManagement.CompletedZones.Contains(__instance.gameObject.name) ||
-                        fastTravelNodes[__instance.gameObject.name] == EventManagement.CurrentZone
-                    )
-                );
+                __result = fastTravelNodes.Keys.Contains(__instance.gameObject.name) && fastTravelNodes[__instance.gameObject.name] == EventManagement.CurrentZone;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(FastTravelNode), nameof(FastTravelNode.OnFastTravelActive))]
+        [HarmonyPostfix]
+        private static void SetFastTravelNodeActive(FastTravelNode __instance)
+        {
+            if (SaveFile.IsAscension)
+            {
+                if (SpecialBridgeNodes.Contains(__instance.gameObject.name))
+                {
+                    __instance.gameObject.SetActive(true);
+                    __instance.transform.Find("Anim").gameObject.transform.localScale = new(0f, 0f, 0f);
+                    __instance.GetComponentInChildren<BoxCollider>().enabled = false;
+                    return;
+                }
+
+                if (!fastTravelNodes.Keys.Contains(__instance.gameObject.name))
+                {
+                    __instance.gameObject.SetActive(false);
+                    return;
+                }
+
+                if (HasCompleted(__instance.gameObject.name))
+                {
+                    __instance.gameObject.SetActive(false);
+                    return;
+                }
+
+                __instance.gameObject.SetActive(true);
+                __instance.GetComponentInChildren<BoxCollider>().enabled = CanVisit(__instance.gameObject.name);
+
+                Color c = CanVisit(__instance.gameObject.name) ? GameColors.Instance.blue : GameColors.Instance.red;
+                Renderer render = __instance.transform.Find("Anim").GetComponentInChildren<Renderer>();
+                render.material.SetColor("_MainColor", c);
+                render.material.SetColor("_RimColor", c);
             }
         }
 
         [HarmonyPatch(typeof(HoloMapWaypointNode), nameof(HoloMapWaypointNode.OnCursorSelectEnd))]
         [HarmonyPrefix]
-        public static void SetFastTravelNodesVisible()
+        private static void SetFastTravelNodesVisible()
         {
             if (SaveFile.IsAscension)
             {
-                foreach (Transform trans in HoloGameMap.Instance.fastTravelMap.gameObject.transform)
+                Transform parent = HoloGameMap.Instance.fastTravelMap.gameObject.transform;
+
+                // Always turn these off
+                foreach (string key in AlwaysOffObjects)
+                    parent.Find(key).gameObject.SetActive(false);
+
+
+                // Modify these based on visibility
+                Transform lineParent = parent.Find("Lines");
+                foreach (Transform line in lineParent)
                 {
-                    bool active = trans.gameObject.name == "WireframeGeo" || (fastTravelNodes.Keys.Contains(trans.gameObject.name) && !EventManagement.CompletedZones.Contains(trans.gameObject.name));
-                    trans.gameObject.SetActive(active);
+                    if (!LinesIndicators.ContainsKey(line.gameObject.name))
+                    {
+                        line.gameObject.SetActive(false);
+                        continue;
+                    }
+
+                    bool hasVisited = LinesIndicators[line.gameObject.name].All(z => HasCompleted(z));
+                    bool canVisit = LinesIndicators[line.gameObject.name].Any(z => CanVisit(z));
+
+                    line.gameObject.SetActive(canVisit);
+                    line.GetComponentInChildren<HoloLineSegment>().line.colorGradient = hasVisited ? InactiveLine : ActiveLine;
                 }
             }
         }
@@ -102,17 +245,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static bool isDroneFlying = false;
 
         [HarmonyPatch(typeof(HoloMapAreaManager), "DroneFlyToArea")]
-        public static class ManageDroneFlying
+        private static class ManageDroneFlying
         {
             [HarmonyPrefix]
-            public static void SetDroneFlying()
+            private static void SetDroneFlying()
             {
                 P03Plugin.Log.LogInfo("Drone flying = true");
                 isDroneFlying = true;
             }
 
             [HarmonyPostfix]
-            public static IEnumerator SetDroneNotFlying(IEnumerator sequence)
+            private static IEnumerator SetDroneNotFlying(IEnumerator sequence)
             {
                 P03Plugin.Log.LogInfo("Drone flying = false");
                 yield return sequence;
@@ -122,7 +265,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(HoloGameMap), nameof(HoloGameMap.UpdateColors))]
         [HarmonyPrefix]
-        public static bool ManuallySetMapColorsIfDroneFlying(ref HoloGameMap __instance)
+        private static bool ManuallySetMapColorsIfDroneFlying(ref HoloGameMap __instance)
         {
             if (SaveFile.IsAscension && isDroneFlying)
             {
@@ -162,18 +305,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             yield return ReturnToLocation(worldPosition);
         }
-
-        // [HarmonyPatch(typeof(HoloGameMap), "ToggleFastTravelActive")]
-        // [HarmonyPrefix]
-        // public static void LogThisStupidError(ref HoloGameMap __instance)
-        // {
-        //     Traverse mapTraverse = Traverse.Create(__instance);
-        //     P03Plugin.Log.LogInfo($"Fast travel map {mapTraverse.Field("fastTravelMap").GetValue<HoloFastTravelMap>()}");
-        //     P03Plugin.Log.LogInfo($"Current area {HoloMapAreaManager.Instance.CurrentArea}");
-        //     P03Plugin.Log.LogInfo($"Current area gameobject {HoloMapAreaManager.Instance.CurrentArea.gameObject}");
-        //     P03Plugin.Log.LogInfo($"Current area marker {HoloMapPlayerMarker.Instance}");
-        //     P03Plugin.Log.LogInfo($"Current area marker gameobject {HoloMapPlayerMarker.Instance.gameObject}");
-        // }
 
         [HarmonyPatch(typeof(MoveHoloMapAreaNode), nameof(MoveHoloMapAreaNode.WillResetBots), MethodType.Getter)]
         [HarmonyPrefix]

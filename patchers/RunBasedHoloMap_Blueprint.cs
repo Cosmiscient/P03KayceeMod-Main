@@ -6,7 +6,6 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.BattleMods;
 using Infiniscryption.P03KayceeRun.Quests;
 using Infiniscryption.P03KayceeRun.Sequences;
-using InscryptionAPI.Saves;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
@@ -22,9 +21,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return CardTemple.Wizard;
             if (zone == Zone.Nature)
                 return CardTemple.Nature;
-            if (zone == Zone.Undead)
-                return CardTemple.Undead;
-            return CardTemple.Tech;
+            return zone == Zone.Undead ? CardTemple.Undead : CardTemple.Tech;
         }
 
         private static IEnumerable<HoloMapBlueprint> AdjacentToQuadrant(this HoloMapBlueprint[,] map, int x, int y)
@@ -889,12 +886,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             int totalDiffulty = 0;
             List<BattleModManager.BattleModDefinition> retval = new();
-            var remaining = new List<BattleModManager.BattleModDefinition>(mods.OrderBy(d => SeededRandom.Value(randomSeed++)));
+            List<BattleModManager.BattleModDefinition> remaining = new List<BattleModManager.BattleModDefinition>(mods.OrderBy(d => SeededRandom.Value(randomSeed++)));
 
             // The first two mods are purely randomly selected
             while (retval.Count < 2 && totalDiffulty < difficulty)
             {
-                var next = remaining.FirstOrDefault(d => d.Difficulty <= (difficulty - totalDiffulty));
+                BattleModManager.BattleModDefinition next = remaining.FirstOrDefault(d => d.Difficulty <= (difficulty - totalDiffulty));
 
                 if (next == null)
                     break;
@@ -919,7 +916,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // So if you have one "extra difficulty" on, and this is map 2, the total difficulty is 3
             int difficultyKey = order + 1 + AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.BaseDifficulty);
 
-            var validMods = BattleModManager.AllBattleMods.Where(d => d.Regions == null || d.Regions.Contains(region.ToTemple())).ToList();
+            List<BattleModManager.BattleModDefinition> validMods = BattleModManager.AllBattleMods.Where(d => d.Regions == null || d.Regions.Contains(region.ToTemple())).ToList();
             int randomSeed = seed + 10;
 
             // Only one battle gets modded per map by default
@@ -937,7 +934,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (difficultyKey > 3)
                 numberOfModdedBattles += difficultyKey - 2;
             numberOfModdedBattles = numberOfModdedBattles > 4 ? 4 : numberOfModdedBattles;
-            var targets = rooms.Where(bp => bp.IsBattleRoom && (order > 0 || bp.color != 1)).OrderBy(x => SeededRandom.Value(randomSeed++)).Take(numberOfModdedBattles).ToList();
+            List<HoloMapBlueprint> targets = rooms.Where(bp => bp.IsBattleRoom && (order > 0 || bp.color != 1)).OrderBy(x => SeededRandom.Value(randomSeed++)).Take(numberOfModdedBattles).ToList();
 
             // And now we move the difficulty key down by 1 if it's above 3
             // Basically, at the difficult 4 step, the difficulty increases by the count
@@ -945,14 +942,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (difficultyKey > 3)
                 difficultyKey -= 1;
 
-            foreach (var bp in targets)
+            foreach (HoloMapBlueprint bp in targets)
                 bp.battleMods.AddRange(SelectMods(validMods, difficultyKey, randomSeed++).Select(d => d.ID));
         }
 
         private static List<HoloMapBlueprint> BuildBlueprint(int order, Zone region, int seed, int stackDepth = 0)
         {
             string blueprintKey = $"ascensionBlueprint{order}{region}";
-            string savedBlueprint = ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, blueprintKey);
+            string savedBlueprint = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, blueprintKey);
 
             if (savedBlueprint != default)
                 return savedBlueprint.Split('|').Select(s => new HoloMapBlueprint(s)).ToList();
@@ -1102,7 +1099,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             savedBlueprint = string.Join("|", retval.Select(b => b.ToString()));
-            ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, blueprintKey, savedBlueprint);
+            P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, blueprintKey, savedBlueprint);
             if (order >= 1)
                 EventManagement.SawMapInfo = true;
             SaveManager.SaveToFile();

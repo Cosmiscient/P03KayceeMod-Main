@@ -112,6 +112,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 public GameObject Target { get; set; }
                 public bool PlayerUpkeep { get; set; }
                 public int QueuedTurnNumber { get; set; }
+
+                public bool ReadyForStrike(bool playerUpkeep) => PlayerUpkeep == playerUpkeep && QueuedTurnNumber < TurnManager.Instance.TurnNumber;
+
             }
 
             protected List<StrikeInfo> PendingAttacks = new();
@@ -166,7 +169,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 PendingAttacks.Add(new() { Attacker = attacker, AttackValue = value, Slot = target, Target = aimIcon, PlayerUpkeep = TurnManager.Instance.IsPlayerTurn, QueuedTurnNumber = TurnManager.Instance.TurnNumber });
             }
 
-            public override bool RespondsToUpkeep(bool playerUpkeep) => PendingAttacks.Any(t => t.Slot.IsPlayerSlot != playerUpkeep);
+            public override bool RespondsToUpkeep(bool playerUpkeep) => PendingAttacks.Any(t => t.ReadyForStrike(playerUpkeep));
 
             private static IEnumerator OverkillSimulator(int damage, PlayableCard attacker, CardSlot opposingSlot)
             {
@@ -191,10 +194,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             public override IEnumerator OnUpkeep(bool playerUpkeep)
             {
-                List<StrikeInfo> strikeQueue = PendingAttacks.Where(t => t.PlayerUpkeep == playerUpkeep && t.QueuedTurnNumber < TurnManager.Instance.TurnNumber).ToList();
+                List<StrikeInfo> strikeQueue = PendingAttacks.Where(t => t.ReadyForStrike(playerUpkeep)).ToList();
                 while (strikeQueue.Count > 0)
                 {
                     StrikeInfo atkDefn = strikeQueue[0];
+
+                    ViewManager.Instance.SwitchToView(View.Default);
+                    yield return new WaitForSeconds(0.25f);
 
                     bool setCardSlot = false;
                     if (atkDefn.Attacker != null && atkDefn.Attacker.Dead)
