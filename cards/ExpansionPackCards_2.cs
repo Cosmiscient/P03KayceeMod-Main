@@ -452,7 +452,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Sparkplug Cell
             CardManager.New(EXP_2_PREFIX, "SparkplugCell", "Sparkplug Cell", 0, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_short_circuit_cell.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 4)
+                .SetCost(energyCost: 3)
                 .SetRegionalP03Card(CardTemple.Tech)
                 .SetRare()
                 .AddAbilities(CellDrawZapUpkeep.AbilityID);

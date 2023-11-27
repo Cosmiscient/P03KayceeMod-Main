@@ -73,7 +73,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             CardSlot opponentSlot = BoardManager.Instance.OpponentSlotsCopy[SeededRandom.Range(0, BoardManager.Instance.OpponentSlotsCopy.Count, randomSeed++)];
 
             // Choose player slot by score
-            List<CardSlot> scores = BoardManager.Instance.PlayerSlotsCopy.OrderBy(s => SeededRandom.Value(randomSeed++)).OrderBy(s => -ScorePlayerSlot(s)).ToList();
+            List<CardSlot> scores = BoardManager.Instance.PlayerSlotsCopy.OrderBy(s => SeededRandom.Value(randomSeed++) * 100f).OrderBy(s => -ScorePlayerSlot(s)).ToList();
             CardSlot playerSlot = scores[0];
 
             Transform parent = missileLauncher.transform.Find("LaunchParent");

@@ -58,7 +58,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 {
                     List<RunBasedHoloMap.Zone> newZones = new() { RunBasedHoloMap.Zone.Magic, RunBasedHoloMap.Zone.Nature, RunBasedHoloMap.Zone.Tech, RunBasedHoloMap.Zone.Undead };
                     int randomSeed = P03AscensionSaveData.RandomSeed;
-                    newZones = newZones.OrderBy(z => SeededRandom.Value(randomSeed++)).ToList();
+                    newZones = newZones.OrderBy(z => SeededRandom.Value(randomSeed++) * 100f).ToList();
                     forcedZoneKey = String.Join(",", newZones.Select(z => z.ToString()));
                     P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "ForcedOrderZones", forcedZoneKey);
                     return newZones;

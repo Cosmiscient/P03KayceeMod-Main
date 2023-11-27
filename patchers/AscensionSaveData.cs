@@ -19,7 +19,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         internal const string ASCENSION_SAVE_KEY = "CopyOfPart3AscensionSave";
         internal const string REGULAR_SAVE_KEY = "CopyOfPart3Save";
 
-        private static readonly string SaveFilePath = Path.Combine(BepInEx.Paths.GameRootPath, "P03SaveFile.gwsave");
+        private static readonly string SaveFilePath = Path.Combine(BepInEx.Paths.GameRootPath, "P03SaveFileActive.gwsave");
 
         internal static AscensionSaveData P03Data { get; private set; }
 
@@ -49,7 +49,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (IsP03Run)
             {
-                RunStateData ??= new();
+                if (RunStateData == null)
+                {
+                    if (File.Exists(SaveFilePath))
+                    {
+                        string json = File.ReadAllText(SaveFilePath);
+                        Dictionary<string, Dictionary<string, object>> internalData = SaveManager.FromJSON<Dictionary<string, Dictionary<string, object>>>(json);
+                        RunStateData = internalData != null ? CreateFromInternalData(new(), internalData) : new();
+                    }
+                    else
+                    {
+                        RunStateData ??= new();
+                    }
+                }
                 __result = RunStateData;
                 return false;
             }
@@ -201,12 +213,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 // And we'll go ahead and save the current runstate to the custom save file
                 RunStateData ??= new();
-                string moddedSaveData = SaveManager.ToJSON(RunStateData);
+                string moddedSaveData = SaveManager.ToJSON(GetInternalData(RunStateData));
                 File.WriteAllText(SaveFilePath, moddedSaveData);
             }
         }
 
-        private static ModdedSaveData OldRunState { get; set; }
+        // private static ModdedSaveData OldRunState { get; set; }
 
         [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.NewRun))]
         [HarmonyPrefix]
@@ -215,28 +227,22 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (IsP03Run)
             {
-                OldRunState = ModdedSaveManager.RunState; ;
                 RunStateData = new();
             }
         }
 
-        [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.NewRun))]
-        [HarmonyPrefix]
-        [HarmonyAfter(new string[] { "cyantist.inscryption.api" })]
-        private static void ResetOldRunStateIfP03Run()
-        {
-            if (IsP03Run && OldRunState != null)
-            {
-                Traverse trav = Traverse.Create(OldRunState);
-                Dictionary<string, Dictionary<string, object>> saveData = trav.Field("SaveData").GetValue<Dictionary<string, Dictionary<string, object>>>();
-                foreach (string guid in saveData.Keys)
-                {
-                    foreach (string key in saveData[guid].Keys)
-                        RunStateData.SetValue(guid, key, saveData[guid][key]);
-                }
-            }
-            OldRunState = null;
-        }
+        // [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.NewRun))]
+        // [HarmonyPrefix]
+        // [HarmonyAfter(new string[] { "cyantist.inscryption.api" })]
+        // private static void ResetOldRunStateIfP03Run()
+        // {
+        //     if (IsP03Run && OldRunState != null)
+        //     {
+        //         Dictionary<string, Dictionary<string, object>> internalData = GetInternalData(OldRunState);
+        //         CreateFromInternalData(ModdedSaveManager.RunState, internalData);
+        //     }
+        //     OldRunState = null;
+        // }
 
         [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.TestSaveFileCorrupted))]
         [HarmonyPrefix]
@@ -247,6 +253,22 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 file.part3Data = new Part3SaveData();
                 file.part3Data.Initialize();
             }
+        }
+
+        private static Dictionary<string, Dictionary<string, object>> GetInternalData(ModdedSaveData moddedSaveData)
+        {
+            Traverse trav = Traverse.Create(moddedSaveData);
+            return trav.Field("SaveData").GetValue<Dictionary<string, Dictionary<string, object>>>();
+        }
+
+        private static ModdedSaveData CreateFromInternalData(ModdedSaveData data, Dictionary<string, Dictionary<string, object>> internalData)
+        {
+            foreach (string guid in internalData.Keys)
+            {
+                foreach (string key in internalData[guid].Keys)
+                    data.SetValue(guid, key, internalData[guid][key]);
+            }
+            return data;
         }
 
         [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LoadFromFile))]
@@ -281,11 +303,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (File.Exists(SaveFilePath))
             {
                 string json = File.ReadAllText(SaveFilePath);
-                RunStateData = SaveManager.FromJSON<ModdedSaveData>(json) ?? new();
+                Dictionary<string, Dictionary<string, object>> internalData = SaveManager.FromJSON<Dictionary<string, Dictionary<string, object>>>(json);
+                RunStateData = internalData != null ? CreateFromInternalData(new(), internalData) : new();
             }
             else
             {
-                RunStateData = new();
+                RunStateData ??= new();
             }
         }
 
@@ -412,7 +435,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 List<CardInfo> starterDeckCards = deckInfo.cards.Select(i => CardLoader.GetCardByName(i.name)).ToList();
 
                 foreach (CardInfo info in starterDeckCards)
-                    //__instance.deck.AddCard(CustomCards.ModifyCardForAscension(info));
                     __instance.deck.AddCard(info);
 
                 if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.WeakStarterDeck))
@@ -425,13 +447,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
 
                 __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.DRAFT_TOKEN));
-                //__instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.DRAFT_TOKEN));
-
-                // __instance.deck.AddCard(CardLoader.GetCardByName(ExpansionPackCards_1.EXP_1_PREFIX + "_GemRotator"));
-
-                // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.UNC_TOKEN));
-                // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.UNC_TOKEN));
-                // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.UNC_TOKEN));
 
                 if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("rarestarter"))
                     __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));
@@ -441,9 +456,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     __instance.deck.AddCard(CardLoader.GetCardByName(ExpansionPackCards_2.RINGWORM_CARD));
                     __instance.currency = 25;
                 }
-
-                // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));
-                // __instance.deck.AddCard(CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN));
 
                 __instance.sideDeckAbilities.Add(Ability.ConduitNull);
 

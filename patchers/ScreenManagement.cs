@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using BepInEx.Bootstrap;
 using DiskCardGame;
 using GBC;
@@ -15,6 +16,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     {
         private const string GRIMORA_MOD = "arackulele.inscryption.grimoramod";
         private const string MAGNIFICUS_MOD = "silenceman.inscryption.magnificusmod";
+
+        private static float Y_GAP => 0.11f;
 
         internal static Dictionary<string, string> AcceptedScreenStates = new()
         {
@@ -200,24 +203,26 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         }
 
         private static readonly string[] menuItems = new string[] { "Menu_New", "Continue", "Menu_Stats", "Menu_Unlocks", "Menu_Exit", "Menu_QuitApp" };
-        [HarmonyPatch(typeof(AscensionMenuScreens), nameof(AscensionMenuScreens.Start))]
+        [HarmonyPatch(typeof(AscensionStartScreen), nameof(AscensionStartScreen.Start))]
         [HarmonyPostfix]
-        private static void AddP03StartOption()
+        private static void AddP03StartOption(AscensionStartScreen __instance)
         {
-            GameObject startScreen = AscensionMenuScreens.Instance.startScreen.gameObject;
+            if (__instance.transform.Find("Center/MenuItems/Menu_Continue_P03") != null)
+                return;
+
+            GameObject startScreen = __instance.gameObject;
 
             GameObject newButton = startScreen.transform.Find($"Center/MenuItems/{menuItems[0]}").gameObject;
             newButton.GetComponentInChildren<PixelText>().SetText("- NEW LESHY RUN -");
             AscensionMenuInteractable newButtonController = newButton.GetComponent<AscensionMenuInteractable>();
 
             Vector3 newP03RunPos = startScreen.transform.Find($"Center/MenuItems/{menuItems[1]}").localPosition;
-            float ygap = newP03RunPos.y - newButton.transform.localPosition.y;
 
             // Make room for the new menu option
             for (int i = 1; i < menuItems.Length; i++)
             {
                 Transform item = startScreen.transform.Find($"Center/MenuItems/{menuItems[i]}");
-                item.localPosition = new Vector3(item.localPosition.x, item.localPosition.y + ygap, item.localPosition.z);
+                item.localPosition = new Vector3(item.localPosition.x, item.localPosition.y - Y_GAP, item.localPosition.z);
             }
 
             // Clone the new button
@@ -238,13 +243,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             AscensionMenuInteractable continueButtonController = continueButton.transform.Find("Menu_Continue").GetComponentInChildren<AscensionMenuInteractable>();
 
             Vector3 continueP03RunPos = startScreen.transform.Find($"Center/MenuItems/{menuItems[2]}").localPosition;
-            ygap = continueP03RunPos.y - continueButton.transform.localPosition.y;
 
             // Make room for the continue menu option
             for (int i = 2; i < menuItems.Length; i++)
             {
                 Transform item = startScreen.transform.Find($"Center/MenuItems/{menuItems[i]}");
-                item.localPosition = new Vector3(item.localPosition.x, item.localPosition.y + ygap, item.localPosition.z);
+                item.localPosition = new Vector3(item.localPosition.x, item.localPosition.y - Y_GAP, item.localPosition.z);
             }
 
             // Clone the continue button
@@ -269,7 +273,91 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             transitionController.screenInteractables.Insert(transitionController.screenInteractables.IndexOf(newButtonController) + 1, newP03ButtonController);
             transitionController.screenInteractables.Insert(transitionController.screenInteractables.IndexOf(continueButtonController) + 1, continueP03ButtonController);
 
-            AscensionMenuScreens.Instance.startScreen.GetComponent<AscensionStartScreen>().UpdateContinueTextEnabled();
+            __instance.UpdateContinueTextEnabled();
+        }
+
+        private static readonly Dictionary<string, int> SORT_KEYS = new() {
+            {"new", 10 }, {"continue", 20 }, {"stats", 30 },
+            {"unlocks", 40 }, {"exit", 50 }, {"quit", 60 }
+        };
+        private static readonly Dictionary<string, int> SCRYBE_SORT_KEYS = new() {
+            {"p02", 2 }, {"grim", 4 }, {"mag", 6 }
+        };
+        private static int MenuItemSortKey(string itemName)
+        {
+            string itemKey = itemName.ToLowerInvariant();
+            int sortValue = 1000;
+            foreach (KeyValuePair<string, int> kvp in SORT_KEYS)
+            {
+                if (itemKey.Contains(kvp.Key))
+                {
+                    sortValue = kvp.Value;
+                    break;
+                }
+            }
+            foreach (KeyValuePair<string, int> kvp in SCRYBE_SORT_KEYS)
+            {
+                if (itemKey.Contains(kvp.Key))
+                {
+                    sortValue += kvp.Value;
+                    break;
+                }
+            }
+            return sortValue;
+        }
+
+        [HarmonyPatch(typeof(AscensionStartScreen), nameof(AscensionStartScreen.UpdateContinueTextEnabled))]
+        [HarmonyPostfix]
+        private static void RemoveDisabledContinueButtons(AscensionStartScreen __instance)
+        {
+            Transform itemsParent = __instance.transform.Find("Center/MenuItems");
+            GameObject leshyContinue = itemsParent.Find("Continue").gameObject;
+            GameObject p03Continue = itemsParent.Find("Menu_Continue_P03").gameObject;
+
+            leshyContinue.SetActive(__instance.RunExists);
+            p03Continue.SetActive(P03AscensionSaveData.P03RunExists);
+
+            List<Transform> allItems = new();
+            foreach (Transform child in itemsParent)
+                allItems.Add(child);
+            allItems = allItems.Where(t => t == leshyContinue.transform ? __instance.RunExists : t != p03Continue.transform || P03AscensionSaveData.P03RunExists)
+                               .OrderBy(t => MenuItemSortKey(t.gameObject.name)).ToList();
+
+            for (int i = 0; i < allItems.Count; i++)
+            {
+                allItems[i].localPosition = new(
+                    allItems[i].localPosition.x,
+                    -i * Y_GAP,
+                    allItems[i].localPosition.z
+                );
+            }
+
+            AscensionMenuScreenTransition transitionController = __instance.GetComponent<AscensionMenuScreenTransition>();
+            int firstMenu = 0;
+            for (int i = 0; i < transitionController.onEnableRevealedObjects.Count; i++)
+            {
+                if (transitionController.onEnableRevealedObjects[i].name.Contains("Menu"))
+                {
+                    firstMenu = i;
+                    break;
+                }
+            }
+
+            transitionController.onEnableRevealedObjects = transitionController.onEnableRevealedObjects.Where(o => !o.name.ToLowerInvariant().Contains("menu") && o.name != "Continue").ToList();
+            foreach (Transform item in allItems)
+                transitionController.onEnableRevealedObjects.Insert(firstMenu, item.gameObject);
+        }
+
+        [HarmonyPatch(typeof(AscensionMenuScreenTransition), nameof(AscensionMenuScreenTransition.OnEnable))]
+        [HarmonyPrefix]
+        private static void EnsureSetupBeforeInitialize(AscensionMenuScreenTransition __instance)
+        {
+            AscensionStartScreen startScreen = __instance.GetComponent<AscensionStartScreen>();
+            if (startScreen != null)
+            {
+                AddP03StartOption(startScreen);
+                startScreen.UpdateContinueTextEnabled();
+            }
         }
     }
 }

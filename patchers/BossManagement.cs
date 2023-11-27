@@ -234,17 +234,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 if (!AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TRADITIONAL_LIVES))
                 {
-                    P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Default, true, true);
+                    // P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Default, true, true);
 
-                    P03AnimationController.Face currentFace = P03AnimationController.Instance.CurrentFace;
-                    View currentView = ViewManager.Instance.CurrentView;
+                    // P03AnimationController.Face currentFace = P03AnimationController.Instance.CurrentFace;
+                    // View currentView = ViewManager.Instance.CurrentView;
 
-                    ViewManager.Instance.SwitchToView(View.P03Face, false, true);
-                    yield return new WaitForSeconds(0.05f);
+                    // ViewManager.Instance.SwitchToView(View.P03Face, false, true);
+                    // yield return new WaitForSeconds(0.05f);
 
-                    HoloGameMap.Instance.Jump();
-                    HoloGameMap.Instance.ShowPoweredOn(poweredOn: false);
-                    yield return new WaitForSeconds(0.2f);
+                    // HoloGameMap.Instance.Jump();
+                    // HoloGameMap.Instance.ShowPoweredOn(poweredOn: false);
+                    // yield return new WaitForSeconds(0.2f);
 
                     //Increase respawn cost if the player has already dropped below 0
                     //if (LifeManagement.respawnCost != 0)
@@ -253,37 +253,37 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     //    yield return new WaitForSeconds(0.4f);
                     //}
 
-                    List<string> dialogueOptions = new() {
-                        "Part3AscensionPayBoss",
-                        "Part3AscensionPayBoss2",
-                        "Part3AscensionPayBoss3",
-                        "Part3AscensionPayBoss4",
-                        "Part3AscensionPayBoss5",
-                        "Part3AscensionPayBoss6",
-                        "Part3AscensionPayBoss7",
-                        "Part3AscensionPayBoss8",
-                        "Part3AscensionPayBoss9"
-                    };
+                    // List<string> dialogueOptions = new() {
+                    //     "Part3AscensionPayBoss",
+                    //     "Part3AscensionPayBoss2",
+                    //     "Part3AscensionPayBoss3",
+                    //     "Part3AscensionPayBoss4",
+                    //     "Part3AscensionPayBoss5",
+                    //     "Part3AscensionPayBoss6",
+                    //     "Part3AscensionPayBoss7",
+                    //     "Part3AscensionPayBoss8",
+                    //     "Part3AscensionPayBoss9"
+                    // };
 
-                    string finalDialogue = dialogueOptions[Random.Range(0, dialogueOptions.Count)];
+                    // string finalDialogue = dialogueOptions[Random.Range(0, dialogueOptions.Count)];
 
-                    yield return TextDisplayer.Instance.PlayDialogueEvent(finalDialogue, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
-                    yield return new WaitForSeconds(0.4f);
+                    // yield return TextDisplayer.Instance.PlayDialogueEvent(finalDialogue, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+                    // yield return new WaitForSeconds(0.4f);
 
-                    yield return P03AnimationController.Instance.ShowChangeCurrency(BOSS_MONEY_REWARD, true);
-                    Part3SaveData.Data.currency += BOSS_MONEY_REWARD;
+                    // yield return P03AnimationController.Instance.ShowChangeCurrency(BOSS_MONEY_REWARD, true);
+                    // Part3SaveData.Data.currency += BOSS_MONEY_REWARD;
 
-                    yield return new WaitForSeconds(0.2f);
-                    P03AnimationController.Instance.SwitchToFace(currentFace);
-                    yield return new WaitForSeconds(0.1f);
+                    // yield return new WaitForSeconds(0.2f);
+                    // P03AnimationController.Instance.SwitchToFace(currentFace);
+                    // yield return new WaitForSeconds(0.1f);
                     Part3SaveData.WorldPosition worldPosition = new(HoloMapAreaManager.Instance.CurrentWorld.Id, HoloMapAreaManager.Instance.CurrentArea.GridX, HoloMapAreaManager.Instance.CurrentArea.GridY);
                     HoloMapAreaManager.Instance.MoveToAreaDirectly(worldPosition);
 
-                    if (ViewManager.Instance.CurrentView != currentView)
-                    {
-                        ViewManager.Instance.SwitchToView(currentView, false, false);
-                        yield return new WaitForSeconds(0.2f);
-                    }
+                    // if (ViewManager.Instance.CurrentView != currentView)
+                    // {
+                    //     ViewManager.Instance.SwitchToView(currentView, false, false);
+                    //     yield return new WaitForSeconds(0.2f);
+                    // }
                     //P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Default, true, true);
                     //yield return new WaitForSeconds(0.1f);
 

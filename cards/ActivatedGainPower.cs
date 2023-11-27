@@ -24,7 +24,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.opponentUsable = false;
             info.activated = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,

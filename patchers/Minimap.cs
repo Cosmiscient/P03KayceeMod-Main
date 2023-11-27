@@ -135,6 +135,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return mapNode;
         }
 
+        [Obsolete]
         public static GameObject CreateMinimap(Transform parent, List<HoloMapBlueprint> blueprint, string prefix, string worldId, int posX, int posY)
         {
             GameObject minimapContainer = new("minimapContainer");
@@ -171,6 +172,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     if (!connections.ContainsKey(adjId))
                     {
                         GameObject line = Instantiate(LinePseudoPrefab, minimap.transform, false);
+                        line.SetActive(true);
                         Destroy(line.GetComponent<HoloLineSegment>());
 
                         HoloLinePartialSegment seg = line.AddComponent<HoloLinePartialSegment>();

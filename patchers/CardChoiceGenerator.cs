@@ -163,67 +163,77 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static IEnumerator EnsureHoloClover(IEnumerator sequence, CardSingleChoicesSequencer __instance, SpecialNodeData nodeData)
         {
-            if (!P03AscensionSaveData.IsP03Run || nodeData is Part3RareCardChoicesNodeData)
+            if (!P03AscensionSaveData.IsP03Run)
             {
                 yield return sequence;
                 yield break;
             }
 
-            if (__instance.rerollInteractable != null)
+            if (__instance.rerollInteractable == null)
+            {
+                GameObject cardClicker = UnityEngine.Object.Instantiate(RunBasedHoloMap.SpecialNodePrefabs[HoloMapNode.NodeDataType.CardChoice], __instance.transform);
+                OnboardDynamicHoloPortrait.HolofyGameObject(cardClicker, GameColors.Instance.gold);
+                cardClicker.transform.Find("RendererParent").localEulerAngles = new(60f, 180f, 180f);
+                cardClicker.transform.localPosition = new(0f, 5f, -1.5f);
+                cardClicker.transform.localScale = new(1f, 1f, 1f);
+                UnityEngine.Object.Destroy(cardClicker.GetComponentInChildren<SineWaveMovement>());
+                UnityEngine.Object.Destroy(cardClicker.GetComponentInChildren<HoloMapNode>());
+
+                // Label
+                GameObject sampleObject = RunBasedHoloMap.SpecialNodePrefabs[HoloMapNode.NodeDataType.BuildACard].transform.Find("HoloFloatingLabel").gameObject;
+                GameObject labelObject = UnityEngine.Object.Instantiate(sampleObject, __instance.transform);
+                labelObject.transform.localPosition = new(-1.2f, 5.8f, -2.3f);
+                labelObject.transform.localEulerAngles = new(90f, 0f, 0f);
+                HoloFloatingLabel label = labelObject.GetComponent<HoloFloatingLabel>();
+                label.line.gameObject.SetActive(false);
+                label.line = null;
+
+                GenericMainInputInteractable mii = cardClicker.AddComponent<GenericMainInputInteractable>();
+                mii.SetCursorType(CursorType.Pickup);
+                mii.CursorEntered = delegate (MainInputInteractable mii)
+                {
+                    AudioController.Instance.PlaySound2D("holomap_node_mouseover", MixerGroup.TableObjectsSFX, 0.5f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.VerySmall), null, new AudioParams.Randomization(true), null, false);
+                    label.gameObject.SetActive(true);
+                    label.SetText(Localization.Translate($"Redraw: ${CurrentRerollCost}"));
+                };
+
+                mii.CursorExited = (mii) => label.gameObject.SetActive(false);
+
+                mii.CursorSelectEnded = delegate (MainInputInteractable mii)
+                {
+                    if (Part3SaveData.Data.currency < CurrentRerollCost)
+                    {
+                        Tween.Shake(cardClicker.transform, cardClicker.transform.position, Vector3.one * 0.1f, 0.33f, 0f);
+                        AudioController.Instance.PlaySound2D("holomap_drop_currency", MixerGroup.TableObjectsSFX, 0.5f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.VerySmall), null, new AudioParams.Randomization(true), null, false);
+                        return;
+                    }
+
+                    label.gameObject.SetActive(false);
+                    Part3SaveData.Data.currency -= CurrentRerollCost;
+                    int prev = PriorRerollCost;
+                    PriorRerollCost = CurrentRerollCost;
+                    CurrentRerollCost += prev;
+                    __instance.OnRerollChoices();
+                };
+
+                __instance.rerollInteractable = mii;
+            }
+
+            if (nodeData is Part3RareCardChoicesNodeData)
+            {
+                MainInputInteractable reroller = __instance.rerollInteractable;
+                __instance.rerollInteractable = null;
+                yield return sequence;
+                __instance.rerollInteractable = reroller;
+            }
+            else
             {
                 __instance.rerollInteractable.gameObject.SetActive(true);
                 yield return sequence;
-                yield break;
+                __instance.rerollInteractable.gameObject.SetActive(false);
             }
 
-            GameObject cardClicker = UnityEngine.Object.Instantiate(RunBasedHoloMap.SpecialNodePrefabs[HoloMapNode.NodeDataType.CardChoice], __instance.transform);
-            OnboardDynamicHoloPortrait.HolofyGameObject(cardClicker, GameColors.Instance.gold);
-            cardClicker.transform.Find("RendererParent").localEulerAngles = new(60f, 180f, 180f);
-            cardClicker.transform.localPosition = new(0f, 5f, -1.5f);
-            cardClicker.transform.localScale = new(1f, 1f, 1f);
-            UnityEngine.Object.Destroy(cardClicker.GetComponentInChildren<SineWaveMovement>());
-            UnityEngine.Object.Destroy(cardClicker.GetComponentInChildren<HoloMapNode>());
-
-            // Label
-            GameObject sampleObject = RunBasedHoloMap.SpecialNodePrefabs[HoloMapNode.NodeDataType.BuildACard].transform.Find("HoloFloatingLabel").gameObject;
-            GameObject labelObject = UnityEngine.Object.Instantiate(sampleObject, __instance.transform);
-            labelObject.transform.localPosition = new(-1.2f, 5.8f, -2.3f);
-            labelObject.transform.localEulerAngles = new(90f, 0f, 0f);
-            HoloFloatingLabel label = labelObject.GetComponent<HoloFloatingLabel>();
-            label.line.gameObject.SetActive(false);
-            label.line = null;
-
-            GenericMainInputInteractable mii = cardClicker.AddComponent<GenericMainInputInteractable>();
-            mii.SetCursorType(CursorType.Pickup);
-            mii.CursorEntered = delegate (MainInputInteractable mii)
-            {
-                AudioController.Instance.PlaySound2D("holomap_node_mouseover", MixerGroup.TableObjectsSFX, 0.5f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.VerySmall), null, new AudioParams.Randomization(true), null, false);
-                label.gameObject.SetActive(true);
-                label.SetText(Localization.Translate($"Redraw: ${CurrentRerollCost}"));
-            };
-
-            mii.CursorExited = (mii) => label.gameObject.SetActive(false);
-
-            mii.CursorSelectEnded = delegate (MainInputInteractable mii)
-            {
-                if (Part3SaveData.Data.currency < CurrentRerollCost)
-                {
-                    Tween.Shake(cardClicker.transform, cardClicker.transform.position, Vector3.one * 0.1f, 0.33f, 0f);
-                    AudioController.Instance.PlaySound2D("holomap_drop_currency", MixerGroup.TableObjectsSFX, 0.5f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.VerySmall), null, new AudioParams.Randomization(true), null, false);
-                    return;
-                }
-
-                label.gameObject.SetActive(false);
-                Part3SaveData.Data.currency -= CurrentRerollCost;
-                int prev = PriorRerollCost;
-                PriorRerollCost = CurrentRerollCost;
-                CurrentRerollCost += prev;
-                __instance.OnRerollChoices();
-            };
-
-            __instance.rerollInteractable = mii;
-
-            yield return sequence;
+            yield break;
         }
 
         [HarmonyPatch(typeof(CardSingleChoicesSequencer), nameof(CardSingleChoicesSequencer.OnCursorEnterRerollInteractable))]

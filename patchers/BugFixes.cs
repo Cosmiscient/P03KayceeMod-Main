@@ -325,5 +325,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             AbilityManager.SyncAbilityList();
             RegionManager.SyncRegionList();
         }
+
+        [HarmonyPatch(typeof(DialogueEventsData), nameof(DialogueEventsData.EventIsPlayed))]
+        [HarmonyPrefix]
+        private static bool NoFecundityCommentsForP03(string eventId, ref bool __result)
+        {
+            if (eventId.Equals("AscensionFecundityNerf") && P03AscensionSaveData.IsP03Run)
+            {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
     }
 }

@@ -691,7 +691,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             // TURN 2
             neutralSentryWall.turns.AddTurn(
                 Enemy("Automaton", replacement: "Shieldbot", difficulty: 3),
-                Enemy(null, replacement: "RoboSkeleton", difficulty: 4)
+                Enemy("RoboSkeleton", replacement: "P03KCMXP2_FlamingExeskeleton", difficulty: 2)
             );
 
             // TURN 3
@@ -711,10 +711,10 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             // TURN 5
             neutralSentryWall.turns.AddTurn(
                 Enemy("SentryBot", replacement: "Shutterbug", difficulty: 6),
-                Enemy(null, replacement: "SentryBot", difficulty: 2),
-                Enemy(null, replacement: "SentryBot", difficulty: 4),
+                Enemy(null, replacement: "Automaton", difficulty: 2, overclock: 5, overclockAbility: Ability.Sharp),
+                Enemy(null, replacement: "Automaton", difficulty: 4, overclock: 5, overclockAbility: Ability.Sharp),
                 Enemy(null, replacement: "Shutterbug", difficulty: 6),
-                Enemy(null, replacement: "SentryBot", difficulty: 3)
+                Enemy(null, replacement: "Automaton", difficulty: 3, overclock: 5, overclockAbility: Ability.Sharp)
             );
 
             // TURN 6
@@ -731,7 +731,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             // TURN 8
             neutralSentryWall.turns.AddTurn(
                 Enemy(null, replacement: "Insectodrone", difficulty: 2),
-                Enemy(null, replacement: "Insectodrone", difficulty: 4),
+                Enemy(null, replacement: "P03KCMXP1_Spyplane", difficulty: 4),
                 Enemy(null, replacement: "SentryBot", difficulty: 4)
             );
 
@@ -1945,7 +1945,8 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 1
             undeadStrafeLatchers.turns.AddTurn(
-                Enemy("P03KCMXP1_ConveyorLatcher", overclock: 2)
+                Enemy("P03KCMXP1_ConveyorLatcher", overclock: 2),
+                Enemy(null, "SentryBot", difficulty: 2, overclock: 5, overclockAbility: Ability.Sharp)
             );
 
             // TURN 2
@@ -1959,7 +1960,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             undeadStrafeLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_ConveyorLatcher"),
                 Enemy("MineCart", replacement: "P03KCMXP1_RoboAngel", difficulty: 6),
-                Enemy(null, "Bombbot", difficulty: 2)
+                Enemy(null, "SentryBot", difficulty: 2, overclock: 5, overclockAbility: Ability.Sharp)
             );
 
             // TURN 4
@@ -2120,7 +2121,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 1
             wizardShieldGems.turns.AddTurn(
-                Enemy("EmptyVessel_BlueGem"),
+                Enemy("EmptyVessel_BlueGem", overclock: 5),
                 Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 3)
             );
 
@@ -2128,19 +2129,22 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             wizardShieldGems.turns.AddTurn(
                 Enemy("EmptyVessel_BlueGem", replacement: "SentinelGreen", difficulty: 3),
                 Enemy("Bombbot", replacement: "GemShielder", difficulty: 3, overclock: 4),
-                Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 3)
+                Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 2, overclock: 3)
             );
 
             // TURN 3
             wizardShieldGems.turns.AddTurn(
                 Enemy("GemShielder", overclock: 2),
                 Enemy(null, replacement: "GemShielder", difficulty: 3, overclock: 4),
-                Enemy(null, replacement: "TechMoxTriple", difficulty: 6)
+                Enemy(null, replacement: "TechMoxTriple", difficulty: 5),
+                Enemy(null, replacement: "SentinelGreen", difficulty: 3)
             );
 
             // TURN 4
             wizardShieldGems.turns.AddTurn(
-                Enemy("SentinelGreen", replacement: "GemRipper", difficulty: 4)
+                Enemy("SentinelGreen", replacement: "GemRipper", difficulty: 4),
+                Enemy(null, replacement: "SentinelGreen", difficulty: 2),
+                Enemy(null, replacement: "Automaton", difficulty: 5)
             );
 
             // TURN 5
@@ -2151,25 +2155,26 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 6
             wizardShieldGems.turns.AddTurn(
-                Enemy(null, replacement: "SentinelGreen", difficulty: 2, overclock: 3),
+                Enemy(null, replacement: "SentinelGreen", difficulty: 1, overclock: 3),
                 Enemy(null, replacement: "TechMoxTriple", difficulty: 5)
             );
 
             // TURN 7
             wizardShieldGems.turns.AddTurn(
-                Enemy(null, replacement: "GemRipper", difficulty: 4),
+                Enemy(null, replacement: "GemRipper", difficulty: 3),
                 Enemy("SentinelGreen", replacement: "SentinelBlue", difficulty: 4)
             );
 
             // TURN 8
             wizardShieldGems.turns.AddTurn(
-                Enemy(null, replacement: "SentinelGreen", difficulty: 1),
+                Enemy("SentinelGreen", overclock: 5),
                 Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 3),
                 Enemy(null, replacement: "EmptyVessel_OrangeGem", difficulty: 4)
             );
 
             // TURN 9
             wizardShieldGems.turns.AddTurn(
+                Enemy("GemRipper"),
                 Enemy(null, replacement: "GemRipper", difficulty: 6),
                 Enemy(null, replacement: "GemShielder", difficulty: 4),
                 Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 3)
@@ -2211,8 +2216,8 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 5
             wizardGuardians.turns.AddTurn(
-                Enemy(null, replacement: "P03KCMXP2_EmeraldGuardian", difficulty: 3, overclock: 5),
-                Enemy(null, replacement: "P03KCMXP2_RubyGuardian", difficulty: 4, overclock: 5)
+                Enemy(null, replacement: "P03KCMXP2_EmeraldGuardian", difficulty: 2, overclock: 5),
+                Enemy(null, replacement: "P03KCMXP2_RubyGuardian", difficulty: 3, overclock: 5)
             );
 
             // TURN 6
@@ -2223,6 +2228,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 7
             wizardGuardians.turns.AddTurn(
+                Enemy("P03KCMXP2_EmeraldSquid", overclock: 3, overclockAbility: Ability.GainGemGreen),
                 Enemy("Automaton", replacement: "P03KCMXP2_GemAugur", difficulty: 5, overclock: 6),
                 Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 2, overclock: 4, overclockAbility: Ability.GainGemOrange)
             );
