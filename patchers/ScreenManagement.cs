@@ -311,8 +311,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static void RemoveDisabledContinueButtons(AscensionStartScreen __instance)
         {
             Transform itemsParent = __instance.transform.Find("Center/MenuItems");
+            if (itemsParent == null)
+                return;
+
             GameObject leshyContinue = itemsParent.Find("Continue").gameObject;
             GameObject p03Continue = itemsParent.Find("Menu_Continue_P03").gameObject;
+
+            if (leshyContinue == null || p03Continue == null)
+                return;
 
             leshyContinue.SetActive(__instance.RunExists);
             p03Continue.SetActive(P03AscensionSaveData.P03RunExists);
@@ -333,6 +339,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             AscensionMenuScreenTransition transitionController = __instance.GetComponent<AscensionMenuScreenTransition>();
+            if (transitionController == null || transitionController.onEnableRevealedObjects == null)
+                return;
+
             int firstMenu = 0;
             for (int i = 0; i < transitionController.onEnableRevealedObjects.Count; i++)
             {
@@ -343,7 +352,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
             }
 
-            transitionController.onEnableRevealedObjects = transitionController.onEnableRevealedObjects.Where(o => !o.name.ToLowerInvariant().Contains("menu") && o.name != "Continue").ToList();
+            transitionController.onEnableRevealedObjects = transitionController.onEnableRevealedObjects.Where(o => o != null && !o.name.ToLowerInvariant().Contains("menu") && o.name != "Continue").ToList();
             foreach (Transform item in allItems)
                 transitionController.onEnableRevealedObjects.Insert(firstMenu, item.gameObject);
         }

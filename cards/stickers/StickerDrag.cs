@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using DiskCardGame;
 using Pixelplacement;
 using UnityEngine;
@@ -12,8 +11,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
     {
         private Vector3 offset;
 
-        private List<Bounds> CardBounds = new();
-        private List<SelectableCard> Cards = new();
+        private readonly List<Bounds> CardBounds = new();
+        private readonly List<SelectableCard> Cards = new();
         public SelectableCard LastHoverCard { get; private set; }
 
         [SerializeField]
@@ -22,13 +21,22 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         [SerializeField]
         public string StickerName;
 
+        public GameObject StenciledProjector;
+        public GameObject UnStenciledProjector;
+
         private bool isDragging = false;
+        private bool hasInitialized = false;
 
         public override int ExecutionOrder => -100;
 
-        protected new void OnEnable()
+        protected new void OnEnable() => base.OnEnable();
+
+        internal void Initialize()
         {
-            base.OnEnable();
+            bool attachedToCard = transform.parent.gameObject.GetComponent<DiskRenderStatsLayer>() != null;
+            StenciledProjector.SetActive(attachedToCard);
+            UnStenciledProjector.SetActive(!attachedToCard);
+            hasInitialized = true;
         }
 
         public override CursorType CursorType => CursorType.Pickup;
@@ -37,7 +45,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         {
             get
             {
-                var screenPoint = Camera.main.WorldToScreenPoint(gameObject.transform.position);
+                Vector3 screenPoint = Camera.main.WorldToScreenPoint(gameObject.transform.position);
                 return Camera.main.ScreenToWorldPoint(new(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z));
             }
         }
@@ -57,15 +65,12 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 Cards.Add(StickerInterfaceManager.Instance.LastDisplayedCard);
             }
 
-            offset = gameObject.transform.position - this.CursorWorldPoint;
+            offset = gameObject.transform.position - CursorWorldPoint;
 
-            this.isDragging = true;
+            isDragging = true;
         }
 
-        private bool IsOverCardBounds(Bounds b, Vector3 p)
-        {
-            return (p.x >= b.min.x && p.x <= b.max.x && p.z >= b.min.z && p.z <= b.max.z);
-        }
+        private bool IsOverCardBounds(Bounds b, Vector3 p) => p.x >= b.min.x && p.x <= b.max.x && p.z >= b.min.z && p.z <= b.max.z;
 
         // public override void OnCursorDrag()
         // {
@@ -83,16 +88,19 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         {
             base.ManagedUpdate();
 
-            if (!this.isDragging)
+            if (!hasInitialized && transform.parent != null)
+                Initialize();
+
+            if (!isDragging)
                 return;
 
-            Vector3 curPosition = this.CursorWorldPoint + offset;
+            Vector3 curPosition = CursorWorldPoint + offset;
 
             LastHoverCard = null;
             curPosition.y = StickerInterfaceManager.STICKER_HOME_POSITION.y + StickerInterfaceManager.Instance.transform.position.y;
             for (int i = 0; i < Cards.Count; i++)
             {
-                if (IsOverCardBounds(CardBounds[i], this.CursorWorldPoint))
+                if (IsOverCardBounds(CardBounds[i], CursorWorldPoint))
                 {
                     LastHoverCard = Cards[i];
                     curPosition.y = Cards[i].StatsLayer.transform.position.y + yOffset;
@@ -102,13 +110,22 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
             if (LastHoverCard == null)
             {
+                UnStenciledProjector.SetActive(true);
+                StenciledProjector.SetActive(false);
+
                 if (gameObject.transform.parent != StickerInterfaceManager.Instance.transform)
                     gameObject.transform.SetParent(StickerInterfaceManager.Instance.transform);
             }
             else
             {
+                UnStenciledProjector.SetActive(false);
+                StenciledProjector.SetActive(true);
+
                 if (gameObject.transform.parent.gameObject != LastHoverCard.StatsLayer.gameObject)
+                {
                     gameObject.transform.SetParent(LastHoverCard.StatsLayer.gameObject.transform);
+
+                }
             }
 
             transform.localPosition = transform.parent.InverseTransformPoint(curPosition);
@@ -120,25 +137,25 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
             if (LastHoverCard == null)
             {
-                if (this.gameObject == StickerInterfaceManager.Instance.LastPrintedSticker)
+                if (gameObject == StickerInterfaceManager.Instance.LastPrintedSticker)
                 {
-                    Vector3 position = this.transform.position;
-                    this.transform.SetParent(StickerInterfaceManager.Instance.transform);
-                    this.transform.localPosition = this.transform.parent.InverseTransformPoint(position);
-                    Tween.LocalPosition(this.transform, StickerInterfaceManager.STICKER_HOME_POSITION, 0.1f, 0f);
+                    Vector3 position = transform.position;
+                    transform.SetParent(StickerInterfaceManager.Instance.transform);
+                    transform.localPosition = transform.parent.InverseTransformPoint(position);
+                    Tween.LocalPosition(transform, StickerInterfaceManager.STICKER_HOME_POSITION, 0.1f, 0f);
                 }
                 else
                 {
-                    Tween.Position(this.transform, this.transform.position + new Vector3(0f, -2f, 0f), 0.2f, 0f, completeCallback: () => GameObject.Destroy(this.gameObject));
+                    Tween.Position(transform, transform.position + new Vector3(0f, -2f, 0f), 0.2f, 0f, completeCallback: () => Destroy(gameObject));
                 }
-                Stickers.UpdateStickerPosition(null, this.StickerName, null);
+                Stickers.ClearStickerAppearance(StickerName);
             }
             else
             {
-                Stickers.UpdateStickerPosition(LastHoverCard.Info, this.StickerName, this.transform.localPosition);
+                LastHoverCard.Info.UpdateStickerPosition(StickerName, transform.localPosition);
             }
 
-            this.isDragging = false;
+            isDragging = false;
         }
     }
 }

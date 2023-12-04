@@ -1,7 +1,6 @@
 using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -41,6 +40,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_viperbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 5)
+                .AddMetaCategories(CardMetaCategory.Part3Random)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .AddAbilities(Ability.Transformer);
 
@@ -84,6 +84,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_conveyorlatcher.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 1)
                 .SetRegionalP03Card(CardTemple.Undead)
+                .AddMetaCategories(CardMetaCategory.Part3Random)
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_conveyor_latcher.png", typeof(ExpansionPackCards_1).Assembly))
                 .AddAbilities(Ability.StrafeSwap, LatchRampage.AbilityID);
 
@@ -121,16 +122,23 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_salmon.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_salmon.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 1)
+                .AddMetaCategories(CardMetaCategory.Part3Random)
                 .SetEvolve("Angler_Fish_More", 1);
 
             CardManager.BaseGameCards.CardByName("Angler_Fish_More").SetEvolve("Angler_Fish_Good", 1);
+
+            CardInfo bm2 = CardManager.New(EXP_1_PREFIX, "BeastMaster2", "B3A5T GR4ND M4ST3R", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_beastmaster.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetCost(energyCost: 3)
+                .AddAbilities(SummonFamiliar.AbilityID, Ability.BuffNeighbours);
 
             CardManager.New(EXP_1_PREFIX, "BeastMaster", "B3A5T M4ST3R", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_beastmaster.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .SetRare()
-                .AddAbilities(SummonFamiliar.AbilityID);
+                .AddAbilities(SummonFamiliar.AbilityID)
+                .SetEvolve(bm2, 1);
 
             // Bull
             CardManager.New(EXP_1_PREFIX, "BuckingBull", "T4URU5", 1, 8)
@@ -154,6 +162,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_ammobot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
                 .SetNeutralP03Card()
+                .AddMetaCategories(CardMetaCategory.Part3Random)
                 .AddAbilities(FullyLoaded.AbilityID);
 
             // oil Bot
@@ -238,6 +247,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_executor.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 6)
                 .SetRegionalP03Card(CardTemple.Undead)
+                .AddMetaCategories(CardMetaCategory.Part3Random)
                 .AddAbilities(Ability.Deathtouch);
 
             // Copy Pasta
@@ -271,6 +281,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
+                .AddMetaCategories(CardMetaCategory.Part3Random)
                 .SetNeutralP03Card()
                 .AddAbilities(RotatingAlarm.AbilityID);
 

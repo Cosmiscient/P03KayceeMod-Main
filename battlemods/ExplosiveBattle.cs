@@ -19,7 +19,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 "Explosive",
                 new List<string>() { "Hm; it looks like the cards in this battle will [c:bR]explode[c:] when they die", "That seems dangerous" },
                 typeof(ExplosiveBattle),
-                difficulty: 1,
+                difficulty: 3,
                 iconPath: "p03kcm/prefabs/unlit-bomb"
             );
             BattleModManager.SetGlobalActivationRule(ID,

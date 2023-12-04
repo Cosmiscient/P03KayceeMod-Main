@@ -242,6 +242,64 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        private static readonly Dictionary<KeyCode, string> DIRECTIONS = new()
+        {
+            { KeyCode.K, "S"}, { KeyCode.I, "N"},{ KeyCode.J, "W"},{ KeyCode.L, "E"}
+        };
+
+        [HarmonyPatch(typeof(ViewController), nameof(ViewController.ManagedLateUpdate))]
+        [HarmonyPrefix]
+        private static bool MoveMap()
+        {
+            if (ViewManager.Instance.CurrentView != View.MapDefault)
+                return true;
+
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
+            if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.I) || Input.GetKey(KeyCode.J) || Input.GetKey(KeyCode.K) || Input.GetKey(KeyCode.L))
+            {
+                if (HoloMapAreaManager.Instance.MovingAreas || MapNodeManager.Instance.MovingNodes)
+                    return true;
+
+                HoloMapArea currentmap = HoloMapAreaManager.Instance.CurrentArea;
+                if (currentmap == null)
+                    return true;
+
+                Transform arrowsParent = currentmap.transform.Find("Nodes");
+                if (arrowsParent == null)
+                    return true;
+
+                foreach (KeyValuePair<KeyCode, string> move in DIRECTIONS)
+                {
+                    if (Input.GetKey(move.Key))
+                    {
+                        Transform nodeTransform = arrowsParent.Find($"MoveArea_{move.Value}");
+                        if (nodeTransform == null || !nodeTransform.gameObject.activeSelf)
+                            return true;
+
+                        MoveHoloMapAreaNode node = nodeTransform.GetComponent<MoveHoloMapAreaNode>();
+                        if (node.Secret)
+                            return true;
+
+                        node.CursorSelectEnd();
+                        return false;
+                    }
+                }
+
+                if (Input.GetKey(KeyCode.Space))
+                {
+                    List<HoloMapNode> nodes = currentmap.GetComponentsInChildren<HoloMapNode>().Where(hn => hn is not MoveHoloMapAreaNode).ToList();
+                    if (nodes.Count == 1)
+                    {
+                        nodes[0].CursorSelectEnd();
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
         private static bool isDroneFlying = false;
 
         [HarmonyPatch(typeof(HoloMapAreaManager), "DroneFlyToArea")]

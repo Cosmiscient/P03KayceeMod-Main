@@ -1,5 +1,5 @@
 # P03 Kaycee's Mod
-## Version 3.0: The Challenge Update
+## Version 4.0: Expansion Pack 2, Achievements, and Stickers!
 
 **Join our Discord!! [https://discord.gg/PxCHsKtfGc](https://discord.gg/PxCHsKtfGc)**
 
@@ -11,16 +11,6 @@ If you enjoyed the energy-based robotic gameplay of Inscryption Act 3 and wished
 
 Installing this mod will give you the option to play against either Leshy or P03 when you start a new run. Selecting Leshy will give you the standard game you're used to, but selecting P03 will send you to the land of Botopia, where you will draft robotic cards (including all new cards created just for this mod), explore procedurally generated maps, fight off bounty hunters, and purchase upgrades with your hard-earned robobucks. And at the end of it all, P03 is waiting for you in an all-new boss fight.
 
-
-## A Personal Message from DivisionByZ0rro (6/20/2023)
-
-Life really does change quickly. I walked away from this about a year ago, and yet this incredible community of incredibly passionate and creative people have stuck together and kept this thing alive. I'm amazed and humbled.
-
-While I have returned to the scene (for at least a little while), I have trasnferred permanent ownership of this over to arcadian.png. I'm sticking around to help with the transition and help sort out (rewrite) some of my crappier code to be more sustainable, but this mod really belongs to the amazing community that has kept the momentum going.
-
-Thanks for everything,
-/0
-
 ## How does this mod work?
 
 When you install this mod, you will see two 'new run' options on the opening screen for Kaycee's Mod. You can either start a New Leshy Run (the default KCM experience) or a new P03 run (this mod's experience).
@@ -30,7 +20,7 @@ P03 runs differ from Leshy runs in a few significant ways:
 1) You have more choice over how the maps play out:
     - You can fight through the four zones in any order you choose. 
     - You are not forced to use any map nodes that you don't want to. (Pro tip: you still need to add cards to your deck - matches last longer than you might be used to).
-2) Most of your choices are based on how you manage your currency. You will find currency on the map, and you earn it by 'overkilling' P03 during battles. (Pro tip: you should deliberately overkill as much as possible if you want to build a strong of a deck as possible). Every upgrade you select will cost you robobucks. The only thing that's free is adding new cards to your deck.
+2) Most of your choices are based on how you manage your currency. You will find some currency on the map, and you earn more of it by 'overkilling' P03 during battles, by killing bounty hunters, and by completing quests given to you by NPCs on the map. (Pro tip: you should deliberately overkill as much as possible if you want to build a strong of a deck as possible). Every upgrade you select will cost you robobucks. The only thing that's free is adding new cards to your deck.
 
 There are also some changes from the way P03's gameplay worked the first time through:
 
@@ -42,26 +32,32 @@ There are also some changes from the way P03's gameplay worked the first time th
 
 The runs are still similar to Leshy in significant ways:
 
-1) You will still start with a draft.
-2) There are a number of starter decks that you can pick from to help guide your selections through the rest of the game.
+1) There are a number of starter decks that you can pick from to help guide your selections through the rest of the game.
+2) Starter decks have four cards and one "draft token," which allows you to choose a card from a draft node event on the first map screen.
 3) You must complete four battles against enemies before facing the boss. Once you beat the boss, you're done with that zone and can't go back.
 
 ### Events
 
 Some events play the same in this mod as they did the first time you played through Botopia. However, some are different. Here's what you need to know before spending your robobucks on an event:
 
-- **Build-a-Card**: This is mostly the same as before, but the ability pool has been modified. The Unkillable sigil is no longer able to be added to a build-a-card, and a few new abilities (such as conduits and cells) are added.
+- **Build-a-Card**: This is mostly the same as before, but the ability pool has been significantly modified. You can also enter whatever name you want for the card, a power you should *definitely* use wisely.
 - **Gemify Cards**: This behaves the same as before.
 - **Items**: You can buy an item like you would in Act 1. However, you can only get one item from each shop.
-- **Overclock**: This is significantly different. As before, the overclocked card gets +1 attack. However, when an overclocked card dies, it is not just removed from your deck. It is replaced with an Exeskeleton with the same set of abilities as the original card. So if you overclock a Sniper and it dies, you will get an Exeskeleton with the Sniper sigil.
+- **Overclock**: This is significantly different. As before, the overclocked card gets +1 attack. However, when an overclocked card dies, it is not completely removed from your deck. It is replaced with an Exeskeleton with the same set of abilities as the original card. So if you overclock a Sniper and it dies, you will get an Exeskeleton with the Sniper sigil.
 - **Recycle**: Instead of getting robobucks back for your recycled card, you get a draft token. Normal cards get you a standard Token, with all of the card's abilities imprinted on the token. Those abilities will transfer to the card you draft with it. Rare cards get you a Rare token, which can be exchanged for another rare card.
-- **Transformer**: You now select two cards instead of one, and the transformation causes one card to transform into the other.
+- **Transformer**: There are now more options to select for the beast transformations, some which comes with additional bonuses and drawbacks. Pay close attention to the energy cost and health associated!
 
 ### NPCs
 
-New in Version 2.0 - you will now encounter NPcs scattered throughout the map who will give you optional side quests that you can complete for some additional rewards!
+You will encounter NPCs scattered throughout each map. They will give you optional side quests that will grant special rewards upon completion. Often these rewards will be extra money, but sometimes a side quest might lead to something a bit more exciting.
 
-New in Version 3.0 - the Quest API is now publicly available for use! See the included QuestAPI.md file for documentation.
+### Achievements and Stickers
+
+Version 4.0 comes with support for achievements! You can view the list of achievements under the "Unlocks" screen in Kaycee's Mod. Each achievement you unlock will also unlock a cosmetic sticker that you can apply to your cards during the run to show off just how good you are at this game (or just because you think SteamBot looks really dapper with a top hat). Stickers can be applied to your cards at any time on the deck review screen (press "W" while at the main map).
+
+### Speedrunning - Quality of Life Improvements
+
+Version 4.0 adds some significant quality of life improvements to help you play the mod a little bit faster. You can navigate the map using the IJKL keys on your keyboard (think WASD movement, but with different keys because the game already uses WASD for other purposes). You an also click any room on the minimap that you've already visited to travel directly back there, saving you the time required to walk back across the map.
 
 ### Challenges
 

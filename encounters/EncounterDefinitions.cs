@@ -540,7 +540,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 5
             neutralBombsAndShields.turns.AddTurn(
-                Enemy("Shieldbot", replacement: "CloserBot", difficulty: 4),
+                Enemy("Shieldbot", overclock: 4),
                 Enemy(null, replacement: "P03KCMXP2_PyroBot", difficulty: 3)
             );
 

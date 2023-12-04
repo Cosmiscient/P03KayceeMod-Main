@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 191935651
+CRC: 3240280232
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 7ebde1180465ee97cf3f7241c902bb3f
+    Hash: eb39f7ad1f8f4ae17cc5023b6aae3bd9
   TypeTreeHash:
     serializedVersion: 2
     Hash: 8c5b7327d4a845eb9a034ee9c89524e4
@@ -41,6 +41,7 @@ Assets:
 - Assets/Prefabs/UFO.prefab
 - Assets/Textures/UFO_Black_Down.mat
 - Assets/Prefabs/arrow-repeat.prefab
+- Assets/Shaders/StandardWithStencil.shader
 - Assets/Shaders/LightProjectorShader.shader
 - Assets/Prefabs/latcher-claw.prefab
 - Assets/Effects/Fire_Flamethrower.prefab

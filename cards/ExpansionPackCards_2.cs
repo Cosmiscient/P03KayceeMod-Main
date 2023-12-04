@@ -42,6 +42,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(EXP_2_PREFIX, "ScrapBot", "Scrap Bot", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_scrapbot.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
+                .AddMetaCategories(CardMetaCategory.Part3Random)
                 .SetNeutralP03Card()
                 .AddAbilities(ScrapDumper.AbilityID);
 
@@ -74,6 +75,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_billdozer.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetNeutralP03Card()
+                .AddMetaCategories(CardMetaCategory.Part3Random)
                 .AddAbilities(Shove.AbilityID);
 
             // Librarian
@@ -110,6 +112,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ignitron.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 3)
                 .SetNeutralP03Card()
+                .AddMetaCategories(CardMetaCategory.Part3Random)
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_ignitron.png", typeof(ExpansionPackCards_2).Assembly))
                 .AddAbilities(FireBomb.AbilityID);
 
@@ -188,6 +191,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_elephant.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 5)
                 .SetRegionalP03Card(CardTemple.Nature)
+                .AddMetaCategories(CardMetaCategory.Part3Random)
                 .AddAbilities(Stomp.AbilityID);
 
             // Zap!
@@ -270,13 +274,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_poodle.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 3)
                 .SetRegionalP03Card(CardTemple.Nature)
+                .AddMetaCategories(CardMetaCategory.Part3Random)
                 .AddAbilities(Ability.MoveBeside, Ability.BuffNeighbours);
 
             // Flame Charmter
-            CardManager.New(EXP_2_PREFIX, "FlameCharmer", "Flamecharmer", 0, 2)
+            CardManager.New(EXP_2_PREFIX, "FlameCharmer", "Flamecharmer", 0, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_flame_charmer.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
-                .AddAbilities(FireBomb.FlameStokerID, Ability.MadeOfStone);
+                .AddAbilities(FireBomb.FlameStokerID, Ability.MadeOfStone)
+                .AddAppearances(RareDiscCardAppearance.ID)
+                .temple = CardTemple.Tech;
 
             // Artillery Droid
             CardManager.New(EXP_2_PREFIX, "ArtilleryDroid", "Artillery Droid", 1, 2)
@@ -300,7 +307,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 5)
                 .SetRegionalP03Card(CardTemple.Undead)
                 .SetRare()
-                .AddAbilities(MissileStrikeSelf.AbilityID);
+                .AddAbilities(MissileStrikeSelf.AbilityID, Ability.Deathtouch);
 
             // Energy Vampire
             CardManager.New(EXP_2_PREFIX, "EnergyVampire", "Energy Vampire", 0, 2)
@@ -316,7 +323,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_orange_moxduster.png", typeof(ExpansionPackCards_2).Assembly))
-                .AddTraits(Trait.Gem)
                 .AddAbilities(Ability.GainGemOrange, MagicDust.AbilityID);
 
             // Charge!
@@ -343,20 +349,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetRegionalP03Card(CardTemple.Undead)
                 .SetRare()
                 .AddAbilities(Shred.AbilityID);
-
-            // Triple Gunner
-            CardInfo qgun = CardManager.New(EXP_2_PREFIX, "QuadGunner", "Mega Gunner", 2, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_quad_gunner.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 6)
-                .AddAbilities(Ability.TriStrike, Ability.DoubleStrike);
-
-            CardInfo tgun = CardManager.New(EXP_2_PREFIX, "TripleGunner", "Triple Gunner", 2, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_triple_gunner.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 6)
-                .AddAbilities(Ability.TriStrike)
-                .SetEvolve(qgun, 1);
-
-            CardManager.BaseGameCards.First(c => c.name == "CloserBot").SetEvolve(tgun, 1);
 
             // L33pbot Neo
             CardInfo lpneo = CardManager.New(EXP_2_PREFIX, "LeapBotNeo", "L33pB0t Neo", 2, 4)
@@ -390,9 +382,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetNeutralP03Card();
 
             // Lockjaw Cell
-            CardManager.New(EXP_2_PREFIX, "LockjawCell", "Lockjaw", 1, 2)
+            CardManager.New(EXP_2_PREFIX, "LockjawCell", "Lockjaw Cell", 1, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_lockjaw_cell.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 5)
+                .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Tech)
                 .SetRare()
                 .AddAbilities(Ability.Reach, CellSteelTrap.AbilityID);
@@ -460,7 +452,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Splice Conduit
             CardManager.New(EXP_2_PREFIX, "SpliceConduit", "Splice Conduit", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_splice_conduit.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 6)
+                .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Tech)
                 .SetRare()
                 .AddAbilities(ConduitAbsorb.AbilityID);

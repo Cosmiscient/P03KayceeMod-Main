@@ -88,6 +88,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                                 if (slot.Card.Info.name.Equals("Tree_Hologram") || slot.Card.Info.name.Equals("Tree_Hologram_SnowCovered"))
                                 {
                                     slot.Card.SetInfo(CardLoader.GetCardByName("DeadTree"));
+                                    yield return new WaitForSeconds(0.25f);
+                                    if (slot.Card.Health <= 0)
+                                    {
+                                        yield return slot.Card.Die(false);
+                                        yield return new WaitForSeconds(0.15f);
+                                    }
                                 }
                                 else
                                 {
@@ -95,13 +101,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
                                         DefaultQuestDefinitions.Pyromania.IncrementQuestCounter(onlyIfActive: true);
 
                                     yield return slot.Card.TakeDamage(1, null);
+                                    yield return new WaitForSeconds(0.25f);
                                 }
-                                yield return new WaitForSeconds(0.25f);
                             }
                         }
 
                         int idx = OnFire.IndexOf(slot.GetSlotModification());
-                        yield return idx == 0
+                        yield return idx <= 0
                             ? slot.SetSlotModification(SlotModificationManager.ModificationType.NoModification)
                             : (object)slot.SetSlotModification(OnFire[idx - 1]);
 
@@ -115,7 +121,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Fire Strike";
-            info.rulebookDescription = "When [creature] attacks, it sets the target space on fire for two turns.";
+            info.rulebookDescription = "When [creature] attacks, it sets the target space on fire for three turns.";
             info.canStack = false;
             info.powerLevel = 3;
             info.opponentUsable = true;

@@ -244,34 +244,92 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 CardModificationInfo prevEvolveMod = info.Mods.FirstOrDefault(m => m.fromEvolve);
                 if (prevEvolveMod != null)
                 {
-                    prevEvolveMod.attackAdjustment += 1;
-                    prevEvolveMod.healthAdjustment += 1;
-
-                    if (cardInfo.name.ToLowerInvariant().Contains("ringworm"))
-                        prevEvolveMod.healthAdjustment += 1;
-
-                    if (prevEvolveMod.nameReplacement.EndsWith(".0"))
+                    if (cardInfo.name.Equals($"{P03Plugin.CardPrefx}_MineCart_Overdrive"))
                     {
-                        int prevVersion = int.Parse(prevEvolveMod.nameReplacement
-                                                       .Split(' ')
-                                                       .Last()
-                                                       .Replace(".0", ""));
-                        prevEvolveMod.nameReplacement = prevEvolveMod.nameReplacement.Replace($"{prevVersion}.0", $"{prevVersion + 1}.0");
+                        int prevVersion = int.Parse(prevEvolveMod.nameReplacement.Replace("er", ""));
+                        prevEvolveMod.nameReplacement = $"{prevVersion + 1}er";
+
+                        int numberOfStrafes = prevEvolveMod.abilities.Where(a => a == Ability.Strafe).Count() + 1;
+                        if (numberOfStrafes < 9)
+                        {
+                            prevEvolveMod.abilities.Add(Ability.Strafe);
+                        }
+                        else
+                        {
+                            int numberOfDoubleStrafes = prevEvolveMod.abilities.Where(a => a == DoubleSprint.AbilityID).Count() + 1;
+                            if (numberOfDoubleStrafes < 9)
+                            {
+                                prevEvolveMod.abilities.Add(DoubleSprint.AbilityID);
+                                prevEvolveMod.abilities.Remove(Ability.Strafe);
+                            }
+                            else
+                            {
+                                int nubmerOfRampagers = prevEvolveMod.abilities.Where(a => a == Ability.StrafeSwap).Count() + 1;
+                                if (nubmerOfRampagers < 9)
+                                {
+                                    prevEvolveMod.abilities.Add(Ability.StrafeSwap);
+                                }
+                                else
+                                {
+                                    prevEvolveMod.healthAdjustment += 10;
+                                    prevEvolveMod.attackAdjustment += 10;
+                                }
+                            }
+                        }
                     }
                     else
                     {
-                        prevEvolveMod.nameReplacement += " 2.0";
+                        if (cardInfo.HasAbility(Ability.BuffNeighbours))
+                        {
+                            prevEvolveMod.abilities.Add(Ability.BuffNeighbours);
+                        }
+                        else
+                        {
+                            prevEvolveMod.attackAdjustment += 1;
+                            prevEvolveMod.healthAdjustment += 1;
+                        }
+
+                        if (cardInfo.name.ToLowerInvariant().Contains("ringworm"))
+                            prevEvolveMod.healthAdjustment += 1;
+
+                        if (prevEvolveMod.nameReplacement.EndsWith(".0"))
+                        {
+                            int prevVersion = int.Parse(prevEvolveMod.nameReplacement
+                                                        .Split(' ')
+                                                        .Last()
+                                                        .Replace(".0", ""));
+                            prevEvolveMod.nameReplacement = prevEvolveMod.nameReplacement.Replace($"{prevVersion}.0", $"{prevVersion + 1}.0");
+                        }
+                        else
+                        {
+                            prevEvolveMod.nameReplacement += " 2.0";
+                        }
                     }
                 }
                 else
                 {
-                    CardModificationInfo evolveMod = new(1, 1)
+                    if (cardInfo.name.Equals($"{P03Plugin.CardPrefx}_MineCart_Overdrive"))
                     {
-                        fromEvolve = true,
-                        nameReplacement = cardInfo.DisplayedNameEnglish + " 2.0",
-                        nonCopyable = false
-                    };
-                    cardInfo.mods.Add(evolveMod);
+                        CardModificationInfo evolveMod = new();
+                        evolveMod.abilities.Add(Ability.Strafe);
+                        evolveMod.fromEvolve = true;
+                        evolveMod.nonCopyable = false;
+                        evolveMod.nameReplacement = "51er";
+                        cardInfo.mods.Add(evolveMod);
+                    }
+                    else
+                    {
+                        CardModificationInfo evolveMod = new()
+                        {
+                            healthAdjustment = cardInfo.HasAbility(Ability.BuffNeighbours) ? 0 : 1,
+                            attackAdjustment = cardInfo.HasAbility(Ability.BuffNeighbours) ? 0 : 1,
+                            abilities = cardInfo.HasAbility(Ability.BuffNeighbours) ? new() { Ability.BuffNeighbours } : new(),
+                            fromEvolve = true,
+                            nameReplacement = cardInfo.DisplayedNameEnglish + " 2.0",
+                            nonCopyable = false
+                        };
+                        cardInfo.mods.Add(evolveMod);
+                    }
                 }
                 __result = cardInfo;
 
@@ -290,7 +348,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 GameObject decalFull = __instance.decalRenderers[1].gameObject;
                 GameObject decalGood = UnityEngine.Object.Instantiate(decalFull, decalFull.transform.parent);
                 decalGood.name = "Decal_Good";
-                decalGood.transform.localPosition = portrait.transform.localPosition;
+                decalGood.transform.localPosition = portrait.transform.localPosition + new Vector3(0f, 0f, -0.0001f);
                 decalGood.transform.localScale = new(1.2f, 1f, 0f);
                 __instance.decalRenderers.Add(decalGood.GetComponent<Renderer>());
             }

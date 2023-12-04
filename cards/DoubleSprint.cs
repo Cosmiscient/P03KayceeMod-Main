@@ -19,7 +19,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Double Sprinter";
             info.rulebookDescription = "At the end of the owner's turn, a card bearing this sigil will move in the direction inscribed in the sigil twice.";
-            info.canStack = false;
+            info.canStack = true;
             info.powerLevel = 0;
             info.opponentUsable = true;
             info.passive = false;
@@ -33,10 +33,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToTurnEnd(bool playerTurnEnd)
-        {
-            return Card != null ? Card.OpponentCard != playerTurnEnd : false;
-        }
+        public override bool RespondsToTurnEnd(bool playerTurnEnd) => Card != null && Card.OpponentCard != playerTurnEnd;
 
         public override IEnumerator OnTurnEnd(bool playerTurnEnd)
         {

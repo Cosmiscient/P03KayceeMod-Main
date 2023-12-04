@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Helpers.Extensions;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -36,7 +37,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnResolveOnBoard()
         {
-            foreach (CardSlot slot in BoardManager.Instance.OpponentSlotsCopy)
+            foreach (CardSlot slot in BoardManager.Instance.GetSlotsCopy(!Card.IsPlayerCard()))
             {
                 if (slot.Card == null)
                 {

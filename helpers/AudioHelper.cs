@@ -113,6 +113,8 @@ namespace Infiniscryption.P03KayceeRun.Helpers
                     }
                 }
             }
+
+            LoadMyLoops("P03_Phase1", __instance);
         }
 
         // public static string FindResourceName(string key, string type, Assembly target)

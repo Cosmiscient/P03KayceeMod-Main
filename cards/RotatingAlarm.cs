@@ -35,7 +35,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private RotatingAlarm()
         {
-            CurrentState = GetDefaultState();
+            CurrentState = Card != null && Card.RenderInfo != null && Card.RenderInfo.overriddenAbilityIcons != null && Card.RenderInfo.overriddenAbilityIcons.ContainsKey(AbilityID)
+                ? Card.RenderInfo.overriddenAbilityIcons[AbilityID].name.Equals(Textures[AlarmState.Up].name)
+                    ? AlarmState.Up
+                    : Card.RenderInfo.overriddenAbilityIcons[AbilityID].name.Equals(Textures[AlarmState.Down].name)
+                    ? AlarmState.Down
+                    : Card.RenderInfo.overriddenAbilityIcons[AbilityID].name.Equals(Textures[AlarmState.Left].name)
+                    ? AlarmState.Left
+                    : Card.RenderInfo.overriddenAbilityIcons[AbilityID].name.Equals(Textures[AlarmState.Right].name)
+                    ? AlarmState.Right
+                    : GetDefaultState()
+                : GetDefaultState();
         }
 
         static RotatingAlarm()

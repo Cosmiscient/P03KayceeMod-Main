@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using DiskCardGame;
-using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -23,7 +22,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.SetExtendedProperty(AbilityIconBehaviours.ORANGE_CELL_INVERSE, true);
             info.passive = false;
             info.hasColorOverride = true;
-            info.colorOverride = GameColors.Instance.purple;
+            info.colorOverride = GameColors.Instance.lightPurple;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
             AbilityID = AbilityManager.Add(

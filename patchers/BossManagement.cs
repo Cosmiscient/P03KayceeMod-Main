@@ -304,6 +304,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 yield return FastTravelManagement.ReturnToLocation(EventManagement.MycologistReturnPosition);
             }
 
+            SaveManager.SaveToFile(false);
+
             yield break;
         }
 

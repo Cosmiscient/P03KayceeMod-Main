@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DigitalRuby.LightningBolt;
 using DiskCardGame;
 using HarmonyLib;
@@ -20,11 +21,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Splice Conduit";
-            info.rulebookDescription = "If [creature] completes a circuit, all cards within that circuit are moved towards it, splicing with [creature] if possible.";
+            info.rulebookDescription = "If [creature] completes a circuit, all cards within that circuit are moved towards it, splicing with it if possible.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = true;
             info.conduitCell = false;
+            info.conduit = true;
             info.passive = false;
             info.hasColorOverride = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
@@ -45,7 +47,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 attackAdjustment = cardToMerge.Info.Attack,
                 healthAdjustment = cardToMerge.Info.Health,
-                abilities = new(cardToMerge.AllAbilities())
+                abilities = new(cardToMerge.AllAbilities().Where(ab => ab != Ability.ConduitNull))
             };
         }
 
@@ -92,9 +94,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             // Start with cards to our left
             for (int i = Card.Slot.Index - 1; i >= 0; i--)
-                yield return MoveTo(slots[i], slots[i + 1]);
+            {
+                if (ConduitCircuitManager.Instance.SlotIsWithinCircuit(slots[i]))
+                    yield return MoveTo(slots[i], slots[i + 1]);
+            }
+
             for (int i = Card.Slot.Index + 1; i < slots.Count; i++)
-                yield return MoveTo(slots[i], slots[i - 1]);
+            {
+                if (ConduitCircuitManager.Instance.SlotIsWithinCircuit(slots[i]))
+                    yield return MoveTo(slots[i], slots[i - 1]);
+            }
 
             if (ViewManager.Instance.CurrentView != view)
             {

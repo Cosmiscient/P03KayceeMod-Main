@@ -16,6 +16,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         internal static readonly Vector3 CARD_HOME_INDEX = new(2.23f, .02f, 0f);
         internal static readonly Vector3 STICKER_HOME_POSITION = new(-2.23f, 0.01f, -1.5f);
 
+        internal const int INTERFACE_STENCIL_NUMBER = 5;
+
         internal bool StickerInterfaceActive { get; set; } = false;
 
         private int DisplayedStickerIndex { get; set; }
@@ -38,7 +40,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                     refCard.transform,
                     refCard.transform.localPosition + new Vector3(0f, 0f, -2f),
                     .2f, 0f,
-                    completeCallback: () => GameObject.Destroy(refCard)
+                    completeCallback: () => Destroy(refCard)
                 );
             }
         }
@@ -47,7 +49,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         {
             FlyOutLastDisplayedCard();
 
-            GameObject card = GameObject.Instantiate(this.sequencer.cardArray.selectableCardPrefab, this.sequencer.transform);
+            GameObject card = Instantiate(sequencer.cardArray.selectableCardPrefab, sequencer.transform);
 
             card.transform.localPosition = CARD_HOME_INDEX + new Vector3(0f, 0f, 2f);
             LastDisplayedCard = card.GetComponentInChildren<SelectableCard>();
@@ -62,7 +64,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         private void RightCardButtonClicked()
         {
-            if (!this.StickerInterfaceActive)
+            if (!StickerInterfaceActive)
                 return;
 
             if (DisplayedCardIndex == Part3SaveData.Data.deck.Cards.Count - 1)
@@ -74,7 +76,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         private void LeftCardButtonClicked()
         {
-            if (!this.StickerInterfaceActive)
+            if (!StickerInterfaceActive)
                 return;
 
             if (DisplayedCardIndex == 0)
@@ -86,7 +88,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         private void RightButtonClicked()
         {
-            if (!this.StickerInterfaceActive)
+            if (!StickerInterfaceActive)
                 return;
 
             if (DisplayedStickerIndex == Stickers.AllStickerKeys.Count - 1)
@@ -98,7 +100,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         private void LeftButtonClicked()
         {
-            if (!this.StickerInterfaceActive)
+            if (!StickerInterfaceActive)
                 return;
 
             if (DisplayedStickerIndex == 0)
@@ -110,14 +112,14 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         private void FlyOutLastPrintedSticker()
         {
-            if (LastPrintedSticker != null && LastPrintedSticker.transform.parent == this.transform)
+            if (LastPrintedSticker != null && LastPrintedSticker.transform.parent == transform)
             {
                 GameObject refObject = LastPrintedSticker;
                 Tween.LocalPosition(
                     refObject.transform,
                     refObject.transform.localPosition + new Vector3(0f, -2f, 0f),
                     0.35f, 0f,
-                    completeCallback: () => GameObject.Destroy(refObject)
+                    completeCallback: () => Destroy(refObject)
                 );
             }
         }
@@ -126,30 +128,28 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         {
             FlyOutLastPrintedSticker();
 
-            var stickerKey = Stickers.AllStickerKeys[DisplayedStickerIndex];
+            string stickerKey = Stickers.AllStickerKeys[DisplayedStickerIndex];
 
             // Check to see if the sticker is on the currently visible card
             if (Stickers.IsStickerApplied(stickerKey))
             {
-                foreach (var proj in this.LastDisplayedCard.GetComponentsInChildren<Projector>())
+                foreach (Projector proj in LastDisplayedCard.GetComponentsInChildren<Projector>())
                 {
                     if (proj.transform.parent.gameObject.name.Equals(stickerKey))
                     {
                         Tween.Position(proj.transform.parent, proj.transform.parent.position + new Vector3(0f, -2f, 0f), 0.2f, 0f,
                             completeCallback: delegate ()
                             {
-                                GameObject.Destroy(proj.transform.parent.gameObject);
+                                Destroy(proj.transform.parent.gameObject);
                             });
                         break;
                     }
                 }
-                Stickers.UpdateStickerPosition(null, stickerKey, null);
-                Stickers.UpdateStickerRotation(null, stickerKey, null);
-                Stickers.UpdateStickerScale(null, stickerKey, null);
+                Stickers.ClearStickerAppearance(stickerKey);
             }
 
             // Right now only print is implemented
-            var sticker = Stickers.GetSticker(Stickers.AllStickerKeys[DisplayedStickerIndex], true, true, Stickers.StickerStyle.Standard);
+            GameObject sticker = Stickers.GetSticker(Stickers.AllStickerKeys[DisplayedStickerIndex], true, true, Stickers.StickerStyle.Standard);
             sticker.transform.SetParent(computerScreen.transform.parent);
             sticker.transform.localPosition = new(
                 computerScreen.transform.localPosition.x,
@@ -177,34 +177,34 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         private void UpdateStickerDisplayer()
         {
             string stickerKey = Stickers.AllStickerKeys[DisplayedStickerIndex];
-            var stickerAchievemnent = ModdedAchievementManager.AchievementById(Stickers.StickerRewards[stickerKey]);
+            ModdedAchievementManager.AchievementDefinition stickerAchievemnent = ModdedAchievementManager.AchievementById(Stickers.StickerRewards[stickerKey]);
 
             if (Stickers.IsStickerApplied(stickerKey))
             {
-                this.buttonText.transform.parent.gameObject.SetActive(true);
-                this.buttonText.SetText(Localization.Translate("RECALL"));
+                buttonText.transform.parent.gameObject.SetActive(true);
+                buttonText.SetText(Localization.Translate("RECALL"));
             }
             else if (!Stickers.DebugStickers && !stickerAchievemnent.IsUnlocked)
             {
-                this.buttonText.transform.parent.gameObject.SetActive(false);
+                buttonText.transform.parent.gameObject.SetActive(false);
             }
             else
             {
-                this.buttonText.transform.parent.gameObject.SetActive(true);
-                this.buttonText.SetText(Localization.Translate("PRINT"));
+                buttonText.transform.parent.gameObject.SetActive(true);
+                buttonText.SetText(Localization.Translate("PRINT"));
             }
         }
 
         private void ShowStickerAtIndex()
         {
-            var previousSticker = this.interfaceContainer.transform.Find("DisplayedSticker");
+            Transform previousSticker = interfaceContainer.transform.Find("DisplayedSticker");
             if (previousSticker != null)
-                GameObject.Destroy(previousSticker.gameObject);
+                Destroy(previousSticker.gameObject);
 
             FlyOutLastPrintedSticker();
 
             string stickerKey = Stickers.AllStickerKeys[DisplayedStickerIndex];
-            var stickerAchievemnent = ModdedAchievementManager.AchievementById(Stickers.StickerRewards[stickerKey]);
+            ModdedAchievementManager.AchievementDefinition stickerAchievemnent = ModdedAchievementManager.AchievementById(Stickers.StickerRewards[stickerKey]);
 
             Stickers.StickerStyle style = Stickers.StickerStyle.Standard;
             if (Stickers.IsStickerApplied(stickerKey))
@@ -218,8 +218,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
             UpdateStickerDisplayer();
 
-            var sticker = Stickers.GetSticker(stickerKey, false, false, style);
-            sticker.transform.SetParent(this.interfaceContainer.transform);
+            GameObject sticker = Stickers.GetSticker(stickerKey, false, false, style);
+            sticker.transform.SetParent(interfaceContainer.transform);
             sticker.name = "DisplayedSticker";
             sticker.transform.localPosition = new(0f, 1f, 0f);
             sticker.layer = LayerMask.NameToLayer("CardOffscreen");
@@ -230,20 +230,20 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         private void SetupStickerInterface(GameObject computerScreen)
         {
             this.computerScreen = computerScreen;
-            GameObject.Destroy(computerScreen.GetComponent<BuildACardScreen>());
+            Destroy(computerScreen.GetComponent<BuildACardScreen>());
 
             GameObject screenContents = computerScreen.transform.Find("RenderCamera/Content/BuildACardInterface").gameObject;
             GameObject screenInteractables = computerScreen.transform.Find("Anim/ScreenInteractables").gameObject;
             screenInteractables.transform.Find("STAGE_Abilities").gameObject.SetActive(false);
 
-            this.interfaceContainer = screenContents.transform.Find("STAGE_Confirm").gameObject;
+            interfaceContainer = screenContents.transform.Find("STAGE_Confirm").gameObject;
             GameObject clickablesContainer = screenInteractables.transform.Find("STAGE_Confirm").gameObject;
 
             // We will reappropriate the confirm stage section
-            this.interfaceContainer.transform.Find("Name").gameObject.SetActive(false);
+            interfaceContainer.transform.Find("Name").gameObject.SetActive(false);
             GameObject printButton = interfaceContainer.transform.Find("Button").gameObject;
-            this.buttonText = printButton.GetComponentInChildren<TextMeshPro>();
-            this.buttonText.SetText(Localization.Translate("PRINT"));
+            buttonText = printButton.GetComponentInChildren<TextMeshPro>();
+            buttonText.SetText(Localization.Translate("PRINT"));
             printButton.transform.localPosition = new(0f, -4f, 0f);
 
             GameObject printInteractable = clickablesContainer.transform.Find("Confirm").gameObject;
@@ -263,7 +263,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             leftInt.CursorSelectEnded = (mii) => LeftButtonClicked();
             rightInt.CursorSelectEnded = (mii) => RightButtonClicked();
 
-            var printButtonInteractable = clickablesContainer.GetComponentInChildren<GenericMainInputInteractable>();
+            GenericMainInputInteractable printButtonInteractable = clickablesContainer.GetComponentInChildren<GenericMainInputInteractable>();
             printButtonInteractable.SetCursorType(CursorType.Pickup);
             printButtonInteractable.transform.localPosition = new(0f, -0.935f, 0.0028f);
             printButtonInteractable.transform.localScale = new(1.2f, .4f, .15f);
@@ -271,15 +271,17 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
             // Make sure only the right stuff is visible
             foreach (Transform interfaceSibling in interfaceContainer.transform.parent)
+            {
                 if (interfaceSibling != interfaceContainer.transform)
                     interfaceSibling.gameObject.SetActive(false);
+            }
         }
 
         internal IEnumerator ShowStickerInterfaceUntilCancelled(Part3DeckReviewSequencer sequencer)
         {
-            this.StickerInterfaceActive = true;
+            StickerInterfaceActive = true;
 
-            GameObject computerScreen = GameObject.Instantiate(SpecialNodeHandler.Instance.buildACardSequencer.screen.gameObject, sequencer.transform);
+            GameObject computerScreen = Instantiate(SpecialNodeHandler.Instance.buildACardSequencer.screen.gameObject, sequencer.transform);
             computerScreen.transform.localEulerAngles = new(90f, 0f, 0f);
             computerScreen.transform.localScale = new(0.8f, 0.8f, 0.8f);
             computerScreen.SetActive(true);
@@ -296,18 +298,17 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
             this.sequencer = sequencer;
 
-            GameObject cardLeftButton = GameObject.Instantiate(computerScreen.transform.Find("Anim/ScreenInteractables/ArrowButton_Left").gameObject, sequencer.transform);
+            GameObject cardLeftButton = Instantiate(computerScreen.transform.Find("Anim/ScreenInteractables/ArrowButton_Left").gameObject, sequencer.transform);
             cardLeftButton.name = "CardLeftButton";
             cardLeftButton.GetComponent<HighlightedInteractable>().CursorSelectEnded = (mii) => LeftCardButtonClicked();
             cardLeftButton.transform.localEulerAngles = new(90f, 270f, 0f);
             cardLeftButton.transform.localPosition = new(1.2f, 0f, 0f);
 
-            GameObject cardRightButton = GameObject.Instantiate(computerScreen.transform.Find("Anim/ScreenInteractables/ArrowButton_Right").gameObject, sequencer.transform);
+            GameObject cardRightButton = Instantiate(computerScreen.transform.Find("Anim/ScreenInteractables/ArrowButton_Right").gameObject, sequencer.transform);
             cardRightButton.name = "CardRightButton";
             cardRightButton.GetComponent<HighlightedInteractable>().CursorSelectEnded = (mii) => RightCardButtonClicked();
             cardRightButton.transform.localEulerAngles = new(90f, 270f, 0f);
             cardRightButton.transform.localPosition = new(3.25f, -.05f, 0f);
-
 
             Tween.LocalPosition(computerScreen.transform, targetPos, 0.25f, 0f, Tween.EaseOut,
                 completeCallback: delegate ()
@@ -318,10 +319,10 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
             yield return new WaitUntil(() => ViewManager.Instance.CurrentView != View.MapDeckReview);
 
-            this.StickerInterfaceActive = false;
-            Tween.LocalScale(cardLeftButton.transform, new(0f, 0f, 0f), 0.2f, 0f, completeCallback: () => GameObject.Destroy(cardLeftButton));
-            Tween.LocalScale(cardRightButton.transform, new(0f, 0f, 0f), 0.2f, 0f, completeCallback: () => GameObject.Destroy(cardRightButton));
-            Tween.LocalPosition(computerScreen.transform, targetPos + new Vector3(0f, 0f, 2f), 0.25f, 0f, Tween.EaseIn, completeCallback: () => GameObject.Destroy(computerScreen));
+            StickerInterfaceActive = false;
+            Tween.LocalScale(cardLeftButton.transform, new(0f, 0f, 0f), 0.2f, 0f, completeCallback: () => Destroy(cardLeftButton));
+            Tween.LocalScale(cardRightButton.transform, new(0f, 0f, 0f), 0.2f, 0f, completeCallback: () => Destroy(cardRightButton));
+            Tween.LocalPosition(computerScreen.transform, targetPos + new Vector3(0f, 0f, 2f), 0.25f, 0f, Tween.EaseIn, completeCallback: () => Destroy(computerScreen));
 
             FlyOutLastPrintedSticker();
             FlyOutLastDisplayedCard();
@@ -330,9 +331,6 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             yield break;
         }
 
-        protected void OnEnable()
-        {
-            StickerInterfaceManager.Instance = this;
-        }
+        protected void OnEnable() => Instance = this;
     }
 }

@@ -19,7 +19,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 "Latches",
                 new List<string>() { "Well look at that. It seems that my cards are getting latched automatically.", "You don't mind an extra challenge, do you?" },
                 typeof(LatchBattle),
-                difficulty: 2,
+                difficulty: 1,
                 regions: new() { CardTemple.Tech, CardTemple.Nature, CardTemple.Wizard },
                 iconPath: "p03kcm/prefabs/latcher-claw"
             );

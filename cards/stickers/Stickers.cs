@@ -25,6 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         internal static readonly Texture2D CARBOARD_TEXTURE = TextureHelper.GetImageAsTexture("cardboard_texture.png", typeof(Stickers).Assembly);
 
         internal static readonly Shader STENCIL_SHADER = AssetBundleManager.Shaders.Find(sh => sh.name.Equals("P03/Projector/StickerStencilApply"));
+        internal static readonly Shader STANDARD_STENCIL_SHADER = AssetBundleManager.Shaders.Find(sh => sh.name.Equals("P03/Projector/StandardWithShader"));
 
         private static Texture2D _transparentTexture;
         internal static Texture2D TRANSPARENT_TEXTURE
@@ -86,11 +87,13 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             { "sticker_cowboy_hat", P03AchievementManagement.KILL_30_BOUNTY_HUNTERS },
             { "sticker_pokerchips", P03AchievementManagement.ALL_QUESTS_COMPLETED },
             { "sticker_companion_cube", P03AchievementManagement.KILL_QUEST_CARD },
+            { "sticker_revolver", P03AchievementManagement.SIX_SHOOTER },
             { "sticker_altcat", P03AchievementManagement.SCALES_TILTED_3X },
             { "sticker_muscles", P03AchievementManagement.FULLY_UPGRADED },
             { "sticker_dr_fire_esq_2", P03AchievementManagement.MAX_SP_CARD },
             { "sticker_battery", P03AchievementManagement.TURBO_RAMP },
             { "sticker_tophat", P03AchievementManagement.MASSIVE_OVERKILL },
+            { "sticker_rainbow_peace", P03AchievementManagement.AVOID_BOUNTY_HUNTERS },
             { "sticker_wizardhat", P03AchievementManagement.PLASMA_JIMMY_CRAZY },
             { "sticker_guillotine", P03AchievementManagement.FULLY_OVERCLOCKED },
             { "sticker_mushroom", P03AchievementManagement.MYCOLOGISTS_COMPLETED },
@@ -203,6 +206,13 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         #region Saved Sticker Positions
 
+        public class CardStickerData
+        {
+            public Dictionary<string, Vector3> Positions { get; set; }
+            public Dictionary<string, Vector3> Rotations { get; set; }
+            public Dictionary<string, Vector3> Scales { get; set; }
+        }
+
         private static Dictionary<string, Vector3> ParseVectorMap(string parsed)
         {
             Dictionary<string, Vector3> retval = new();
@@ -240,110 +250,102 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         private static string FormatVectorMap(Dictionary<string, Vector3> value) => String.Join("|", value.Select(kvp => $"{kvp.Key},{kvp.Value.x},{kvp.Value.y},{kvp.Value.z}"));
 
-        private static string FormatVectorMapOfMaps(Dictionary<string, Dictionary<string, Vector3>> value) => String.Join("@", value.Select(kvp => $"{kvp.Key}/{FormatVectorMap(kvp.Value)}"));
+        internal static bool IsStickerApplied(string stickerName) => Part3SaveData.Data.deck.Cards.Any(ci => ci.GetStickerData().Positions.ContainsKey(stickerName));
 
-        private static string GetCardKey(CardInfo card)
+        private static CardModificationInfo GetStickerMod(this CardInfo info, bool force = false)
         {
-            if (card == null)
+            foreach (CardModificationInfo cardMod in info.Mods)
             {
+                if (string.IsNullOrEmpty(cardMod.singletonId))
+                    continue;
+
+                if (cardMod.singletonId.StartsWith("Stickers"))
+                    return cardMod;
+            }
+            if (!force)
                 return null;
-            }
-
-            string retval = card.name;
-            string cardKey = CustomCards.ConvertCardToCompleteCode(card);
-            int duplicates = 0;
-            foreach (CardInfo deckCard in Part3SaveData.Data.deck.Cards)
+            CardModificationInfo stickerMod = new()
             {
-                if (deckCard.name.Equals(retval))
+                singletonId = "Stickers"
+            };
+            Part3SaveData.Data.deck.ModifyCard(info, stickerMod);
+            return stickerMod;
+        }
+
+        private static Dictionary<string, Vector3> GetStickerVectors(this CardModificationInfo stickerMod, string vectorKey)
+        {
+            string vectorKeyStart = $"[Sticker{vectorKey}:";
+
+            if (stickerMod.singletonId.Contains($"[Sticker{vectorKey}:"))
+            {
+                int startIndex = stickerMod.singletonId.IndexOf(vectorKeyStart);
+                string vectorData = stickerMod.singletonId.Substring(startIndex).Replace(vectorKeyStart, "");
+                if (vectorData.Contains("]"))
                 {
-                    if (cardKey.Equals(CustomCards.ConvertCardToCompleteCode(deckCard)))
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        duplicates += 1;
-                    }
+                    int endIndex = vectorData.IndexOf("]");
+                    vectorData = vectorData.Substring(0, endIndex).Replace("]", "");
+
+                    return ParseVectorMap(vectorData);
                 }
             }
-            return $"{retval}{duplicates}";
+            return null;
         }
 
-        private static Dictionary<string, Dictionary<string, Vector3>> UpdateVectorHelper(this Dictionary<string, Dictionary<string, Vector3>> dictionary, CardInfo card, string stickerName, Vector3? vector)
+        internal static CardStickerData GetStickerData(this CardInfo info)
         {
-            if (card == null)
+            CardModificationInfo stickerMod = info.GetStickerMod();
+            return new CardStickerData()
             {
-                foreach (string key in dictionary.Keys)
+                Positions = stickerMod?.GetStickerVectors("Positions") ?? new(),
+                Rotations = stickerMod?.GetStickerVectors("Rotations") ?? new(),
+                Scales = stickerMod?.GetStickerVectors("Scales") ?? new()
+            };
+        }
+
+        internal static CardInfo SetStickerData(this CardInfo info, CardStickerData data)
+        {
+            CardModificationInfo stickerMod = info.GetStickerMod(force: true);
+            stickerMod.singletonId = "Stickers";
+            stickerMod.singletonId += $"[StickerPositions:{FormatVectorMap(data.Positions)}]";
+            stickerMod.singletonId += $"[StickerRotations:{FormatVectorMap(data.Rotations)}]";
+            stickerMod.singletonId += $"[StickerScales:{FormatVectorMap(data.Scales)}]";
+            return info;
+        }
+
+        internal static void UpdateStickerPosition(this CardInfo info, string stickerKey, Vector3 position)
+        {
+            CardStickerData data = info.GetStickerData();
+            data.Positions[stickerKey] = position;
+            info.SetStickerData(data);
+        }
+
+        internal static void UpdateStickerRotation(this CardInfo info, string stickerKey, Vector3 rotation)
+        {
+            CardStickerData data = info.GetStickerData();
+            data.Rotations[stickerKey] = rotation;
+            info.SetStickerData(data);
+        }
+
+        internal static void UpdateStickerScale(this CardInfo info, string stickerKey, Vector3 scale)
+        {
+            CardStickerData data = info.GetStickerData();
+            data.Scales[stickerKey] = scale;
+            info.SetStickerData(data);
+        }
+
+        internal static void ClearStickerAppearance(string stickerKey)
+        {
+            foreach (CardInfo card in Part3SaveData.Data.deck.Cards)
+            {
+                CardStickerData data = card.GetStickerData();
+                if (data.Positions.ContainsKey(stickerKey))
                 {
-                    if (dictionary[key].ContainsKey(stickerName))
-                    {
-                        dictionary[key].Remove(stickerName);
-                    }
-                }
-                return dictionary;
-            }
-
-            string cardKey = GetCardKey(card);
-
-            if (!dictionary.ContainsKey(cardKey))
-            {
-                dictionary[cardKey] = new();
-            }
-
-            if (String.IsNullOrEmpty(stickerName))
-            {
-                dictionary[cardKey] = new();
-                return dictionary;
-            }
-
-            if (vector.HasValue)
-            {
-                dictionary[cardKey][stickerName] = vector.Value;
-            }
-            else if (dictionary[cardKey].ContainsKey(stickerName))
-            {
-                dictionary[cardKey].Remove(stickerName);
-            }
-
-            return dictionary;
-        }
-
-        private static Dictionary<string, Dictionary<string, Vector3>> AppliedStickerPositions
-        {
-            get => ParseVectorMapOfMaps(P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "AppliedStickerPositions"));
-            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "AppliedStickerPositions", FormatVectorMapOfMaps(value));
-        }
-
-        internal static void UpdateStickerPosition(CardInfo card, string stickerName, Vector3? position) => AppliedStickerPositions = AppliedStickerPositions.UpdateVectorHelper(card, stickerName, position);
-
-        private static Dictionary<string, Dictionary<string, Vector3>> AppliedStickerRotations
-        {
-            get => ParseVectorMapOfMaps(P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "AppliedStickerRotations"));
-            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "AppliedStickerRotations", FormatVectorMapOfMaps(value));
-        }
-
-        internal static void UpdateStickerRotation(CardInfo card, string stickerName, Vector3? eulerAngles) => AppliedStickerRotations = AppliedStickerRotations.UpdateVectorHelper(card, stickerName, eulerAngles);
-
-        private static Dictionary<string, Dictionary<string, Vector3>> AppliedStickerScales
-        {
-            get => ParseVectorMapOfMaps(P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "AppliedStickerScales"));
-            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, "AppliedStickerScales", FormatVectorMapOfMaps(value));
-        }
-
-        internal static void UpdateStickerScale(CardInfo card, string stickerName, Vector3? scale) => AppliedStickerScales = AppliedStickerScales.UpdateVectorHelper(card, stickerName, scale);
-
-        internal static bool IsStickerApplied(string stickerName)
-        {
-            Dictionary<string, Dictionary<string, Vector3>> stickerDict = AppliedStickerPositions;
-            foreach (string cardKey in stickerDict.Keys)
-            {
-                if (stickerDict[cardKey].ContainsKey(stickerName))
-                {
-                    return true;
+                    data.Positions.Remove(stickerKey);
+                    data.Rotations.Remove(stickerKey);
+                    data.Scales.Remove(stickerKey);
+                    card.SetStickerData(data);
                 }
             }
-
-            return false;
         }
 
         #endregion
@@ -368,7 +370,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             textureRenderer.material.renderQueue = 3000;
         }
 
-        internal static GameObject GetSticker(string stickerName, bool interactable, bool project, StickerStyle style, int stencilNumber = 1)
+        internal static GameObject GetSticker(string stickerName, bool interactable, bool project, StickerStyle style, int stencilNumber = StickerInterfaceManager.INTERFACE_STENCIL_NUMBER)
         {
             Texture2D texture = AllStickerTypes[style].FirstOrDefault(t => t.name.Equals(stickerName));
             if (texture == null)
@@ -399,15 +401,12 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 projectorObject.transform.localPosition = new(0f, 0f, -0.35f);
 
                 Projector projector = projectorObject.AddComponent<Projector>();
-                string shaderName = interactable ? "P03/Projector/UnStenciledSticker" : "P03/Projector/StenciledSticker";
-                Shader lightShader = AssetBundleManager.Shaders.Find(sh => sh.name.Equals(shaderName));
-                projector.material = new(lightShader);
+                projector.material = new(AssetBundleManager.Shaders.Find(sh => sh.name.Equals("P03/Projector/StenciledSticker")));
                 projector.material.SetColor("_Color", Color.white);
                 projector.material.SetTexture("_ShadowTex", texture);
-                if (!interactable)
-                    projector.material.SetInt("_StencilNumber", stencilNumber);
-                projector.farClipPlane = interactable ? 1.3121f : 1.26f;
-                projector.nearClipPlane = interactable ? 0f : 1.23f;
+                projector.material.SetInt("_StencilNumber", interactable ? StickerInterfaceManager.INTERFACE_STENCIL_NUMBER : stencilNumber);
+                projector.farClipPlane = 10f;
+                projector.nearClipPlane = 0f;
                 projector.fieldOfView = 25;
                 projector.ignoreLayers = 1 << 2;
                 projector.orthographic = true;
@@ -418,20 +417,38 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 // projectorSphere.transform.localPosition = projector.transform.localPosition;
                 // projectorSphere.transform.localScale = new(0.05f, 0.05f, 0.05f);
 
-                if (!interactable)
+                if (interactable)
+                {
+                    GameObject intProjectorObject = new("InteractiveProjector");
+                    intProjectorObject.transform.SetParent(sticker.transform);
+                    intProjectorObject.transform.localPosition = new(0f, 0f, -0.35f);
+
+                    Projector intProjector = intProjectorObject.AddComponent<Projector>();
+                    intProjector.material = new(AssetBundleManager.Shaders.Find(sh => sh.name.Equals("P03/Projector/UnStenciledSticker")));
+                    intProjector.material.SetColor("_Color", Color.white);
+                    intProjector.material.SetTexture("_ShadowTex", texture);
+                    intProjector.farClipPlane = 10f;
+                    intProjector.nearClipPlane = 0f;
+                    intProjector.fieldOfView = 25;
+                    intProjector.ignoreLayers = 1 << 2;
+                    intProjector.orthographic = true;
+                    intProjector.orthographicSize = 0.25f;
+
+                    StickerDrag dragger = sticker.AddComponent<StickerDrag>();
+                    dragger.StickerName = stickerName;
+                    dragger.StenciledProjector = projectorObject;
+                    dragger.UnStenciledProjector = intProjectorObject;
+                    sticker.AddComponent<StickerRotate>();
+
+                }
+                else
                 {
                     projectorObject.AddComponent<Camera>().depth = -5;
                     projectorObject.AddComponent<StickerProjector>();
                 }
             }
 
-            if (interactable)
-            {
-                StickerDrag dragger = sticker.AddComponent<StickerDrag>();
-                dragger.StickerName = stickerName;
-                sticker.AddComponent<StickerRotate>();
-            }
-            else
+            if (!interactable)
             {
                 UnityEngine.Object.Destroy(sticker.GetComponent<MeshCollider>());
             }
@@ -522,7 +539,41 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             yield return sequence;
         }
 
-        private static int LAST_STENCIL_NUMBER = 2;
+        private static int LAST_STENCIL_NUMBER = StickerInterfaceManager.INTERFACE_STENCIL_NUMBER + 1;
+
+        private static void CreateStencilDuplicate(GameObject target, int stencilNumber)
+        {
+            bool canCreate = true;
+            foreach (Transform child in target.transform)
+            {
+                if (child.gameObject.name.Equals("PortraitStencil"))
+                {
+                    child.GetComponent<Renderer>().material.SetInt("_StencilNumber", stencilNumber);
+                    canCreate = false;
+                }
+            }
+            if (canCreate)
+            {
+                GameObject stencilPortrait = UnityEngine.Object.Instantiate(target, target.transform.parent);
+                stencilPortrait.name = "PortraitStencil";
+
+                List<Transform> children = new();
+                foreach (Transform t in stencilPortrait.transform)
+                    children.Add(t);
+                foreach (Transform t in children)
+                    UnityEngine.Object.Destroy(t.gameObject);
+
+                Renderer stencilRenderer = stencilPortrait.GetComponent<Renderer>();
+                stencilRenderer.material = new(STENCIL_SHADER);
+                stencilRenderer.material.SetInt("_StencilNumber", stencilNumber);
+                stencilPortrait.transform.SetParent(target.transform);
+                stencilPortrait.transform.localPosition = Vector3.zero;
+                stencilPortrait.transform.localScale = new(1f, 1f, 1f);
+                stencilPortrait.transform.localEulerAngles = Vector3.zero;
+            }
+        }
+
+        private static readonly List<string> STENCIL_PATHS = new() { "ScreenFront", "Rails", "Bottom", "Top", "Top/MetalSlider" };
 
         [HarmonyPatch(typeof(Card), nameof(Card.RenderCard))]
         [HarmonyPostfix]
@@ -541,59 +592,100 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 __instance.StatsLayer.transform.Find($"Top/Stickers/Sticker_{i}").gameObject.layer = 2;
             }
 
-            foreach (Projector proj in __instance.GetComponentsInChildren<Projector>())
+            foreach (Projector proj in __instance.GetComponentsInChildren<Projector>().ToList())
             {
                 UnityEngine.Object.Destroy(proj.transform.parent.gameObject);
             }
 
-            if (LAST_STENCIL_NUMBER == 255)
-                LAST_STENCIL_NUMBER = 2;
-            else
-                LAST_STENCIL_NUMBER++;
-
-            string cardKey = GetCardKey(__instance.Info);
-            Dictionary<string, Dictionary<string, Vector3>> positions = AppliedStickerPositions;
-            Dictionary<string, Dictionary<string, Vector3>> scales = AppliedStickerScales;
-            Dictionary<string, Dictionary<string, Vector3>> rotations = AppliedStickerRotations;
+            CardStickerData data = __instance.Info.GetStickerData();
             bool activeInterface = StickerInterfaceManager.Instance != null && StickerInterfaceManager.Instance.StickerInterfaceActive;
+            bool cardHasStickers = data.Positions.Count > 0;
 
-            if (positions.ContainsKey(cardKey))
+            // Figure out the appropriate stencil number for the card
+            int stencilNumber = StickerInterfaceManager.INTERFACE_STENCIL_NUMBER;
+            if (!activeInterface && cardHasStickers)
             {
-                if (!activeInterface)
-                {
-                    foreach (Transform child in __instance.StatsLayer.transform)
-                    {
-                        if (child.gameObject.name.Equals("Stencil"))
-                            UnityEngine.Object.Destroy(child.gameObject);
-                    }
+                if (LAST_STENCIL_NUMBER == 255)
+                    LAST_STENCIL_NUMBER = StickerInterfaceManager.INTERFACE_STENCIL_NUMBER + 1;
+                else
+                    LAST_STENCIL_NUMBER++;
+                stencilNumber = LAST_STENCIL_NUMBER;
+            }
 
-                    GameObject stencil = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    stencil.name = "Stencil";
-                    stencil.transform.SetParent(__instance.StatsLayer.transform);
-                    stencil.transform.localScale = new(1.945f, 1.2f, 0.055f);
-                    stencil.transform.localPosition = new(0f, -0.05f, 0f);
-                    stencil.transform.localEulerAngles = new(0f, 0f, 0f);
-                    Material material = new(STENCIL_SHADER);
-                    material.SetInt("_StencilNumber", LAST_STENCIL_NUMBER);
-                    stencil.GetComponent<Renderer>().material = material;
-                    UnityEngine.Object.Destroy(stencil.GetComponent<Collider>());
-                }
+            // We create a little stencil world around each card
+            foreach (string path in STENCIL_PATHS)
+                CreateStencilDuplicate(__instance.StatsLayer.transform.Find(path).gameObject, stencilNumber);
 
-                foreach (string stickerKey in positions[cardKey].Keys)
+            // // The card art face also needs to set the stencil buffer, but that uses the
+            // // uber shader, and I can't recompile that one. So I have to duplicate it
+            // GameObject portraitObj = __instance.StatsLayer.transform.Find("ScreenFront").gameObject;
+            // bool canCreate = true;
+            // foreach (Transform child in portraitObj.transform)
+            // {
+            //     if (child.gameObject.name.Equals("PortraitStencil"))
+            //     {
+            //         child.GetComponent<Renderer>().material.SetInt("_StencilNumber", activeInterface || !positions.ContainsKey(cardKey) ? StickerInterfaceManager.INTERFACE_STENCIL_NUMBER : LAST_STENCIL_NUMBER);
+            //         canCreate = false;
+            //     }
+            // }
+            // if (canCreate)
+            // {
+            //     GameObject stencilPortrait = UnityEngine.Object.Instantiate(portraitObj, portraitObj.transform.parent);
+            //     stencilPortrait.name = "PortraitStencil";
+            //     UnityEngine.Object.Destroy(stencilPortrait.transform.Find("ScreenOverlay").gameObject);
+            //     UnityEngine.Object.Destroy(stencilPortrait.transform.Find("Cracks").gameObject);
+            //     Renderer stencilRenderer = stencilPortrait.GetComponent<Renderer>();
+            //     stencilRenderer.material = new(STENCIL_SHADER);
+            //     stencilRenderer.material.SetInt("_StencilNumber", activeInterface || !positions.ContainsKey(cardKey) ? StickerInterfaceManager.INTERFACE_STENCIL_NUMBER : LAST_STENCIL_NUMBER);
+            //     stencilPortrait.transform.SetParent(portraitObj.transform);
+            //     stencilPortrait.transform.localPosition = Vector3.zero;
+            //     stencilPortrait.transform.localScale = new(1f, 1f, 1.01f);
+            //     stencilPortrait.transform.localEulerAngles = Vector3.zero;
+            // }
+
+            if (cardHasStickers)
+            {
+                // // Okay - step one - we need to replace the standard shader with our shader
+                // // Our shader functions the same as the standard shader, except it will set the stencil buffer
+                // foreach (MeshRenderer renderer in __instance.GetComponentsInChildren<MeshRenderer>())
+                // {
+                //     foreach (Material mat in renderer.materials.Where(m => m.shader.name.Equals("P03/Projector/StandardWithShader")))
+                //     {
+                //         renderer.material.SetInt("_StencilNumber", activeInterface ? StickerInterfaceManager.INTERFACE_STENCIL_NUMBER : LAST_STENCIL_NUMBER);
+                //     }
+                //     Material[] materials = renderer.materials;
+                //     for (int i = 0; i < materials.Length; i++)
+                //     {
+                //         if (!materials[i].shader.name.Equals("Standard"))
+                //             continue;
+
+                //         // Material newMat = new(STANDARD_STENCIL_SHADER);
+                //         // newMat.CopyPropertiesFromMaterial(materials[i]);
+                //         // newMat.SetInt("_StencilNumber", activeInterface ? StickerInterfaceManager.INTERFACE_STENCIL_NUMBER : LAST_STENCIL_NUMBER);
+                //         // materials[i] = newMat;
+                //         materials[i].shader = STANDARD_STENCIL_SHADER;
+                //         materials[i].SetInt("_StencilNumber", activeInterface ? StickerInterfaceManager.INTERFACE_STENCIL_NUMBER : LAST_STENCIL_NUMBER);
+                //     }
+                //     renderer.materials = materials;
+                // }
+
+                foreach (string stickerKey in data.Positions.Keys)
                 {
                     GameObject sticker = GetSticker(stickerKey, activeInterface, true, StickerStyle.Standard, LAST_STENCIL_NUMBER);
                     sticker.transform.SetParent(__instance.StatsLayer.transform);
-                    sticker.transform.localPosition = positions[cardKey][stickerKey];
+                    if (activeInterface)
+                        sticker.GetComponent<StickerDrag>().Initialize();
+                    sticker.transform.localPosition = data.Positions[stickerKey];
                     sticker.transform.localEulerAngles = new(0f, 180f, 90f);
 
-                    if (scales.ContainsKey(cardKey) && scales[cardKey].ContainsKey(stickerKey))
+                    if (data.Scales.ContainsKey(stickerKey))
                     {
-                        sticker.transform.localScale = scales[cardKey][stickerKey];
+                        sticker.transform.localScale = data.Scales[stickerKey];
                     }
 
-                    if (rotations.ContainsKey(cardKey) && rotations[cardKey].ContainsKey(stickerKey))
+                    if (data.Rotations.ContainsKey(stickerKey))
                     {
-                        sticker.transform.localEulerAngles = rotations[cardKey][stickerKey];
+                        sticker.transform.localEulerAngles = data.Rotations[stickerKey];
                     }
 
                     // Reparent

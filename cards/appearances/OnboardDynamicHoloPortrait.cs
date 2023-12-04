@@ -62,7 +62,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (destroyComponents)
             {
                 List<Component> compsToDestroy = new();
-                foreach (var c in new List<Type>() { typeof(Rigidbody), typeof(AutoRotate), typeof(Animator), typeof(InteractableBase), typeof(Item) })
+                foreach (Type c in new List<Type>() { typeof(Rigidbody), typeof(AutoRotate), typeof(Animator), typeof(InteractableBase), typeof(Item) })
                     compsToDestroy.AddRange(inChildren ? obj.GetComponentsInChildren(c) : obj.GetComponents(c));
 
                 foreach (Component c in compsToDestroy.Where(c => !c.SafeIsUnityNull()))
@@ -74,7 +74,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Get reference material
             Material refMat = reference ?? CardLoader.GetCardByName("BridgeRailing").holoPortraitPrefab.GetComponentInChildren<Renderer>().material;
 
-            var allRenderers = inChildren ? obj.GetComponentsInChildren<Renderer>() : obj.GetComponents<Renderer>();
+            Renderer[] allRenderers = inChildren ? obj.GetComponentsInChildren<Renderer>() : obj.GetComponents<Renderer>();
             foreach (Renderer renderer in allRenderers)
             {
                 foreach (Material material in renderer.materials)
@@ -112,10 +112,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
 
             string shaderKey = Card.Info.GetExtendedProperty(SHADER_KEY);
-            if (string.IsNullOrEmpty(shaderKey))
-                shaderKey = "SFHologram/HologramShader";
+            if (!shaderKey.Equals("default", StringComparison.InvariantCultureIgnoreCase))
+            {
+                if (string.IsNullOrEmpty(shaderKey))
+                    shaderKey = "SFHologram/HologramShader";
 
-            HolofyGameObject(obj, color, shaderKey);
+                HolofyGameObject(obj, color, shaderKey);
+            }
         }
 
         private void SpawnHoloPortrait(DiskCardAnimationController dcac)

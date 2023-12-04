@@ -18,7 +18,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Seed Sprinter";
             info.rulebookDescription = "At the end of its controller's turn, [creature] moves one space in the direction indicated (if it can) and plants a seed in its previous space.";
             info.canStack = false;
-            info.powerLevel = 2;
+            info.powerLevel = 3;
             info.opponentUsable = true;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
@@ -37,17 +37,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (cardSlot.Card == null)
             {
                 CardInfo treeCard = CardLoader.GetCardByName(ExpansionPackCards_1.SEED_CARD);
-                CardModificationInfo extraAbilities = new() { abilities = new() };
-
-                foreach (CardModificationInfo mod in Card.Info.Mods)
-                {
-                    if (mod.abilities != null && mod.abilities.Count > 0)
-                    {
-                        extraAbilities.abilities.AddRange(mod.abilities);
-                        if (mod.fromOverclock)
-                            extraAbilities.fromOverclock = true;
-                    }
-                }
+                CardModificationInfo extraAbilities = new() { abilities = new(Card.Info.Abilities) };
 
                 if (extraAbilities.abilities.Count > 0)
                 {

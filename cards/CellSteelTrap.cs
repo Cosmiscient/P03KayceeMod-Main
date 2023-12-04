@@ -14,7 +14,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         static CellSteelTrap()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
-            info.rulebookName = "Power Trap";
+            info.rulebookName = "Trap When Powered";
             info.rulebookDescription = "When a card bearing this sigil perishes while in a circuit, the creature opposing it perishes as well. A Vessel is created in your hand.";
             info.canStack = false;
             info.powerLevel = 1;

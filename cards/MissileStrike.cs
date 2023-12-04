@@ -10,6 +10,7 @@ using InscryptionAPI.Helpers.Extensions;
 using InscryptionAPI.Triggers;
 using InscryptionCommunityPatch.Card;
 using Pixelplacement;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -98,7 +99,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             private static MissileStrikeManager _instance;
             internal static MissileStrikeManager Instance
             {
-                get => _instance ?? BoardManager.Instance.gameObject.AddComponent<MissileStrikeManager>();
+                get
+                {
+                    if (_instance == null || _instance.SafeIsUnityNull())
+                    {
+                        _instance = BoardManager.Instance.gameObject.AddComponent<MissileStrikeManager>();
+                    }
+                    return _instance;
+                }
                 private set => _instance = value;
             }
 
@@ -273,7 +281,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.SetupPhase))]
         [HarmonyPostfix]
-        private static void EnsureSetup() => _ = MissileStrikeManager.Instance;
+        private static void EnsureSetup()
+        {
+            if (!GlobalTriggerHandler.Instance.nonCardReceivers.Contains(MissileStrikeManager.Instance))
+                GlobalTriggerHandler.Instance.RegisterNonCardReceiver(MissileStrikeManager.Instance);
+        }
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
         [HarmonyPostfix]

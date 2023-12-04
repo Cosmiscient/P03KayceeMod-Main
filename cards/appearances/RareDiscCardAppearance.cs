@@ -11,8 +11,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static readonly Dictionary<string, Color?> configColors = new();
         private static readonly Dictionary<string, Color> defaultColors = new()
         {
-            {"BorderColor", GameColors.Instance.darkGold * 0.33f},
-            {"NameBannerColor", new Color(1f, 1f, 1f, 1f)},
+            {"BorderColor", new(0.2f, 0f, 0f) },
+            {"PortraitColor", new(1f, 0f, 0f) },
+            {"AttackColor", new(1f, 0f, 0f) },
+            {"HealthColor", new(1f, 0f, 0f) },
+            {"EnergyColor", new(1f, 0f, 0f) },
+            {"DefaultAbilityColor", new(1f, 0f, 0f) },
+            {"NameBannerColor", new(0.5f, 0.4f, 0.4f)},
             {"NameTextColor", new Color(0f, 0f, 0f, 1f)}
         };
 
@@ -41,10 +46,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             Color? c = ConfigFileColor(key);
 
-            if (c.HasValue)
-                return c;
-
-            return defaultColors.ContainsKey(key) ? defaultColors[key] : null;
+            return c.HasValue ? c : defaultColors.ContainsKey(key) ? defaultColors[key] : null;
         }
 
         public static new Appearance ID { get; private set; }

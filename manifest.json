@@ -4,8 +4,9 @@
     "website_url": "https://github.com/Cosmiscient/P03KayceeMod-Main",
     "description": "Had enough of Leshy? Face P03 inside of Kaycee's Mod! Now with NPCs, extra cards, and secrets.",
     "dependencies": [
-        "API_dev-API-2.4.0",
-        "WhistleWind-New_Spell_Card_Toolkit-1.2.0",
-        "Infiniscryption-Achievements-0.1.4"
+        "API_dev-API-2.18.5",
+        "WhistleWind-New_Spell_Card_Toolkit-1.2.1",
+        "Infiniscryption-Pack_Management_API-1.1.5",
+        "Infiniscryption-Achievements-0.2.0"
     ]
 }

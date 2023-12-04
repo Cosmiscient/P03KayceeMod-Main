@@ -73,7 +73,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 __instance.currencyText.text = card.metaCategories.Contains(CardMetaCategory.Rare)
                     ? card.ModAbilities.Count > 0 ? "RARE++" : "RARE"
-                    : card.Gemified || card.mods.Count > 0 ? "TKN++" : "TKN";
+                    : card.Gemified || card.ModAbilities.Count > 0 ? "TKN++" : "TKN";
             }
         }
 

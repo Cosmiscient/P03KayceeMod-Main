@@ -36,7 +36,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     if (slot.Card.HasAbility(rule.requiredAbility))
                     {
-                        if (!slot.Card.TemporaryMods.Any(m => m.singletonId.Equals(rule.modId)))
+                        if (!slot.Card.TemporaryMods.Any(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(rule.modId)))
                         {
                             CardModificationInfo info = new(rule.gainedAbility)
                             {

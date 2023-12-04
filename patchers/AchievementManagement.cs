@@ -194,7 +194,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 false,
                 grp.ID,
                 TextureHelper.GetImageAsTexture("achievement_crime.png", typeof(P03AchievementManagement).Assembly)
-            ).ID; // [a pig with an apple in its mouth] sticker
+            ).ID; // [peace sign] sticker
 
             PLASMA_JIMMY_CRAZY = ModdedAchievementManager.New(
                 P03Plugin.PluginGuid,
@@ -448,7 +448,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     AchievementManager.Unlock(FULLY_UPGRADED);
                 }
 
-                if (Part3SaveData.Data.deck.Cards.Where(c => c.HasAbility(Ability.PermaDeath) || c.HasAbility(NewPermaDeath.AbilityID)).Count() == 0)
+                if (Part3SaveData.Data.deck.Cards.All(c => c.HasAbility(Ability.PermaDeath) || c.HasAbility(NewPermaDeath.AbilityID)))
                     AchievementManager.Unlock(FULLY_OVERCLOCKED);
             }
         }

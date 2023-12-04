@@ -120,17 +120,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public static CardInfo GetBountyTarget()
         {
             CardInfo dummyCard = ScriptableObject.CreateInstance<CardInfo>();
-            dummyCard.name = "!BOUNTYTARGET";
-
-            dummyCard.decals = new()
-            {
-                CustomCards.DUMMY_DECAL,
-                CustomCards.DUMMY_DECAL_2,
-                DECAL
-            };
+            dummyCard.name = "P03KCM_BOUNTYTARGET";
+            dummyCard.SetBasic(" ", 0, 0);
+            dummyCard.AddPart3Decal(DECAL);
 
             CardModificationInfo mod = GetCurrentMod();
             dummyCard.SetPortrait(GetPortrait(mod.deathCardInfo));
+            mod.deathCardInfo = null;
             dummyCard.specialAbilities = new() { AbilityID };
 
             dummyCard.mods = new() { mod };
@@ -188,12 +184,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         [HarmonyPatch(typeof(BountyHunterGenerator), nameof(BountyHunterGenerator.TryAddBountyHunterToTurnPlan))]
         [HarmonyPrefix]
+        [HarmonyPriority(HarmonyLib.Priority.VeryHigh)]
         private static bool AddBountyTargetInstead(List<List<CardInfo>> turnPlan, ref List<List<CardInfo>> __result)
         {
             if (!P03AscensionSaveData.IsP03Run)
                 return true;
 
             if (!Quest.IsDefaultActive() || (Part3SaveData.Data.battlesSinceBountyHunter >= 3 && Part3SaveData.Data.BountyTier >= 1))
+                return true;
+
+            if (turnPlan == null || turnPlan.Count < 3)
                 return true;
 
             // So we're always going to add the bounty target to turn 3. Always.

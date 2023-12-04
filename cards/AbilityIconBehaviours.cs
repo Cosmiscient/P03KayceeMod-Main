@@ -156,7 +156,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
                 {
                     if (slot.Card != null && (slot.Card.HasAnyOfAbilities(GemReRenderAbilities) || slot.Card.Info.appearanceBehaviour.Contains(ReplicaAppearanceBehavior.ID)))
+                    {
                         slot.Card.RenderCard();
+                        slot.Card.UpdateFaceUpOnBoardEffects();
+                    }
                 }
                 foreach (PlayableCard card in PlayerHand.Instance.cardsInHand)
                 {

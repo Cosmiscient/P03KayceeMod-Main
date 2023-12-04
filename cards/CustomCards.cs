@@ -389,6 +389,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_2.png", typeof(CustomCards).Assembly)
                     );
                     cards.CardByName("PlasmaGunner").AddAppearances(ForceRevolverAppearance.ID);
+
+                    cards.CardByName("JuniorSage").AddAppearances(OnboardWizardCardModel.ID);
+                    cards.CardByName("PracticeMage").AddAppearances(OnboardWizardCardModel.ID);
+                    cards.CardByName("RubyGolem").AddAppearances(OnboardWizardCardModel.ID);
+                    cards.CardByName("MoxRuby").AddAppearances(OnboardWizardCardModel.ID);
                 }
 
                 foreach (CardInfo ci in cards.Where(ci => ci.temple == CardTemple.Tech))
@@ -403,8 +408,52 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     }
                 }
 
+                if (!P03AscensionSaveData.IsP03Run)
+                {
+                    foreach (CardInfo ci in cards.Where(c =>
+                        c.GetModPrefix() is P03Plugin.CardPrefx or
+                        ExpansionPackCards_1.EXP_1_PREFIX or
+                        ExpansionPackCards_2.EXP_2_PREFIX
+                    ))
+                    {
+                        ci.metaCategories = new();
+                    }
+                }
+
                 return cards;
             };
+
+            // Triple Gunner
+            CardInfo qgun = CardManager.New(P03Plugin.CardPrefx, "QuadGunner", "Mega Gunner", 2, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_quad_gunner.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 6)
+                .AddAbilities(Ability.TriStrike, Ability.DoubleStrike);
+
+            CardInfo tgun = CardManager.New(P03Plugin.CardPrefx, "TripleGunner", "Triple Gunner", 2, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_triple_gunner.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 6)
+                .AddAbilities(Ability.TriStrike)
+                .SetEvolve(qgun, 1);
+
+            CardManager.BaseGameCards.First(c => c.name == "CloserBot").SetEvolve(tgun, 1);
+
+            // Hurt Heal Conduit
+
+            CardInfo hhc = CardManager.New(P03Plugin.CardPrefx, "HurtHealConduit", "Hurt-n-Heal Conduit", 0, 4)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_conduitattackhealer.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 5)
+                .AddAbilities(Ability.ConduitBuffAttack, Ability.ConduitHeal);
+
+            CardManager.BaseGameCards.First(c => c.name == "HealerConduit").SetEvolve(hhc, 1);
+            CardManager.BaseGameCards.First(c => c.name == "AttackConduit").SetEvolve(hhc, 1);
+
+            // 50er
+            CardInfo minecartrad = CardManager.New(P03Plugin.CardPrefx, "MineCart_Overdrive", "50er", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_50er.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 2)
+                .AddAbilities(Ability.Strafe, Ability.Strafe);
+
+            CardManager.BaseGameCards.First(c => c.name == "MineCart").SetEvolve(minecartrad, 1);
 
             CardManager.New(P03Plugin.CardPrefx, DRAFT_TOKEN, "Basic Token", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_drafttoken.png", typeof(CustomCards).Assembly))
@@ -657,6 +706,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook);
                     }
 
+                    if (ab.Id is Ability.Strafe or Ability.StrafeSwap or Ability.StrafePush)
+                    {
+                        ab.Info.canStack = true;
+                    }
+
+                    if (ab.Id is Ability.MadeOfStone)
+                    {
+                        ab.Info.rulebookDescription = "[creature] is immune to the effects of Touch of Death, Stinky, and fire.";
+                    }
+
                     if (ab.Id is Ability.GainGemBlue or Ability.GainGemOrange or Ability.GainGemGreen)
                     {
                         ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Modular);
@@ -675,6 +734,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     if (ab.Id == Ability.DrawCopy)
                     {
                         ab.Info.canStack = true;
+                    }
+
+                    if (ab.Id == Ability.GemDependant)
+                    {
+                        ab.Info.rulebookDescription = ab.Info.rulebookDescription.Replace("Mox card", "Gem Vessel");
                     }
 
                     ab.Info.rulebookDescription = ab.Info.rulebookDescription.Replace("Spell", "Command").Replace("spell", "command");
@@ -715,7 +779,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return info;
         }
 
-        public static bool EligibleForGemBonus(this PlayableCard card, GemType gem) => GameFlowManager.IsCardBattle && (card.OpponentCard ? OpponentGemsManager.Instance.HasGem(gem) : ResourcesManager.Instance.HasGem(gem));
+        public static bool EligibleForGemBonus(this PlayableCard card, GemType gem) => card != null && GameFlowManager.IsCardBattle && (card.OpponentCard ? OpponentGemsManager.Instance.HasGem(gem) : ResourcesManager.Instance.HasGem(gem));
 
         public static CardInfo SetRegionalP03Card(this CardInfo info, params CardTemple[] region)
         {

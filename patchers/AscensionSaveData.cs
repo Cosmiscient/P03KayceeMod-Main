@@ -231,6 +231,31 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        [HarmonyPatch(typeof(SaveFile), nameof(SaveFile.OuroborosDeaths), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool P03GetOuroborosDeaths(SaveFile __instance, ref int __result)
+        {
+            if (IsP03Run)
+            {
+                __result = P03Data == null ? 0 : P03Data.currentOuroborosDeaths;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(SaveFile), nameof(SaveFile.OuroborosDeaths), MethodType.Setter)]
+        [HarmonyPrefix]
+        private static bool P03GetOuroborosDeaths(SaveFile __instance, int value)
+        {
+            if (IsP03Run)
+            {
+                P03Data ??= new();
+                P03Data.currentOuroborosDeaths = value;
+                return false;
+            }
+            return true;
+        }
+
         // [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.NewRun))]
         // [HarmonyPrefix]
         // [HarmonyAfter(new string[] { "cyantist.inscryption.api" })]

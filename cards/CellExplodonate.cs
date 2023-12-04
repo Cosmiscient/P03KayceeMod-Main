@@ -98,7 +98,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public IEnumerator OnBellRung(bool playerCombatPhase) { yield return Card.Die(false, null); }
 
-        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
+        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
 
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer) { yield return Explodonate(); }
     }

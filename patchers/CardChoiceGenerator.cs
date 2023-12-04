@@ -230,8 +230,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 __instance.rerollInteractable.gameObject.SetActive(true);
                 yield return sequence;
-                __instance.rerollInteractable.gameObject.SetActive(false);
             }
+            __instance.rerollInteractable.gameObject.SetActive(false);
+            __instance.GetComponentInChildren<HoloFloatingLabel>()?.gameObject.SetActive(false);
 
             yield break;
         }

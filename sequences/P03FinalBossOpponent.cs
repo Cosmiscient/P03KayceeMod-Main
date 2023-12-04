@@ -8,6 +8,7 @@ using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Pixelplacement;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
@@ -19,15 +20,33 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public override bool GiveCurrencyOnDefeat => false;
         public override string PostDefeatedDialogueId => "P03AscensionDefeated";
 
-        private readonly List<string> PhaseTwoWeirdCards = new() { "MantisGod", "Coyote", "Moose", "Grizzly", "FrankNStein", "Amalgam", "Adder" };
+        private readonly List<string> PhaseTwoWeirdCards = new() { "MantisGod", "Moose", "Grizzly", "FrankNStein", "Amalgam", "Adder", "JuniorSage", "PracticeMage", "Revenant", "Bonehound", "RubyGolem" };
 
         private CardInfo PhaseTwoBlocker;
 
         private static readonly CardSlot CardSlotPrefab = ResourceBank.Get<CardSlot>("Prefabs/Cards/CardSlot_Part3");
 
+        private static readonly Dictionary<CardTemple, GameObject> CardPrefabs = new()
+        {
+            { CardTemple.Undead, ResourceBank.Get<GameObject>("Prefabs/Cards/PlayableCard_Grimora") },
+            { CardTemple.Wizard, ResourceBank.Get<GameObject>("Prefabs/Cards/PlayableCard_Magnificus") },
+            { CardTemple.Nature, ResourceBank.Get<GameObject>("Prefabs/Cards/PlayableCard") }
+        };
+
+        private static readonly Dictionary<CardTemple, GameObject> CardRenderCameraPrefabs = new()
+        {
+            { CardTemple.Undead, ResourceBank.Get<GameObject>("Prefabs/Cards/CardRenderCamera_Grimora") },
+            { CardTemple.Wizard, ResourceBank.Get<GameObject>("Prefabs/Cards/CardRenderCamera_Magnificus") },
+            { CardTemple.Nature, ResourceBank.Get<GameObject>("Prefabs/Cards/CardRenderCamera") },
+            //{ CardTemple.Tech, ResourceBank.Get<GameObject>("Prefabs/Cards/CardRenderCamera_Part3") }
+        };
+
+        private static Dictionary<CardTemple, CardRenderCamera> CardRenderCameras = null;
+
         private static readonly HighlightedInteractable OpponentQueueSlotPrefab = ResourceBank.Get<HighlightedInteractable>("Prefabs/Cards/QueueSlot");
 
         private bool FasterEvents = false;
+        private bool HasDoneFirstWeirdCards = false;
 
         public P03FinalBossScreenArray ScreenArray;
 
@@ -47,8 +66,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             if (difficulty >= 1)
             {
-                PhaseTwoWeirdCards.Remove("Coyote");
                 PhaseTwoWeirdCards.Remove("Grizzly");
+                PhaseTwoWeirdCards.Remove("PracticeMage");
                 PhaseTwoWeirdCards.Add("Shark");
                 PhaseTwoWeirdCards.Add("Moose");
                 PhaseTwoBlocker.mods.Add(new(Ability.DeathShield));
@@ -57,6 +76,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 PhaseTwoWeirdCards.Remove("FrankNStein");
                 PhaseTwoWeirdCards.Remove("Adder");
+                PhaseTwoWeirdCards.Remove("Revenant");
                 PhaseTwoWeirdCards.Add("Urayuli");
                 PhaseTwoBlocker.mods.Add(new(Ability.Sharp));
             }
@@ -183,6 +203,37 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield return ClearBoard();
                 yield return ClearQueue();
                 ScreenArray.ShowFace(P03AnimationController.Face.Angry, P03AnimationController.Face.Bored);
+
+                // Go ahead and instantiate the card render cameras for the cameos from part 1/2/3 cards in this stage
+                CardRenderCamera oldInstance = CardRenderCamera.m_Instance;
+                CardRenderCameras = new();
+                int idx = 2;
+                CardRenderCameras[CardTemple.Tech] = oldInstance;
+                foreach (KeyValuePair<CardTemple, GameObject> cameraInfo in CardRenderCameraPrefabs)
+                {
+                    GameObject obj = Instantiate(cameraInfo.Value, Part3GameFlowManager.Instance.transform);
+                    obj.transform.position = obj.transform.position + (Vector3.down * 10f * idx++);
+                    CardRenderCamera camera = obj.GetComponentInChildren<CardRenderCamera>();
+                    camera.gameObject.name = $"SpecialRenderCamera{cameraInfo.Key}";
+
+
+                    RenderTexture newRendTex = new(camera.snapshotRenderTexture.width, camera.snapshotRenderTexture.height, camera.snapshotRenderTexture.depth, camera.snapshotRenderTexture.format);
+                    newRendTex.Create();
+
+                    RenderTexture newEmTex = new(camera.snapshotEmissionRenderTexture.width, camera.snapshotEmissionRenderTexture.height, camera.snapshotEmissionRenderTexture.depth, camera.snapshotEmissionRenderTexture.format);
+                    newEmTex.Create();
+
+                    foreach (Camera unityCamera in camera.GetComponentsInChildren<Camera>())
+                    {
+                        if (unityCamera.targetTexture == camera.snapshotRenderTexture)
+                            unityCamera.targetTexture = camera.snapshotRenderTexture = newRendTex;
+                        if (unityCamera.targetTexture == camera.snapshotEmissionRenderTexture)
+                            unityCamera.targetTexture = camera.snapshotEmissionRenderTexture = newEmTex;
+                    }
+
+                    CardRenderCameras[cameraInfo.Key] = camera;
+                }
+                CardRenderCamera.m_Instance = oldInstance;
 
                 ViewManager.Instance.SwitchToView(View.Default, false, false);
                 P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Angry, true, true);
@@ -354,6 +405,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return ClearQueue();
             yield return ClearBoard();
 
+            CardRenderCamera defaultCam = CardRenderCameras[CardTemple.Tech];
+            CardRenderCamera.m_Instance = defaultCam;
+            CardRenderCameras.Remove(CardTemple.Tech);
+            CardRenderCameras.ForEach(kvp => kvp.Value.snapshotEmissionRenderTexture.Release());
+            CardRenderCameras.ForEach(kvp => kvp.Value.snapshotRenderTexture.Release());
+            CardRenderCameras.ForEach(kvp => Destroy(kvp.Value));
+            CardRenderCameras = null;
+
             OpponentAnimationController.Instance.ClearLookTarget();
 
             ScreenArray.ShowFace(P03AnimationController.Face.Bored);
@@ -516,6 +575,177 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private int[] adjustedPlanP2;
 
+        private static CardTemple? SaveFileOverride = null;
+
+        [HarmonyPatch(typeof(SaveFile), nameof(SaveFile.IsPart1), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool HackPart1(ref bool __result)
+        {
+            if (SaveFileOverride.HasValue && SaveFileOverride.Value == CardTemple.Nature)
+            {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(SaveFile), nameof(SaveFile.IsPart3), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool HackPart3(ref bool __result)
+        {
+            if (SaveFileOverride.HasValue && SaveFileOverride.Value != CardTemple.Tech)
+            {
+                __result = false;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(SaveFile), nameof(SaveFile.IsGrimora), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool HackGrimora(ref bool __result)
+        {
+            if (SaveFileOverride.HasValue && SaveFileOverride.Value == CardTemple.Undead)
+            {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(SaveFile), nameof(SaveFile.IsMagnificus), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool HackMagnificus(ref bool __result)
+        {
+            if (SaveFileOverride.HasValue && SaveFileOverride.Value == CardTemple.Wizard)
+            {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+
+        // [HarmonyPatch(typeof(CardRenderCamera), nameof(CardRenderCamera.ValidStatsLayer))]
+        // [HarmonyPrefix]
+        // [HarmonyPriority(Priority.VeryHigh)]
+        // private static bool OnlyTakeAppropriateStatsLayers(CardRenderCamera __instance, RenderStatsLayer layer, ref bool __result)
+        // {
+        //     if (layer == null || layer.PlayableCard == null)
+        //         return true;
+
+        //     if (!__instance.gameObject.name.StartsWith("SpecialRenderCamera"))
+        //         return true;
+
+        //     if (__instance.gameObject.name.Equals("SpecialRenderCameraUndead"))
+        //         __result = layer.PlayableCard.Info.temple == CardTemple.Undead;
+        //     else if (__instance.gameObject.name.Equals("SpecialRenderCameraNature"))
+        //         __result = layer.PlayableCard.Info.temple == CardTemple.Nature;
+        //     else if (__instance.gameObject.name.Equals("SpecialRenderCameraWizard"))
+        //         __result = layer.PlayableCard.Info.temple == CardTemple.Wizard;
+
+        //     return false;
+        // }
+
+        [HarmonyPatch(typeof(RenderStatsLayer), nameof(RenderStatsLayer.RenderCard))]
+        [HarmonyPrefix]
+        [HarmonyPriority(Priority.VeryHigh)]
+        private static bool OverrideRenderInP03Boss(RenderStatsLayer __instance, CardRenderInfo info)
+        {
+            if (TurnManager.Instance != null
+                && TurnManager.Instance.Opponent != null
+                && TurnManager.Instance.Opponent is P03AscensionOpponent p03
+                && p03.NumLives == 2
+                && CardRenderCameras != null)
+            {
+                if (__instance.Renderer != null)
+                {
+                    SaveFileOverride = info.baseInfo.temple;
+                    bool emissionEnabled = CardDisplayer3D.EmissionEnabledForCard(info, __instance.PlayableCard);
+                    if (!emissionEnabled)
+                        __instance.DisableEmission();
+
+                    P03Plugin.Log.LogInfo($"Rendering {info.baseInfo.name} {info.baseInfo.temple} {CardRenderCameras[info.baseInfo.temple].gameObject.name}");
+                    CardRenderCameras[info.baseInfo.temple].QueueStatsLayerForRender(info, __instance, __instance.PlayableCard, __instance.RenderToMainTexture, emissionEnabled);
+                    SaveFileOverride = null;
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(GravestoneCardAnimationController), nameof(GravestoneCardAnimationController.SetCardRendererFlipped))]
+        [HarmonyPrefix]
+        [HarmonyPriority(Priority.VeryHigh)]
+        private static bool HackForGrimAnim(GravestoneCardAnimationController __instance, bool flipped)
+        {
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                __instance.armAnim.transform.localEulerAngles = !flipped ? new Vector3(-270f, 90f, -90f) : new Vector3(-90f, 0f, 0f);
+                __instance.armAnim.transform.localPosition = !flipped ? new Vector3(0f, -0.1f, -0.1f) : new Vector3(0f, 0.24f, -0.1f);
+                __instance.damageMarks.transform.localPosition = !flipped ? new Vector3(0.19f, -0.37f, -0.01f) : new Vector3(-0.21f, -0.1f, -0.01f);
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(CardSpawner), nameof(CardSpawner.SpawnPlayableCard))]
+        [HarmonyPrefix]
+        [HarmonyPriority(Priority.VeryHigh)]
+        private static bool MakeCardWithAppropriatePrefab(CardInfo info, ref PlayableCard __result)
+        {
+            if (TurnManager.Instance != null
+                && TurnManager.Instance.Opponent != null
+                && TurnManager.Instance.Opponent is P03AscensionOpponent p03
+                && p03.NumLives == 2
+                && info.temple != CardTemple.Tech)
+            {
+                P03Plugin.Log.LogInfo("In Custom Make Card");
+                SaveFileOverride = info.temple;
+                GameObject card = Instantiate(CardPrefabs[info.temple]);
+                PlayableCard playableCard = card.GetComponent<PlayableCard>();
+                playableCard.SetInfo(info);
+                __result = playableCard;
+
+                // Kind of a funny hack...there's got to be a better way to fix this
+                // If I don't do this, the gravestone cards are upside down.
+                if (info.temple == CardTemple.Undead)
+                {
+                    GameObject newParent = new("Part3Parent");
+                    newParent.transform.SetParent(card.transform);
+                    //card.transform.Find("SkeletonAttackAnim").SetParent(newParent.transform);
+                    card.transform.Find("RotatingParent").SetParent(newParent.transform);
+                    newParent.transform.localPosition = Vector3.zero;
+                    newParent.transform.localScale = Vector3.one;
+                    newParent.transform.localEulerAngles = new(90f, 180f, 0f);
+                }
+
+                SaveFileOverride = null;
+                return false;
+            }
+            return true;
+        }
+
+        // [HarmonyPatch(typeof(Opponent), nameof(CreateCard))]
+        // [HarmonyPrefix]
+        // [HarmonyPriority(Priority.VeryHigh)]
+        // private static bool MakeCardWithAppropriatePrefab(Opponent __instance, CardInfo cardInfo, ref PlayableCard __result)
+        // {
+        //     P03Plugin.Log.LogInfo($"Creating card for opponent {cardInfo.name} {cardInfo.temple}");
+        //     if (__instance is P03AscensionOpponent p03 && p03.NumLives == 2 && cardInfo.temple != CardTemple.Tech)
+        //     {
+        //         P03Plugin.Log.LogInfo("In Custom Make Card");
+        //         GameObject prefab = cardInfo.temple == CardTemple.Wizard ? MagnificusCardPrefab : (cardInfo.temple == CardTemple.Undead ? GrimoraCardPrefab : LeshyCardPrefab);
+        //         Instantiate(prefab);
+        //         PlayableCard playableCard = prefab.GetComponent<PlayableCard>();
+        //         playableCard.SetInfo(cardInfo);
+        //         playableCard.SetIsOpponentCard(true);
+        //         p03.ModifyQueuedCard(playableCard);
+        //         __result = playableCard;
+        //         return false;
+        //     }
+        //     return true;
+        // }
+
         public override IEnumerator QueueNewCards(bool doTween = true, bool changeView = true)
         {
             if (NumLives == 1)
@@ -531,17 +761,47 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             if (TurnManager.Instance.TurnNumber < plan.Length)
                 numCardsToQueue = plan[TurnManager.Instance.TurnNumber];
 
-            for (int i = 0; i < numCardsToQueue; i++)
+            if (NumLives == 2 && !HasDoneFirstWeirdCards)
             {
-                if (slotsToQueue.Count > 0)
+                int difficulty = AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.BaseDifficulty);
+                List<string> firstTurnCards = new();
+                if (difficulty == 0)
+                    firstTurnCards = new() { "JuniorSage", "Revenant" };
+                else if (difficulty == 1)
+                    firstTurnCards = new() { "RubyGolem", "FrankNStein" };
+                else if (difficulty == 2)
+                    firstTurnCards = new() { "RubyGolem", "Bonehound", "Adder" };
+
+                foreach (string cardName in firstTurnCards)
                 {
-                    //int statPoints = Mathf.RoundToInt((float)Mathf.Min(6, TurnManager.Instance.TurnNumber + 1) * 2.5f);
-                    CardSlot slot = slotsToQueue[Random.Range(0, slotsToQueue.Count)];
-                    CardInfo card = GenerateCard(TurnManager.Instance.TurnNumber);
-                    if (card != null)
+                    if (slotsToQueue.Count > 0)
                     {
-                        yield return QueueCard(card, slot, doTween, changeView, true);
-                        slotsToQueue.Remove(slot);
+                        //int statPoints = Mathf.RoundToInt((float)Mathf.Min(6, TurnManager.Instance.TurnNumber + 1) * 2.5f);
+                        CardSlot slot = slotsToQueue[Random.Range(0, slotsToQueue.Count)];
+                        CardInfo card = CardLoader.GetCardByName(cardName);
+                        if (card != null)
+                        {
+                            yield return QueueCard(card, slot, doTween, changeView, true);
+                            slotsToQueue.Remove(slot);
+                        }
+                    }
+                }
+                HasDoneFirstWeirdCards = true;
+            }
+            else
+            {
+                for (int i = 0; i < numCardsToQueue; i++)
+                {
+                    if (slotsToQueue.Count > 0)
+                    {
+                        //int statPoints = Mathf.RoundToInt((float)Mathf.Min(6, TurnManager.Instance.TurnNumber + 1) * 2.5f);
+                        CardSlot slot = slotsToQueue[Random.Range(0, slotsToQueue.Count)];
+                        CardInfo card = GenerateCard(TurnManager.Instance.TurnNumber);
+                        if (card != null)
+                        {
+                            yield return QueueCard(card, slot, doTween, changeView, true);
+                            slotsToQueue.Remove(slot);
+                        }
                     }
                 }
             }

@@ -21,6 +21,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookDescription = "When [creature] deals damage, create a Forced Upgrade card in hand. Forced Upgrade is defined as a spell that costs 2 energy and caused any target to upgrade to a new version.";
             info.canStack = false;
             info.powerLevel = 1;
+            info.activated = false;
             info.opponentUsable = false;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
