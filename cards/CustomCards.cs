@@ -619,16 +619,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 2)
                 .SetNewBeastTransformer(0, -1);
 
-            CardInfo cTower = CardManager.New(P03Plugin.CardPrefx, "StarterConduitTower", "Tower Conduit", 0, 2)
+            CardInfo cTower = CardManager.New(P03Plugin.CardPrefx, "StarterConduitTower", "Conduit Tower", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_conduit_tower.png", typeof(CustomCards).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("syntax_conduittower.png", typeof(CustomCards).Assembly))
                 .AddAppearances(OnboardDynamicHoloPortrait.ID)
                 .AddAbilities(Ability.ConduitNull)
                 .SetCost(energyCost: 1);
             cTower.temple = CardTemple.Tech;
-            cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/specialnodesequences/teslacoil");
-            cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "0,-.39,0");
-            cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, ".6,.6,.6");
+            cTower.holoPortraitPrefab = CardManager.BaseGameCards.CardByName("ConduitTower").holoPortraitPrefab;
+            // cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/specialnodesequences/teslacoil");
+            // cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "0,-.39,0");
+            // cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, ".6,.6,.6");
 
             CardInfo radio = CardManager.New(P03Plugin.CardPrefx, RADIO_TOWER, "Radio Tower", 0, 3);
             radio.AddSpecialAbilities(ListenToTheRadio.AbilityID, RerenderOnBoard.AbilityID);

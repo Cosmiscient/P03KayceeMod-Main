@@ -32,6 +32,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             LastTriggeredCard = Card;
             Card.Status.hiddenAbilities.Add(Ability);
             CardModificationInfo mod = BountyHunterGenerator.GenerateMod(Math.Min(TurnManager.Instance.TurnNumber, 3), 20);
+            if (mod.energyCostAdjustment > 6) // Lucky you!
+                mod.energyCostAdjustment = 6;
             Card.AddTemporaryMod(mod);
             Card.RenderCard();
         }

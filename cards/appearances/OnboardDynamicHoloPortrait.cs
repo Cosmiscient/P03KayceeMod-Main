@@ -112,11 +112,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
 
             string shaderKey = Card.Info.GetExtendedProperty(SHADER_KEY);
+            if (string.IsNullOrEmpty(shaderKey))
+                shaderKey = "SFHologram/HologramShader";
+
             if (!shaderKey.Equals("default", StringComparison.InvariantCultureIgnoreCase))
             {
-                if (string.IsNullOrEmpty(shaderKey))
-                    shaderKey = "SFHologram/HologramShader";
-
                 HolofyGameObject(obj, color, shaderKey);
             }
         }

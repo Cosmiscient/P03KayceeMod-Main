@@ -59,50 +59,9 @@ Version 4.0 comes with support for achievements! You can view the list of achiev
 
 Version 4.0 adds some significant quality of life improvements to help you play the mod a little bit faster. You can navigate the map using the IJKL keys on your keyboard (think WASD movement, but with different keys because the game already uses WASD for other purposes). You an also click any room on the minimap that you've already visited to travel directly back there, saving you the time required to walk back across the map.
 
-### Challenges
+## Developer Guide
 
-Some challenges simply don't work in this context. Any challenge that doesn't work will be 'locked' and you won't be able to select it.
-
-If you've created a new custom challenge and you want it to be compatible with this mod, you need to set a flag named "P03" on the challenge using the Challenge Manager in API 2.4+. 
-You can also set a flag called "noleshy" to prevent your challenge from showing up in a leshy run.
-
-
-```c#
-ChallengeManager.FullChallenge fch = ChallengeManager.AddSpecific(...)
-fch.SetFlags("P03"); // Allows the challenge to appear in a P03 run
-fch.SetFlags("noleshy"); // Keeps the challenge from appearing in a leshy run
-```
-
-If the challenge does not have this flag set, it will always be locked when the player is setting up a P03 run.
-
-## Adding more cards to the pool
-
-If you want to add more cards to the pool for use in this mod, you need to add one of five new unique metacategories to your cards. These metacategories control which regions the cards can appear in choice nodes. For example, a card that has the 'TechRegionCards' can only show up in the draft node at the hub of the map, or in choice nodes in the Tech region ("Resplendent Bastion").
-
-All of these metacategories have this plugin's GUID: 'zorro.inscryption.infiniscryption.p03kayceerun'
-
-The five metacategories are:
-
-- **NeutralRegionCards**: For cards that can appear in any region.
-- **WizardRegionCards**: For cards that should appear in the Wizard region (these cards should be gem-related)
-- **TechRegionCards**: For cards that should appear in the Tech region (these cards should be conduit-related)
-- **NatureRegionCards**: For cards that should appear in the Nature region (these cards should be beast/animal related)
-- **UndeadRegionCards**: For cards that should appear in the Undead region (these cards should be death-related)
-
-Note that this does not control which battles/encounters the cards appear in.
-
-Here is an example of how to do this in code.
-
-```c#
-public static readonly CardMetaCategory WizardRegion = (CardMetaCategory)GuidManager.GetEnumValue<CardMetaCategory>("zorro.inscryption.infiniscryption.p03kayceerun", "WizardRegionCards");
-
-CardInfo myCard = (...);
-myCard.AddMetaCategories(WizardRegion);
-```
-
-## Modding encounters
-
-Unfortunately, custom encounters and regions are not currently supported by this mod. Perhaps sometime in the future.
+If you want to build your own mods that add content to P03 runs, please check out the [P03 Developer's Guide](https://github.com/Cosmiscient/P03KayceeMod-Main/wiki). You'll find instructions on how to add cards, challenges, encounters, quests, and more!
 
 ## Credits
 
@@ -140,7 +99,6 @@ While the full credits will play in-game when you win for the first time, I have
 
 - [BepInEx](https://inscryption.thunderstore.io/package/BepInEx/BepInExPack_Inscryption/)
 - [API](https://inscryption.thunderstore.io/package/API_dev/API/)
-- [All The Sigils](https://inscryption.thunderstore.io/package/AllTheSigils/All_The_Sigils/)
 - [Achievements](https://inscryption.thunderstore.io/package/Infiniscryption/Achievements/)
 - [Spells](https://inscryption.thunderstore.io/package/WhistleWind/New_Spell_Card_Toolkit/)
 
