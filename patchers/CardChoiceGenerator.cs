@@ -222,6 +222,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (nodeData is Part3RareCardChoicesNodeData)
             {
                 MainInputInteractable reroller = __instance.rerollInteractable;
+                __instance.rerollInteractable.gameObject.SetActive(false);
+                __instance.GetComponentInChildren<HoloFloatingLabel>()?.gameObject.SetActive(false);
                 __instance.rerollInteractable = null;
                 yield return sequence;
                 __instance.rerollInteractable = reroller;

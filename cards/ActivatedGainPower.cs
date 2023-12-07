@@ -12,7 +12,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
-        public const int ENERGY_COST = 6;
+        public const int ENERGY_COST = 4;
 
         static ActivatedGainPower()
         {

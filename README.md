@@ -3,13 +3,26 @@
 
 **Join our Discord!! [https://discord.gg/PxCHsKtfGc](https://discord.gg/PxCHsKtfGc)**
 
-**Check out this super spicy 720p trailer made in a free video editor**
+**HYPE ALERT!! NEW TRAILER ONLINE!!**
 
-[![SUPER SPICY 720p TRAILER](https://img.youtube.com/vi/f68rs2rJ_jM/0.jpg)](https://www.youtube.com/watch?v=f68rs2rJ_jM)
+[![GET HYPE TRAILER!](http://i3.ytimg.com/vi/rN8mf_rjX1o/hqdefault.jpg)](https://www.youtube.com/watch?v=rN8mf_rjX1o)
 
-If you enjoyed the energy-based robotic gameplay of Inscryption Act 3 and wished it was available as part of Kaycee's Mod, then this is the mod for you.
+Are you tired of Leshy? Mildly disturbed by Grimora? Intimidated by Magnificus? This is the mod for you! 
 
 Installing this mod will give you the option to play against either Leshy or P03 when you start a new run. Selecting Leshy will give you the standard game you're used to, but selecting P03 will send you to the land of Botopia, where you will draft robotic cards (including all new cards created just for this mod), explore procedurally generated maps, fight off bounty hunters, and purchase upgrades with your hard-earned robobucks. And at the end of it all, P03 is waiting for you in an all-new boss fight.
+
+## I'm new here - how do I install this?
+
+[Follow this link](https://www.youtube.com/watch?v=ASOJ4idMRxk) to an easy-to-follow guide for how to get started with Inscryption modding.
+
+## What's new in version 4.0?
+
+- **Expansion Pack 2**: With 50 new cards and all-new mechanics!
+- **Achievements**: That happy little ding and extra rush of dopamine when you do something extra special.
+- **Stickers**: Unlockable cosmetics to customize your cards and show off your swag. If you want some *extra* swag, I **highly** recommend installing the [High Res Mod](https://inscryption.thunderstore.io/package/overfall/InscryptionHighRes/) to really make those stickers pop. 
+- **Modified Battles**: P03 got bored - battles sometimes have extra modifiers on them.
+- **New Items**: The UFO abducts a card from the board and puts it in your hand. And the Laser Rifle upgrades any card by giving it the Sniper ability for the rest of the battle.
+- **Faster Navigation**: You can now fast travel to any room that you've visited before by clicking it on the minimap. And rather than clicking arrows, you can also travel through the map by using the IJKL keys on your keyboard like arrow keys.
 
 ## How does this mod work?
 
@@ -74,10 +87,19 @@ While the full credits will play in-game when you win for the first time, I have
 - Answearing Machine
 - Nevernamed
 - Anne Bean
-- Gold
+- Inverse Fireman
 - Amy
+- Bitty45
+- Ian5
+- Darson
+- VG Civilian
+- Catboy Stinkbug
 
 **Card Design, Balance, and Playtesting**
+- Inverse Fireman
+- Ian5
+- Mr Etc
+- Catboy Stinkbug
 - TheGreenDigi
 - Bitty45
 - Jury
@@ -102,15 +124,23 @@ While the full credits will play in-game when you win for the first time, I have
 - [Achievements](https://inscryption.thunderstore.io/package/Infiniscryption/Achievements/)
 - [Spells](https://inscryption.thunderstore.io/package/WhistleWind/New_Spell_Card_Toolkit/)
 
+And these aren't required, but **highly** recommended:
+
+- [High Res Mod](https://inscryption.thunderstore.io/package/overfall/InscryptionHighRes/)
+- [Pack Manager](https://inscryption.thunderstore.io/package/Infiniscryption/Pack_Management_API/)
+
 ## Changelog 
 
 <details>
 <summary>Changelog</summary>
 
-3.9 (4.0 alpha 1)
-- Expansion Pack 2 is now complete. We have added 22 new cards and 20 new sigils.
-- There are now achievements. Completing achievements unlocks stickers that can be used to customize your cards with each run.
-- Seedbot now plants seeds instead of creating trees. Seeds immediately bury themselves and then sprout into trees on the following turn.
+4.0.0
+- Huge new update!
+- Expansion Pack 2 is now complete - with 50 (!!) new cards!
+- The save system has been re-done. You might have some work to do.
+- There are now achievements!
+- And STICKERS! Completing achievements unlocks stickers that can be used to customize your cards with each run.
+- Also a ton of bug fixes and balance changes.
 
 3.1.6
 - Fixed some defects with the \[redacted\] boss.
@@ -211,164 +241,9 @@ While the full credits will play in-game when you win for the first time, I have
 - New art for mirror tentacle
 - Fixed an API compatibility issue that made the quest system break with mods that added dialogue (thanks WhistleWind and NeverNamed)
 
-2.3.7
-- Fixed pack manager issue from 2.3.6
-- NPCs have new faces
-- Beast node is now the base game version
-
-2.3.6
-- Mod works on API 2.12.0
-- Too Easy quest is fixed
-
-2.3.5
-- Final update by DivisionByZ0rro - see note.
-- Gem Cycler updates the resources manager on each gem change.
-- Fixed defect where the recycler was giving away common tokens instead of rare token when cashing in a rare card.
-- Energy Conduit no longer crashes inside of of a circuit
-- The checks for entering REDACTED are more robust, which should hopefully fix some issues entering that zone.
-- The "No Bomb Remote" challenge has been replaced with a second, stackable Smaller Backpack challenge.
-
-2.3.4
-- Fixed a defect in the interaction between "Unkillable when Powered" and "Skeleclocked"
-
-2.3.3
-- There was a really silly bug in the audio import code - this should hopefully solve the modman compatibility issue.
-- You'll know if the audio bug is fixed because this will be the last time you see me talk about it.
-- If there's another mention of it, it means I didn't fix it this time either.
-
-2.3.2
-- Repackaged to hopefully fix modman compatibility issues
-
-2.3.1
-- Rewrote the audio importing code to not assume the location of the audio files.
-
-2.3
-- Added some kick-ass new music from Purist to the final boss fight
-- Fixed an issue with holographic cards breaking due to floating point parsing in certain locales
-- Rewrote the Gem Cycler ability to fix breaking portraits
-- Fixed a couple of miscellaneous visual defects
-- Fixed defect in transformer cards where cards eventually transformed permanently into Add3rs
-
-2.2.8
-- Prevent upgrades from being assigned to the lower level of the tower in Gaudy Gem Land
-- Updated dialogue for some quests
-
-2.2.7
-- I goofed and screwed up the packaging for version 2.2.6. This will fix that.
-
-2.2.6
-- Changed how challenge compatibility works
-
-2.2.4
-- Prevent Too Easy and Donation quests from appearing in the final zone.
-- Fixed the dialogue for the Lost Friend quest and buffed the reward for that quest.
-- Added a small additional reward for the broken generator quest
-
-2.2.3
-- Balance tweaks to Recycle Angel
-- Fixed visual issue where card slots would not properly reset their colors in certain situations.
-- Tweaked the Gembound Ripper encounter
-- Compatibility with API 2.4+
-
-2.2.2
-- Fixed the orange and green blessings to not work when the cards are in your hand.
-
-2.2.1
-- Fixed the interaction between Transform and Permadeath - cards should permadie even if they are on their opposite side when they die now
-- Fixed the interaction between Transform and Build-A-Card - custom cards should no longer lose their attack/health when merged in a transform node
-- Fixed the attack animation of REDACTED
-- Fixed the REDACTED ability of REDCATED to actually do what it says
-- Fixed the interaction of Guard Dog and REDACTED
-
-2.2.0
-- Fast travel between zones is less restricted - you can now continue exploring a region after you beat the boss. You still cannot travel back to a region you have cleared and left, however.
-- Fixed a visual defect with Zombie Process
-- Fixed a visual defect with ability icons on REDACTED
-- Fixed a defect with board slots not properly resetting after REDACTED
-- Updated artwork for Skeleton Master
-
-2.1.4
-- Fixed defect with Skeleton Master
-- Fixed defect with CopyPasta (opposing slots are now properly selectable)
-- Fixed defect with ability conduits erroneously duplicating existing abilities on cards
-- Tweaked the Spyplane encounter
-
-2.1.3
-- Fixed Mr:Clock to show the correct state of the rotation when it enters the battlefield.
-- Fixed a defect with trading cards with Transformer to REDACTED
-- Made some more of the new abilities able to be acquired in Add Ability nodes
-
-2.1.2
-- Set the 'not randomly selectable' flag for the new custom items so that they won't be picked by the Pack Rat in Act 1
-- Hopefully fixed issues with the 'ConduitGainAbility' manager
-- Fixed the Radio and Power Tower quests to not accidentally give you duplicate copies of the quest cards.
-- Replaced the art for Executor
-- Tweaked the Wing Latcher encounter, the Mr:Clock encounter, and the Bombs and Shields encounter.
-
-2.1.1
-- Fixed defect with the GOLD!! quest
-
-2.1
-- Fixed defects with Mr:Clock, Oroboros, and Gem Cycler
-
-2.0
+2.0.0
 - The NPC Update! Quests! New cards! A new boss maybe?!
 
-1.1.3
-- Okay - no more trying to be clever. The interoperability between this mod and the pack manager mod is now contained in a separate BepInEx plugin, so if it fails (because you don't have Pack Manager installed), nothing in the P03 plugin is affected.
-- Hopefully. Finally. Fixed the starter deck bug.
-
-1.1.2
-- Some additional convenience code that I wrote apparently re-introduced an old bug where this mod chokes if the Pack Management mod is not also installed. I think I have that fixed now.
-
-1.1.1
-- Fixed defect where the new P03 items would show up in Leshy's runs
-
-1.1.0
-- Previous versions of this mod would leave your save file in a state where unloading the mod would permanently corrupt your save file. This has now been fixed. If you load up this version of the mod and take any action that would cause the game to save your file to the disk, your save file should now be able to handle this mod being uninstalled.
-- Fixed an issue where sometimes the trading sequence would activate multiple times at once
-- Replaced the Transformer event
-- Added some new items and replaced some of the items that you start with.
-- Replaced some of the temporary card portraits with kickass new art by Makako and Nevernamed
-- Used some serious hacks to make the Deck Editor mod compatible with this mod
-- Moved project to its own repo to make collaboration with other modders easier
-- Fixed an issue where tranferring Transformer via the shredder made the recipient turn into an Add3r permanently.
-- Filled the main challenge screen with a bunch of new challenges
-- Random balance tweaks to some cards
-- Rebalanced a lot of the encounters to be harder at higher difficulties, and hopefully fixed some issues with a couple of encounters being too difficult at low difficulties.
-- Registered all of the custom metacategories created by this mod with the Pack Management mod to improve compatibility with cards that are missing 
-- Preparing myself for the inevitable amount of bugs that will appear once I release this.
-
-
-1.0.7
-- Patch 1.0.5 broke Build-A-Card. This should fix it.
-
-1.0.6
-- Fixed defect where activating chapter select would corrupt your entire save file unrecoverably. Let's take a moment of silence for all of the save files that were lost over the past few days...
-
-1.0.5
-- Okay, *really* fixed the P03 starter deck/Leshy starter deck issue...I hope. I really hope.
-- Prevent cards from being Skeleclocked more than once.
-- Removed GainBattery from Build-A-Card
-- Rebalanced the Energy Conduit, Thick Droid, and Automaton
-- Fixed a defect with the rare card appearance and Leshy runs
-- Build-A-Card now randomly selects a set of abilities for you to choose from
-- Updated dependency to API 2.02
-
-1.0.4
-- Fixed it so that P03 no longer puts his starter decks over Leshy's when you have no starter decks unlocked and play a Leshy run.
-- Fixed an incompatibility with the Pack Manager mod that caused the 'A Random Card Is Played' option in the Canvas boss fight to softlock the game. 
-
-1.0.3
-- Fixed defect where sometimes the RNG would generate a map that didn't have enough room to hold all possible nodes.
-
-1.0.2
-- Fixed defect where the game's internal data files were not loading correctly after being checked into and out of GIT.
-
-1.0.1
-- Properly created soft dependency on Pack Manager mod
-- Properly handle what happens when you have no starter decks unlocked.
-
-1.0
+1.0.0
 - Initial version.
 </details>

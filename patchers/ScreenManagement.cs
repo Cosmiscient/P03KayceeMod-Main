@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Bootstrap;
@@ -204,7 +205,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static readonly string[] menuItems = new string[] { "Menu_New", "Continue", "Menu_Stats", "Menu_Unlocks", "Menu_Exit", "Menu_QuitApp" };
         [HarmonyPatch(typeof(AscensionStartScreen), nameof(AscensionStartScreen.Start))]
-        [HarmonyPostfix]
+        [HarmonyBefore(GRIMORA_MOD, MAGNIFICUS_MOD)]
+        [HarmonyPrefix]
         private static void AddP03StartOption(AscensionStartScreen __instance)
         {
             if (__instance.transform.Find("Center/MenuItems/Menu_Continue_P03") != null)
@@ -266,14 +268,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             continueP03Button.transform.Find("Menu_Continue_DISABLED").GetComponentInChildren<PixelText>().SetText("- CONTINUE P03 RUN -");
 
             // Add to transition
-            AscensionMenuScreenTransition transitionController = startScreen.GetComponent<AscensionMenuScreenTransition>();
-
-            transitionController.onEnableRevealedObjects.Insert(transitionController.onEnableRevealedObjects.IndexOf(newButton) + 1, newP03Button);
-            transitionController.onEnableRevealedObjects.Insert(transitionController.onEnableRevealedObjects.IndexOf(continueButton) + 1, continueP03Button);
-            transitionController.screenInteractables.Insert(transitionController.screenInteractables.IndexOf(newButtonController) + 1, newP03ButtonController);
-            transitionController.screenInteractables.Insert(transitionController.screenInteractables.IndexOf(continueButtonController) + 1, continueP03ButtonController);
-
-            __instance.UpdateContinueTextEnabled();
+            // AscensionMenuScreenTransition transitionController = startScreen.GetComponent<AscensionMenuScreenTransition>();
+            RemoveDisabledContinueButtons(__instance);
+            // transitionController.onEnableRevealedObjects.Insert(transitionController.onEnableRevealedObjects.IndexOf(newButton) + 1, newP03Button);
+            // transitionController.onEnableRevealedObjects.Insert(transitionController.onEnableRevealedObjects.IndexOf(continueButton) + 1, continueP03Button);
+            // transitionController.screenInteractables.Insert(transitionController.screenInteractables.IndexOf(newButtonController) + 1, newP03ButtonController);
+            // transitionController.screenInteractables.Insert(transitionController.screenInteractables.IndexOf(continueButtonController) + 1, continueP03ButtonController);
         }
 
         private static readonly Dictionary<string, int> SORT_KEYS = new() {
@@ -281,11 +281,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {"unlocks", 40 }, {"exit", 50 }, {"quit", 60 }
         };
         private static readonly Dictionary<string, int> SCRYBE_SORT_KEYS = new() {
-            {"p02", 2 }, {"grim", 4 }, {"mag", 6 }
+            {"p03", 2 }, {"grim", 4 }, {"mag", 6 }
         };
-        private static int MenuItemSortKey(string itemName)
+        private static int MenuItemSortKey(GameObject item)
         {
-            string itemKey = itemName.ToLowerInvariant();
+            PixelText text = item.GetComponent<PixelText>();
+            string itemKey = item.name.ToLowerInvariant();
             int sortValue = 1000;
             foreach (KeyValuePair<string, int> kvp in SORT_KEYS)
             {
@@ -302,32 +303,59 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     sortValue += kvp.Value;
                     break;
                 }
+                if (text != null && text.Text.ToLowerInvariant().Contains(kvp.Key))
+                {
+                    sortValue += kvp.Value;
+                    break;
+                }
             }
             return sortValue;
         }
 
-        [HarmonyPatch(typeof(AscensionStartScreen), nameof(AscensionStartScreen.UpdateContinueTextEnabled))]
-        [HarmonyPostfix]
+        private static bool IsMenuItem(GameObject obj) => MenuItemSortKey(obj) < 1000;
+
+        private static Transform FindLeshyContinueButton(Transform parent)
+        {
+            foreach (Transform child in parent)
+            {
+                if (child.name.Equals("Continue", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    foreach (Transform grandchild in child)
+                    {
+                        if (!grandchild.gameObject.name.ToLowerInvariant().Contains("grim"))
+                            return child;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         private static void RemoveDisabledContinueButtons(AscensionStartScreen __instance)
         {
             Transform itemsParent = __instance.transform.Find("Center/MenuItems");
             if (itemsParent == null)
                 return;
 
-            GameObject leshyContinue = itemsParent.Find("Continue").gameObject;
-            GameObject p03Continue = itemsParent.Find("Menu_Continue_P03").gameObject;
+            Transform leshyContinueTransform = FindLeshyContinueButton(itemsParent);
+            Transform p03ContinueTransform = itemsParent.Find("Menu_Continue_P03");
 
-            if (leshyContinue == null || p03Continue == null)
+            if (leshyContinueTransform == null || p03ContinueTransform == null)
                 return;
 
-            leshyContinue.SetActive(__instance.RunExists);
-            p03Continue.SetActive(P03AscensionSaveData.P03RunExists);
+            leshyContinueTransform.Find("Menu_Continue").gameObject.SetActive(__instance.RunExists);
+            leshyContinueTransform.Find("Menu_Continue_DISABLED").gameObject.SetActive(!__instance.RunExists);
+            leshyContinueTransform.gameObject.SetActive(__instance.RunExists);
+
+            p03ContinueTransform.Find("Menu_Continue").gameObject.SetActive(P03AscensionSaveData.P03RunExists);
+            p03ContinueTransform.Find("Menu_Continue_DISABLED").gameObject.SetActive(!P03AscensionSaveData.P03RunExists);
+            p03ContinueTransform.gameObject.SetActive(P03AscensionSaveData.P03RunExists);
 
             List<Transform> allItems = new();
             foreach (Transform child in itemsParent)
                 allItems.Add(child);
-            allItems = allItems.Where(t => t == leshyContinue.transform ? __instance.RunExists : t != p03Continue.transform || P03AscensionSaveData.P03RunExists)
-                               .OrderBy(t => MenuItemSortKey(t.gameObject.name)).ToList();
+            allItems = allItems.Where(t => t == leshyContinueTransform ? __instance.RunExists : t != p03ContinueTransform || P03AscensionSaveData.P03RunExists)
+                               .OrderBy(t => MenuItemSortKey(t.gameObject)).ToList();
 
             for (int i = 0; i < allItems.Count; i++)
             {
@@ -343,30 +371,36 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return;
 
             int firstMenu = 0;
+
             for (int i = 0; i < transitionController.onEnableRevealedObjects.Count; i++)
             {
-                if (transitionController.onEnableRevealedObjects[i].name.Contains("Menu"))
+                if (IsMenuItem(transitionController.onEnableRevealedObjects[i]))
                 {
                     firstMenu = i;
                     break;
                 }
             }
 
-            transitionController.onEnableRevealedObjects = transitionController.onEnableRevealedObjects.Where(o => o != null && !o.name.ToLowerInvariant().Contains("menu") && o.name != "Continue").ToList();
+            transitionController.onEnableRevealedObjects = transitionController.onEnableRevealedObjects.Where(o => !IsMenuItem(o)).ToList();
             foreach (Transform item in allItems)
                 transitionController.onEnableRevealedObjects.Insert(firstMenu, item.gameObject);
+            transitionController.onEnableRevealedObjects = transitionController.onEnableRevealedObjects.Distinct().ToList();
+
+            transitionController.screenInteractables = transitionController.onEnableRevealedObjects.SelectMany(g => g.GetComponentsInChildren<MainInputInteractable>()).ToList();
         }
 
-        [HarmonyPatch(typeof(AscensionMenuScreenTransition), nameof(AscensionMenuScreenTransition.OnEnable))]
-        [HarmonyPrefix]
-        private static void EnsureSetupBeforeInitialize(AscensionMenuScreenTransition __instance)
+        [HarmonyPatch(typeof(AscensionMenuScreenTransition), nameof(AscensionMenuScreenTransition.SequentiallyRevealContents))]
+        [HarmonyPostfix]
+        private static IEnumerator EnsureSetupBeforeInitialize(IEnumerator sequence, AscensionMenuScreenTransition __instance)
         {
             AscensionStartScreen startScreen = __instance.GetComponent<AscensionStartScreen>();
             if (startScreen != null)
             {
-                AddP03StartOption(startScreen);
-                startScreen.UpdateContinueTextEnabled();
+                yield return new WaitForEndOfFrame();
+                RemoveDisabledContinueButtons(startScreen);
+                yield return new WaitForEndOfFrame();
             }
+            yield return sequence;
         }
     }
 }

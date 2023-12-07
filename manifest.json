@@ -1,8 +1,8 @@
 {
     "name": "P03_In_Kaycees_Mod",
-    "version_number": "3.9.0",
+    "version_number": "4.0.0",
     "website_url": "https://github.com/Cosmiscient/P03KayceeMod-Main",
-    "description": "Had enough of Leshy? Face P03 inside of Kaycee's Mod! Now with NPCs, extra cards, and secrets.",
+    "description": "Had enough of Leshy? Face P03 inside of Kaycee's Mod! Expansion Pack 2 now available!",
     "dependencies": [
         "API_dev-API-2.18.5",
         "WhistleWind-New_Spell_Card_Toolkit-1.2.1",

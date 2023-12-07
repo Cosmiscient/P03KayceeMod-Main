@@ -94,6 +94,9 @@ P03NoTokens,Default,,You destroyed all of my draft tokens…
 ,Default,,I suppose that was the right play.
 P03NoCardsInHand,Default,,But you have no cards…
 ,Angry,,How did you play all of your cards already?
+P03NoDraftableCardsInHand,Default,,What is this…
+,Angry,,All of your cards are [c:bR]total garbage![c:]
+,Angry,,I don't want any of those!
 P03ReplayMod,Default,,Let's try [c:bR][v:0][c:] again
 P03LostFinalBoss,Happy,,"So close, but yet so far away"
 ,Default,,My [c:bG]Great Transcendence[c:] cannot be stopped

@@ -33,7 +33,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToTakeDamage(PlayableCard source) => source != null;
+        public override bool RespondsToTakeDamage(PlayableCard source) => source != null && !Card.Dead && Card.Health > 0;
 
         public override IEnumerator OnTakeDamage(PlayableCard source)
         {
@@ -41,7 +41,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             //PlayableCard target = this.Card.OpposingCard();
 
-            if (opposingSlot.Card != null)
+            if (opposingSlot.Card != null && !opposingSlot.Card.Dead)
             {
                 //target.Die(false, base.Card);
                 //base.Card.Slot.opposingSlot.Card.Die(false, base.Card);
@@ -51,7 +51,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 //Debug.Log("Card found");
             }
 
-            yield return new WaitForSeconds(0.05f);
+            // Lots of bad stuff can happen if we're currently dead at this point
+            // There's no point in continuing to move if we're just going to die anyway
+            if (Card.Dead || Card.Health < 0)
+                yield break;
+
+            yield return new WaitForSeconds(0.25f);
 
             Card.SetIsOpponentCard(!Card.OpponentCard);
 

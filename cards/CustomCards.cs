@@ -622,11 +622,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo cTower = CardManager.New(P03Plugin.CardPrefx, "StarterConduitTower", "Conduit Tower", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_conduit_tower.png", typeof(CustomCards).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("syntax_conduittower.png", typeof(CustomCards).Assembly))
-                .AddAppearances(OnboardDynamicHoloPortrait.ID)
+                .AddAppearances(OnboardHoloPortrait.ID)
                 .AddAbilities(Ability.ConduitNull)
                 .SetCost(energyCost: 1);
             cTower.temple = CardTemple.Tech;
-            cTower.holoPortraitPrefab = CardManager.BaseGameCards.CardByName("ConduitTower").holoPortraitPrefab;
+            cTower.holoPortraitPrefab = Resources.Load<GameObject>("prefabs/cards/hologramportraits/TerrainHologram_Conduit");
             // cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/specialnodesequences/teslacoil");
             // cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "0,-.39,0");
             // cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, ".6,.6,.6");

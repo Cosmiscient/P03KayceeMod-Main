@@ -105,7 +105,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 TurnManager.Instance.PostBattleSpecialNode = AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoBossRares)
                     ? new CardChoicesNodeData()
-                    : (SpecialNodeData)new CardChoiceGenerator.Part3RareCardChoicesNodeData();
+                    : new CardChoiceGenerator.Part3RareCardChoicesNodeData();
             }
 
             yield return sequence;

@@ -7,6 +7,7 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.Spells.Patchers;
 using Pixelplacement;
 using Sirenix.Serialization.Utilities;
 using UnityEngine;
@@ -907,6 +908,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.SwitchToView(View.Default, false, false);
         }
 
+        private static bool ValidCard(PlayableCard card) => card != null && card.Info.name != CustomCards.DRAFT_TOKEN && !card.Info.IsSpell();
+
         public IEnumerator ExchangeTokensSequence()
         {
 
@@ -914,10 +917,17 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03Drafting", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
-            if (PlayerHand.Instance.cardsInHand.Count == 0)
+            if (PlayerHand.Instance.CardsInHand.Count == 0)
             {
                 ScreenArray.EndLoadingFaces(P03AnimationController.Face.Angry);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03NoCardsInHand", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+                yield break;
+            }
+
+            if (PlayerHand.Instance.CardsInHand.Where(ValidCard).Count() == 0)
+            {
+                ScreenArray.EndLoadingFaces(P03AnimationController.Face.Angry);
+                yield return TextDisplayer.Instance.PlayDialogueEvent("P03NoDraftableCardsInHand", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield break;
             }
 
@@ -931,12 +941,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             CardSlot slot = possibleSlots[SeededRandom.Range(0, possibleSlots.Count, seed++)];
 
             ViewManager.Instance.SwitchToView(View.Hand, false, false);
+            float delay = 2f / PlayerHand.Instance.CardsInHand.Count;
             foreach (PlayableCard card in PlayerHand.Instance.CardsInHand)
             {
                 PlayerHand.Instance.OnCardInspected(card);
-                yield return new WaitForSeconds(0.33f);
+                yield return new WaitForSeconds(delay);
             }
-            List<PlayableCard> possibles = PlayerHand.Instance.CardsInHand.Where(c => c.Info.name != CustomCards.DRAFT_TOKEN).ToList();
+            List<PlayableCard> possibles = PlayerHand.Instance.CardsInHand.Where(ValidCard).ToList();
             PlayableCard cardToSteal = possibles[SeededRandom.Range(0, possibles.Count, seed++)];
             PlayerHand.Instance.OnCardInspected(cardToSteal);
             yield return new WaitForSeconds(0.75f);

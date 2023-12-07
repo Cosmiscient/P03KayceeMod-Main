@@ -23,7 +23,7 @@ namespace Infiniscryption.P03KayceeRun
 
         public const string PluginGuid = "zorro.inscryption.infiniscryption.p03kayceerun";
         public const string PluginName = "Infiniscryption P03 in Kaycee's Mod";
-        public const string PluginVersion = "2.3";
+        public const string PluginVersion = "4.0";
         public const string CardPrefx = "P03KCM";
 
         internal static P03Plugin Instance;
