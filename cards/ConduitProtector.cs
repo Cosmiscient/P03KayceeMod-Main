@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
@@ -13,7 +11,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
     public class ConduitProtector : AbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -29,9 +27,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.hasColorOverride = true;
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.CellDrawRandomCardOnDeath).Info.colorOverride;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
 
-            ConduitProtector.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(ConduitProtector),
@@ -58,11 +56,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             foreach (CardSlot slot in possibles.GetRange(1, possibles.Count - 2))
             {
-                if (slot.Card == null || !slot.Card.HasAbility(ConduitProtector.AbilityID))
+                if (slot.Card == null || !slot.Card.HasAbility(AbilityID))
                     continue;
 
                 List<PlayableCard> conduits = ConduitCircuitManager.Instance.GetConduitsForSlot(slot);
-                
+
                 if (conduits.Count > 0 && conduits.Any(pc => pc.Slot == opposingSlot))
                 {
                     yield return __instance.SlotAttackSlot(attackingSlot, slot, waitAfter);

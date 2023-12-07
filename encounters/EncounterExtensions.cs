@@ -2,11 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
-using Infiniscryption.P03KayceeRun.Helpers;
-using Infiniscryption.P03KayceeRun.Patchers;
-using InscryptionAPI.Card;
-using UnityEngine;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Encounters;
 
 namespace Infiniscryption.P03KayceeRun.Encounters
@@ -16,15 +13,15 @@ namespace Infiniscryption.P03KayceeRun.Encounters
     {
         internal static List<string> P03OnlyEncounters = new();
 
-        internal static Dictionary<string, EncounterBlueprintData> HolyHackerole = new ();
+        internal static Dictionary<string, EncounterBlueprintData> HolyHackerole = new();
 
         private static void MatchMods(CardInfo orig, CardInfo copy)
         {
             if (orig == null || copy == null || orig.mods == null || orig.mods.Count == 0)
                 return;
 
-            copy.mods = new ();
-            foreach (var m in orig.mods)
+            copy.mods = new();
+            foreach (CardModificationInfo m in orig.mods)
                 copy.mods.Add((CardModificationInfo)m.Clone());
         }
 
@@ -32,14 +29,17 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         {
             // Screw your stupid copying of stuff killing my card mods.
             // I'll fix it myself. The hard way.
-            EncounterManager.ModifyEncountersList += delegate(List<EncounterBlueprintData> allEncounters)
+            EncounterManager.ModifyEncountersList += delegate (List<EncounterBlueprintData> allEncounters)
             {
-                foreach (var ebd in allEncounters)
+                if (!P03AscensionSaveData.IsP03Run)
+                    return allEncounters;
+
+                foreach (EncounterBlueprintData ebd in allEncounters)
                 {
                     if (!HolyHackerole.Keys.Contains(ebd.name))
                         continue;
 
-                    var originalTurns = HolyHackerole[ebd.name].turns;
+                    List<List<EncounterBlueprintData.CardBlueprint>> originalTurns = HolyHackerole[ebd.name].turns;
 
                     try
                     {
@@ -48,14 +48,15 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                             for (int c = 0; c < ebd.turns[t].Count; c++)
                             {
                                 if (originalTurns[t][c].card != null)
-                                    ebd.turns[t][c].card = CardLoader.Clone(originalTurns[t][c].card);
+                                    ebd.turns[t][c].card = CardLoader.GetCardByName(originalTurns[t][c].card.name);
                                 if (originalTurns[t][c].replacement != null)
-                                    ebd.turns[t][c].replacement = CardLoader.Clone(originalTurns[t][c].replacement);
+                                    ebd.turns[t][c].replacement = CardLoader.GetCardByName(originalTurns[t][c].replacement.name);
                                 MatchMods(originalTurns[t][c].card, ebd.turns[t][c].card);
                                 MatchMods(originalTurns[t][c].replacement, ebd.turns[t][c].replacement);
                             }
                         }
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         P03Plugin.Log.LogError($"Failed to repair encounter {ebd.name}");
                         P03Plugin.Log.LogError(ex);
@@ -77,7 +78,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 return RunBasedHoloMap.Zone.Undead;
             else if (temple.Value == CardTemple.Wizard)
                 return RunBasedHoloMap.Zone.Magic;
-            
+
             return RunBasedHoloMap.Zone.Neutral;
         }
 
@@ -90,7 +91,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         public static List<List<EncounterBlueprintData.CardBlueprint>> AddTurn(this List<List<EncounterBlueprintData.CardBlueprint>> blueprint, params IEnumerable<EncounterBlueprintData.CardBlueprint>[] input)
         {
             List<EncounterBlueprintData.CardBlueprint> newTurn = new();
-            foreach (var subset in input)
+            foreach (IEnumerable<EncounterBlueprintData.CardBlueprint> subset in input)
                 newTurn.AddRange(subset);
             blueprint.Add(newTurn);
             return blueprint;
@@ -99,7 +100,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         public static List<List<EncounterBlueprintData.CardBlueprint>> AddTurn(this List<List<EncounterBlueprintData.CardBlueprint>> blueprint, IEnumerable<IEnumerable<EncounterBlueprintData.CardBlueprint>> input)
         {
             List<EncounterBlueprintData.CardBlueprint> newTurn = new();
-            foreach (var subset in input)
+            foreach (IEnumerable<EncounterBlueprintData.CardBlueprint> subset in input)
                 newTurn.AddRange(subset);
             blueprint.Add(newTurn);
             return blueprint;
@@ -108,7 +109,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         public static List<List<EncounterBlueprintData.CardBlueprint>> AddTurn(this List<List<EncounterBlueprintData.CardBlueprint>> blueprint, IEnumerable<List<EncounterBlueprintData.CardBlueprint>> input)
         {
             List<EncounterBlueprintData.CardBlueprint> newTurn = new();
-            foreach (var subset in input)
+            foreach (List<EncounterBlueprintData.CardBlueprint> subset in input)
                 newTurn.AddRange(subset);
             blueprint.Add(newTurn);
             return blueprint;
@@ -149,6 +150,9 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         [HarmonyPrefix]
         private static bool P03EncountersNeverHavePrerequisitesMet(ref EncounterBlueprintData __instance, ref bool __result)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
             if (P03OnlyEncounters.Contains(__instance.name))
             {
                 __result = false;
@@ -161,8 +165,11 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         [HarmonyPostfix]
         private static void EnsureOverclocked(ref PlayableCard card)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (card.Info != null && card.Info.Mods != null && card.Info.Mods.Any(m => m.fromOverclock))
                 card.Anim.SetOverclocked(true);
-        }        
+        }
     }
 }

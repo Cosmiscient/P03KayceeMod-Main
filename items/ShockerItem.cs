@@ -1,20 +1,16 @@
 using System.Collections;
-using DiskCardGame;
-using HarmonyLib;
-using UnityEngine;
-using Pixelplacement;
-using System;
-using DigitalRuby.LightningBolt;
 using System.Collections.Generic;
+using DigitalRuby.LightningBolt;
+using DiskCardGame;
+using InscryptionAPI.Helpers;
 using InscryptionAPI.Items;
 using InscryptionAPI.Items.Extensions;
-using InscryptionAPI.Helpers;
 using InscryptionAPI.Resource;
-using Infiniscryption.P03KayceeRun.Helpers;
+using Pixelplacement;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Items
 {
-    [HarmonyPatch]
     public class ShockerItem : ConsumableItem
     {
         public static ConsumableItemData ItemData { get; private set; }
@@ -22,24 +18,22 @@ namespace Infiniscryption.P03KayceeRun.Items
         private static readonly Vector3 BASE_POSITION = new(0f, 0.2f, 0f);
 
         private static readonly float sfxVolume = 0.3f;
-        private GameObject audioObject = new GameObject("StaticAudioObject");
-        public AudioSource audioSource;
 
         public static GameObject GetBaseGameObject(string basePrefabId, string objName)
         {
-            GameObject gameObject = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("prefabs/items/bombremoteitem"));
+            GameObject gameObject = Instantiate(ResourceBank.Get<GameObject>("prefabs/items/bombremoteitem"));
             gameObject.transform.localPosition = Vector3.zero;
             gameObject.name = $"{P03Plugin.CardPrefx}_{objName}";
 
-            GameObject tempObject = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>(basePrefabId), gameObject.transform);
+            GameObject tempObject = Instantiate(ResourceBank.Get<GameObject>(basePrefabId), gameObject.transform);
 
             if (tempObject.GetComponent<Animator>() != null)
-                GameObject.Destroy(tempObject.GetComponent<Animator>());
+                Destroy(tempObject.GetComponent<Animator>());
 
-            GameObject.Destroy(gameObject.GetComponent<BombRemoteItem>());
-            GameObject.Destroy(gameObject.gameObject.transform.Find("BombRemote").gameObject);
+            Destroy(gameObject.GetComponent<BombRemoteItem>());
+            Destroy(gameObject.gameObject.transform.Find("BombRemote").gameObject);
 
-            GameObject.DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject);
 
             return gameObject;
         }
@@ -54,7 +48,7 @@ namespace Infiniscryption.P03KayceeRun.Items
             renderer.material.EnableKeyword("_EMISSION");
             renderer.material.SetColor("_EmissionColor", GameColors.Instance.blue);
 
-            GameObject.Destroy(gameObject.GetComponentInChildren<AutoRotate>());
+            Destroy(gameObject.GetComponentInChildren<AutoRotate>());
             gameObject.AddComponent<ShockerItem>();
 
             return gameObject;
@@ -79,82 +73,76 @@ namespace Infiniscryption.P03KayceeRun.Items
             .SetRegionSpecific(true)
             .SetPrefabID(prefabPathKey)
             .SetNotRandomlyGiven(true);
-        }       
+        }
 
         public override bool ExtraActivationPrerequisitesMet()
         {
-            return (ResourcesManager.Instance.PlayerMaxEnergy < 6 
-                 || ResourcesManager.Instance.PlayerEnergy < ResourcesManager.Instance.PlayerMaxEnergy);
+            return ResourcesManager.Instance.PlayerMaxEnergy < 6
+                 || ResourcesManager.Instance.PlayerEnergy < ResourcesManager.Instance.PlayerMaxEnergy;
         }
 
         public override void OnExtraActivationPrerequisitesNotMet()
         {
             base.OnExtraActivationPrerequisitesNotMet();
-            this.PlayShakeAnimation();
+            PlayShakeAnimation();
         }
 
         private Transform _coilTransform;
-        private Transform CoilTransform => (_coilTransform ??= this.gameObject.transform.Find("TeslaCoil(Clone)"));
+        private Transform CoilTransform => _coilTransform ??= gameObject.transform.Find("TeslaCoil(Clone)");
 
         public override IEnumerator ActivateSequence()
         {
-            Vector3 target = this.CoilTransform.position + (Vector3.up * 11);
-            Tween.Position(this.CoilTransform, target, 0.5f, 0f);
-            this.PlayPickUpSound();
+            Vector3 target = CoilTransform.position + (Vector3.up * 11);
+            Tween.Position(CoilTransform, target, 0.5f, 0f);
+            PlayPickUpSound();
             yield return new WaitForSeconds(0.5f);
             ViewManager.Instance.SwitchToView(View.Default, false, true);
             yield return new WaitForSeconds(0.1f);
-            this.CoilTransform.position = new Vector3(0f, 11f, 0f);
+            CoilTransform.position = new Vector3(0f, 11f, 0f);
             yield return new WaitForEndOfFrame();
-            Tween.Position(this.CoilTransform, new Vector3(0f, 5.3f, 0f), 0.3f, 0f, completeCallback:() => this.PlayPlacedSound());
+            Tween.Position(CoilTransform, new Vector3(0f, 5.3f, 0f), 0.3f, 0f, completeCallback: () => PlayPlacedSound());
             yield return new WaitForSeconds(0.3f);
 
             //Start custom sound effect
-            audioSource = audioObject.AddComponent<AudioSource>();
-            string path = AudioHelper.FindAudioClip("static");
-            AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
-            audioSource.clip = audioClip;
-            audioSource.loop = false;
-            audioSource.volume = sfxVolume;
-            audioSource.Play();
+            AudioController.Instance.PlaySound3D("static", MixerGroup.TableObjectsSFX, CoilTransform.position, sfxVolume, 0f);
 
-            Renderer renderer = this.gameObject.transform.Find("TeslaCoil(Clone)/Base/Rod/ball_low").gameObject.GetComponent<Renderer>();
+            Renderer renderer = gameObject.transform.Find("TeslaCoil(Clone)/Base/Rod/ball_low").gameObject.GetComponent<Renderer>();
             renderer.material.EnableKeyword("_EMISSION");
             Tween.ShaderColor(renderer.material, "_EmissionColor", GameColors.Instance.blue, 0.4f, 0f, Tween.EaseInOut, Tween.LoopType.None, null, null, true);
 
             yield return new WaitForSeconds(0.5f);
 
-            GameObject selfLightning = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), this.gameObject.transform.parent);
-            selfLightning.GetComponent<LightningBoltScript>().StartObject = this.CoilTransform.gameObject;
+            GameObject selfLightning = Instantiate(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), gameObject.transform.parent);
+            selfLightning.GetComponent<LightningBoltScript>().StartObject = CoilTransform.gameObject;
             selfLightning.GetComponent<LightningBoltScript>().StartPosition = Vector3.up * 2f;
             selfLightning.GetComponent<LightningBoltScript>().EndObject = Camera.main.gameObject;
 
-            GameObject resourceLightning = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), this.gameObject.transform.parent);
-            resourceLightning.GetComponent<LightningBoltScript>().StartObject = this.CoilTransform.gameObject;
+            GameObject resourceLightning = Instantiate(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), gameObject.transform.parent);
+            resourceLightning.GetComponent<LightningBoltScript>().StartObject = CoilTransform.gameObject;
             resourceLightning.GetComponent<LightningBoltScript>().StartPosition = Vector3.up * 2f;
             resourceLightning.GetComponent<LightningBoltScript>().EndObject = ResourceDrone.Instance.gameObject;
 
-            GameObject lifeLightning = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), this.gameObject.transform.parent);
-            lifeLightning.GetComponent<LightningBoltScript>().StartObject = this.CoilTransform.gameObject;
+            GameObject lifeLightning = Instantiate(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), gameObject.transform.parent);
+            lifeLightning.GetComponent<LightningBoltScript>().StartObject = CoilTransform.gameObject;
             lifeLightning.GetComponent<LightningBoltScript>().StartPosition = Vector3.up * 2f;
             lifeLightning.GetComponent<LightningBoltScript>().EndObject = LifeManager.Instance.scales.gameObject;
             lifeLightning.GetComponent<LightningBoltScript>().EndPosition = Vector3.up * 2f;
 
-            GameObject upLightning = GameObject.Instantiate<GameObject>(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), this.gameObject.transform.parent);
-            upLightning.GetComponent<LightningBoltScript>().StartObject = this.CoilTransform.gameObject;
+            GameObject upLightning = Instantiate(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"), gameObject.transform.parent);
+            upLightning.GetComponent<LightningBoltScript>().StartObject = CoilTransform.gameObject;
             upLightning.GetComponent<LightningBoltScript>().StartPosition = Vector3.up * 2f;
-            upLightning.GetComponent<LightningBoltScript>().EndObject = this.CoilTransform.gameObject;
+            upLightning.GetComponent<LightningBoltScript>().EndObject = CoilTransform.gameObject;
             upLightning.GetComponent<LightningBoltScript>().EndPosition = Vector3.up * 11f;
 
             selfLightning.SetActive(false);
             resourceLightning.SetActive(false);
             lifeLightning.SetActive(false);
 
-            List<GameObject> lightnings = new List<GameObject>() { selfLightning, resourceLightning, lifeLightning };
+            List<GameObject> lightnings = new() { selfLightning, resourceLightning, lifeLightning };
 
             for (int i = 0; i < 8; i++)
             {
-                lightnings[UnityEngine.Random.Range(0, 3)].SetActive(true);
+                lightnings[Random.Range(0, 3)].SetActive(true);
                 //AudioController.Instance.PlaySound3D("teslacoil_spark", MixerGroup.TableObjectsSFX, selfLightning.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
                 yield return new WaitForSeconds(0.05f);
                 selfLightning.SetActive(false);
@@ -164,7 +152,7 @@ namespace Infiniscryption.P03KayceeRun.Items
 
             for (int i = 0; i < 8; i++)
             {
-                lightnings[UnityEngine.Random.Range(0, 3)].SetActive(true);
+                lightnings[Random.Range(0, 3)].SetActive(true);
                 //AudioController.Instance.PlaySound3D("teslacoil_spark", MixerGroup.TableObjectsSFX, selfLightning.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
                 yield return new WaitForSeconds(0.1f);
                 selfLightning.SetActive(false);
@@ -178,9 +166,9 @@ namespace Infiniscryption.P03KayceeRun.Items
             //AudioController.Instance.PlaySound3D("teslacoil_spark", MixerGroup.TableObjectsSFX, selfLightning.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
 
             foreach (GameObject obj in lightnings)
-                GameObject.Destroy(obj);
+                Destroy(obj);
 
-            GameObject.Destroy(upLightning);
+            Destroy(upLightning);
 
             yield return ResourcesManager.Instance.AddMaxEnergy(1);
             //yield return ResourcesManager.Instance.AddEnergy(1);
@@ -194,12 +182,10 @@ namespace Infiniscryption.P03KayceeRun.Items
 
             //GameObject.Destroy(upLightning);
 
-            Destroy(audioObject);
-
             yield return new WaitForSeconds(0.15f);
 
-            target = this.CoilTransform.position + (Vector3.up * 11);
-            Tween.Position(this.CoilTransform, target, 1f, 0f);
+            target = CoilTransform.position + (Vector3.up * 11);
+            Tween.Position(CoilTransform, target, 1f, 0f);
             yield return new WaitForSeconds(0.5f);
         }
     }

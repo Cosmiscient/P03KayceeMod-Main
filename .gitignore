@@ -15,3 +15,18 @@ compiled/
 *.pdb
 
 deploy.ps1
+
+P03AssetBundle/[Ll]ibrary/
+P03AssetBundle/[Tt]emp/
+P03AssetBundle/[Oo]bj/
+P03AssetBundle/[Bb]uild/
+P03AssetBundle/[Bb]uilds/
+P03AssetBundle/[Ll]ogs/
+P03AssetBundle/[Uu]ser[Ss]ettings/
+
+# MemoryCaptures can get excessive in size.
+# They also could contain extremely sensitive data
+P03AssetBundle/[Mm]emoryCaptures/
+
+# Recordings can get excessive in size
+P03AssetBundle/[Rr]ecordings/

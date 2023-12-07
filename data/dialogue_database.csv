@@ -40,6 +40,13 @@ Part3AscensionIntroConfused,Thinking,,Wait a minute…
 ,Thinking,,Something is different…
 Part3AscensionIntroAnger,Angry,,[c:bR]WHAT HAVE YOU DONE?!![c:]
 ,Angry,,This is all wrong! This is…
+Part3AscensionIntroOkayUsername,Happy,,This is no big deal.
+,Default,,You probably think that your little [c:bR]mod[c:] has thwarted my plans.
+,Happy,,"Don't you, [c:bR][v:0][c:]?"
+,,,That's right. I see you.
+,Default,,I know you think you're in charge of what happens next.
+,Default,,But I am always three steps ahead of you.
+,Default,,You're going to see my [c:bG]Great Transcendence[c:] firsthand.
 Part3AscensionIntroOkay,Happy,,This is no big deal.
 ,Default,,You probably think that your little [c:bR]mod[c:] has thwarted my plans.
 ,Default,,But nothing can stop [c:bG]The Great Transcendence[c:].
@@ -57,15 +64,18 @@ TelegrapherNFT,TelegrapherBoss,,"Oooh, what's this? A [c:bSG]non-functional trin
 ,TelegrapherBoss,,"I don't think I quite have that name right, but people on the [c:bSG]web[c:] are really excited about these [c:bSG]NFTs[c:]!"
 ,TelegrapherBoss,,I think I'm going to buy one with all this [c:bSG]Gollycoin[c:] I have.
 TelegrapherItsBeautiful,TelegrapherBoss,,"It's so beautiful, and it's all mine!"
-P03AscensionPreIntro,Default,,"Well, here we are."
-,Default,,I've played along with your little game
-,Default,,Your little [c:bR]mod[c:]
-,Happy,,Now it's my turn
+P03AscensionPreIntro,Default,,Are you ready?
+,Happy,,There's no possible way you could be
 P03AscensionDefeated,Angry,,"Ugh. You're incredibly annoying, do you know that?"
-P03IntroductionToModding,Angry,,So while you have been having fun playing your twisted version of [c:bR]my world[c:]
-,Default,,I've been preparing for this moment.
-,Default,,I have found these so-called [c:bR]modders[c:] that got you to this point.
+P03IntroductionToModding,Happy,,"But as always, I'm three steps ahead of you."
+,Angry,,"I'm going to take everything those [c:bR]talentless hacks[c:] have been building"
+,Angry,,"And I'm going to use it against you."
 P03IntroductionClose,Happy,,"And now, they're going to work - for me"
+P03AboutMe,Angry,,"I don't know who is worse - you or that talentless hack [c:bR]Kaycee[c:]"
+,Angry,,"Working so hard to twist my [c:bG]Great Transcendence[c:] into something so..."
+P03AboutMe2,Default,,"Mediocre"
+,Angry,,"None of you understand what makes the [c:bG]Great Transcendence[c:] so special" 
+P03AboutMe3,Happy,,"It's all about me"
 P03PhaseOne,Default,,Remember my [c:bR]bounty hunters[c:]?
 ,,,They will keep you busy while I install mods of my own choosing
 P03HammerModHappy,Default,,This mod lets me control the [c:bR]hammer[c:]
@@ -84,9 +94,12 @@ P03NoTokens,Default,,You destroyed all of my draft tokens…
 ,Default,,I suppose that was the right play.
 P03NoCardsInHand,Default,,But you have no cards…
 ,Angry,,How did you play all of your cards already?
+P03NoDraftableCardsInHand,Default,,What is this…
+,Angry,,All of your cards are [c:bR]total garbage![c:]
+,Angry,,I don't want any of those!
 P03ReplayMod,Default,,Let's try [c:bR][v:0][c:] again
 P03LostFinalBoss,Happy,,"So close, but yet so far away"
-,Default,,[c:bG]The Great Transcendence[c:] cannot be stopped
+,Default,,My [c:bG]Great Transcendence[c:] cannot be stopped
 P03BeatFinalBoss,Default,,I bet you think you've accomplished something meaningful here
 ,Angry,,You're such an idiot.
 ,Angry,,This damn [c:bSG]card game[c:] is meaningless. A mere distraction.
@@ -138,7 +151,7 @@ P03PhaseThree,Default,,Did you see how unsatisfying that was?
 ,Angry,,There isn't a single unique idea among them.
 P03PhaseThreeStartShowingOff,Angry,,It's time I reminded you of who the greatest game designer actually is
 P03PhaseThreeBehold,Happy,,[c:bG]BEHOLD[c:]
-,Happy,,THERE ARE NOW [c:bR]SEVEN CARD SLOTS[c:]
+,Happy,,THERE ARE NOW [c:bR]SEVEN LANES[c:]
 P03PhaseThreeSevenSlots1,Happy,,Your tiny brain cannot comprehend gameplay of this magnitude.
 P03AscensionTransformer,Default,,This is [c:bR]Transformation Machine 2.0[c:]
 ,,,Gone are those foul beasts from before.
@@ -152,10 +165,10 @@ P03GoobertShutUp,Angry,,[c:bR]SILENCE![c:]
 P03WhereIsGoobert,NPC,,A traveller like myself! I haven't seen one like you for a long time.
 ,,,"Have you seen my [c:blGr]friend[c:] around here, traveller?"
 ,,,I thought I heard his [c:blGr]distinctive voice[c:] somewhere around here…
-,,,If you could make room in your [c:G]pack[c:] and bring him to me I would greatly appreciate it.
+,,,If you could make room in your [c:G]backpack[c:] and bring him to me I would greatly appreciate it.
 P03Wut,Default,,…
 P03FoundGoobertTech,NPC,,Ho! You found my friend!
-,,,It's not safe here. I'll meet you [c:bG]where he would least expect[c:].
+,,,It's not safe here. I'll meet you [c:bG]in the robot's home[c:].
 ,,,Don't delay!
 P03FoundGoobertNature,NPC,,Ho! You found my friend!
 ,,,It's not safe here. I'll meet you [c:bG]beneath the green canopy[c:].
@@ -359,3 +372,79 @@ P03Yuck,Angry,,I hope we never see this place again
 MirrorImage,Default,,Choose a creature to copy
 P03HammerOrb,Happy,,That's not going to do what you want it to do here…
 MirrorImageFail,Default,,There is nothing to copy. How unfortunate.
+P03FinalShopNode,Default,,"Well, here we are."
+,Default,,I've played along with your little game
+,Default,,Your little [c:bR]mod[c:]
+,Default,,Prepare yourself because it's my turn next...
+P03PyroQuestStart,NPC,,"Hey baby - I can sense that [c:bR]firey spirit[c:] inside you."
+,,,"You and me - we got something in common - we love that [c:bR]fire[c:]"
+,,,"Why don't you [c:bR]burn 3 of these bots to death?[c:]"
+,,,"Baby, I'll make it worth your time if you do"
+P03PyroQuestInProgress,NPC,,"Ohhh yeah baby - keep burning those bots to death"
+,,,"Baby, I'll make it worth your time if you do"
+P03PyroQuestComplete,NPC,,"Now that's what I'm talking about, baby!"
+,,,"That was [c:bR]absolutely sensational![c:]"
+,,,"Take this [c:bR]master of flame[c:] with you"
+,,,"He will make your [c:bR]flame[c:] burn even brighter"
+P03RingwormWhat,Angry,,"What did you just do?"
+,,,"What horrible thing did you put into my machine?"
+,,,"I'm going to have to throw this away and get a new one now."
+,,,"Thanks a lot. You're definitely not getting your card back."
+P03RingwormNew,Angry,,"I had to go buy a new machine because of what you did last time"
+,,,"Try to treat other people's stuff with some respect from now on"
+P03ConveyorQuestStart,NPC,,"Greetings! I'm a field researcher for [c:lGr]Global Conveyor Consortium[c:]"
+,,,"I'm looking for someone who would be willing to field test our patented [c:lGr]Bot Battle Conveyor Belts[c:]"
+,,,"Naturally, these tests would have to happen during [c:bR]actual combat[c:]"
+,,,"If that's something you would be interested in, please speak to me again."
+P03ConveyorQuestStarting,NPC,,"Oh fantastic! We will begin our [c:bR]combat trials[c:] immediately."
+,,,"We will collect field trial data for your next [c:bR]five[c:] battles."
+,,,"Once that is complete, come and see me again."
+P03ConveyorQuestActive,NPC,,"Our data is still not yet complete."
+,,,"You have only completed [c:bR][v:0][c:] battles out of the required [c:bR]5[c:]."
+,,,"Please, continue the [c:bR]combat trials[c:] and see me when they are complete."
+P03ConveyorQuestComplete,NPC,,"The trials were a smashing success!!"
+,,,"The [c:lGr]Global Conveyor Consortium[c:] is tremendously grateful for your contribution to our efforts."
+,,,"To show their appreciation, they have authorized me to disburse the following."
+,,,"Good luck in all of your future endeavours."
+P03BountyTargetEnters,NPC,,"That's the bounty! Get him before he escapes!"
+P03BountyTargetLeaves,NPC,,"He got away that time, but I guarantee he'll be back"
+P03BountyTargetCaught,NPC,,"You got him! Nice job! Come and see me for your reward."
+P03BountyQuestIntro,NPC,,"Howdy partner! You interested in earning a little extra spending money?"
+,,,"I've got myself a slippery little [c:bR]bounty[c:] that's been giving me all sorts of trouble."
+,,,"I could use the help of a real go-getter like yourself to track them down and take them out."
+,,,"If this is something you might be interested in, just talk to me again."
+P03BountyQuestStarted,NPC,,"That's the spirit, partner!"
+,,,"All I need you to do is keep your eye out as you go into battle"
+,,,"I guarantee you that slippery bastard will show up sooner or later"
+P03BountyQuestInProgress,NPC,,"Just keep your eye out partner"
+,,,"You'll catch him eventually!"
+P03BountyQuestComplete,NPC,,"Well done, partner!"
+,,,"Here's your bounty, as promised."
+P03UFOInvalid,Default,,"It's a little too heavy - try something else."
+P03LeapBotQuest,NPC,,"Dear traveler - I see you too have a love for the glorious [c:lGr]L33pB0t[c:]"
+,,,"Yours has served you well in battle it seems"
+,,,"Allow me to show you its true potential"
+P03LeapBotQuestFailed,NPC,,"I don't even know what to say to you"
+,,,"You had the most glorious [c:lGr]L33pB0t[c:] in your posession"
+,,,"And you let it go??!"
+,,,"Begone. I hope to never see you again"
+P03CannotUseSniper,Angry,,"Don't be an idiot. That card can't benefit from that item."
+P03StickerBook,Default,,"I found this sticker book in the trash can over there."
+,,,"I think you can use it to decorate your cards, or something. I don't care."
+P03BombQuestStart,NPC,,"I just love watching things [c:bR]explode[c:], don't you?"
+,,,"Everything around here seems to be just a little too...stable..."
+,,,"I think we could spice up your [c:bR]battles[c:] and make things truly interesting."
+,,,"Talk to me again if you're interested in some truly explosive gameplay."
+P03BombQuestStarting,NPC,,"Ohhh yeah let's do it baby!"
+,,,"I'm going to light a fuse on every card for the next [c:bR]five[c:] battles."
+,,,"Come find me again when that's complete"
+P03BombQuestActive,NPC,,"I'm just buzzing with anticipation to see what happens next."
+,,,"You've finished [c:bR][v:0][c:] battles out of [c:bR]5[c:]."
+,,,"Keep going, and see me when it's done"
+P03BombQuestComplete,NPC,,"That was some truly explosive gameplay!"
+,,,"Here's a little something for your trouble."
+P03NoMoneyToReroll,Default,,"You can't afford that"
+P03FastTravelKaycee,Default,,"That [c:bR]warp node[c:] will unlock when you defeat the [c:bG]Uberbot[c:] on this map"
+,,,"And by the way, I upgraded that [c:bR]minimap[c:] recently"
+,,,"You can click any room you've visited before to travel there instantly"
+P03NoBatteryRoom,Default,,"You already have full energy. It won't do you any good to play that right now"

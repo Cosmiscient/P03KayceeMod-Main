@@ -1,13 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
-using Pixelplacement;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -29,7 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
 
-            BuckWildRework.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(BuckWildRework),
@@ -37,30 +33,35 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToTakeDamage(PlayableCard source) => source != null;
+        public override bool RespondsToTakeDamage(PlayableCard source) => source != null && !Card.Dead && Card.Health > 0;
 
         public override IEnumerator OnTakeDamage(PlayableCard source)
         {
-            CardSlot opposingSlot = base.Card.Slot.opposingSlot;
+            CardSlot opposingSlot = Card.Slot.opposingSlot;
 
             //PlayableCard target = this.Card.OpposingCard();
 
-            if (opposingSlot.Card != null)
+            if (opposingSlot.Card != null && !opposingSlot.Card.Dead)
             {
                 //target.Die(false, base.Card);
                 //base.Card.Slot.opposingSlot.Card.Die(false, base.Card);
-                this.Card.Anim.StrongNegationEffect();
+                Card.Anim.StrongNegationEffect();
                 yield return new WaitForSeconds(0.2f);
-                yield return opposingSlot.Card.Die(false, base.Card);
+                yield return opposingSlot.Card.Die(false, Card);
                 //Debug.Log("Card found");
             }
 
-            yield return new WaitForSeconds(0.05f);
+            // Lots of bad stuff can happen if we're currently dead at this point
+            // There's no point in continuing to move if we're just going to die anyway
+            if (Card.Dead || Card.Health < 0)
+                yield break;
 
-            base.Card.SetIsOpponentCard(!base.Card.OpponentCard);
+            yield return new WaitForSeconds(0.25f);
 
-            base.Card.transform.eulerAngles += new Vector3(0f, 0f, -180f);
-            yield return Singleton<BoardManager>.Instance.AssignCardToSlot(base.Card, base.Card.OpposingSlot(), 0.25f);
+            Card.SetIsOpponentCard(!Card.OpponentCard);
+
+            Card.transform.eulerAngles += new Vector3(0f, 0f, -180f);
+            yield return Singleton<BoardManager>.Instance.AssignCardToSlot(Card, Card.OpposingSlot(), 0.25f);
 
             //base.Card.Anim.Anim.rootRotation = new Quaternion(0.6f, 0.4f, -0.4f, 0.6f);
 
@@ -74,8 +75,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             //    Debug.Log("Didn't flip");
             //}
 
-            Debug.Log(base.Card.transform.eulerAngles);
-            Debug.Log(base.Card.transform.rotation);
+            Debug.Log(Card.transform.eulerAngles);
+            Debug.Log(Card.transform.rotation);
 
             yield return new WaitForSeconds(0.5f);
         }

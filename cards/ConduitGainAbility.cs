@@ -1,10 +1,8 @@
-using HarmonyLib;
-using DiskCardGame;
-using UnityEngine;
-using System.Collections.Generic;
 using System.Collections;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 using System.Linq;
+using DiskCardGame;
+using HarmonyLib;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -12,8 +10,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
     public abstract class ConduitGainAbility : Conduit
     {
         protected abstract Ability AbilityToGive { get; }
+        protected virtual Ability SecondaryAbilityToGive => Ability.None;
+        protected virtual bool Gemify => false;
+
+        internal const string CONDUIT_ABILITY_ID = "ConduitGainAbilityMod";
 
         internal static List<ConduitGainAbility> ActiveAbilities = new();
+
+        static ConduitGainAbility()
+        {
+            AbilityIconBehaviours.DynamicAbilityCardModIds.Add(CONDUIT_ABILITY_ID);
+        }
 
         public override bool RespondsToResolveOnBoard() => true;
 
@@ -31,17 +38,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return base.OnResolveOnBoard();
         }
 
-        private static Dictionary<PlayableCard, CardModificationInfo> ConduitAbilityMods = new();
+        private static readonly Dictionary<PlayableCard, CardModificationInfo> ConduitAbilityMods = new();
 
         private static CardModificationInfo GetConduitAbilityMod(PlayableCard card)
         {
-            CardModificationInfo mod = null;
-            ConduitAbilityMods.TryGetValue(card, out mod);
+            ConduitAbilityMods.TryGetValue(card, out CardModificationInfo mod);
 
             if (mod == null)
             {
-                mod = new ();
-                mod.singletonId = "ConduitGainAbilityMod";
+                mod = new() { singletonId = CONDUIT_ABILITY_ID };
                 card.AddTemporaryMod(mod);
                 ConduitAbilityMods.Add(card, mod);
             }
@@ -56,6 +61,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 CardModificationInfo info = ConduitAbilityMods[card];
                 card.RemoveTemporaryMod(info);
                 ConduitAbilityMods.Remove(card);
+                card.RenderCard();
                 card.UpdateFaceUpOnBoardEffects();
             }
         }
@@ -65,18 +71,31 @@ namespace Infiniscryption.P03KayceeRun.Cards
             List<Ability> retval = new();
             List<PlayableCard> conduits = ConduitCircuitManager.Instance.GetConduitsForSlot(slot);
             foreach (ConduitGainAbility ability in ActiveAbilities.Where(ab => ab != null))
+            {
                 foreach (PlayableCard card in conduits)
+                {
                     if (ability.Card == card)
-                        retval.Add(ability.AbilityToGive);
+                    {
+                        if (ability.AbilityToGive != Ability.None)
+                            retval.Add(ability.AbilityToGive);
+                        if (ability.SecondaryAbilityToGive != Ability.None)
+                            retval.Add(ability.SecondaryAbilityToGive);
+                        if (ability.Gemify)
+                            retval.Add(Ability.None);
+                    }
+                }
+            }
 
             return retval;
         }
 
-        private static bool Match(List<Ability> a, List<Ability> b)
+        private static bool Match(List<Ability> a, CardModificationInfo bMod)
         {
-            var anotb = a.Except(b).ToList();
-            var bnota = b.Except(a).ToList();
-            return !anotb.Any() && !bnota.Any();
+            List<Ability> b = new(bMod.abilities);
+            if (bMod.gemify)
+                b.Add(Ability.None);
+
+            return !a.Except(b).Any() && !b.Except(a).Any();
         }
 
         private static void ResolveForSlots(List<CardSlot> slots)
@@ -86,11 +105,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 List<Ability> conduitAbilities = GetConduitAbilitiesForSlot(slot);
                 CardModificationInfo info = GetConduitAbilityMod(slot.Card);
 
-                if (!Match(conduitAbilities, info.abilities))
+                if (!Match(conduitAbilities, info))
                 {
                     info.abilities.Clear();
-                    info.abilities.AddRange(conduitAbilities);
+                    info.abilities.AddRange(conduitAbilities.Where(a => a != Ability.None));
+                    info.gemify = conduitAbilities.Any(a => a == Ability.None);
                     slot.Card.AddTemporaryMod(info);
+                    slot.Card.RenderCard();
                     slot.Card.UpdateFaceUpOnBoardEffects();
                 }
             }
@@ -99,39 +120,47 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static void FixCardsNotOnBoard()
         {
             foreach (PlayableCard card in PlayerHand.Instance.CardsInHand)
+            {
                 ClearConduitAbilityMods(card);
+            }
 
             foreach (PlayableCard card in TurnManager.Instance.Opponent.queuedCards)
+            {
                 ClearConduitAbilityMods(card);
+            }
         }
 
         private static void ClearAllCards()
         {
             FixCardsNotOnBoard();
             foreach (PlayableCard card in BoardManager.Instance.playerSlots.Where(s => s.Card != null).Select(s => s.Card))
+            {
                 ClearConduitAbilityMods(card);
+            }
 
             foreach (PlayableCard card in BoardManager.Instance.opponentSlots.Where(s => s.Card != null).Select(s => s.Card))
+            {
                 ClearConduitAbilityMods(card);
+            }
         }
 
-        private static void CleanList()
-        {
-            ActiveAbilities.RemoveAll(ab => ab == null);
-        }
+        private static void CleanList() => ActiveAbilities.RemoveAll(ab => ab == null);
 
         [HarmonyPatch(typeof(ConduitCircuitManager), nameof(ConduitCircuitManager.ManagedUpdate))]
         [HarmonyPostfix]
         private static void ManageAllActiveAbilityMods()
         {
             if (!GameFlowManager.Instance || GameFlowManager.Instance.CurrentGameState != GameState.CardBattle)
+            {
                 return;
+            }
 
             CleanList();
 
             if (ActiveAbilities.Count == 0)
+            {
                 ClearAllCards();
-
+            }
             else
             {
                 ResolveForSlots(BoardManager.Instance.opponentSlots);
@@ -142,9 +171,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
         [HarmonyPostfix]
-        private static void CleanupActiveAbilities()
-        {
-            ActiveAbilities.Clear();
-        }
+        private static void CleanupActiveAbilities() => ActiveAbilities.Clear();
     }
 }

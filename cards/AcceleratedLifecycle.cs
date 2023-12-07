@@ -1,19 +1,15 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
-using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
     public class AcceleratedLifecycle : ActivatedAbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -35,7 +31,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            AcceleratedLifecycle.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(AcceleratedLifecycle),
@@ -52,18 +48,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 if (!slot.Card)
                     return 0;
 
-                if (slot.Card == this.Card)
+                if (slot.Card == Card)
                     return 0;
-                
+
                 if (slot.Card.AllAbilities().Any(ab => AbilityManager.AllAbilities.AbilityByID(ab).AbilityBehavior.IsSubclassOf(typeof(Latch))))
                 {
-                    if (slot.Card.HasAbility(LatchDeathLatch.AbilityID))
-                        return 20;
-
-                    if (slot.Card.HasAbility(Ability.LatchBrittle))
-                        return 15;
-
-                    return 10;
+                    return slot.Card.HasAbility(LatchDeathLatch.AbilityID) ? 20 : slot.Card.HasAbility(Ability.LatchBrittle) ? 15 : 10;
                 }
 
                 if (slot.Card.HasAbility(Ability.ExplodeOnDeath))
@@ -72,7 +62,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     int powerLevelCount = 0;
                     foreach (CardSlot adj in BoardManager.Instance.GetAdjacentSlots(slot))
                     {
-                        if (adj == this.Card.slot)
+                        if (adj == Card.slot)
                             return 0;
 
                         if (adj.Card != null)
@@ -96,12 +86,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnUpkeep(bool playerUpkeep)
         {
-            if (playerUpkeep && !this.Card.OpponentCard)
+            if (playerUpkeep && !Card.OpponentCard)
             {
                 ActivatedThisTurn = false;
                 yield break;
             }
-            else if (!playerUpkeep && this.Card.OpponentCard)
+            else if (!playerUpkeep && Card.OpponentCard)
             {
                 // If we have a latch card, we want to kill it:
                 List<CardSlot> possibles = BoardManager.Instance.OpponentSlotsCopy;
@@ -115,24 +105,24 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         }
 
-        public override bool CanActivate()
-        {
-            return GetValidTargets().Count > 0 && !ActivatedThisTurn;
-        }
+        public override bool CanActivate() => GetValidTargets().Count > 0 && !ActivatedThisTurn;
 
         private List<CardSlot> GetValidTargets()
         {
             List<CardSlot> retval = new();
-            foreach (CardSlot slot in BoardManager.Instance.GetSlots(!this.Card.OpponentCard))
-                if (slot.Card != null && slot.Card != this.Card)
+            foreach (CardSlot slot in BoardManager.Instance.GetSlots(!Card.OpponentCard))
+            {
+                if (slot.Card != null && slot.Card != Card)
                     retval.Add(slot);
+            }
+
             return retval;
         }
 
         private IEnumerator RecycleCard(CardSlot target)
         {
-            this.Card.Anim.StrongNegationEffect();
-            AudioController.Instance.PlaySound3D("angel_reveal", MixerGroup.TableObjectsSFX, this.Card.Slot.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
+            Card.Anim.StrongNegationEffect();
+            AudioController.Instance.PlaySound3D("angel_reveal", MixerGroup.TableObjectsSFX, Card.Slot.gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
             yield return new WaitForSeconds(1.0f);
             CardInfo targetInfo = target.Card.Info;
             yield return target.Card.Die(false, null, true);

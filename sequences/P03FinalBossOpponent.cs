@@ -1,14 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
-using DiskCardGame;
-using Infiniscryption.P03KayceeRun.Patchers;
-using UnityEngine;
 using System.Linq;
-using Pixelplacement;
-using HarmonyLib;
 using DigitalRuby.LightningBolt;
-using Infiniscryption.P03KayceeRun.Helpers;
+using DiskCardGame;
+using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Encounters;
+using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.Spells.Patchers;
+using Pixelplacement;
+using Sirenix.Serialization.Utilities;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
 {
@@ -16,20 +18,40 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     public class P03AscensionOpponent : Part3BossOpponent
     {
         public override string PreIntroDialogueId => "";
-
+        public override bool GiveCurrencyOnDefeat => false;
         public override string PostDefeatedDialogueId => "P03AscensionDefeated";
 
-        private List<string> PhaseTwoWeirdCards = new() { "MantisGod", "Coyote", "Moose", "Grizzly", "FrankNStein", "Amalgam", "Adder" };
+        private readonly List<string> PhaseTwoWeirdCards = new() { "MantisGod", "Moose", "Grizzly", "FrankNStein", "Amalgam", "Adder", "JuniorSage", "PracticeMage", "Revenant", "Bonehound", "RubyGolem" };
 
         private CardInfo PhaseTwoBlocker;
 
         private static readonly CardSlot CardSlotPrefab = ResourceBank.Get<CardSlot>("Prefabs/Cards/CardSlot_Part3");
 
+        private static readonly Dictionary<CardTemple, GameObject> CardPrefabs = new()
+        {
+            { CardTemple.Undead, ResourceBank.Get<GameObject>("Prefabs/Cards/PlayableCard_Grimora") },
+            { CardTemple.Wizard, ResourceBank.Get<GameObject>("Prefabs/Cards/PlayableCard_Magnificus") },
+            { CardTemple.Nature, ResourceBank.Get<GameObject>("Prefabs/Cards/PlayableCard") }
+        };
+
+        private static readonly Dictionary<CardTemple, GameObject> CardRenderCameraPrefabs = new()
+        {
+            { CardTemple.Undead, ResourceBank.Get<GameObject>("Prefabs/Cards/CardRenderCamera_Grimora") },
+            { CardTemple.Wizard, ResourceBank.Get<GameObject>("Prefabs/Cards/CardRenderCamera_Magnificus") },
+            { CardTemple.Nature, ResourceBank.Get<GameObject>("Prefabs/Cards/CardRenderCamera") },
+            //{ CardTemple.Tech, ResourceBank.Get<GameObject>("Prefabs/Cards/CardRenderCamera_Part3") }
+        };
+
+        private static Dictionary<CardTemple, CardRenderCamera> CardRenderCameras = null;
+
         private static readonly HighlightedInteractable OpponentQueueSlotPrefab = ResourceBank.Get<HighlightedInteractable>("Prefabs/Cards/QueueSlot");
 
         private bool FasterEvents = false;
+        private bool HasDoneFirstWeirdCards = false;
 
-        private GameObject audioObject = new GameObject("P03BossMusicAudioObject");
+        public P03FinalBossScreenArray ScreenArray;
+
+        private readonly GameObject audioObject = new("P03BossMusicAudioObject");
         public AudioSource audioSource;
 
         private List<Color> slotColors;
@@ -45,8 +67,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             if (difficulty >= 1)
             {
-                PhaseTwoWeirdCards.Remove("Coyote");
                 PhaseTwoWeirdCards.Remove("Grizzly");
+                PhaseTwoWeirdCards.Remove("PracticeMage");
                 PhaseTwoWeirdCards.Add("Shark");
                 PhaseTwoWeirdCards.Add("Moose");
                 PhaseTwoBlocker.mods.Add(new(Ability.DeathShield));
@@ -55,6 +77,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 PhaseTwoWeirdCards.Remove("FrankNStein");
                 PhaseTwoWeirdCards.Remove("Adder");
+                PhaseTwoWeirdCards.Remove("Revenant");
                 PhaseTwoWeirdCards.Add("Urayuli");
                 PhaseTwoBlocker.mods.Add(new(Ability.Sharp));
             }
@@ -62,7 +85,18 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public override IEnumerator PreDefeatedSequence()
         {
-            return base.PreDefeatedSequence();
+            ViewManager.Instance.SwitchToView(View.Default, false, false);
+            ScreenArray.EndLoadingFaces(P03AnimationController.Face.SurrenderFlag);
+            ScreenArray.ShowFaceImmediate(P03AnimationController.Face.SurrenderFlag);
+            yield return new WaitForSeconds(1.5f);
+
+            //Turn off the boss music
+            // GameObject bossMusic = GameObject.Find("P03BossMusicAudioObject");
+            // GameObject.Destroy(bossMusic);
+            AudioController.Instance.StopAllLoops();
+            yield return new WaitForSeconds(0.1f);
+            ScreenArray.Collapse();
+            yield return new WaitForSeconds(5f);
         }
 
         [HarmonyPatch(typeof(BountyHunter), nameof(BountyHunter.OnDie))]
@@ -77,12 +111,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private CardInfo GenerateCard(int turn)
         {
-            if (this.NumLives == 3)
-                return BountyHunterGenerator.GenerateCardInfo(BountyHunterGenerator.GenerateMod(turn, 5 * turn + 6));
+            if (NumLives == 3)
+                return BountyHunterGenerator.GenerateCardInfo(BountyHunterGenerator.GenerateMod(turn, (5 * turn) + 6));
 
-            if (this.NumLives == 2)
+            if (NumLives == 2)
             {
-                int randomSeed = P03AscensionSaveData.RandomSeed + 100 * TurnManager.Instance.TurnNumber + BoardManager.Instance.opponentSlots.Where(s => BoardManager.Instance.GetCardQueuedForSlot(s) != null).Count();
+                int randomSeed = P03AscensionSaveData.RandomSeed + (100 * TurnManager.Instance.TurnNumber) + BoardManager.Instance.opponentSlots.Where(s => BoardManager.Instance.GetCardQueuedForSlot(s) != null).Count();
                 string cardName = PhaseTwoWeirdCards[SeededRandom.Range(0, PhaseTwoWeirdCards.Count, randomSeed)];
                 return CardLoader.GetCardByName(cardName);
             }
@@ -90,43 +124,69 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return null;
         }
 
+        public override void SetSceneEffectsShown(bool shown)
+        {
+            if (shown)
+            {
+                ScreenArray = P03FinalBossScreenArray.Create(BoardManager.Instance.gameObject.transform);
+                ScreenArray.transform.localPosition = new(0f, 0f, 7f);
+                ScreenArray.ShowFace(P03AnimationController.Face.Happy);
+            }
+            else
+            {
+                if (ScreenArray != null)
+                {
+                    ScreenArray.StopAllCoroutines();
+                    Destroy(ScreenArray.gameObject);
+                }
+            }
+        }
+
         public override IEnumerator IntroSequence(EncounterData encounter)
         {
-            yield return TextDisplayer.Instance.PlayDialogueEvent(this.PreIntroDialogueId, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            yield return TextDisplayer.Instance.PlayDialogueEvent(PreIntroDialogueId, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             ViewManager.Instance.SwitchToView(View.P03Face, false, true);
             yield return new WaitForSeconds(0.1f);
-            this.SetSceneEffectsShown(true);
 
-            //Pause background audio?
+            // Pause background audio?
             AudioController.Instance.SetLoopPaused(true);
 
-            audioSource = audioObject.AddComponent<AudioSource>();
-            string path = AudioHelper.FindAudioClip("P03_Phase1");
-            AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
-            audioSource.clip = audioClip;
-            audioSource.loop = true;
-            audioSource.volume = BossManagement.bossMusicVolume;
-            audioSource.Play();
+            // audioSource = audioObject.AddComponent<AudioSource>();
+            // string path = AudioHelper.FindAudioClip("P03_Phase1");
+            // AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
+            // audioSource.clip = audioClip;
+            // audioSource.loop = true;
+            // audioSource.volume = BossManagement.bossMusicVolume;
+            // audioSource.Play();
 
-            //AudioController.Instance.SetLoopAndPlay($"P03_Phase1", 0, true, true);
-            //AudioController.Instance.SetLoopVolumeImmediate(0.35f, 0);
-            yield return this.StartBattleSequence();
+            AudioController.Instance.SetLoopAndPlay($"P03_Phase1", 0, true, true);
+            AudioController.Instance.SetLoopVolumeImmediate(0.35f, 0);
+            yield return StartBattleSequence();
             yield break;
         }
 
         public override IEnumerator StartBattleSequence()
         {
-            this.NumLives = 3;
+            NumLives = 3;
 
-            this.InitializeCards();
+            InitializeCards();
+
+            yield return new WaitForSeconds(1f);
+
+            yield return TextDisplayer.Instance.PlayDialogueEvent("P03AboutMe", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            ViewManager.Instance.SwitchToView(View.P03FaceClose, false, false);
+            yield return TextDisplayer.Instance.PlayDialogueEvent("P03AboutMe2", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            ViewManager.Instance.SwitchToView(View.Default, false, false);
+            SetSceneEffectsShown(true);
+            yield return TextDisplayer.Instance.PlayDialogueEvent("P03AboutMe3", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
             yield return new WaitForSeconds(1f);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03IntroductionToModding", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
-            ViewManager.Instance.SwitchToView(View.P03FaceClose, false, false);
-            yield return TextDisplayer.Instance.PlayDialogueEvent("P03IntroductionClose", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            // ViewManager.Instance.SwitchToView(View.P03FaceClose, false, false);
+            // yield return TextDisplayer.Instance.PlayDialogueEvent("P03IntroductionClose", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             ViewManager.Instance.SwitchToView(View.BoardCentered, false, false);
 
-            yield return base.QueueCard(GenerateCard(0), BoardManager.Instance.OpponentSlotsCopy[2], true, true, true);
+            yield return QueueCard(GenerateCard(0), BoardManager.Instance.OpponentSlotsCopy[2], true, true, true);
             yield return new WaitForSeconds(0.15f);
 
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseOne", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
@@ -137,28 +197,69 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public override IEnumerator StartNewPhaseSequence()
         {
-            if (this.NumLives == 2)
+            if (NumLives == 2)
             {
                 yield return new WaitForSeconds(1f);
                 ViewManager.Instance.SwitchToView(View.Board, false, false);
-                yield return this.ClearBoard();
-                yield return this.ClearQueue();
+                yield return ClearBoard();
+                yield return ClearQueue();
+                ScreenArray.ShowFace(P03AnimationController.Face.Angry, P03AnimationController.Face.Bored);
+
+                // Go ahead and instantiate the card render cameras for the cameos from part 1/2/3 cards in this stage
+                CardRenderCamera oldInstance = CardRenderCamera.m_Instance;
+                CardRenderCameras = new();
+                int idx = 2;
+                CardRenderCameras[CardTemple.Tech] = oldInstance;
+                foreach (KeyValuePair<CardTemple, GameObject> cameraInfo in CardRenderCameraPrefabs)
+                {
+                    GameObject obj = Instantiate(cameraInfo.Value, Part3GameFlowManager.Instance.transform);
+                    obj.transform.position = obj.transform.position + (Vector3.down * 10f * idx++);
+                    CardRenderCamera camera = obj.GetComponentInChildren<CardRenderCamera>();
+                    camera.gameObject.name = $"SpecialRenderCamera{cameraInfo.Key}";
+
+
+                    RenderTexture newRendTex = new(camera.snapshotRenderTexture.width, camera.snapshotRenderTexture.height, camera.snapshotRenderTexture.depth, camera.snapshotRenderTexture.format);
+                    newRendTex.Create();
+
+                    RenderTexture newEmTex = new(camera.snapshotEmissionRenderTexture.width, camera.snapshotEmissionRenderTexture.height, camera.snapshotEmissionRenderTexture.depth, camera.snapshotEmissionRenderTexture.format);
+                    newEmTex.Create();
+
+                    foreach (Camera unityCamera in camera.GetComponentsInChildren<Camera>())
+                    {
+                        if (unityCamera.targetTexture == camera.snapshotRenderTexture)
+                            unityCamera.targetTexture = camera.snapshotRenderTexture = newRendTex;
+                        if (unityCamera.targetTexture == camera.snapshotEmissionRenderTexture)
+                            unityCamera.targetTexture = camera.snapshotEmissionRenderTexture = newEmTex;
+                    }
+
+                    CardRenderCameras[cameraInfo.Key] = camera;
+                }
+                CardRenderCamera.m_Instance = oldInstance;
 
                 ViewManager.Instance.SwitchToView(View.Default, false, false);
                 P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Angry, true, true);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseTwo", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
-                string path = AudioHelper.FindAudioClip("P03_Phase2");
-                AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
-                audioSource.clip = audioClip;
-                audioSource.loop = true;
-                audioSource.volume = BossManagement.bossMusicVolume;
-                audioSource.Play();
+                // string path = AudioHelper.FindAudioClip("P03_Phase2");
+                // AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
+                // audioSource.clip = audioClip;
+                // audioSource.loop = true;
+                // audioSource.volume = BossManagement.bossMusicVolume;
+                // audioSource.Play();
+
+                AudioController.Instance.SetLoopAndPlay($"P03_Phase2", 1, true, false);
+                AudioController.Instance.SetLoopVolumeImmediate(0f, 1);
+                AudioController.Instance.SetLoopVolume(0f, 0f, 0, false);
+                AudioController.Instance.loopSources[1].Stop();
+                AudioController.Instance.loopSources[1].time = AudioController.Instance.loopSources[0].time;
+                AudioController.Instance.loopSources[1].Play();
+                AudioController.Instance.SetLoopVolume(0.35f, 1f, 1, false);
 
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseTwoInControl", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield return new WaitForSeconds(1f);
 
+                ScreenArray.ShowFace(P03AnimationController.Face.Angry, P03AnimationController.Face.Default, P03AnimationController.Face.Bored);
                 ViewManager.Instance.SwitchToView(View.Default, false, false);
                 yield return new WaitForSeconds(0.15f);
                 ViewManager.Instance.SwitchToView(View.Board, false, false);
@@ -171,7 +272,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 {
                     ViewManager.Instance.SwitchToView(View.BoneTokens, false, false);
                     GameObject prefab = Resources.Load<GameObject>("prefabs/cardbattle/CardBattle").GetComponentInChildren<Part1ResourcesManager>().gameObject;
-                    GameObject part1ResourceManager = GameObject.Instantiate(prefab, Part3ResourcesManager.Instance.gameObject.transform.parent);
+                    GameObject part1ResourceManager = Instantiate(prefab, Part3ResourcesManager.Instance.gameObject.transform.parent);
                     WeirdManager = part1ResourceManager.GetComponent<Part1ResourcesManager>();
 
                     yield return WeirdManager.AddBones(50);
@@ -211,7 +312,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         [HarmonyPostfix]
         public static void ChangeFOVForBoss(ref ViewInfo __result, View view)
         {
-            if (view == View.Board || view == View.BoardCentered)
+            if (view is View.Board or View.BoardCentered)
             {
                 if (BoardManager.Instance != null && BoardManager.Instance.playerSlots != null && BoardManager.Instance.playerSlots.Count == 7)
                 {
@@ -234,17 +335,16 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private float GetXPos(bool beginning, bool isOpponent, bool isQueue)
         {
-            if (!isOpponent)
-                return beginning ? BoardManager.Instance.playerSlots.First().transform.localPosition.x : BoardManager.Instance.playerSlots.Last().transform.localPosition.x;
-            else if (isQueue)
-                return beginning ? BoardManager.Instance.opponentQueueSlots.First().transform.localPosition.x : BoardManager.Instance.opponentQueueSlots.Last().transform.localPosition.x;
-            else
-                return beginning ? BoardManager.Instance.opponentSlots.First().transform.localPosition.x : BoardManager.Instance.opponentSlots.Last().transform.localPosition.x;
+            return !isOpponent
+                ? beginning ? BoardManager.Instance.playerSlots.First().transform.localPosition.x : BoardManager.Instance.playerSlots.Last().transform.localPosition.x
+                : isQueue
+                ? beginning ? BoardManager.Instance.opponentQueueSlots.First().transform.localPosition.x : BoardManager.Instance.opponentQueueSlots.Last().transform.localPosition.x
+                : beginning ? BoardManager.Instance.opponentSlots.First().transform.localPosition.x : BoardManager.Instance.opponentSlots.Last().transform.localPosition.x;
         }
 
         private IEnumerator CreateSlot(HighlightedInteractable prefab, bool beginning, Transform parent, bool isOpponent, bool isQueue)
         {
-            HighlightedInteractable slot = (HighlightedInteractable)UnityEngine.Object.Instantiate(prefab, parent);
+            HighlightedInteractable slot = Instantiate(prefab, parent);
             string nameBase = isOpponent ? "OpponentSlot" : "Playerslot";
             nameBase += beginning ? "-1" : "5";
             slot.name = nameBase;
@@ -267,7 +367,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 if (isOpponent)
                 {
                     Transform quad = slot.transform.Find("Quad");
-                    quad.rotation = UnityEngine.Quaternion.Euler(90f, 180f, 0f);
+                    quad.rotation = Quaternion.Euler(90f, 180f, 0f);
                 }
 
                 List<CardSlot> slots = isOpponent ? BoardManager.Instance.opponentSlots : BoardManager.Instance.playerSlots;
@@ -291,9 +391,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield break;
             }
 
-            GameObject lightning = Object.Instantiate<GameObject>(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"));
+            GameObject lightning = Instantiate(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"));
             lightning.GetComponent<LightningBoltScript>().EndObject = slot.gameObject;
-            Object.Destroy(lightning, 0.65f);
+            Destroy(lightning, 0.65f);
             slot.OnCursorEnter();
             yield return new WaitForSeconds(0.95f);
             slot.OnCursorExit();
@@ -303,10 +403,20 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         private IEnumerator PhaseThreeSequence()
         {
             // Phase three
-            yield return this.ClearQueue();
-            yield return this.ClearBoard();
+            yield return ClearQueue();
+            yield return ClearBoard();
+
+            CardRenderCamera defaultCam = CardRenderCameras[CardTemple.Tech];
+            CardRenderCamera.m_Instance = defaultCam;
+            CardRenderCameras.Remove(CardTemple.Tech);
+            CardRenderCameras.ForEach(kvp => kvp.Value.snapshotEmissionRenderTexture.Release());
+            CardRenderCameras.ForEach(kvp => kvp.Value.snapshotRenderTexture.Release());
+            CardRenderCameras.ForEach(kvp => Destroy(kvp.Value));
+            CardRenderCameras = null;
 
             OpponentAnimationController.Instance.ClearLookTarget();
+
+            ScreenArray.ShowFace(P03AnimationController.Face.Bored);
 
             yield return new WaitForSeconds(1f);
 
@@ -314,20 +424,20 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 yield return WeirdManager.SpendBones(WeirdManager.PlayerBones);
                 yield return new WaitForSeconds(0.5f);
-                GameObject.Destroy(WeirdManager.gameObject, 0.25f);
+                Destroy(WeirdManager.gameObject, 0.25f);
                 WeirdManager = null;
             }
             ViewManager.Instance.SwitchToView(View.Default, false, false);
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Angry, true, true);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseThree", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
-            //AudioController.Instance.SetLoopVolumeImmediate(0f, 1);
-            audioSource.volume = 0;
+            AudioController.Instance.SetLoopVolumeImmediate(0f, 1);
 
             yield return new WaitForSeconds(FasterEvents ? 0.6f : 1.5f);
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Happy, true, true);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03PhaseThreeStartShowingOff", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Thinking, true, true);
+            yield return new WaitForSeconds(0.2f);
             yield return new WaitForSeconds(FasterEvents ? 1f : 2f);
             PhaseTwoEffects();
             yield return new WaitForSeconds(FasterEvents ? 1f : 2f);
@@ -336,22 +446,25 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             CameraEffects.Instance.Shake(0.05f, 100f); // Essentially just shake forever; I'll manually stop the shake later
             AudioSource source = AudioController.Instance.PlaySound2D("glitch_escalation", MixerGroup.TableObjectsSFX, volume: 0.4f);
+            yield return new WaitForSeconds(0.2f);
+            ScreenArray.ShowBigMoon();
+            yield return new WaitForSeconds(0.2f);
 
             // Tween each of the four things that need to move
             Transform itemTrans = ItemsManager.Instance.gameObject.transform;
-            Vector3 newItemPos = new Vector3(6.75f, itemTrans.localPosition.y, itemTrans.localPosition.z);
+            Vector3 newItemPos = new(6.75f, itemTrans.localPosition.y, itemTrans.localPosition.z);
             Tween.LocalPosition(itemTrans, newItemPos, durationOfEffect, 0f);
 
             Transform hammerTrans = ItemsManager.Instance.Slots.FirstOrDefault(s => s.name.ToLowerInvariant().StartsWith("hammer")).gameObject.transform;
-            Vector3 newHammerPos = new Vector3(-9.5f, hammerTrans.localPosition.y, hammerTrans.localPosition.z);
+            Vector3 newHammerPos = new(-9.5f, hammerTrans.localPosition.y, hammerTrans.localPosition.z);
             Tween.LocalPosition(hammerTrans, newHammerPos, durationOfEffect, 0f);
 
             Transform bellTrans = (BoardManager.Instance as BoardManager3D).bell.gameObject.transform;
-            Vector3 newBellPos = new Vector3(-5f, bellTrans.localPosition.y, bellTrans.localPosition.z);
+            Vector3 newBellPos = new(-5f, bellTrans.localPosition.y, bellTrans.localPosition.z);
             Tween.LocalPosition(bellTrans, newBellPos, durationOfEffect, 0f);
 
             Transform scaleTrans = LifeManager.Instance.Scales3D.gameObject.transform;
-            Vector3 newScalePos = new Vector3(-6, scaleTrans.localPosition.y, scaleTrans.localPosition.z);
+            Vector3 newScalePos = new(-6, scaleTrans.localPosition.y, scaleTrans.localPosition.z);
             Tween.LocalPosition(scaleTrans, newScalePos, durationOfEffect, 0f);
             yield return new WaitForSeconds(durationOfEffect);
 
@@ -374,12 +487,15 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             source.Stop();
             yield return new WaitForSeconds(1f);
 
-            string path = AudioHelper.FindAudioClip("P03_Phase3");
-            AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
-            audioSource.clip = audioClip;
-            audioSource.loop = true;
-            audioSource.volume = BossManagement.bossMusicVolume;
-            audioSource.Play();
+            // string path = AudioHelper.FindAudioClip("P03_Phase3");
+            // AudioClip audioClip = InscryptionAPI.Sound.SoundManager.LoadAudioClip(path);
+            // audioSource.clip = audioClip;
+            // audioSource.loop = true;
+            // audioSource.volume = BossManagement.bossMusicVolume;
+            // audioSource.Play();
+
+            AudioController.Instance.SetLoopAndPlay($"P03_Phase3", 0, true, true);
+            AudioController.Instance.SetLoopVolumeImmediate(0.35f, 0);
 
             yield return new WaitForSeconds(1f);
 
@@ -411,7 +527,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return BoardManager.Instance.CreateCardInSlot(firewallB, BoardManager.Instance.opponentSlots[6]);
             yield return new WaitForSeconds(1.5f);
 
-            yield return this.ReplaceBlueprint("P03FinalBoss");
+            yield return ReplaceBlueprint("P03FinalBoss");
             yield return new WaitForSeconds(1f);
             ViewManager.Instance.SwitchToView(View.Default);
         }
@@ -423,13 +539,15 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             TableVisualEffectsManager.Instance.SetDustParticlesActive(!showEffects);
             if (showEffects)
             {
+                ScreenArray.EndLoadingFaces(P03FinalBossExtraScreen.LOOKUP_FACE);
+                ScreenArray.RecolorFrames(P03FinalBossExtraScreen.RedFrameColor);
                 UIManager.Instance.Effects.GetEffect<ScreenColorEffect>().SetColor(GameColors.Instance.nearWhite);
                 UIManager.Instance.Effects.GetEffect<ScreenColorEffect>().SetAlpha(1f);
                 UIManager.Instance.Effects.GetEffect<ScreenColorEffect>().SetIntensity(0f, 1f);
-                base.SpawnScenery("LightQuadTableEffect");
+                //SpawnScenery("LightQuadTableEffect");
 
                 Color angryColor = GameColors.Instance.red;
-                Color partiallyTransparentRed = new Color(angryColor.r, angryColor.g, angryColor.b, 0.5f);
+                Color partiallyTransparentRed = new(angryColor.r, angryColor.g, angryColor.b, 0.5f);
 
                 TableVisualEffectsManager.Instance.ChangeTableColors(angryColor, Color.black, GameColors.Instance.nearWhite, partiallyTransparentRed, angryColor, Color.white, GameColors.Instance.gray, GameColors.Instance.gray, GameColors.Instance.lightGray);
 
@@ -446,7 +564,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
                 if (WeirdManager != null)
                 {
-                    GameObject.Destroy(WeirdManager, 0.25f);
+                    Destroy(WeirdManager, 0.25f);
                     WeirdManager = null;
                 }
             }
@@ -458,32 +576,233 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private int[] adjustedPlanP2;
 
+        private static CardTemple? SaveFileOverride = null;
+
+        [HarmonyPatch(typeof(SaveFile), nameof(SaveFile.IsPart1), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool HackPart1(ref bool __result)
+        {
+            if (SaveFileOverride.HasValue && SaveFileOverride.Value == CardTemple.Nature)
+            {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(SaveFile), nameof(SaveFile.IsPart3), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool HackPart3(ref bool __result)
+        {
+            if (SaveFileOverride.HasValue && SaveFileOverride.Value != CardTemple.Tech)
+            {
+                __result = false;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(SaveFile), nameof(SaveFile.IsGrimora), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool HackGrimora(ref bool __result)
+        {
+            if (SaveFileOverride.HasValue && SaveFileOverride.Value == CardTemple.Undead)
+            {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(SaveFile), nameof(SaveFile.IsMagnificus), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool HackMagnificus(ref bool __result)
+        {
+            if (SaveFileOverride.HasValue && SaveFileOverride.Value == CardTemple.Wizard)
+            {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+
+        // [HarmonyPatch(typeof(CardRenderCamera), nameof(CardRenderCamera.ValidStatsLayer))]
+        // [HarmonyPrefix]
+        // [HarmonyPriority(Priority.VeryHigh)]
+        // private static bool OnlyTakeAppropriateStatsLayers(CardRenderCamera __instance, RenderStatsLayer layer, ref bool __result)
+        // {
+        //     if (layer == null || layer.PlayableCard == null)
+        //         return true;
+
+        //     if (!__instance.gameObject.name.StartsWith("SpecialRenderCamera"))
+        //         return true;
+
+        //     if (__instance.gameObject.name.Equals("SpecialRenderCameraUndead"))
+        //         __result = layer.PlayableCard.Info.temple == CardTemple.Undead;
+        //     else if (__instance.gameObject.name.Equals("SpecialRenderCameraNature"))
+        //         __result = layer.PlayableCard.Info.temple == CardTemple.Nature;
+        //     else if (__instance.gameObject.name.Equals("SpecialRenderCameraWizard"))
+        //         __result = layer.PlayableCard.Info.temple == CardTemple.Wizard;
+
+        //     return false;
+        // }
+
+        [HarmonyPatch(typeof(RenderStatsLayer), nameof(RenderStatsLayer.RenderCard))]
+        [HarmonyPrefix]
+        [HarmonyPriority(Priority.VeryHigh)]
+        private static bool OverrideRenderInP03Boss(RenderStatsLayer __instance, CardRenderInfo info)
+        {
+            if (TurnManager.Instance != null
+                && TurnManager.Instance.Opponent != null
+                && TurnManager.Instance.Opponent is P03AscensionOpponent p03
+                && p03.NumLives == 2
+                && CardRenderCameras != null)
+            {
+                if (__instance.Renderer != null)
+                {
+                    SaveFileOverride = info.baseInfo.temple;
+                    bool emissionEnabled = CardDisplayer3D.EmissionEnabledForCard(info, __instance.PlayableCard);
+                    if (!emissionEnabled)
+                        __instance.DisableEmission();
+
+                    P03Plugin.Log.LogInfo($"Rendering {info.baseInfo.name} {info.baseInfo.temple} {CardRenderCameras[info.baseInfo.temple].gameObject.name}");
+                    CardRenderCameras[info.baseInfo.temple].QueueStatsLayerForRender(info, __instance, __instance.PlayableCard, __instance.RenderToMainTexture, emissionEnabled);
+                    SaveFileOverride = null;
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(GravestoneCardAnimationController), nameof(GravestoneCardAnimationController.SetCardRendererFlipped))]
+        [HarmonyPrefix]
+        [HarmonyPriority(Priority.VeryHigh)]
+        private static bool HackForGrimAnim(GravestoneCardAnimationController __instance, bool flipped)
+        {
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                __instance.armAnim.transform.localEulerAngles = !flipped ? new Vector3(-270f, 90f, -90f) : new Vector3(-90f, 0f, 0f);
+                __instance.armAnim.transform.localPosition = !flipped ? new Vector3(0f, -0.1f, -0.1f) : new Vector3(0f, 0.24f, -0.1f);
+                __instance.damageMarks.transform.localPosition = !flipped ? new Vector3(0.19f, -0.37f, -0.01f) : new Vector3(-0.21f, -0.1f, -0.01f);
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(CardSpawner), nameof(CardSpawner.SpawnPlayableCard))]
+        [HarmonyPrefix]
+        [HarmonyPriority(Priority.VeryHigh)]
+        private static bool MakeCardWithAppropriatePrefab(CardInfo info, ref PlayableCard __result)
+        {
+            if (TurnManager.Instance != null
+                && TurnManager.Instance.Opponent != null
+                && TurnManager.Instance.Opponent is P03AscensionOpponent p03
+                && p03.NumLives == 2
+                && info.temple != CardTemple.Tech)
+            {
+                P03Plugin.Log.LogInfo("In Custom Make Card");
+                SaveFileOverride = info.temple;
+                GameObject card = Instantiate(CardPrefabs[info.temple]);
+                PlayableCard playableCard = card.GetComponent<PlayableCard>();
+                playableCard.SetInfo(info);
+                __result = playableCard;
+
+                // Kind of a funny hack...there's got to be a better way to fix this
+                // If I don't do this, the gravestone cards are upside down.
+                if (info.temple == CardTemple.Undead)
+                {
+                    GameObject newParent = new("Part3Parent");
+                    newParent.transform.SetParent(card.transform);
+                    //card.transform.Find("SkeletonAttackAnim").SetParent(newParent.transform);
+                    card.transform.Find("RotatingParent").SetParent(newParent.transform);
+                    newParent.transform.localPosition = Vector3.zero;
+                    newParent.transform.localScale = Vector3.one;
+                    newParent.transform.localEulerAngles = new(90f, 180f, 0f);
+                }
+
+                SaveFileOverride = null;
+                return false;
+            }
+            return true;
+        }
+
+        // [HarmonyPatch(typeof(Opponent), nameof(CreateCard))]
+        // [HarmonyPrefix]
+        // [HarmonyPriority(Priority.VeryHigh)]
+        // private static bool MakeCardWithAppropriatePrefab(Opponent __instance, CardInfo cardInfo, ref PlayableCard __result)
+        // {
+        //     P03Plugin.Log.LogInfo($"Creating card for opponent {cardInfo.name} {cardInfo.temple}");
+        //     if (__instance is P03AscensionOpponent p03 && p03.NumLives == 2 && cardInfo.temple != CardTemple.Tech)
+        //     {
+        //         P03Plugin.Log.LogInfo("In Custom Make Card");
+        //         GameObject prefab = cardInfo.temple == CardTemple.Wizard ? MagnificusCardPrefab : (cardInfo.temple == CardTemple.Undead ? GrimoraCardPrefab : LeshyCardPrefab);
+        //         Instantiate(prefab);
+        //         PlayableCard playableCard = prefab.GetComponent<PlayableCard>();
+        //         playableCard.SetInfo(cardInfo);
+        //         playableCard.SetIsOpponentCard(true);
+        //         p03.ModifyQueuedCard(playableCard);
+        //         __result = playableCard;
+        //         return false;
+        //     }
+        //     return true;
+        // }
+
         public override IEnumerator QueueNewCards(bool doTween = true, bool changeView = true)
         {
-            if (base.NumLives == 1)
+            if (NumLives == 1)
             {
                 yield return base.QueueNewCards(doTween, changeView);
                 yield break;
             }
 
             List<CardSlot> slotsToQueue = BoardManager.Instance.OpponentSlotsCopy.FindAll((CardSlot x) => x.Card == null || (x.Card != null && !x.Card.Info.HasTrait(Trait.Terrain)));
-            slotsToQueue.RemoveAll((CardSlot x) => base.Queue.Exists((PlayableCard y) => y.QueuedSlot == x));
+            slotsToQueue.RemoveAll((CardSlot x) => Queue.Exists((PlayableCard y) => y.QueuedSlot == x));
             int numCardsToQueue = 0;
-            int[] plan = (base.NumLives == 3) ? MODDERS_PART_1 : this.adjustedPlanP2;
+            int[] plan = (NumLives == 3) ? MODDERS_PART_1 : adjustedPlanP2;
             if (TurnManager.Instance.TurnNumber < plan.Length)
                 numCardsToQueue = plan[TurnManager.Instance.TurnNumber];
 
-            for (int i = 0; i < numCardsToQueue; i++)
+            if (NumLives == 2 && !HasDoneFirstWeirdCards)
             {
-                if (slotsToQueue.Count > 0)
+                int difficulty = AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.BaseDifficulty);
+                List<string> firstTurnCards = new();
+                if (difficulty == 0)
+                    firstTurnCards = new() { "JuniorSage", "Revenant" };
+                else if (difficulty == 1)
+                    firstTurnCards = new() { "RubyGolem", "FrankNStein" };
+                else if (difficulty == 2)
+                    firstTurnCards = new() { "RubyGolem", "Bonehound", "Adder" };
+
+                foreach (string cardName in firstTurnCards)
                 {
-                    //int statPoints = Mathf.RoundToInt((float)Mathf.Min(6, TurnManager.Instance.TurnNumber + 1) * 2.5f);
-                    CardSlot slot = slotsToQueue[Random.Range(0, slotsToQueue.Count)];
-                    CardInfo card = GenerateCard(TurnManager.Instance.TurnNumber);
-                    if (card != null)
+                    if (slotsToQueue.Count > 0)
                     {
-                        yield return base.QueueCard(card, slot, doTween, changeView, true);
-                        slotsToQueue.Remove(slot);
+                        //int statPoints = Mathf.RoundToInt((float)Mathf.Min(6, TurnManager.Instance.TurnNumber + 1) * 2.5f);
+                        CardSlot slot = slotsToQueue[Random.Range(0, slotsToQueue.Count)];
+                        CardInfo card = CardLoader.GetCardByName(cardName);
+                        if (card != null)
+                        {
+                            yield return QueueCard(card, slot, doTween, changeView, true);
+                            slotsToQueue.Remove(slot);
+                        }
+                    }
+                }
+                HasDoneFirstWeirdCards = true;
+            }
+            else
+            {
+                for (int i = 0; i < numCardsToQueue; i++)
+                {
+                    if (slotsToQueue.Count > 0)
+                    {
+                        //int statPoints = Mathf.RoundToInt((float)Mathf.Min(6, TurnManager.Instance.TurnNumber + 1) * 2.5f);
+                        CardSlot slot = slotsToQueue[Random.Range(0, slotsToQueue.Count)];
+                        CardInfo card = GenerateCard(TurnManager.Instance.TurnNumber);
+                        if (card != null)
+                        {
+                            yield return QueueCard(card, slot, doTween, changeView, true);
+                            slotsToQueue.Remove(slot);
+                        }
                     }
                 }
             }
@@ -497,12 +816,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             if (shopping)
             {
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03ShoppingForMod", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+                ScreenArray.StartLoadingFaces();
                 yield return new WaitForSeconds(0.3f);
             }
-            if (!firstPlay)
-                yield return TextDisplayer.Instance.PlayDialogueEvent("P03ReplayMod", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, new string[] { modName }, null);
-            else
-                yield return TextDisplayer.Instance.PlayDialogueEvent("P03SelectedMod", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, new string[] { modName }, null);
+            yield return !firstPlay
+                ? TextDisplayer.Instance.PlayDialogueEvent("P03ReplayMod", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, new string[] { modName }, null)
+                : (object)TextDisplayer.Instance.PlayDialogueEvent("P03SelectedMod", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, new string[] { modName }, null);
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Thinking);
             yield return new WaitForSeconds(0.3f);
             ViewManager.Instance.SwitchToView(View.Default, false, false);
@@ -517,7 +836,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             if (TurnManager.Instance != null &&
                 TurnManager.Instance.Opponent is P03AscensionOpponent &&
                 (TurnManager.Instance.Opponent as P03AscensionOpponent).scalesHidden)
+            {
                 yield break;
+            }
 
             yield return sequence;
         }
@@ -526,9 +847,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         {
             ViewManager.Instance.SwitchToView(View.P03Face, false, false);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03UnityMod", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            ScreenArray.EndLoadingFaces();
             ViewManager.Instance.SwitchToView(View.Consumables, false, false);
             yield return new WaitForSeconds(0.5f);
-            ResourceDrone.Instance.gameObject.transform.localPosition = ResourceDrone.Instance.gameObject.transform.localPosition + Vector3.up * 6f;
+            ResourceDrone.Instance.gameObject.transform.localPosition = ResourceDrone.Instance.gameObject.transform.localPosition + (Vector3.up * 6f);
             yield return new WaitForSeconds(0.5f);
             ViewManager.Instance.SwitchToView(View.Scales, false, false);
             yield return new WaitForSeconds(0.5f);
@@ -544,6 +866,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public IEnumerator APISequence()
         {
+            ScreenArray.EndLoadingFaces();
             ViewManager.Instance.SwitchToView(View.P03Face, false, false);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03ApiInstalled", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             ViewManager.Instance.SwitchToView(View.Consumables, false, false);
@@ -585,6 +908,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.SwitchToView(View.Default, false, false);
         }
 
+        private static bool ValidCard(PlayableCard card) => card != null && card.Info.name != CustomCards.DRAFT_TOKEN && !card.Info.IsSpell();
+
         public IEnumerator ExchangeTokensSequence()
         {
 
@@ -592,26 +917,37 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03Drafting", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
-            if (PlayerHand.Instance.cardsInHand.Count == 0)
+            if (PlayerHand.Instance.CardsInHand.Count == 0)
             {
+                ScreenArray.EndLoadingFaces(P03AnimationController.Face.Angry);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03NoCardsInHand", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield break;
             }
 
+            if (PlayerHand.Instance.CardsInHand.Where(ValidCard).Count() == 0)
+            {
+                ScreenArray.EndLoadingFaces(P03AnimationController.Face.Angry);
+                yield return TextDisplayer.Instance.PlayDialogueEvent("P03NoDraftableCardsInHand", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+                yield break;
+            }
+
+            ScreenArray.EndLoadingFaces();
+
             InteractionCursor.Instance.InteractionDisabled = true;
 
-            int seed = P03AscensionSaveData.RandomSeed + 10 * TurnManager.Instance.TurnNumber;
+            int seed = P03AscensionSaveData.RandomSeed + (10 * TurnManager.Instance.TurnNumber);
 
             List<CardSlot> possibleSlots = BoardManager.Instance.OpponentSlotsCopy.Where(s => s.Card == null).ToList();
             CardSlot slot = possibleSlots[SeededRandom.Range(0, possibleSlots.Count, seed++)];
 
             ViewManager.Instance.SwitchToView(View.Hand, false, false);
+            float delay = 2f / PlayerHand.Instance.CardsInHand.Count;
             foreach (PlayableCard card in PlayerHand.Instance.CardsInHand)
             {
                 PlayerHand.Instance.OnCardInspected(card);
-                yield return new WaitForSeconds(0.33f);
+                yield return new WaitForSeconds(delay);
             }
-            List<PlayableCard> possibles = PlayerHand.Instance.CardsInHand.Where(c => c.Info.name != CustomCards.DRAFT_TOKEN).ToList();
+            List<PlayableCard> possibles = PlayerHand.Instance.CardsInHand.Where(ValidCard).ToList();
             PlayableCard cardToSteal = possibles[SeededRandom.Range(0, possibles.Count, seed++)];
             PlayerHand.Instance.OnCardInspected(cardToSteal);
             yield return new WaitForSeconds(0.75f);
@@ -621,7 +957,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             cardToSteal.Anim.SetTrigger("fly_off");
             Tween.Position(cardToSteal.transform, cardToSteal.transform.position + new Vector3(0f, 3f, 5f), 0.4f, 0f, Tween.EaseInOut, Tween.LoopType.None, null, delegate ()
             {
-                Object.Destroy(cardToSteal.gameObject);
+                Destroy(cardToSteal.gameObject);
             }, true);
             yield return new WaitForSeconds(0.75f);
 
@@ -648,15 +984,18 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03AngryNoHammer", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+                ScreenArray.EndLoadingFaces(P03AnimationController.Face.Angry);
                 ViewManager.Instance.SwitchToView(View.Default);
                 yield return new WaitForSeconds(0.1f);
                 yield break;
             }
 
+            ScreenArray.EndLoadingFaces();
+
             ViewManager.Instance.SwitchToView(View.P03Face, false, false);
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03HammerModHappy", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
-            int seed = P03AscensionSaveData.RandomSeed + 10 * TurnManager.Instance.TurnNumber + 234;
+            int seed = P03AscensionSaveData.RandomSeed + (10 * TurnManager.Instance.TurnNumber) + 234;
             CardSlot target = slots[SeededRandom.Range(0, slots.Count, seed)];
 
             // Find the hammer item
@@ -675,14 +1014,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             foreach (CardSlot slot in BoardManager.Instance.PlayerSlotsCopy.Where(s => s != null && s.Card != null))
             {
                 Transform firstPersonItem = FirstPersonController.Instance.AnimController.SpawnFirstPersonAnimation(hammer.FirstPersonPrefabId, null).transform;
-                firstPersonItem.localPosition = hammer.FirstPersonItemPos + Vector3.right * 3f + Vector3.forward * 1f;
+                firstPersonItem.localPosition = hammer.FirstPersonItemPos + (Vector3.right * 3f) + (Vector3.forward * 1f);
                 firstPersonItem.localEulerAngles = hammer.FirstPersonItemEulers;
                 yield return new WaitForSeconds(0.3f);
                 hammer.MoveItemToPosition(firstPersonItem, slot.transform.position);
                 yield return new WaitForSeconds(0.5f);
                 yield return hammer.OnValidTargetSelected(slot, firstPersonItem.gameObject);
                 yield return new WaitForSeconds(1f);
-                GameObject.Destroy(firstPersonItem.gameObject);
+                Destroy(firstPersonItem.gameObject);
                 yield return new WaitForEndOfFrame();
                 yield return new WaitForEndOfFrame();
                 yield return new WaitForEndOfFrame();
@@ -699,11 +1038,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield break;
         }
 
-        [HarmonyPatch(typeof(Opponent), nameof(Opponent.ReplaceBlueprint))]
+        [HarmonyPatch(typeof(Opponent), nameof(ReplaceBlueprint))]
         [HarmonyPostfix]
         public static IEnumerator Postfix(IEnumerator sequence, string blueprintId, bool removeLockedCards = false)
         {
-            if (!SaveFile.IsAscension || !(TurnManager.Instance.opponent is P03AscensionOpponent) || !blueprintId.Equals("P03FinalBoss"))
+            if (!SaveFile.IsAscension || TurnManager.Instance.opponent is not P03AscensionOpponent || !blueprintId.Equals("P03FinalBoss"))
             {
                 yield return sequence;
                 yield break;

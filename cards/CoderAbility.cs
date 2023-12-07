@@ -11,7 +11,7 @@ using UnityEngine;
 namespace Infiniscryption.P03KayceeRun.Cards
 {
     public class Programmer : AbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -28,7 +28,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            Programmer.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(Programmer),
@@ -44,7 +44,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 yield break;
 
             CardSlot targetSlot = null;
-            int randomSeed = P03AscensionSaveData.RandomSeed + TurnManager.Instance.TurnNumber * 100 + slots.IndexOf(this.Card.slot);
+            int randomSeed = P03AscensionSaveData.RandomSeed + (TurnManager.Instance.TurnNumber * 100) + slots.IndexOf(Card.slot);
             foreach (int idx in preferredSlots)
             {
                 if (slots[idx].Card == null)
@@ -65,35 +65,29 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield break;
         }
 
-        public override bool RespondsToResolveOnBoard()
-        {
-            return true;
-        }
+        public override bool RespondsToResolveOnBoard() => true;
 
         public override IEnumerator OnResolveOnBoard()
         {
-            List<CardSlot> slots = !this.Card.OpponentCard ? BoardManager.Instance.PlayerSlotsCopy : BoardManager.Instance.OpponentSlotsCopy;
+            List<CardSlot> slots = !Card.OpponentCard ? BoardManager.Instance.PlayerSlotsCopy : BoardManager.Instance.OpponentSlotsCopy;
 
             PlayableCard codeCard = slots.Where(s => s.Card != null).Select(s => s.Card).FirstOrDefault(c => c.Info.HasTrait(CodeTrait));
             if (codeCard == null)
                 yield return CreateCodeCard(slots);
         }
 
-		public override bool RespondsToUpkeep(bool playerUpkeep)
-        {
-            return this.Card.OpponentCard == !playerUpkeep;
-        }
+        public override bool RespondsToUpkeep(bool playerUpkeep) => Card.OpponentCard == !playerUpkeep;
 
-        private static int[] preferredSlots = new int[] { 2, 3, 1, 4, 0 };
-		public override IEnumerator OnUpkeep(bool playerUpkeep)
-		{
+        private static readonly int[] preferredSlots = new int[] { 2, 3, 1, 4, 0 };
+        public override IEnumerator OnUpkeep(bool playerUpkeep)
+        {
             // Look for code on this side of the board
 
             List<CardSlot> slots = playerUpkeep ? BoardManager.Instance.PlayerSlotsCopy : BoardManager.Instance.OpponentSlotsCopy;
 
             PlayableCard codeCard = slots.Where(s => s.Card != null).Select(s => s.Card).FirstOrDefault(c => c.Info.HasTrait(CodeTrait));
 
-            int randomSeed = P03AscensionSaveData.RandomSeed + TurnManager.Instance.TurnNumber * 100 + slots.IndexOf(this.Card.slot);
+            int randomSeed = P03AscensionSaveData.RandomSeed + (TurnManager.Instance.TurnNumber * 100) + slots.IndexOf(Card.slot);
             if (codeCard == null)
             {
                 yield return CreateCodeCard(slots);
@@ -102,16 +96,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             // The code already exists. Now we modify it
             ViewManager.Instance.SwitchToView(View.BoardCentered);
-            
+
             // Programmers only modify stats not abilities
             // Artists modify abilities
-            this.Card.Anim.SetShaking(true);
+            Card.Anim.SetShaking(true);
             codeCard.Anim.SetShaking(true);
             yield return new WaitForSeconds(1.2f);
 
             codeCard.Anim.SetOverclocked(true);
             bool attack = SeededRandom.Bool(randomSeed++);
-            codeCard.AddTemporaryMod(new (attack ? 1 : 0, attack ? 0 : 1));
+            codeCard.AddTemporaryMod(new(attack ? 1 : 0, attack ? 0 : 1));
             yield return new WaitForSeconds(0.6f);
             ViewManager.Instance.SwitchToView(View.Default);
         }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using DiskCardGame;
 using InscryptionAPI.Card;
@@ -7,9 +6,9 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-	public class CellUndying : DrawCopyOnDeath
-	{
-		public override Ability Ability => AbilityID;
+    public class CellUndying : DrawCopyOnDeath
+    {
+        public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
         static CellUndying()
@@ -26,7 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.CellDrawRandomCardOnDeath).Info.colorOverride;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            CellUndying.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(CellUndying),
@@ -34,9 +33,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-		public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer)
-		{
-			return ConduitCircuitManager.Instance.SlotIsWithinCircuit(base.Card.Slot);
-		}
-	}
+        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
+    }
 }

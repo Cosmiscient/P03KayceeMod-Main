@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
+using Infiniscryption.P03KayceeRun.BattleMods;
 using Infiniscryption.P03KayceeRun.Quests;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
@@ -7,17 +10,18 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     public class HoloMapBlueprint
     {
         public const int NO_SPECIAL = 0;
-        public const int LEFT_BRIDGE = 1;
-        public const int RIGHT_BRIDGE = 2;
-        public const int FULL_BRIDGE = 4;
-        public const int NORTH_BUILDING_ENTRANCE = 8;
-        public const int NORTH_GATEWAY = 16;
-        public const int NORTH_CABIN = 32;
-        public const int LOWER_TOWER_ROOM = 64;
-        public const int LANDMARKER = 128;
-        public const int BROKEN_GENERATOR = 256;
-        public const int MYCOLOGIST_WELL = 512;
-        public const int FAST_TRAVEL_NODE = 1024;
+        public const int LEFT_BRIDGE = 1 << 0;
+        public const int RIGHT_BRIDGE = 1 << 1;
+        public const int FULL_BRIDGE = 1 << 2;
+        public const int NORTH_BUILDING_ENTRANCE = 1 << 3;
+        public const int NORTH_GATEWAY = 1 << 4;
+        public const int NORTH_CABIN = 1 << 5;
+        public const int LOWER_TOWER_ROOM = 1 << 6;
+        public const int LANDMARKER = 1 << 7;
+        public const int BROKEN_GENERATOR = 1 << 8;
+        public const int MYCOLOGIST_WELL = 1 << 9;
+        public const int FAST_TRAVEL_NODE = 1 << 10;
+        public const int FINAL_SHOP_NODE = 1 << 11;
 
         public const int BATTLE = 0;
         public const int TRADE = 1;
@@ -38,6 +42,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public int battleTerrainIndex;
         public int encounterDifficulty;
         public bool isSecretRoom;
+        public List<BattleModManager.ID> battleMods = new();
 
         public SpecialEvent dialogueEvent;
 
@@ -46,17 +51,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public int distance; // used only for generation - doesn't get saved or parsed
         public int color;
 
-        public override string ToString()
-        {
-            return $"[{randomSeed},{x},{y},{arrowDirections},{specialDirection},{specialDirectionType},{encounterDifficulty},{(int)opponent},{(int)upgrade},{specialTerrain},{blockedDirections},{(int)blockEvent},{battleTerrainIndex},{color},{(int)dialogueEvent},{secretDirection},{isSecretRoom},{encounterIndex}]";
-        }
+        private string GetBattleModString() => String.Join("#", battleMods.Select(i => i.ToString()));
 
-        public HoloMapBlueprint(int randomSeed) { this.randomSeed = randomSeed; this.encounterIndex = -1; this.upgrade = HoloMapSpecialNode.NodeDataType.MoveArea; }
+        public override string ToString() => $"[{randomSeed},{x},{y},{arrowDirections},{specialDirection},{specialDirectionType},{encounterDifficulty},{(int)opponent},{(int)upgrade},{specialTerrain},{blockedDirections},{(int)blockEvent},{battleTerrainIndex},{color},{(int)dialogueEvent},{secretDirection},{isSecretRoom},{encounterIndex},{GetBattleModString()}]";
+
+        public HoloMapBlueprint(int randomSeed) { this.randomSeed = randomSeed; encounterIndex = -1; upgrade = HoloMapNode.NodeDataType.MoveArea; }
 
         public HoloMapBlueprint(string parsed)
         {
             string[] split = parsed.Replace("[", "").Replace("]", "").Split(',');
-            this.randomSeed = int.Parse(split[0]);
+            randomSeed = int.Parse(split[0]);
             x = int.Parse(split[1]);
             y = int.Parse(split[2]);
             arrowDirections = int.Parse(split[3]);
@@ -64,7 +68,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             specialDirectionType = int.Parse(split[5]);
             encounterDifficulty = int.Parse(split[6]);
             opponent = (Opponent.Type)int.Parse(split[7]);
-            upgrade = (HoloMapSpecialNode.NodeDataType)int.Parse(split[8]);
+            upgrade = (HoloMapNode.NodeDataType)int.Parse(split[8]);
             specialTerrain = int.Parse(split[9]);
             blockedDirections = int.Parse(split[10]);
             blockEvent = (StoryEvent)int.Parse(split[11]);
@@ -75,52 +79,50 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // because we have to be backwards compatible
             dialogueEvent = (SpecialEvent)(split.Length > 14 ? int.Parse(split[14]) : 0);
             secretDirection = split.Length > 15 ? int.Parse(split[15]) : 0;
-            isSecretRoom = split.Length > 16 ? bool.Parse(split[16]) : false;
+            isSecretRoom = split.Length > 16 && bool.Parse(split[16]);
             encounterIndex = split.Length > 17 ? int.Parse(split[17]) : -1;
+
+            battleMods = new();
+            if (split.Length > 18)
+            {
+                string[] allMods = split[18].Split('#');
+                foreach (string p in allMods)
+                {
+                    if (int.TryParse(p, out int id))
+                        battleMods.Add((BattleModManager.ID)id);
+                }
+            }
         }
 
         public bool EligibleForUpgrade
         {
-            get
-            {
-                return this.opponent == Opponent.Type.Default && 
-                       this.upgrade == HoloMapNode.NodeDataType.MoveArea && 
-                       (this.specialTerrain & LANDMARKER) == 0 && 
-                       (this.specialTerrain & BROKEN_GENERATOR) == 0 && 
-                       (this.specialTerrain & MYCOLOGIST_WELL) == 0 && 
-                       (this.specialTerrain & LOWER_TOWER_ROOM) == 0 && 
-                       (this.specialTerrain & FAST_TRAVEL_NODE) == 0;
-            }
+            get => opponent == Opponent.Type.Default &&
+                       upgrade == HoloMapNode.NodeDataType.MoveArea &&
+                       (specialTerrain & LANDMARKER) == 0 &&
+                       (specialTerrain & BROKEN_GENERATOR) == 0 &&
+                       (specialTerrain & MYCOLOGIST_WELL) == 0 &&
+                       (specialTerrain & LOWER_TOWER_ROOM) == 0 &&
+                       (specialTerrain & FAST_TRAVEL_NODE) == 0;
         }
 
-        public bool EligibleForDialogue
-        {
-            get
-            {
-                return this.dialogueEvent == SpecialEvent.None;
-            }
-        }
+        public bool EligibleForDialogue => dialogueEvent == SpecialEvent.None;
+
+        public bool IsBattleRoom => (specialDirectionType is BATTLE or NEUTRAL_BATTLE) && specialDirection != 0;
 
         public bool IsDeadEnd
         {
-            get
-            {
-                return this.arrowDirections == RunBasedHoloMap.NORTH || 
-                       this.arrowDirections == RunBasedHoloMap.SOUTH || 
-                       this.arrowDirections == RunBasedHoloMap.WEST || 
-                       this.arrowDirections == RunBasedHoloMap.EAST;
-            }
+            get => arrowDirections == RunBasedHoloMap.NORTH ||
+                       arrowDirections == RunBasedHoloMap.SOUTH ||
+                       arrowDirections == RunBasedHoloMap.WEST ||
+                       arrowDirections == RunBasedHoloMap.EAST;
         }
 
         public int NumberOfArrows
         {
-            get
-            {
-                return (((this.arrowDirections & RunBasedHoloMap.NORTH) != 0) ? 1 : 0) +
-                       (((this.arrowDirections & RunBasedHoloMap.SOUTH) != 0) ? 1 : 0) +
-                       (((this.arrowDirections & RunBasedHoloMap.EAST) != 0) ? 1 : 0) +
-                       (((this.arrowDirections & RunBasedHoloMap.WEST) != 0) ? 1 : 0);
-            }
+            get => (((arrowDirections & RunBasedHoloMap.NORTH) != 0) ? 1 : 0) +
+                       (((arrowDirections & RunBasedHoloMap.SOUTH) != 0) ? 1 : 0) +
+                       (((arrowDirections & RunBasedHoloMap.EAST) != 0) ? 1 : 0) +
+                       (((arrowDirections & RunBasedHoloMap.WEST) != 0) ? 1 : 0);
         }
 
         public List<string> DebugString
@@ -128,22 +130,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             get
             {
                 List<string> retval = new();
-                string code = ((this.specialTerrain & LANDMARKER) != 0) ? "L" : this.opponent != Opponent.Type.Default ? "B" : this.specialDirection != RunBasedHoloMap.BLANK ? "E" : this.upgrade != HoloMapSpecialNode.NodeDataType.MoveArea ? "U" : " ";
+                string code = ((specialTerrain & LANDMARKER) != 0) ? "L" : opponent != Opponent.Type.Default ? "B" : specialDirection != RunBasedHoloMap.BLANK ? "E" : upgrade != HoloMapNode.NodeDataType.MoveArea ? "U" : " ";
                 retval.Add("#---#");
-                retval.Add((this.arrowDirections & RunBasedHoloMap.NORTH) != 0 ? $"|{this.color}| |" : $"|{this.color}  |");
-                retval.Add("|" + ((this.arrowDirections & RunBasedHoloMap.WEST) != 0 ? $"-{code}" : $" {code}") + ((this.arrowDirections & RunBasedHoloMap.EAST) != 0 ? "-|" : " |"));
-                retval.Add((this.arrowDirections & RunBasedHoloMap.SOUTH) != 0 ? "| | |" : "|   |");
+                retval.Add((arrowDirections & RunBasedHoloMap.NORTH) != 0 ? $"|{color}| |" : $"|{color}  |");
+                retval.Add("|" + ((arrowDirections & RunBasedHoloMap.WEST) != 0 ? $"-{code}" : $" {code}") + ((arrowDirections & RunBasedHoloMap.EAST) != 0 ? "-|" : " |"));
+                retval.Add((arrowDirections & RunBasedHoloMap.SOUTH) != 0 ? "| | |" : "|   |");
                 retval.Add("#---#");
                 return retval;
             }
         }
 
-        public string KeyCode
-        {
-            get
-            {
-                return $"{x},{y}";
-            }
-        }
+        public string KeyCode => $"{x},{y}";
     }
 }

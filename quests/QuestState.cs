@@ -1,16 +1,10 @@
-using HarmonyLib;
-using DiskCardGame;
-using InscryptionAPI.Saves;
-using System.Linq;
 using System;
-using System.Collections.Generic;
-using InscryptionAPI.Guid;
-using Infiniscryption.P03KayceeRun.Sequences;
 using System.Collections;
-using UnityEngine;
-using Infiniscryption.P03KayceeRun.Items;
-using Infiniscryption.P03KayceeRun.Faces;
-using Infiniscryption.P03KayceeRun.Cards;
+using System.Collections.Generic;
+using DiskCardGame;
+using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Patchers;
+using InscryptionAPI.Guid;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {
@@ -54,6 +48,11 @@ namespace Infiniscryption.P03KayceeRun.Quests
         public string DialogueId { get; private set; }
 
         /// <summary>
+        /// A function to get the dialogue ID in a dynamic fashion
+        /// </summary>
+        public Func<string> DynamicDialogueId { get; private set; }
+
+        /// <summary>
         /// The text that will appear over the NPC's head when you hover over them in this state
         /// </summary>
         public string NPCHoverText { get; set; }
@@ -63,7 +62,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// </summary>
         public QuestDefinition ParentQuest { get; private set; }
 
-        private string SaveKey => String.Format("{0}_{1}", this.ParentQuest.QuestName, this.StateName);
+        private string SaveKey => String.Format("{0}_{1}", ParentQuest.QuestName, StateName);
 
         /// <summary>
         /// Optional. A dynamic state to be calculated at lookup time. 
@@ -76,24 +75,23 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// </summary>
         public QuestStateStatus Status
         {
-            get 
-            { 
+            get
+            {
                 // Status cannot be anothing other that not started if the quest has not been generated
-                if (!this.ParentQuest.QuestGenerated)
+                if (!ParentQuest.QuestGenerated)
                     return QuestStateStatus.NotStarted;
 
                 // Start by getting the status from the save file
-                QuestStateStatus status = (QuestStateStatus)ModdedSaveManager.RunState.GetValueAsInt(this.ParentQuest.ModGuid, $"{this.SaveKey}_Status");
-                if (status == QuestStateStatus.NotStarted && this != this.ParentQuest.InitialState) // Only the initial state can be not started
+                QuestStateStatus status = (QuestStateStatus)P03AscensionSaveData.RunStateData.GetValueAsInt(ParentQuest.ModGuid, $"{SaveKey}_Status");
+                if (status == QuestStateStatus.NotStarted && this != ParentQuest.InitialState) // Only the initial state can be not started
                     status = QuestStateStatus.Active;
 
                 // If the set status is fail or success, or there is no dynamic status, we're done
-                if (status == QuestStateStatus.Success || status == QuestStateStatus.Failure || this.DynamicStatus == null)
-                    return status;
-                else
-                    return this.DynamicStatus();
+                return status == QuestStateStatus.Success || status == QuestStateStatus.Failure || DynamicStatus == null
+                    ? status
+                    : DynamicStatus();
             }
-            set { ModdedSaveManager.RunState.SetValue(this.ParentQuest.ModGuid, $"{this.SaveKey}_Status", (int)value); }
+            set => P03AscensionSaveData.RunStateData.SetValue(ParentQuest.ModGuid, $"{SaveKey}_Status", (int)value);
         }
 
         /// <summary>
@@ -101,14 +99,14 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// </summary>
         public bool HasGivenRewwards
         {
-            get { return ModdedSaveManager.RunState.GetValueAsBoolean(this.ParentQuest.ModGuid, String.Format("{0}_RewardStatus", this.SaveKey)); }
-            set { ModdedSaveManager.RunState.SetValue(this.ParentQuest.ModGuid, String.Format("{0}_RewardStatus", this.SaveKey), value); }
+            get => P03AscensionSaveData.RunStateData.GetValueAsBoolean(ParentQuest.ModGuid, String.Format("{0}_RewardStatus", SaveKey));
+            set => P03AscensionSaveData.RunStateData.SetValue(ParentQuest.ModGuid, String.Format("{0}_RewardStatus", SaveKey), value);
         }
 
         /// <summary>
         /// This list of rewards granted by this quest
         /// </summary>
-        public List<QuestReward> Rewards { get; private set; } = new ();
+        public List<QuestReward> Rewards { get; private set; } = new();
 
         /// <summary>
         /// Indicates if this event should automatically complete successfully upon talking to an NPC.
@@ -117,18 +115,12 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// dialogue state automatically.</remarks>
         public bool AutoComplete { get; internal set; }
 
-        private Dictionary<QuestStateStatus, QuestState> childStates = new();
+        private readonly Dictionary<QuestStateStatus, QuestState> childStates = new();
 
         /// <summary>
         /// Indicates if this is the final state to a quest
         /// </summary>
-        public bool IsEndState
-        {
-            get
-            {
-                return this.childStates.Count == 0;
-            }
-        }
+        public bool IsEndState => childStates.Count == 0;
 
         /// <summary>
         /// Indicates if this is a failure state of the quest.
@@ -146,13 +138,13 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// <param name="nextState">The next state</param>
         public QuestState SetNextState(QuestStateStatus statusCondition, QuestState nextState)
         {
-            if (this.IsFailState || statusCondition == QuestStateStatus.Failure)
+            if (IsFailState || statusCondition == QuestStateStatus.Failure)
                 nextState.IsFailState = true;
 
-            if (this.childStates.ContainsKey(statusCondition))
-                this.childStates[statusCondition] = nextState;
+            if (childStates.ContainsKey(statusCondition))
+                childStates[statusCondition] = nextState;
             else
-                this.childStates.Add(statusCondition, nextState);
+                childStates.Add(statusCondition, nextState);
             return nextState;
         }
 
@@ -162,7 +154,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// <param name="statusCondition">The status trigger for the next state</param>
         public QuestState SetNextState(QuestStateStatus statusCondition, string hoverText, string dialogueId, bool autoComplete = false)
         {
-            QuestState nextState = new(this.ParentQuest, String.Format("{0}_{1}", this.StateName, statusCondition.ToString()), hoverText, dialogueId, autoComplete:autoComplete);
+            QuestState nextState = new(ParentQuest, String.Format("{0}_{1}", StateName, statusCondition.ToString()), hoverText, dialogueId, autoComplete: autoComplete);
             return SetNextState(statusCondition, nextState);
         }
 
@@ -170,21 +162,12 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// Gets the next state in the state chain based on a given condition
         /// </summary>
         /// <param name="statusCondition">The status condition</param>
-        public QuestState GetNextState(QuestStateStatus statusCondition)
-        {
-            if (this.childStates.ContainsKey(statusCondition))
-                return this.childStates[statusCondition];
-            else
-                return null;
-        }
+        public QuestState GetNextState(QuestStateStatus statusCondition) => childStates.ContainsKey(statusCondition) ? childStates[statusCondition] : null;
 
         /// <summary>
         /// Gets the next state based on the current state's condition. Useful for traveling the state tree quickly.
         /// </summary>
-        public QuestState GetNextState()
-        {
-            return this.GetNextState(this.Status);
-        }
+        public QuestState GetNextState() => GetNextState(Status);
 
         /// <summary>
         /// Grants all rewards associated with this quest state. Only happens if the quest is in a success state and rewards have not been given before.
@@ -194,36 +177,54 @@ namespace Infiniscryption.P03KayceeRun.Quests
             // The moment we are asked to grant rewards, we lock our state to where it can't change again.
             // This makes it where the dyamic status can't change anymore; if we are in a failure or success status at this
             // point, we're always going to be in that status moving forward.
-            this.Status = this.Status;
+            Status = Status;
 
-            if (this.Status != QuestStateStatus.Success || this.HasGivenRewwards)
+            if (Status != QuestStateStatus.Success || HasGivenRewwards)
                 yield break;
 
-            this.HasGivenRewwards = true;
+            HasGivenRewwards = true;
 
-            foreach (QuestReward reward in this.Rewards)
+            foreach (QuestReward reward in Rewards)
                 yield return reward.GrantReward();
-            
+
             yield break;
         }
 
-        private static Dictionary<StoryEvent, QuestState> storyEventReverseLookup = new ();
+        private static readonly Dictionary<StoryEvent, QuestState> storyEventReverseLookup = new();
 
         internal QuestState(QuestDefinition parentQuest, string stateName, string hoverText, string dialogueId, bool autoComplete = false)
         {
-            this.StateName = stateName;
-            this.ParentQuest = parentQuest;
-            this.NPCHoverText = hoverText;
-            this.AutoComplete = autoComplete;
-            this.DialogueId = dialogueId;
+            StateName = stateName;
+            ParentQuest = parentQuest;
+            NPCHoverText = hoverText;
+            AutoComplete = autoComplete;
+            DialogueId = dialogueId;
 
-            this.StateCompleteEvent = GuidManager.GetEnumValue<StoryEvent>(parentQuest.ModGuid, String.Format("{0}_{1}_Complete", parentQuest.QuestName, this.StateName));
-            this.StateSuccessfulEvent = GuidManager.GetEnumValue<StoryEvent>(parentQuest.ModGuid, String.Format("{0}_{1}_Success", parentQuest.QuestName, this.StateName));
-            this.StateFailedEvent = GuidManager.GetEnumValue<StoryEvent>(parentQuest.ModGuid, String.Format("{0}_{1}_Failure", parentQuest.QuestName, this.StateName));
+            StateCompleteEvent = GuidManager.GetEnumValue<StoryEvent>(parentQuest.ModGuid, String.Format("{0}_{1}_Complete", parentQuest.QuestName, StateName));
+            StateSuccessfulEvent = GuidManager.GetEnumValue<StoryEvent>(parentQuest.ModGuid, String.Format("{0}_{1}_Success", parentQuest.QuestName, StateName));
+            StateFailedEvent = GuidManager.GetEnumValue<StoryEvent>(parentQuest.ModGuid, String.Format("{0}_{1}_Failure", parentQuest.QuestName, StateName));
 
-            storyEventReverseLookup[this.StateCompleteEvent] = this;
-            storyEventReverseLookup[this.StateSuccessfulEvent] = this;
-            storyEventReverseLookup[this.StateFailedEvent] = this;
+            storyEventReverseLookup[StateCompleteEvent] = this;
+            storyEventReverseLookup[StateSuccessfulEvent] = this;
+            storyEventReverseLookup[StateFailedEvent] = this;
+        }
+
+        internal QuestState(QuestDefinition parentQuest, string stateName, string hoverText, Func<string> dialogueId, bool autoComplete = false)
+        {
+            StateName = stateName;
+            ParentQuest = parentQuest;
+            NPCHoverText = hoverText;
+            AutoComplete = autoComplete;
+            DialogueId = null;
+            DynamicDialogueId = dialogueId;
+
+            StateCompleteEvent = GuidManager.GetEnumValue<StoryEvent>(parentQuest.ModGuid, String.Format("{0}_{1}_Complete", parentQuest.QuestName, StateName));
+            StateSuccessfulEvent = GuidManager.GetEnumValue<StoryEvent>(parentQuest.ModGuid, String.Format("{0}_{1}_Success", parentQuest.QuestName, StateName));
+            StateFailedEvent = GuidManager.GetEnumValue<StoryEvent>(parentQuest.ModGuid, String.Format("{0}_{1}_Failure", parentQuest.QuestName, StateName));
+
+            storyEventReverseLookup[StateCompleteEvent] = this;
+            storyEventReverseLookup[StateSuccessfulEvent] = this;
+            storyEventReverseLookup[StateFailedEvent] = this;
         }
 
         [HarmonyPatch(typeof(StoryEventsData), "EventCompleted")]
@@ -232,10 +233,10 @@ namespace Infiniscryption.P03KayceeRun.Quests
         {
             if (!storyEventReverseLookup.ContainsKey(storyEvent))
                 return true;
-            
+
             QuestState matchingState = storyEventReverseLookup[storyEvent];
-            
-            if (matchingState.Status == QuestStateStatus.NotStarted || matchingState.Status == QuestStateStatus.Active)
+
+            if (matchingState.Status is QuestStateStatus.NotStarted or QuestStateStatus.Active)
                 __result = false;
             else if (storyEvent == matchingState.StateCompleteEvent)
                 __result = true;
@@ -243,7 +244,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 __result = matchingState.Status == QuestStateStatus.Failure;
             else if (storyEvent == matchingState.StateSuccessfulEvent)
                 __result = matchingState.Status == QuestStateStatus.Success;
-            
+
             return false;
         }
     }

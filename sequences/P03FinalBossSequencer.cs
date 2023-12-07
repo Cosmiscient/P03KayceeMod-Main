@@ -13,13 +13,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public static readonly string[] MODS = new string[] { "Special Hammer Mod", "Incredible Drafting Mod", "The Community API", "Super-Duper Unity Editor" };
 
-        public P03AscensionOpponent P03AscensionOpponent
-        {
-            get
-            {
-                return TurnManager.Instance.opponent as P03AscensionOpponent;
-            }
-        }
+        public P03AscensionOpponent P03AscensionOpponent => TurnManager.Instance.opponent as P03AscensionOpponent;
 
         public override EncounterData BuildCustomEncounter(CardBattleNodeData nodeData)
         {
@@ -73,19 +67,18 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 case 8:
                     yield return P03AscensionOpponent.UnityEngineSequence();
                     yield break;
+                default:
+                    break;
             }
-        }        
+        }
 
         public override IEnumerator GameEnd(bool playerWon)
         {
             OpponentAnimationController.Instance.ClearLookTarget();
+            ViewManager.Instance.SwitchToView(View.Default, false, false);
 
             if (playerWon)
             {
-                //Turn off the boss music
-                GameObject bossMusic = GameObject.Find("P03BossMusicAudioObject");
-                GameObject.Destroy(bossMusic);
-
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03BeatFinalBoss", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 ViewManager.Instance.SwitchToView(View.Default, false, false);
@@ -99,6 +92,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 P03AnimationController.Instance.SetHeadTrigger("neck_snap");
                 CustomCoroutine.WaitOnConditionThenExecute(() => P03AnimationController.Instance.CurrentFace == P03AnimationController.Face.Choking, delegate
                 {
+                    AchievementManager.Unlock(P03AchievementManagement.FIRST_WIN);
+                    if (AscensionChallengeManagement.SKULL_STORM_ACTIVE)
+                        AchievementManager.Unlock(P03AchievementManagement.SKULLSTORM);
                     AudioController.Instance.PlaySound3D("p03_head_off", MixerGroup.TableObjectsSFX, P03AnimationController.Instance.transform.position, 1f, 0f, null, null, null, null, false);
                 });
                 yield return new WaitForSeconds(12f);
@@ -112,11 +108,35 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             }
             else
             {
+                P03AscensionOpponent.ScreenArray.EndLoadingFaces(P03AnimationController.Face.Happy);
+                yield return new WaitForSeconds(1.5f);
+
                 ViewManager.Instance.SwitchToView(View.P03Face, false, false);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03LostFinalBoss", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield return new WaitForSeconds(1.5f);
                 EventManagement.FinishAscension(false);
             }
+        }
+
+        public override IEnumerator DamageAddedToScale(int amount, bool playerIsAttacker)
+        {
+            if (playerIsAttacker)
+            {
+                P03AscensionOpponent.ScreenArray.ShowFace(
+                    P03AnimationController.Face.Angry,
+                    P03AnimationController.Face.Choking,
+                    P03FinalBossExtraScreen.LOOKUP_FACE
+                );
+            }
+            else
+            {
+                P03AscensionOpponent.ScreenArray.ShowFace(
+                    P03AnimationController.Face.Happy,
+                    P03AnimationController.Face.Bored,
+                    P03AnimationController.Face.Happy
+                );
+            }
+            yield return base.DamageAddedToScale(amount, playerIsAttacker);
         }
     }
 }

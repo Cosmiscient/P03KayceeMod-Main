@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Cards;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Helpers
@@ -9,8 +10,10 @@ namespace Infiniscryption.P03KayceeRun.Helpers
     {
         public static void RecolorAllMaterials(GameObject obj, Color color, string shaderKey = null, bool emissive = false, string[] shaderKeywords = null, bool forceEnable = false, bool makeTransparent = false)
         {
-            Color halfMain = new Color(color.r, color.g, color.b);
-            halfMain.a = 0.5f;
+            Color halfMain = new(color.r, color.g, color.b)
+            {
+                a = 0.5f
+            };
 
             if (makeTransparent)
                 shaderKey = "Standard";
@@ -32,7 +35,7 @@ namespace Infiniscryption.P03KayceeRun.Helpers
                     }
 
                     if (shaderKeywords != null)
-                        material.SetShaderKeywords(shaderKeywords);         
+                        material.SetShaderKeywords(shaderKeywords);
 
                     if (material.HasProperty("_EmissionColor"))
                         material.SetColor("_EmissionColor", color * 0.5f);
@@ -45,11 +48,11 @@ namespace Infiniscryption.P03KayceeRun.Helpers
                     if (!makeTransparent)
                     {
                         if (material.HasProperty("_Color"))
-                            material.SetColor("_Color", halfMain); 
+                            material.SetColor("_Color", halfMain);
                     }
                     else
                     {
-                        material.SetColor("_Color", color); 
+                        material.SetColor("_Color", color);
                         material.SetOverrideTag("RenderType", "Transparent");
                         material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One);
                         material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
@@ -69,21 +72,18 @@ namespace Infiniscryption.P03KayceeRun.Helpers
             "_DetailAlbedoMap",
         };
 
-        private static Dictionary<string, Dictionary<string, bool>> _rendererCache = new ();
+        private static readonly Dictionary<string, Dictionary<string, bool>> _rendererCache = new();
 
         private static bool CardComponentHasTargetTexture(Renderer renderer, string textureName, string matchKey)
         {
             if (!_rendererCache.ContainsKey(renderer.gameObject.name))
-                _rendererCache[renderer.gameObject.name] = new ();
+                _rendererCache[renderer.gameObject.name] = new();
 
             if (_rendererCache[renderer.gameObject.name].ContainsKey(textureName))
                 return _rendererCache[renderer.gameObject.name][textureName];
 
             Texture tex = renderer.material.GetTexture(textureName);
-            if (tex != null && tex.name.ToLowerInvariant().Contains(matchKey))
-                _rendererCache[renderer.gameObject.name][textureName] = true;
-            else
-                _rendererCache[renderer.gameObject.name][textureName] = false;
+            _rendererCache[renderer.gameObject.name][textureName] = tex != null && tex.name.ToLowerInvariant().Contains(matchKey);
 
             return _rendererCache[renderer.gameObject.name][textureName];
         }
@@ -95,15 +95,25 @@ namespace Infiniscryption.P03KayceeRun.Helpers
                 try
                 {
                     foreach (string textureName in TextureNames)
+                    {
                         if (String.IsNullOrEmpty(originalTextureKey) || CardComponentHasTargetTexture(renderer, textureName, originalTextureKey.ToLowerInvariant()))
-                            foreach (var material in renderer.materials)
+                        {
+                            foreach (Material material in renderer.materials)
                                 material.SetTexture(textureName, texture);
+                        }
+                    }
                 }
                 catch
                 {
                     // Do nothing
                 }
             }
+        }
+
+        public static void HolofyAllRenderers(GameObject gameObject, Color color)
+        {
+            foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>())
+                OnboardDynamicHoloPortrait.HolofyGameObject(renderer.gameObject, color);
         }
 
         public static Material GetBakedEmissiveMaterial(Texture texture, Texture emissionTexture = null)

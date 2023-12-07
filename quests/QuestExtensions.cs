@@ -1,16 +1,6 @@
-using HarmonyLib;
-using DiskCardGame;
-using InscryptionAPI.Saves;
-using System.Linq;
 using System;
-using System.Collections.Generic;
-using InscryptionAPI.Guid;
-using Infiniscryption.P03KayceeRun.Sequences;
-using System.Collections;
-using UnityEngine;
-using Infiniscryption.P03KayceeRun.Items;
-using Infiniscryption.P03KayceeRun.Faces;
-using Infiniscryption.P03KayceeRun.Cards;
+using System.Linq;
+using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Patchers;
 
 namespace Infiniscryption.P03KayceeRun.Quests
@@ -31,10 +21,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// Sets the prior stage of this quest, if this is a follow-up to a multi-part quest
         /// </summary>
         /// <param name="prior">The prior event</param>
-        public static QuestDefinition SetPriorQuest(this QuestDefinition parent, QuestDefinition prior)
-        {
-            return parent.SetPriorQuest(prior.EventId);
-        }
+        public static QuestDefinition SetPriorQuest(this QuestDefinition parent, QuestDefinition prior) => parent.SetPriorQuest(prior.EventId);
 
         /// <summary>
         /// Sets the NPC Descriptor override
@@ -44,6 +31,29 @@ namespace Infiniscryption.P03KayceeRun.Quests
             parent.ForcedNPCDescriptor = npc;
             return parent;
         }
+
+        /// <summary>
+        /// Sets a condition for when the quest must be generated
+        /// </summary>
+        public static QuestDefinition SetMustBeGeneratedCondition(this QuestDefinition parent, Func<bool> condition)
+        {
+            parent.MustBeGeneratedConditon = condition;
+            return parent;
+        }
+
+        /// <summary>
+        /// Sets a condition for where the quest can exist on the map
+        /// </summary>
+        public static QuestDefinition SetValidRoomCondition(this QuestDefinition parent, Predicate<HoloMapBlueprint> condition)
+        {
+            parent.ValidRoomCondition = condition;
+            return parent;
+        }
+
+        /// <summary>
+        /// Sets the room generation condition so that the quest won't generate at the starting spot of the map
+        /// </summary>
+        public static QuestDefinition GenerateAwayFromStartingArea(this QuestDefinition parent) => parent.SetValidRoomCondition(bp => bp.color != 1);
 
         /// <summary>
         /// Sets a condition (restriction) for the quest to be valid for generation.
@@ -60,20 +70,15 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// <param name="parent"></param>
         public static QuestDefinition SetRegionCondition(this QuestDefinition parent, RunBasedHoloMap.Zone region)
         {
-            return parent.SetGenerateCondition(() => {
+            return parent.SetGenerateCondition(() =>
+            {
                 return EventManagement.CurrentZone == region || EventManagement.CompletedZones.Any(z => z.ToLowerInvariant().EndsWith(region.ToString().ToLowerInvariant()));
             });
         }
 
-        public static QuestState AddDummyStartingState(this QuestDefinition parent, Func<QuestState.QuestStateStatus> status)
-        {
-            return parent.AddDialogueState("DUMMY", "DUMMY").SetDynamicStatus(status);
-        }
+        public static QuestState AddDummyStartingState(this QuestDefinition parent, Func<QuestState.QuestStateStatus> status) => parent.AddDialogueState("DUMMY", "DUMMY").SetDynamicStatus(status);
 
-        public static QuestState AddDummyStartingState(this QuestDefinition parent, Func<bool> status)
-        {
-            return parent.AddDialogueState("DUMMY", "DUMMY").SetDynamicStatus(() => status() ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Failure);
-        }
+        public static QuestState AddDummyStartingState(this QuestDefinition parent, Func<bool> status) => parent.AddDialogueState("DUMMY", "DUMMY").SetDynamicStatus(() => status() ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Failure);
 
         /// <summary>
         /// Adds an opening dialogue state to a quest. Most quests will start this way.
@@ -83,7 +88,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// <returns></returns>
         public static QuestState AddDialogueState(this QuestDefinition parent, string hoverText, string dialogueId)
         {
-            QuestState state = new (parent, "InitialDialogue", hoverText, dialogueId, autoComplete:true);
+            QuestState state = new(parent, "InitialDialogue", hoverText, dialogueId, autoComplete: true);
             parent.InitialState = state;
             return state;
         }
@@ -96,7 +101,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// <returns></returns>
         public static QuestState AddState(this QuestDefinition parent, string hoverText, string dialogueId)
         {
-            QuestState state = new (parent, "InitialState", hoverText, dialogueId);
+            QuestState state = new(parent, "InitialState", hoverText, dialogueId);
             parent.InitialState = state;
             return state;
         }
@@ -123,20 +128,18 @@ namespace Infiniscryption.P03KayceeRun.Quests
             if (failState.HasValue)
             {
                 StoryEvent actualFailState = failState.Value;
-                return state.SetDynamicStatus(() => {
-                    if (StoryEventsData.EventCompleted(actualFailState))
-                        return QuestState.QuestStateStatus.Failure;
-                    if (StoryEventsData.EventCompleted(successState))
-                        return QuestState.QuestStateStatus.Success;
-                    return QuestState.QuestStateStatus.Active;
+                return state.SetDynamicStatus(() =>
+                {
+                    return StoryEventsData.EventCompleted(actualFailState)
+                        ? QuestState.QuestStateStatus.Failure
+                        : StoryEventsData.EventCompleted(successState) ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Active;
                 });
             }
             else
             {
-                return state.SetDynamicStatus(() => {
-                    if (StoryEventsData.EventCompleted(successState))
-                        return QuestState.QuestStateStatus.Success;
-                    return QuestState.QuestStateStatus.Active;
+                return state.SetDynamicStatus(() =>
+                {
+                    return StoryEventsData.EventCompleted(successState) ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Active;
                 });
             }
         }
@@ -166,7 +169,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// <param name="dialogueId">The dialogue that the NPC will say</param>
         public static QuestState AddDialogueState(this QuestState parent, string hoverText, string dialogueId, QuestState.QuestStateStatus status = QuestState.QuestStateStatus.Success)
         {
-            QuestState state = new (parent.ParentQuest, String.Format("Dialogue_{0}", dialogueId), hoverText, dialogueId, autoComplete:true);
+            QuestState state = new(parent.ParentQuest, String.Format("Dialogue_{0}", dialogueId), hoverText, dialogueId, autoComplete: true);
             parent.SetNextState(status, state);
             return state;
         }
@@ -179,7 +182,20 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// <param name="status">The status of the parent state that will trigger this state. Usually this is "success"</param>
         public static QuestState AddNamedState(this QuestState parent, string name, string hoverText, string dialogueId, QuestState.QuestStateStatus status = QuestState.QuestStateStatus.Success)
         {
-            QuestState state = new (parent.ParentQuest, name, hoverText, dialogueId, autoComplete:false);
+            QuestState state = new(parent.ParentQuest, name, hoverText, dialogueId, autoComplete: false);
+            parent.SetNextState(status, state);
+            return state;
+        }
+
+        /// <summary>
+        /// Adds a passthrough dialogue state to a quest state.
+        /// </summary>
+        /// <param name="hoverText">The text that shows over the NPC's head when you hover over them</param>
+        /// <param name="dialogueId">The dialogue that the NPC will say</param>
+        /// <param name="status">The status of the parent state that will trigger this state. Usually this is "success"</param>
+        public static QuestState AddNamedState(this QuestState parent, string name, string hoverText, Func<string> dialogueId, QuestState.QuestStateStatus status = QuestState.QuestStateStatus.Success)
+        {
+            QuestState state = new(parent.ParentQuest, name, hoverText, dialogueId, autoComplete: false);
             parent.SetNextState(status, state);
             return state;
         }
@@ -199,12 +215,11 @@ namespace Infiniscryption.P03KayceeRun.Quests
             {
                 string saveKey = String.Format("{0}_Counter", parent.ParentQuest.QuestName);
                 string modGuid = parent.ParentQuest.ModGuid;
-                retval.DynamicStatus = () => 
+                retval.DynamicStatus = () =>
                 {
-                    if (ModdedSaveManager.RunState.GetValueAsInt(modGuid, saveKey) >= threshold)
-                        return QuestState.QuestStateStatus.Success;
-                    else
-                        return QuestState.QuestStateStatus.Active;
+                    return P03AscensionSaveData.RunStateData.GetValueAsInt(modGuid, saveKey) >= threshold
+                        ? QuestState.QuestStateStatus.Success
+                        : QuestState.QuestStateStatus.Active;
                 };
             }
             return retval;
@@ -217,37 +232,36 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// over the course of the run. This function creates a dummy variable associated with the quests and increments it
         /// by one. There is a related helper function to create a quest state that automatically complets itself successfully
         /// whenever this quest counter reaches a certain threshold, which is the primary use case for this helper</remarks>
-        public static void IncrementQuestCounter(this QuestDefinition defn, int incrementBy = 1)
+        public static void IncrementQuestCounter(this QuestDefinition defn, int incrementBy = 1, bool onlyIfActive = false)
         {
+            if (onlyIfActive)
+            {
+                if (defn.CurrentState.Status != QuestState.QuestStateStatus.Active)
+                    return;
+            }
+
             string saveKey = String.Format("{0}_Counter", defn.QuestName);
-            int curValue = ModdedSaveManager.RunState.GetValueAsInt(defn.ModGuid, saveKey);
-            ModdedSaveManager.RunState.SetValue(defn.ModGuid, saveKey, curValue + incrementBy);
+            int curValue = P03AscensionSaveData.RunStateData.GetValueAsInt(defn.ModGuid, saveKey);
+            P03AscensionSaveData.RunStateData.SetValue(defn.ModGuid, saveKey, curValue + incrementBy);
         }
 
         /// <summary>
         /// This convenience method gets the current value of the dummy count variable tracked alongside the quest
         /// </summary>
-        public static int GetQuestCounter(this QuestDefinition defn)
-        {
-            return ModdedSaveManager.RunState.GetValueAsInt(defn.ModGuid, String.Format("{0}_Counter", defn.QuestName));   
-        }
+        public static int GetQuestCounter(this QuestDefinition defn) => P03AscensionSaveData.RunStateData.GetValueAsInt(defn.ModGuid, String.Format("{0}_Counter", defn.QuestName));
+
+        public static QuestState WaitForQuestCounter(this QuestState state, int threshold) => state.SetDynamicStatus(() => state.ParentQuest.GetQuestCounter() >= threshold ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Active);
 
         /// <summary>
         /// Helper to determine if this particular quest state is the "default" active state when the quest is active.
         /// </summary>
         /// <returns>True if the state represents the default active state of the quest</returns>
-        public static bool IsDefaultState(this QuestState state)
-        {
-            return state.StateName == "DEFAULTACTIVESTATE";
-        }
+        public static bool IsDefaultState(this QuestState state) => state.StateName == "DEFAULTACTIVESTATE";
 
         /// <summary>
         /// Helper to determine if the active state of the question is the "default" active state.
         /// </summary>
-        public static bool IsDefaultActive(this QuestDefinition defn)
-        {
-            return defn.CurrentState.IsDefaultState();
-        }
+        public static bool IsDefaultActive(this QuestDefinition defn) => defn.CurrentState.IsDefaultState();
 
         public static QuestState AddMonetaryReward(this QuestState state, int amount)
         {
@@ -255,33 +269,33 @@ namespace Infiniscryption.P03KayceeRun.Quests
             return state;
         }
 
-        public static QuestState AddDynamicMonetaryReward(this QuestState state)
+        public static QuestState AddDynamicMonetaryReward(this QuestState state, bool low = false)
         {
-            state.Rewards.Add(new QuestRewardDynamicCoins());
+            state.Rewards.Add(new QuestRewardDynamicCoins() { Low = low });
             return state;
         }
 
         public static QuestState AddGainCardReward(this QuestState state, string cardName)
         {
-            state.Rewards.Add(new QuestRewardCard() { CardName  = cardName });
+            state.Rewards.Add(new QuestRewardCard() { CardName = cardName });
             return state;
         }
 
         public static QuestState AddGainItemReward(this QuestState state, string itemName)
         {
-            state.Rewards.Add(new QuestRewardItem() { ItemName = itemName});
+            state.Rewards.Add(new QuestRewardItem() { ItemName = itemName });
             return state;
         }
 
         public static QuestState AddLoseCardReward(this QuestState state, string cardName)
         {
-            state.Rewards.Add(new QuestRewardLoseCard { CardName  = cardName });
+            state.Rewards.Add(new QuestRewardLoseCard { CardName = cardName });
             return state;
         }
 
         public static QuestState AddLoseItemReward(this QuestState state, string itemName)
         {
-            state.Rewards.Add(new QuestRewardLoseItem() { ItemName = itemName});
+            state.Rewards.Add(new QuestRewardLoseItem() { ItemName = itemName });
             return state;
         }
 
@@ -294,6 +308,12 @@ namespace Infiniscryption.P03KayceeRun.Quests
         public static QuestState AddGainAbilitiesReward(this QuestState state, int count, Ability ability)
         {
             state.Rewards.Add(new QuestRewardModifyRandomCards() { NumberOfCards = count, Ability = ability });
+            return state;
+        }
+
+        public static QuestState AddReward(this QuestState state, QuestReward reward)
+        {
+            state.Rewards.Add(reward);
             return state;
         }
     }

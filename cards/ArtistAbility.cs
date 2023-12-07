@@ -1,9 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
-using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
@@ -12,8 +10,8 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-	public class Artist : AbilityBehaviour
-	{
+    public class Artist : AbilityBehaviour
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -32,7 +30,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            Artist.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(Artist),
@@ -40,21 +38,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-		public override bool RespondsToUpkeep(bool playerUpkeep)
-        {
-            return this.Card.OpponentCard == !playerUpkeep;
-        }
+        public override bool RespondsToUpkeep(bool playerUpkeep) => Card.OpponentCard == !playerUpkeep;
 
-        private static int[] preferredSlots = new int[] { 2, 3, 1, 4, 0 };
-		public override IEnumerator OnUpkeep(bool playerUpkeep)
-		{
+        private static readonly int[] preferredSlots = new int[] { 2, 3, 1, 4, 0 };
+        public override IEnumerator OnUpkeep(bool playerUpkeep)
+        {
             // Look for code on this side of the board
 
             List<CardSlot> slots = playerUpkeep ? BoardManager.Instance.PlayerSlotsCopy : BoardManager.Instance.OpponentSlotsCopy;
 
             PlayableCard codeCard = slots.Where(s => s.Card != null).Select(s => s.Card).FirstOrDefault(c => c.Info.HasTrait(CodeTrait));
 
-            int randomSeed = P03AscensionSaveData.RandomSeed + TurnManager.Instance.TurnNumber * 100 + slots.IndexOf(this.Card.slot);
+            int randomSeed = P03AscensionSaveData.RandomSeed + (TurnManager.Instance.TurnNumber * 100) + slots.IndexOf(Card.slot);
             if (codeCard == null)
             {
                 yield break;
@@ -62,15 +57,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             // The code already exists. Now we modify it
             ViewManager.Instance.SwitchToView(View.Board);
-            
+
             // Programmers only modify stats not abilities
             // Artists modify abilities
-            this.Card.Anim.SetShaking(true);
+            Card.Anim.SetShaking(true);
             codeCard.Anim.SetShaking(true);
             yield return new WaitForSeconds(1.2f);
 
             codeCard.Anim.SetOverclocked(true);
-            CardModificationInfo newAbilityMod = new (AbilitiesUtil.GetRandomLearnedAbility(randomSeed, true, categoryCriteria: AbilityMetaCategory.BountyHunter));
+            CardModificationInfo newAbilityMod = new(AbilitiesUtil.GetRandomLearnedAbility(randomSeed, true, categoryCriteria: AbilityMetaCategory.BountyHunter));
 
             // Remove an ability if it has three on it already
             List<CardModificationInfo> abilityMods = codeCard.temporaryMods.Where(m => m.abilities != null && m.abilities.Count > 0).ToList();

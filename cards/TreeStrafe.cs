@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
-using System.Linq;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -17,14 +16,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Seed Sprinter";
-            info.rulebookDescription = "At the end of its controller's turn, [creature] moves one space in the direction indicated (if it can) and leaves behind a tree.";
+            info.rulebookDescription = "At the end of its controller's turn, [creature] moves one space in the direction indicated (if it can) and plants a seed in its previous space.";
             info.canStack = false;
-            info.powerLevel = 2;
+            info.powerLevel = 3;
             info.opponentUsable = true;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_treestrafe.png", typeof(TreeStrafe).Assembly));
 
-            TreeStrafe.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(TreeStrafe),
@@ -33,36 +33,26 @@ namespace Infiniscryption.P03KayceeRun.Cards
         }
 
         public override IEnumerator PostSuccessfulMoveSequence(CardSlot cardSlot)
-		{
-			if (cardSlot.Card == null)
-			{
-                CardInfo treeCard = CardLoader.GetCardByName("Tree_Hologram");
-                CardModificationInfo extraAbilities = new () { abilities = new () };
-
-                foreach (var mod in this.Card.Info.Mods)
-                {
-                    if (mod.abilities != null && mod.abilities.Count > 0)
-                    {
-                        extraAbilities.abilities.AddRange(mod.abilities);
-                        if (mod.fromOverclock)
-                            extraAbilities.fromOverclock = true;
-                    }
-                }
+        {
+            if (cardSlot.Card == null)
+            {
+                CardInfo treeCard = CardLoader.GetCardByName(ExpansionPackCards_1.SEED_CARD);
+                CardModificationInfo extraAbilities = new() { abilities = new(Card.Info.Abilities) };
 
                 if (extraAbilities.abilities.Count > 0)
                 {
                     if (extraAbilities.abilities.Contains(NewPermaDeath.AbilityID))
                         extraAbilities.abilities.Remove(NewPermaDeath.AbilityID);
 
-                    if (extraAbilities.abilities.Contains(TreeStrafe.AbilityID))
-                        extraAbilities.abilities.Remove(TreeStrafe.AbilityID);
+                    if (extraAbilities.abilities.Contains(AbilityID))
+                        extraAbilities.abilities.Remove(AbilityID);
 
                     treeCard.mods.Add(extraAbilities);
                 }
 
-				yield return BoardManager.Instance.CreateCardInSlot(treeCard, cardSlot, 0.1f, true);
-			}
-			yield break;
-		}
+                yield return BoardManager.Instance.CreateCardInSlot(treeCard, cardSlot, 0.1f, true);
+            }
+            yield break;
+        }
     }
 }

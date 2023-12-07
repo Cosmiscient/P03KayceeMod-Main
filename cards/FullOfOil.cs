@@ -1,19 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class FullOfOil : AbilityBehaviour
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -31,7 +27,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
 
-            FullOfOil.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(FullOfOil),
@@ -42,20 +38,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
             List<CardSlot> targets = new();
-            targets.AddRange(BoardManager.Instance.GetAdjacentSlots(this.Card.Slot));
-            targets.Add(this.Card.Slot.opposingSlot);
+            targets.AddRange(BoardManager.Instance.GetAdjacentSlots(Card.Slot));
+            targets.Add(Card.Slot.opposingSlot);
             targets.RemoveAll(s => s == null || s.Card == null);
 
             if (targets.Count == 0)
                 yield break;
 
-            var originalView = ViewManager.Instance.CurrentView;
+            View originalView = ViewManager.Instance.CurrentView;
             ViewManager.Instance.SwitchToView(View.Board, false, false);
             yield return new WaitForSeconds(0.15f);
 
             foreach (CardSlot slot in targets)
             {
-                this.Card.Anim.StrongNegationEffect();
+                Card.Anim.StrongNegationEffect();
                 slot.Card.Anim.StrongNegationEffect();
                 yield return new WaitForSeconds(0.25f);
                 slot.Card.TemporaryMods.Add(new(0, 3));
@@ -69,6 +65,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
 
-        
+
     }
 }

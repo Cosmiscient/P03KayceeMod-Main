@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
@@ -24,6 +23,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void AttachExporter(ref CardRenderCamera __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (__instance.gameObject.GetComponent<CardExporter>() == null)
             {
                 P03Plugin.Log.LogDebug("Adding Card Exporter!");
@@ -34,21 +36,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public void StartCardExport()
         {
             inRender = true;
-            base.StartCoroutine(ExportAllCards());
+            StartCoroutine(ExportAllCards());
         }
-
-        [SerializeField]        
-        private GameObject temporaryHolding;
 
         [SerializeField]
-        private PlayableCard dummyCard;
+        private readonly GameObject temporaryHolding;
 
-        private static RenderStatsLayer statsLayer = null;
+        [SerializeField]
+        private readonly PlayableCard dummyCard;
 
-        private bool IsTalkingCard(CardInfo info)
-        {
-            return info.appearanceBehaviour.Contains(CardAppearanceBehaviour.Appearance.DynamicPortrait) || info.animatedPortrait != null;
-        }
+        private static readonly RenderStatsLayer statsLayer = null;
+
+        private bool IsTalkingCard(CardInfo info) => info.appearanceBehaviour.Contains(CardAppearanceBehaviour.Appearance.DynamicPortrait) || info.animatedPortrait != null;
 
         [SerializeField]
         public float xOffset = 0.4f;
@@ -65,8 +64,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override void ManagedUpdate()
         {
-            if (!inRender && 
-                (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && 
+            if (!inRender &&
+                (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) &&
                 (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
             {
                 if (Input.GetKey(KeyCode.X))
@@ -78,32 +77,45 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     skipBulkRender = true;
                     StartCardExport();
                 }
+                else if (Input.GetKey(KeyCode.S))
+                {
+                    ExportAllSigils();
+                }
             }
         }
 
-        private static Bounds GetMaxBounds(GameObject g) {
-
-            List<Renderer> renderers = new ();
+        internal static Bounds GetMaxBounds(GameObject g)
+        {
+            List<Renderer> renderers = new();
             foreach (string p in GameObjectPaths)
             {
                 Transform t = g.transform.Find(p);
                 if (t != null)
+                {
                     renderers.AddRange(t.gameObject.GetComponents<Renderer>());
+                }
             }
 
-            if (renderers.Count == 0) return new Bounds(g.transform.position, Vector3.zero);
-            var b = renderers[0].bounds;
-            foreach (Renderer r in renderers) {
+            if (renderers.Count == 0)
+            {
+                return new Bounds(g.transform.position, Vector3.zero);
+            }
+
+            Bounds b = renderers[0].bounds;
+            foreach (Renderer r in renderers)
+            {
                 b.Encapsulate(r.bounds);
             }
             return b;
         }
 
-        private static Dictionary<string, string> imageCache = new ();
+        private static readonly Dictionary<string, string> imageCache = new();
         private static string GetImageEmbedded(string cardName)
         {
             if (imageCache.Keys.Contains(cardName))
+            {
                 return imageCache[cardName];
+            }
 
             byte[] sourceBytes = cardName.Equals("queue", StringComparison.InvariantCultureIgnoreCase) ?
                                   TextureHelper.GetResourceBytes("cadslot_down.png", typeof(CardExporter).Assembly) :
@@ -115,22 +127,21 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return imageCache[cardName];
         }
 
-        private static System.Text.RegularExpressions.Regex rgx = new System.Text.RegularExpressions.Regex("[^a-zA-Z0-9]");
-        private static string GetRepr(CardInfo info)
-        {
-            if (info.mods == null || info.mods.Count == 0)
-                return info.name;
-            return rgx.Replace(CustomCards.ConvertCardToCompleteCode(info), "");
-        }
+        private static readonly System.Text.RegularExpressions.Regex rgx = new("[^a-zA-Z0-9]");
+        private static string GetRepr(CardInfo info) => info.mods == null || info.mods.Count == 0 ? info.name : rgx.Replace(CustomCards.ConvertCardToCompleteCode(info), "");
 
-        private static HashSet<string> GeneratedThisRun = new ();
+        private static readonly HashSet<string> GeneratedThisRun = new();
         private static bool Generated(CardInfo info)
         {
             if (info.mods == null || info.mods.Count == 0)
+            {
                 return File.Exists($"cardexports/{GetRepr(info)}.png");
+            }
 
             if (GeneratedThisRun.Contains(GetRepr(info)))
+            {
                 return true;
+            }
 
             GeneratedThisRun.Add(GetRepr(info));
             return false;
@@ -148,7 +159,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             try
             {
-                screenshot.ReadPixels(new (0, 0, Screen.currentResolution.width, Screen.currentResolution.height), 0, 0, false);
+                screenshot.ReadPixels(new(0, 0, Screen.currentResolution.width, Screen.currentResolution.height), 0, 0, false);
                 screenshot.Apply();
 
                 Bounds cardBounds = GetMaxBounds(card.gameObject);
@@ -159,13 +170,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 int xMin = Mathf.RoundToInt(Mathf.Min(lower.x, upper.x));
                 int yMin = Mathf.RoundToInt(Mathf.Min(lower.y, upper.y));
 
-                finalTexture = new (width, height);
-                finalTexture.filterMode = FilterMode.Trilinear;
+                finalTexture = new(width, height)
+                {
+                    filterMode = FilterMode.Trilinear
+                };
 
                 for (int x = 0; x < width; x++)
+                {
                     for (int y = 0; y < height; y++)
+                    {
                         finalTexture.SetPixel(x, y, screenshot.GetPixel(x + xMin, y + yMin));
-
+                    }
+                }
 
                 P03Plugin.Log.LogDebug("Writing file");
                 File.WriteAllBytes(filename, ImageConversion.EncodeToPNG(finalTexture));
@@ -178,10 +194,42 @@ namespace Infiniscryption.P03KayceeRun.Cards
             card.transform.localPosition = card.transform.localPosition + new Vector3(0, 10, 0);
             yield return new WaitForEndOfFrame();
             if (card != null)
-                GameObject.DestroyImmediate(card.gameObject);
+            {
+                DestroyImmediate(card.gameObject);
+            }
+
             if (finalTexture != null)
-                GameObject.DestroyImmediate(finalTexture);
+            {
+                DestroyImmediate(finalTexture);
+            }
+
             yield return new WaitForEndOfFrame();
+        }
+
+        private void ExportAllSigils()
+        {
+            if (!Directory.Exists("cardexports"))
+            {
+                Directory.CreateDirectory("cardexports");
+            }
+
+            List<AbilityManager.FullAbility> mySigils = GuidManager.GetValues<Ability>()
+                                      .Select(a => AbilityManager.AllAbilities.FirstOrDefault(f => f.Info.ability == a))
+                                      .Where(ai => ai != null && ai.Info != null && !string.IsNullOrEmpty(ai.Info.name))
+                                      .Where(ai => ai.Info.name.StartsWith(P03Plugin.PluginGuid))
+                                      .OrderBy(ai => ai.Info.rulebookName)
+                                      .ToList();
+
+            P03Plugin.Log.LogInfo($"Running sigil export for {mySigils.Count} sigils");
+
+            string mdTable = "|Icon|Name|Power Level|Description|\n|---|---|---|---|\n";
+            foreach (AbilityManager.FullAbility item in mySigils)
+            {
+                mdTable += $"|[[https://github.com/Cosmiscient/P03KayceeMod-Main/blob/main/assets/{item.Texture.name}.png]]";
+                mdTable += $"|{item.Info.rulebookName}|{item.Info.powerLevel}|{item.Info.rulebookDescription}|\n";
+            }
+
+            File.WriteAllText("cardexports/sigil_table.md", mdTable);
         }
 
         public IEnumerator ExportAllCards()
@@ -209,13 +257,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return new WaitForSeconds(.15f);
 
             if (!Directory.Exists("cardexports"))
+            {
                 Directory.CreateDirectory("cardexports");
+            }
 
             Camera camera = ViewManager.Instance.CameraParent.gameObject.GetComponentInChildren<Camera>();
-            Vector3 renderPosition = new(0f,0f,0f);
+            Vector3 renderPosition = new(0f, 0f, 0f);
 
-            Texture2D screenshot = new Texture2D(Screen.currentResolution.width, Screen.currentResolution.height);
-            screenshot.filterMode = FilterMode.Trilinear;
+            Texture2D screenshot = new(Screen.currentResolution.width, Screen.currentResolution.height)
+            {
+                filterMode = FilterMode.Trilinear
+            };
 
             List<CardInfo> cardsToRender = CardManager.AllCardsCopy.Where(ci => ci.temple == CardTemple.Tech && ci.name[0] != '!').ToList();
             if (skipBulkRender)
@@ -226,13 +278,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             while (cardsToRender.Count > 0)
             {
-                List<PlayableCard> currentBatch = new ();
+                List<PlayableCard> currentBatch = new();
 
                 while (cardsToRender.Count > 0 && currentBatch.Count < 20)
                 {
                     CardInfo info = cardsToRender[0];
                     cardsToRender.RemoveAt(0);
-                    
+
                     PlayableCard card = CardSpawner.SpawnPlayableCard(info);
                     card.gameObject.transform.localPosition = new Vector3(card.gameObject.transform.localPosition.x + xOffset, card.gameObject.transform.localPosition.y, card.gameObject.transform.localPosition.z);
                     renderPosition = card.gameObject.transform.localPosition;
@@ -247,26 +299,30 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     PlayableCard card = currentBatch[i];
                     yield return GenerateCard(card, renderPosition, screenshot, camera);
-                }                
+                }
             }
 
-            List<EncounterBlueprintData> encountersToExport = EncounterManager.AllEncountersCopy.Where(ebd => Infiniscryption.P03KayceeRun.Encounters.EncounterExtensions.P03OnlyEncounters.Contains(ebd.name)).ToList();
+            List<EncounterBlueprintData> encountersToExport = EncounterManager.AllEncountersCopy.Where(ebd => Encounters.EncounterExtensions.P03OnlyEncounters.Contains(ebd.name)).ToList();
 
             // We also want to export all the base game encounters for act 3
-            foreach (var encounter in EncounterManager.BaseGameEncounters)
+            foreach (EncounterBlueprintData encounter in EncounterManager.BaseGameEncounters)
             {
                 if (encounter.randomReplacementCards != null && encounter.randomReplacementCards.Any(ci => ci.temple != CardTemple.Tech))
+                {
                     continue;
+                }
 
                 bool valid = true;
                 bool doneSearching = false;
 
-                foreach (var turn in encounter.turns)
+                foreach (List<EncounterBlueprintData.CardBlueprint> turn in encounter.turns)
                 {
-                    foreach (var ci in turn)
+                    foreach (EncounterBlueprintData.CardBlueprint ci in turn)
                     {
                         if (ci.card == null)
+                        {
                             continue;
+                        }
 
                         if (ci.card.temple != CardTemple.Tech)
                         {
@@ -284,20 +340,27 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     }
 
                     if (doneSearching)
+                    {
                         break;
+                    }
                 }
 
                 if (valid)
+                {
                     encountersToExport.Add(encounter);
+                }
             }
 
             // Now we export all of the encounters
-            foreach (var encounter in encountersToExport)
+            foreach (EncounterBlueprintData encounter in encountersToExport)
             {
                 P03Plugin.Log.LogDebug($"Generating encounter {encounter.name}");
                 string export = $"<body><h2 class=\"title\">{encounter.name}</h2><table cellpadding=\"0\" cellspacing=\"0\"><tr><td/>";
                 for (int i = encounter.minDifficulty; i <= encounter.maxDifficulty; i++)
+                {
                     export += $"<td colspan=5 class=\"levelheader\">Level {i}</td><td><div class=\"levelspacer\"/></td>";
+                }
+
                 export += "</tr>";
 
                 Dictionary<string, string> styleSet = new() {
@@ -305,7 +368,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 };
 
                 Dictionary<int, List<List<CardInfo>>> turnPlanDictionary = new();
-                Dictionary<int, float> runningPowerLevelTotals = new ();
+                Dictionary<int, float> runningPowerLevelTotals = new();
                 for (int i = encounter.minDifficulty; i <= encounter.maxDifficulty; i++)
                 {
                     runningPowerLevelTotals[i] = 0f;
@@ -314,25 +377,27 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                 for (int turnNumber = 0; turnNumber < encounter.turns.Count; turnNumber++)
                 {
-                    P03Plugin.Log.LogDebug($"Generating turn {turnNumber+1}");
-                    var turn = encounter.turns[turnNumber];
-                    export += $"<tr><td class=\"turnlabel\">Turn {turnNumber+1}</td>";
+                    P03Plugin.Log.LogDebug($"Generating turn {turnNumber + 1}");
+                    List<EncounterBlueprintData.CardBlueprint> turn = encounter.turns[turnNumber];
+                    export += $"<tr><td class=\"turnlabel\">Turn {turnNumber + 1}</td>";
                     for (int i = encounter.minDifficulty; i <= encounter.maxDifficulty; i++)
                     {
                         P03Plugin.Log.LogDebug($"Generating difficulty {i}");
                         List<CardInfo> turnEncounterCards = turnPlanDictionary[i].Count > turnNumber ? turnPlanDictionary[i][turnNumber] : new();
-                        foreach (var currentCard in turnEncounterCards)
+                        foreach (CardInfo currentCard in turnEncounterCards)
                         {
                             if (!Generated(currentCard))
                             {
                                 PlayableCard tempCard = CardSpawner.SpawnPlayableCard(currentCard);
-                                Vector3 newPositon = new Vector3(tempCard.gameObject.transform.localPosition.x + xOffset, tempCard.gameObject.transform.localPosition.y, tempCard.gameObject.transform.localPosition.z);
+                                Vector3 newPositon = new(tempCard.gameObject.transform.localPosition.x + xOffset, tempCard.gameObject.transform.localPosition.y, tempCard.gameObject.transform.localPosition.z);
                                 yield return new WaitForSeconds(1.0f);
                                 yield return GenerateCard(tempCard, newPositon, screenshot, camera);
                             }
 
                             if (!styleSet.Keys.Contains(GetRepr(currentCard)))
+                            {
                                 styleSet[GetRepr(currentCard)] = GetImageEmbedded(GetRepr(currentCard));
+                            }
                         }
                         // foreach (var cardBp in turn)
                         // {
@@ -358,7 +423,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         //         currentCard.mods ??= new();
                         //         currentCard.mods.Add(new (1, 0) { fromOverclock = true });
                         //     }
-                            
+
                         //     if (currentCard != null)
                         //     {
                         //         P03Plugin.Log.LogDebug($"Adding card {currentCard.name} to turn");
@@ -389,7 +454,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         {
                             turnSlots[turnNumber % 2 == 0 ? 0 : 4] = GetRepr(conduitsInTurn[0]);
                             turnEncounterCards.Remove(conduitsInTurn[0]);
-                        } else if (conduitsInTurn.Count == 2)
+                        }
+                        else if (conduitsInTurn.Count == 2)
                         {
                             turnSlots[0] = GetRepr(conduitsInTurn[0]);
                             turnSlots[4] = GetRepr(conduitsInTurn[1]);
@@ -397,12 +463,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
                             turnEncounterCards.Remove(conduitsInTurn[1]);
                         }
                         if (turnEncounterCards.Count > 5)
+                        {
                             throw new InvalidOperationException("Somehow this turn has too many cards!");
-                        if (turnEncounterCards.Count == 4 || turnEncounterCards.Count == 5)
+                        }
+
+                        if (turnEncounterCards.Count is 4 or 5)
                         {
                             for (int s = 0; s < turnEncounterCards.Count; s++)
+                            {
                                 turnSlots[s] = GetRepr(turnEncounterCards[s]);
-                        } else if (turnEncounterCards.Count == 3)
+                            }
+                        }
+                        else if (turnEncounterCards.Count == 3)
                         {
                             turnSlots[1] = GetRepr(turnEncounterCards[0]);
                             turnSlots[2] = GetRepr(turnEncounterCards[1]);
@@ -464,14 +536,19 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 finalExport += "}\n\n";
 
                 foreach (string styleDef in styleSet.Values)
+                {
                     finalExport += styleDef;
+                }
 
                 finalExport += "</style>\n" + export;
 
                 File.WriteAllText(filename, finalExport);
             }
 
-            GameObject.Destroy(screenshot);
+            Destroy(screenshot);
+
+            ExportAllSigils();
+
             ExplorableAreaManager.Instance.SetHangingLightColors(originalHangingLightColor, originalHangingLightCardColor);
 
             GameOptions.optionsData.noiseEnabled = noiseEnabled;
@@ -489,11 +566,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void EnsureOverclocked(ref PlayableCard __result)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (!inRender)
-                return; 
+            {
+                return;
+            }
 
             if (__result.Info != null && __result.Info.Mods != null && __result.Info.Mods.Any(m => m.fromOverclock))
+            {
                 __result.Anim.SetOverclocked(true);
+            }
         }
     }
 }

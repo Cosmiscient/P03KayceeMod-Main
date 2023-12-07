@@ -1,0 +1,16 @@
+{
+    "[csharp]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave":
+        {
+            "source.organizeImports": "always",
+            "source.fixAll": "always"
+        }
+    },
+    "dotnet.implementType.propertyGenerationBehavior": "preferAutoProperties",
+    "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "fullSolution",
+    "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "fullSolution",
+    "dotnet.server.useOmnisharp": true,
+    "csharp.suppressBuildAssetsNotification": false,
+    "omnisharp.organizeImportsOnFormat": true,
+}

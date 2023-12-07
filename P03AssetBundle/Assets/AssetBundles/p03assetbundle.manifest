@@ -1,0 +1,72 @@
+ManifestFileVersion: 0
+CRC: 3240280232
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: eb39f7ad1f8f4ae17cc5023b6aae3bd9
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 8c5b7327d4a845eb9a034ee9c89524e4
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
+- Class: 136
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Shaders/ProjectedUnstenciledSticker.shader
+- Assets/Textures/Tractorbeam.mat
+- Assets/Prefabs/Molotov.prefab
+- Assets/Prefabs/UFO.prefab
+- Assets/Textures/UFO_Black_Down.mat
+- Assets/Prefabs/arrow-repeat.prefab
+- Assets/Shaders/StandardWithStencil.shader
+- Assets/Shaders/LightProjectorShader.shader
+- Assets/Prefabs/latcher-claw.prefab
+- Assets/Effects/Fire_Flamethrower.prefab
+- Assets/Effects/Fire_Ball.prefab
+- Assets/Effects/Fire_Glow.mat
+- Assets/Shaders/StickerStencilApply.shader
+- Assets/Models/bottle.fbx
+- Assets/Textures/UFO_Fire.mat
+- Assets/Prefabs/mantrap.prefab
+- Assets/Effects/Fire_Material.mat
+- Assets/Prefabs/Launcher.prefab
+- Assets/Shaders/ProjectStickerShader.shader
+- Assets/Textures/UFO_Middle.mat
+- Assets/Prefabs/rocket-bomb.prefab
+- Assets/Textures/PolaroidMaterial.mat
+- Assets/Shaders/MultiplyProjectorShader.shader
+- Assets/Effects/Fire_Particles.png
+- Assets/Effects/Fire_Parent.prefab
+- Assets/Textures/UFO_Base.mat
+- Assets/Effects/UFO_Particles.png
+- Assets/Prefabs/Unlit-Bomb.prefab
+- Assets/Prefabs/Missile.prefab
+- Assets/Prefabs/LaserRifle.prefab
+- Assets/Prefabs/Frame.prefab
+- Assets/Models/missile_model.dae
+- Assets/Prefabs/LeepBot.prefab
+- Assets/Effects/Fire_Material_Additive.mat
+Dependencies: []

@@ -1,10 +1,9 @@
-using HarmonyLib;
-using DiskCardGame;
 using System.Collections;
-using UnityEngine;
-using Infiniscryption.P03KayceeRun.Faces;
-using System;
 using System.Collections.Generic;
+using DiskCardGame;
+using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Faces;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -26,7 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TRADITIONAL_LIVES))
             {
                 // Reduce the number of lives
-                EventManagement.NumberOfLivesRemaining = EventManagement.NumberOfLivesRemaining - 1;
+                EventManagement.NumberOfLivesRemaining--;
                 EventManagement.NumberOfZoneEnemiesKilled = 0;
             }
         }
@@ -73,7 +72,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 //This method makes sure it only triggers once per run,
                 //And only when the respawn increase kicks in after the freebie
-                if (!(AscensionChallengeManagement.ExpensiveRespawnUIPlayed) && (respawnCostIncrease == respawnCostExpensive))
+                if (!AscensionChallengeManagement.ExpensiveRespawnUIPlayed && (respawnCostIncrease == respawnCostExpensive))
                 {
                     ChallengeActivationUI.Instance.ShowActivation(AscensionChallenge.LessLives);
                     AscensionChallengeManagement.ExpensiveRespawnUIPlayed = true;
@@ -122,9 +121,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             else
             {
                 //If the player hasn't died to a boss, explain it
-                
+
                 //if (diedToBoss)
-                if ((diedToBoss) && (!StoryEventsData.EventCompleted(EventManagement.SAW_P03_BOSSPAIDRESPAWN_EXPLAIN)))
+                if (diedToBoss && (!StoryEventsData.EventCompleted(EventManagement.SAW_P03_BOSSPAIDRESPAWN_EXPLAIN)))
                 {
                     //yield return new WaitForSeconds(0.2f);
                     ViewManager.Instance.SwitchToView(View.P03Face, false, false);
@@ -134,7 +133,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     yield return new WaitForSeconds(0.4f);
                 }
             }
-            
+
             //Show increase in respawn cost
             //yield return new WaitForSeconds(0.4f);
             yield return P03PaidRespawnFace.ShowChangePRCost(respawnCost, true, diedToBoss);
@@ -206,7 +205,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             //If this is a P03 kaycee mod run AND trad lives arent on, reset lives if the player just won a battle
             //If the lives arent reset, there's a bug where the player keeps losing constantly even after a victory
             //Since the life count isn't > 0
-            if (!AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TRADITIONAL_LIVES) && (SaveFile.IsAscension))
+            if (!AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TRADITIONAL_LIVES) && SaveFile.IsAscension)
             {
                 Part3SaveData.Data.playerLives = 1;
                 Debug.Log("Lives Set: " + Part3SaveData.Data.playerLives);
@@ -238,7 +237,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             //This method makes sure it only triggers once per run
-            if (!(AscensionChallengeManagement.TradLivesUIPlayed))
+            if (!AscensionChallengeManagement.TradLivesUIPlayed)
             {
                 ChallengeActivationUI.Instance.ShowActivation(AscensionChallengeManagement.TRADITIONAL_LIVES);
                 AscensionChallengeManagement.TradLivesUIPlayed = true;
@@ -270,7 +269,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     if (!createBloodStain)
                     {
                         ViewManager.Instance.SwitchToView(View.MapDefault, false, false);
-		                yield return new WaitForSeconds(0.1f);
+                        yield return new WaitForSeconds(0.1f);
                     }
 
                     continue;
@@ -289,12 +288,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Default, true, true);
             yield return new WaitForSeconds(0.1f);
 
-            List<string> dialogueOptions = new List<string>();
-            dialogueOptions.Add("Part3AscensionDeath");
-            dialogueOptions.Add("Part3AscensionDeath2");
-            dialogueOptions.Add("Part3AscensionDeath3");
-            dialogueOptions.Add("Part3AscensionDeath4");
-            dialogueOptions.Add("Part3AscensionDeath5");
+            List<string> dialogueOptions = new() {
+                "Part3AscensionDeath",
+                "Part3AscensionDeath2",
+                "Part3AscensionDeath3",
+                "Part3AscensionDeath4",
+                "Part3AscensionDeath5"
+            };
 
             if (!AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TRADITIONAL_LIVES))
             {
@@ -306,7 +306,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             string finalDialogue = dialogueOptions[UnityEngine.Random.Range(0, dialogueOptions.Count)];
 
             yield return TextDisplayer.Instance.PlayDialogueEvent(finalDialogue, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
-		    yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.1f);
             EventManagement.FinishAscension(false);
             yield break;
         }
@@ -319,7 +319,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 foreach (Part3SaveData.MapAreaStateData area in __instance.areaData)
                 {
-                    area.clearedBattles.ForEach(delegate(LookDirection x)
+                    area.clearedBattles.ForEach(delegate (LookDirection x)
                     {
                         area.clearedDirections.Remove(x);
                     });

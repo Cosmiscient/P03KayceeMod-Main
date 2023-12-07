@@ -1,19 +1,14 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
-using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-    [HarmonyPatch]
     public class Overheat : AbilityBehaviour, InscryptionAPI.Triggers.IPassiveAttackBuff
-	{
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -27,8 +22,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.opponentUsable = true;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_overheat.png", typeof(Overheat).Assembly));
 
-            Overheat.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(Overheat),
@@ -38,7 +34,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public int GetPassiveAttackBuff(PlayableCard currentCard)
         {
-            if (currentCard != this.Card) return 0;
+            if (currentCard != Card) return 0;
 
             if (LifeManager.Instance.DamageUntilPlayerWin > 5)
             {
@@ -50,12 +46,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 return -1;
             }
 
-            if (LifeManager.Instance.DamageUntilPlayerWin == 5)
-            {
-                return 0;
-            }
-
-            return 0;
+            return LifeManager.Instance.DamageUntilPlayerWin == 5 ? 0 : 0;
         }
     }
 }

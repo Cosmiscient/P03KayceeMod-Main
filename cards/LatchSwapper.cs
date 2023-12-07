@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
-using InscryptionAPI;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -24,9 +23,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.powerLevel = 2;
             info.opponentUsable = true;
             info.passive = false;
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_latch_swapper.png", typeof(LatchSwapper).Assembly));
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
 
-            LatchSwapper.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(LatchSwapper),
@@ -36,17 +36,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private PlayableCard lastTarget = null;
 
-        public override void OnSuccessfullyLatched(PlayableCard target)
-        {
-            lastTarget = target;
-        }
+        public override void OnSuccessfullyLatched(PlayableCard target) => lastTarget = target;
 
         public override IEnumerator OnPreDeathAnimation(bool wasSacrifice)
         {
             yield return base.OnPreDeathAnimation(wasSacrifice);
-            if (this.lastTarget != null)
+            if (lastTarget != null)
             {
-                yield return this.lastTarget.GetComponent<SwapStats>().OnTakeDamage(lastTarget);
+                yield return lastTarget.GetComponent<SwapStats>().OnTakeDamage(lastTarget);
             }
         }
     }

@@ -1,18 +1,28 @@
-using HarmonyLib;
-using DiskCardGame;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using InscryptionAPI.Saves;
-using System;
-using Infiniscryption.P03KayceeRun.Sequences;
+using DiskCardGame;
+using HarmonyLib;
+using Infiniscryption.P03KayceeRun.BattleMods;
 using Infiniscryption.P03KayceeRun.Quests;
+using Infiniscryption.P03KayceeRun.Sequences;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
     [HarmonyPatch]
     public static partial class RunBasedHoloMap
     {
-        private static readonly int[][] NSEW = new int[][] { new int[]{ 0, -1 }, new int[]{0, 1}, new int[]{1, 0}, new int[]{-1, 0}};
+        private static readonly int[][] NSEW = new int[][] { new int[] { 0, -1 }, new int[] { 0, 1 }, new int[] { 1, 0 }, new int[] { -1, 0 } };
+
+        private static CardTemple ToTemple(this Zone zone)
+        {
+            if (zone == Zone.Magic)
+                return CardTemple.Wizard;
+            if (zone == Zone.Nature)
+                return CardTemple.Nature;
+            return zone == Zone.Undead ? CardTemple.Undead : CardTemple.Tech;
+        }
 
         private static IEnumerable<HoloMapBlueprint> AdjacentToQuadrant(this HoloMapBlueprint[,] map, int x, int y)
         {
@@ -42,11 +52,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return retval;
         }
 
-        public static IEnumerable<HoloMapBlueprint> AdjacentToQuadrant(this HoloMapBlueprint[,] map, HoloMapBlueprint node)
-        {
-            return map.AdjacentToQuadrant(node.x, node.y);
-        }
-        
+        public static IEnumerable<HoloMapBlueprint> AdjacentToQuadrant(this HoloMapBlueprint[,] map, HoloMapBlueprint node) => map.AdjacentToQuadrant(node.x, node.y);
+
         public static IEnumerable<HoloMapBlueprint> AdjacentTo(this HoloMapBlueprint[,] map, int x, int y)
         {
             return NSEW.Where(p => x + p[0] >= 0 &&
@@ -60,25 +67,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             int x = direction == WEST ? node.x - 1 : direction == EAST ? node.x + 1 : node.x;
             int y = direction == NORTH ? node.y - 1 : direction == SOUTH ? node.y + 1 : node.y;
-            if (x < 0 || x >= 6 || y < 0 || y >= 6)
-                return null;
-            return new(x, y);
+            return x < 0 || x >= 6 || y < 0 || y >= 6 ? null : new(x, y);
         }
 
         public static HoloMapBlueprint GetAdjacentNode(int x, int y, HoloMapBlueprint[,] map, int direction)
         {
             x = direction == WEST ? x - 1 : direction == EAST ? x + 1 : x;
             y = direction == NORTH ? y - 1 : direction == SOUTH ? y + 1 : y;
-            if (x < 0 || y < 0 || x >= map.GetLength(0) || y >= map.GetLength(1))
-                return null;
-
-            return map[x,y];
+            return x < 0 || y < 0 || x >= map.GetLength(0) || y >= map.GetLength(1) ? null : map[x, y];
         }
 
         public static HoloMapBlueprint[,] ToMap(this List<HoloMapBlueprint> bp)
         {
-            HoloMapBlueprint[,] retval = new HoloMapBlueprint[6,6];
-            foreach (var hmb in bp)
+            HoloMapBlueprint[,] retval = new HoloMapBlueprint[6, 6];
+            foreach (HoloMapBlueprint hmb in bp)
                 retval[hmb.x, hmb.y] = hmb;
 
             return retval;
@@ -86,25 +88,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         public static HoloMapBlueprint GetAdjacentNode(this HoloMapBlueprint node, List<HoloMapBlueprint> map, int direction)
         {
-            var newLoc = GetAdjacentLocation(node, direction);
-            if (newLoc == null)
-                return null;
-            return map.FirstOrDefault(bp => bp.x == newLoc.Item1 && bp.y == newLoc.Item2);
+            Tuple<int, int> newLoc = GetAdjacentLocation(node, direction);
+            return newLoc == null ? null : map.FirstOrDefault(bp => bp.x == newLoc.Item1 && bp.y == newLoc.Item2);
         }
 
-        public static HoloMapBlueprint GetAdjacentNode(this HoloMapBlueprint node, HoloMapBlueprint[,] map, int direction)
-        {
-            return GetAdjacentNode(node.x, node.y, map, direction);
-        }
+        public static HoloMapBlueprint GetAdjacentNode(this HoloMapBlueprint node, HoloMapBlueprint[,] map, int direction) => GetAdjacentNode(node.x, node.y, map, direction);
 
         public static List<HoloMapBlueprint> GetPointOfInterestNodes(this List<HoloMapBlueprint> nodes, Func<HoloMapBlueprint, bool> filter = null)
         {
-            Func<HoloMapBlueprint, bool> activeFilter = (filter == null) ? ((HoloMapBlueprint i) => true) : filter;
+            Func<HoloMapBlueprint, bool> activeFilter = filter ?? ((HoloMapBlueprint i) => true);
             List<HoloMapBlueprint> deadEndPOI = nodes.Where(activeFilter).Where(bp => bp.IsDeadEnd && bp.EligibleForUpgrade).ToList();
-            if (deadEndPOI.Count > 0)
-                return deadEndPOI;
-            else
-                return nodes.Where(activeFilter).Where(bp => bp.EligibleForUpgrade).ToList();
+            return deadEndPOI.Count > 0 ? deadEndPOI : nodes.Where(activeFilter).Where(bp => bp.EligibleForUpgrade).ToList();
         }
 
         public static HoloMapBlueprint GetRandomPointOfInterest(this List<HoloMapBlueprint> nodes, Func<HoloMapBlueprint, bool> filter = null, int randomSeed = -1)
@@ -116,16 +110,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return possibles.Count == 0 ? null : possibles[UnityEngine.Random.Range(0, possibles.Count)];
         }
 
-        public static IEnumerable<HoloMapBlueprint> AdjacentTo(this HoloMapBlueprint[,] map, HoloMapBlueprint node)
-        {
-            return map.AdjacentTo(node.x, node.y);
-        }
+        public static IEnumerable<HoloMapBlueprint> AdjacentTo(this HoloMapBlueprint[,] map, HoloMapBlueprint node) => map.AdjacentTo(node.x, node.y);
 
         public static int DirTo(this HoloMapBlueprint start, HoloMapBlueprint end)
         {
             int retval = BLANK;
-            retval = retval | (start.x == end.x ? 0 : start.x < end.x ? EAST : WEST);
-            retval = retval | (start.y == end.y ? 0 : start.y < end.y ? SOUTH : NORTH);
+            retval |= start.x == end.x ? 0 : start.x < end.x ? EAST : WEST;
+            retval |= start.y == end.y ? 0 : start.y < end.y ? SOUTH : NORTH;
             return retval;
         }
 
@@ -133,9 +124,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             List<HoloMapBlueprint> possibles = new();
             for (int i = 0; i < map.GetLength(0); i++)
+            {
                 for (int j = 0; j < map.GetLength(1); j++)
-                    if (map[i,j] != null && map[i,j].color == color)
+                {
+                    if (map[i, j] != null && map[i, j].color == color)
                         possibles.Add(map[i, j]);
+                }
+            }
 
             HoloMapBlueprint startNode = possibles[UnityEngine.Random.Range(0, possibles.Count)];
             CrawlQuadrant(map, startNode.x, startNode.y);
@@ -146,21 +141,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // Find all adjacent uncrawled nodes
             List<HoloMapBlueprint> uncrawled = map.AdjacentTo(x, y)
                                                   .Where(bp => bp != null)
-                                                  .Where(bp => map[x,y].color == bp.color)
+                                                  .Where(bp => map[x, y].color == bp.color)
                                                   .Where(bp => bp.arrowDirections == BLANK)
                                                   .ToList();
 
             if (uncrawled.Count == 0)
-                return;            
+                return;
 
             // Pick a random adjacent uncrawled node
-            HoloMapBlueprint current = map[x,y];
+            HoloMapBlueprint current = map[x, y];
             HoloMapBlueprint next = uncrawled[UnityEngine.Random.Range(0, uncrawled.Count)];
-            current.arrowDirections = current.arrowDirections | current.DirTo(next);
-            next.arrowDirections = next.arrowDirections | next.DirTo(current);
+            current.arrowDirections |= current.DirTo(next);
+            next.arrowDirections |= next.DirTo(current);
 
             CrawlQuadrant(map, next.x, next.y);
-            
+
             // double check this one again
             CrawlQuadrant(map, x, y);
         }
@@ -169,23 +164,23 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             // This is too hard to generalize, although maybe I'll come up with a way to do it?
             int v = region == Zone.Magic ? 3 : 2;
-            
+
             for (int i = 2; i >= 0; i--)
             {
-                if (map[i, v] != null && map[i, v+1] != null)
+                if (map[i, v] != null && map[i, v + 1] != null)
                 {
                     map[i, v].arrowDirections = map[i, v].arrowDirections | SOUTH;
-                    map[i, v+1].arrowDirections = map[i, v+1].arrowDirections | NORTH;
+                    map[i, v + 1].arrowDirections = map[i, v + 1].arrowDirections | NORTH;
                     break;
                 }
             }
 
             for (int i = 3; i <= 5; i++)
             {
-                if (map[i, v] != null && map[i, v+1] != null)
+                if (map[i, v] != null && map[i, v + 1] != null)
                 {
                     map[i, v].arrowDirections = map[i, v].arrowDirections | SOUTH;
-                    map[i, v+1].arrowDirections = map[i, v+1].arrowDirections | NORTH;
+                    map[i, v + 1].arrowDirections = map[i, v + 1].arrowDirections | NORTH;
                     break;
                 }
             }
@@ -200,7 +195,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
             }
 
-            for (int j = v+1; j <= 5; j++)
+            for (int j = v + 1; j <= 5; j++)
             {
                 if (map[2, j] != null && map[3, j] != null)
                 {
@@ -226,7 +221,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             foreach (HoloMapBlueprint deadEnd in possibles)
             {
                 HoloMapBlueprint adjacent = deadEnd.GetAdjacentNode(map, deadEnd.arrowDirections);
-                
+
                 // If the node leading into a dead end only has two directions
                 // And the color of the dead end has more than two nodes
                 // We kill the dead end and make the hall leading into it into a dead end
@@ -278,8 +273,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (UnityEngine.Random.value < bridgeOdds)
                 {
                     bridge.specialTerrain |= HoloMapBlueprint.FULL_BRIDGE;
-                    map[bridge.x-1, bridge.y].specialTerrain |= HoloMapBlueprint.LEFT_BRIDGE;
-                    map[bridge.x+1, bridge.y].specialTerrain |= HoloMapBlueprint.RIGHT_BRIDGE;
+                    map[bridge.x - 1, bridge.y].specialTerrain |= HoloMapBlueprint.LEFT_BRIDGE;
+                    map[bridge.x + 1, bridge.y].specialTerrain |= HoloMapBlueprint.RIGHT_BRIDGE;
                     bridgeOdds -= 0.25f;
                 }
                 bridgeNodes.Remove(bridge);
@@ -303,7 +298,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // Find the way back. It's the arrow directions with the special direction removed
             int directionBack = battleNode.arrowDirections & ~battleNode.specialDirection;
-            
+
             // Find the node in that direction
             HoloMapBlueprint prevNode = GetAdjacentNode(battleNode, map, directionBack);
 
@@ -339,9 +334,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     if (map[xy.Item1, xy.Item2] == null)
                     {
                         // Good. We found a spot
-                        HoloMapBlueprint brandNewNode = new(newBattleNode.randomSeed + 1000);
-                        brandNewNode.x = xy.Item1;
-                        brandNewNode.y = xy.Item2;
+                        HoloMapBlueprint brandNewNode = new(newBattleNode.randomSeed + 1000)
+                        {
+                            x = xy.Item1,
+                            y = xy.Item2
+                        };
 
                         nodes.Add(brandNewNode);
                         map[xy.Item1, xy.Item2] = brandNewNode;
@@ -361,7 +358,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                         // Make the old battle node into trade node
                         oldBattleNode.specialDirectionType = HoloMapBlueprint.TRADE;
-                        
+
                         return true;
                     }
                 }
@@ -370,7 +367,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return false;
         }
 
-        private static bool DiscoverAndCreateEnemyEncounter(HoloMapBlueprint[,] map, List<HoloMapBlueprint> nodes, int tier, Zone region, HoloMapSpecialNode.NodeDataType reward, List<int> usedIndices, int color = -1)
+        private static bool DiscoverAndCreateEnemyEncounter(HoloMapBlueprint[,] map, List<HoloMapBlueprint> nodes, int tier, Zone region, HoloMapNode.NodeDataType reward, List<int> usedIndices, int color = -1)
         {
             // The goal here is to find four rooms that have only one entrance
             // Then back out to the first spot that doesn't have a choice
@@ -408,7 +405,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (rewardNode != null)
             {
-                enemyNode = enemyNode ?? rewardNode.GetAdjacentNode(map, rewardNode.arrowDirections);
+                enemyNode ??= rewardNode.GetAdjacentNode(map, rewardNode.arrowDirections);
                 enemyNode.specialDirection = DirTo(enemyNode, rewardNode);
                 enemyNode.encounterDifficulty = EventManagement.EncounterDifficulty;
 
@@ -449,11 +446,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             HoloMapBlueprint bossIntroRoom = null;
             for (int j = map.GetLength(1) - 1; j >= 2; j--)
             {
-                for(int i = map.GetLength(0) - 1; i >= 0; i--)
+                for (int i = map.GetLength(0) - 1; i >= 0; i--)
                 {
-                    if (map[i,j] != null && map[i,j-1] == null && map[i,j-2] == null)
+                    if (map[i, j] != null && map[i, j - 1] == null && map[i, j - 2] == null)
                     {
-                        bossIntroRoom = map[i,j];
+                        bossIntroRoom = map[i, j];
                         break;
                     }
                 }
@@ -470,30 +467,31 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             bossIntroRoom.blockEvent = EventManagement.ALL_ZONE_ENEMIES_KILLED;
 
             // We need to create the special lower tower room
-            HoloMapBlueprint lowerTowerRoom = new(0);
-            lowerTowerRoom.specialTerrain = HoloMapBlueprint.LOWER_TOWER_ROOM;
-            lowerTowerRoom.arrowDirections = NORTH | SOUTH;
-            lowerTowerRoom.x = bossIntroRoom.x;
-            lowerTowerRoom.y = bossIntroRoom.y - 1;
-            lowerTowerRoom.color = bossIntroRoom.color;
+            HoloMapBlueprint lowerTowerRoom = new(0)
+            {
+                specialTerrain = HoloMapBlueprint.LOWER_TOWER_ROOM,
+                arrowDirections = NORTH | SOUTH,
+                x = bossIntroRoom.x,
+                y = bossIntroRoom.y - 1,
+                color = bossIntroRoom.color
+            };
             map[lowerTowerRoom.x, lowerTowerRoom.y] = lowerTowerRoom;
             nodes.Add(lowerTowerRoom);
 
-            HoloMapBlueprint bossRoom = new(0);
-            bossRoom.opponent = Opponent.Type.CanvasBoss;
-            bossRoom.arrowDirections = SOUTH;
-            bossRoom.x = bossIntroRoom.x;
-            bossRoom.y = bossIntroRoom.y - 2;
-            bossRoom.color = bossIntroRoom.color;
+            HoloMapBlueprint bossRoom = new(0)
+            {
+                opponent = Opponent.Type.CanvasBoss,
+                arrowDirections = SOUTH,
+                x = bossIntroRoom.x,
+                y = bossIntroRoom.y - 2,
+                color = bossIntroRoom.color
+            };
             map[bossRoom.x, bossRoom.y] = bossRoom;
             nodes.Add(bossRoom);
 
-        }   
-
-        private static bool CanHaveSecretRoom(this HoloMapBlueprint node, HoloMapBlueprint[,] map, int direction, bool strict = true)
-        {
-            return (node.opponent == Opponent.Type.Default && node.GetAdjacentLocation(direction) != null && node.GetAdjacentNode(map, direction) == null && ((node.arrowDirections & OppositeDirection(direction)) == 0 || !strict));
         }
+
+        private static bool CanHaveSecretRoom(this HoloMapBlueprint node, HoloMapBlueprint[,] map, int direction, bool strict = true) => node.opponent == Opponent.Type.Default && node.GetAdjacentLocation(direction) != null && node.GetAdjacentNode(map, direction) == null && ((node.arrowDirections & OppositeDirection(direction)) == 0 || !strict);
 
         private static bool CanHaveSecretRoom(this HoloMapBlueprint node, HoloMapBlueprint[,] map, bool strict = true)
         {
@@ -507,8 +505,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             //    If strict is false, this second condition is ignored (I'd rather have an easy to find secret room
             //    than fail to create one at all)
             foreach (int dir in DIR_LOOKUP.Keys)
-                if (node.CanHaveSecretRoom(map, dir, strict:strict))
+            {
+                if (node.CanHaveSecretRoom(map, dir, strict: strict))
                     return true;
+            }
 
             return false;
         }
@@ -518,11 +518,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // Get a list of all possible neighbors
             List<HoloMapBlueprint> neighbors = nodes.Where(bp => bp.CanHaveSecretRoom(map)).ToList();
             if (neighbors.Count == 0) // 
-                neighbors = nodes.Where(bp => bp.CanHaveSecretRoom(map, strict:false)).ToList();
+                neighbors = nodes.Where(bp => bp.CanHaveSecretRoom(map, strict: false)).ToList();
 
             // Pick a random neighbor
             P03Plugin.Log.LogDebug($"Found {neighbors.Count} possibilities for secret room");
-            var secretSpaceNeighbor = neighbors[UnityEngine.Random.Range(0, neighbors.Count)];
+            HoloMapBlueprint secretSpaceNeighbor = neighbors[UnityEngine.Random.Range(0, neighbors.Count)];
 
             // Figure out the direction for the secret room
             int adjDir = 0;
@@ -538,7 +538,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 foreach (int dir in DIR_LOOKUP.Keys)
                 {
-                    if (secretSpaceNeighbor.CanHaveSecretRoom(map, dir, strict:false))
+                    if (secretSpaceNeighbor.CanHaveSecretRoom(map, dir, strict: false))
                     {
                         adjDir = dir;
                         break;
@@ -546,8 +546,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
             }
 
-            var location = secretSpaceNeighbor.GetAdjacentLocation(adjDir);
-            
+            Tuple<int, int> location = secretSpaceNeighbor.GetAdjacentLocation(adjDir);
+
             // Create a new space on the map
             HoloMapBlueprint newBp = new(randomSeed);
             nodes.Add(newBp);
@@ -580,17 +580,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // And does not have the same color as the starting room
             List<HoloMapBlueprint> bossPossibles = nodes.Where(bp => bp.y >= 1 && map[bp.x, bp.y - 1] == null && bp.color != nodes[0].color).ToList();
             HoloMapBlueprint bossIntroRoom = bossPossibles[UnityEngine.Random.Range(0, bossPossibles.Count)];
-            bossIntroRoom.specialTerrain |= (region == Zone.Nature ? HoloMapBlueprint.NORTH_CABIN : HoloMapBlueprint.NORTH_BUILDING_ENTRANCE);
+            bossIntroRoom.specialTerrain |= region == Zone.Nature ? HoloMapBlueprint.NORTH_CABIN : HoloMapBlueprint.NORTH_BUILDING_ENTRANCE;
             bossIntroRoom.specialTerrain |= HoloMapBlueprint.FAST_TRAVEL_NODE;
             bossIntroRoom.specialTerrain &= ~HoloMapBlueprint.LANDMARKER;
             bossIntroRoom.arrowDirections |= NORTH;
             bossIntroRoom.blockedDirections |= NORTH;
             bossIntroRoom.blockEvent = EventManagement.ALL_ZONE_ENEMIES_KILLED;
 
-            HoloMapBlueprint bossRoom = new(bossIntroRoom.randomSeed + 200 * bossIntroRoom.x);
-            bossRoom.x = bossIntroRoom.x;
-            bossRoom.y = bossIntroRoom.y - 1;
-            bossRoom.opponent = (region == Zone.Undead) ? Opponent.Type.ArchivistBoss : (region == Zone.Nature ? Opponent.Type.PhotographerBoss : Opponent.Type.TelegrapherBoss);
+            HoloMapBlueprint bossRoom = new(bossIntroRoom.randomSeed + (200 * bossIntroRoom.x))
+            {
+                x = bossIntroRoom.x,
+                y = bossIntroRoom.y - 1,
+                opponent = (region == Zone.Undead) ? Opponent.Type.ArchivistBoss : (region == Zone.Nature ? Opponent.Type.PhotographerBoss : Opponent.Type.TelegrapherBoss)
+            };
             bossRoom.arrowDirections |= SOUTH;
             bossRoom.color = bossIntroRoom.color;
 
@@ -600,9 +602,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static List<HoloMapBlueprint> BuildHubBlueprint(int seed)
         {
-            List<HoloMapBlueprint> retval = new();
-            retval.Add(new(seed) { upgrade = HoloMapWaypointNode.NodeDataType.FastTravel, x=0, y=1, arrowDirections = NORTH });
-            retval.Add(new(seed) { opponent = Opponent.Type.P03Boss, x=0, y=0, arrowDirections = SOUTH });
+            List<HoloMapBlueprint> retval = new() {
+                new(seed) { upgrade = HoloMapNode.NodeDataType.FastTravel, x = 0, y = 2, arrowDirections = NORTH },
+                new(seed) { specialTerrain = HoloMapBlueprint.FINAL_SHOP_NODE, x = 0, y = 1, arrowDirections = NORTH | SOUTH },
+                new(seed) { opponent = Opponent.Type.P03Boss, x = 0, y = 0, arrowDirections = SOUTH }
+            };
 
             return retval;
         }
@@ -648,37 +652,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             map.Add(bp);
             P03Plugin.Log.LogDebug($"Turbo Room [{x}, {y}] DIR={bp.arrowDirections} S={bp.specialDirection}");
 
-            if (x == 0)
-            {
-                if (y % 2 == 0)
-                    return new (x + 1, y);
-                else
-                    return new (x, y + 1);
-            }
-
-            if (x == 5)
-            {
-                if (y % 2 == 0)
-                    return new (x, y + 1);
-                else
-                    return new (x - 1, y);
-            }
-
-            if (y % 2 == 0)
-                return new (x + 1, y);
-            
-            return new (x - 1, y);
+            return x == 0
+                ? y % 2 == 0 ? new(x + 1, y) : new(x, y + 1)
+                : x == 5 ? y % 2 == 0 ? new(x, y + 1) : new(x - 1, y) : y % 2 == 0 ? new(x + 1, y) : new(x - 1, y);
         }
 
         // Builds one room for each regional encounter, then gives you fast travel to leave
         // then gives you one room for each neutral encounter, then gives you fast travel to leave again
         private static List<HoloMapBlueprint> BuildTurboBlueprint(int seed, Zone zone)
         {
-            List<HoloMapBlueprint> retval = new ();
+            List<HoloMapBlueprint> retval = new();
 
             Tuple<int, int> roomPos = new(0, 2);
             RegionGeneratorData data = REGION_DATA[zone];
-            List<HoloMapNode.NodeDataType> rewards = new () {
+            List<HoloMapNode.NodeDataType> rewards = new() {
                 HoloMapNode.NodeDataType.CardChoice,
                 HoloMapNode.NodeDataType.AddCardAbility,
                 data.defaultReward,
@@ -710,17 +697,18 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 roomPos = BuildTurboRoom(retval, seed++, roomPos, reward, i);
             }
 
-            BuildTurboRoom(retval, seed++, roomPos);        
+            BuildTurboRoom(retval, seed++, roomPos);
 
             return retval;
         }
 
         private static List<HoloMapBlueprint> BuildMycologistBlueprint(int seed)
         {
-            List<HoloMapBlueprint> retval = new();
-            retval.Add(new(seed++) { x=0, y=2, arrowDirections = EAST, specialDirection = EAST, specialDirectionType = HoloMapBlueprint.TRADE });
-            retval.Add(new(seed++) { x=1, y=2, arrowDirections = WEST | NORTH, specialDirection = NORTH, specialDirectionType = HoloMapBlueprint.TRADE });
-            retval.Add(new(seed++) { x=1, y=1, arrowDirections = SOUTH, opponent = Opponent.Type.MycologistsBoss });
+            List<HoloMapBlueprint> retval = new() {
+                new(seed++) { x = 0, y = 2, arrowDirections = EAST, specialDirection = EAST, specialDirectionType = HoloMapBlueprint.TRADE },
+                new(seed++) { x = 1, y = 2, arrowDirections = WEST | NORTH, specialDirection = NORTH, specialDirectionType = HoloMapBlueprint.TRADE },
+                new(seed++) { x = 1, y = 1, arrowDirections = SOUTH, opponent = Opponent.Type.MycologistsBoss }
+            };
             return retval;
         }
 
@@ -729,20 +717,23 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // Log to the file for debug purposes
             for (int j = 0; j < bpBlueprint.GetLength(1); j++)
             {
-                List<string> lines = new() { "", "", "", "", ""};
+                List<string> lines = new() { "", "", "", "", "" };
                 for (int i = 0; i < bpBlueprint.GetLength(0); i++)
+                {
                     for (int s = 0; s < lines.Count; s++)
                         lines[s] += bpBlueprint[i, j] == null ? "     " : bpBlueprint[i, j].DebugString[s];
+                }
+
                 for (int s = 0; s < lines.Count; s++)
                     P03Plugin.Log.LogInfo(lines[s]);
-            }  
+            }
         }
 
         private static void BuildStoryEvents(List<HoloMapBlueprint> blueprint, Zone region)
         {
             // Get all the story events we're supposed to get
-            var stevents = QuestManager.GetSpecialEventForZone(region);
-            foreach (var storyData in stevents)
+            List<Tuple<SpecialEvent, Predicate<HoloMapBlueprint>>> stevents = QuestManager.GetSpecialEventForZone(region);
+            foreach (Tuple<SpecialEvent, Predicate<HoloMapBlueprint>> storyData in stevents)
             {
                 SpecialEvent se = storyData.Item1;
                 Predicate<HoloMapBlueprint> pred = storyData.Item2;
@@ -784,22 +775,22 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (region == Zone.Tech)
             {
                 // Set the corners empty
-                bpBlueprint[0,0] = bpBlueprint[0,1] = bpBlueprint[1,0] = null;
-                bpBlueprint[0,4] = bpBlueprint[0,5] = bpBlueprint[1,5] = null;
-                bpBlueprint[4,0] = bpBlueprint[5,0] = bpBlueprint[5,1] = null;
-                bpBlueprint[4,5] = bpBlueprint[5,5] = bpBlueprint[5,4] = null;
-                
+                bpBlueprint[0, 0] = bpBlueprint[0, 1] = bpBlueprint[1, 0] = null;
+                bpBlueprint[0, 4] = bpBlueprint[0, 5] = bpBlueprint[1, 5] = null;
+                bpBlueprint[4, 0] = bpBlueprint[5, 0] = bpBlueprint[5, 1] = null;
+                bpBlueprint[4, 5] = bpBlueprint[5, 5] = bpBlueprint[5, 4] = null;
+
                 // Randomly chop some rooms
                 // Chop one of the middle rooms
-                bpBlueprint[UnityEngine.Random.Range(2,4), UnityEngine.Random.Range(2,4)] = null;
-                
+                bpBlueprint[UnityEngine.Random.Range(2, 4), UnityEngine.Random.Range(2, 4)] = null;
+
                 // Randomly chop a corner
                 int[] corners = new int[] { 1, 4 };
                 bpBlueprint[corners[UnityEngine.Random.Range(0, 2)], corners[UnityEngine.Random.Range(0, 2)]] = null;
 
                 // Randomly chop an interior side
                 x = UnityEngine.Random.Range(1, 5);
-                y = x == 1 || x == 4 ? UnityEngine.Random.Range(2, 4) : corners[UnityEngine.Random.Range(0, 2)];
+                y = x is 1 or 4 ? UnityEngine.Random.Range(2, 4) : corners[UnityEngine.Random.Range(0, 2)];
                 bpBlueprint[x, y] = null;
             }
             if (region == Zone.Magic)
@@ -809,7 +800,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 {
                     bpBlueprint[i, 0] = null;
 
-                    if (i != 2 && i != 3)
+                    if (i is not 2 and not 3)
                         bpBlueprint[i, 1] = null;
                 }
 
@@ -860,15 +851,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (offset <= 1)
                     bpBlueprint[5, 5] = null;
                 else
-                    bpBlueprint[5, 0] = null;                
+                    bpBlueprint[5, 0] = null;
             }
             if (region == Zone.Undead)
             {
                 bool pointUp = UnityEngine.Random.value < 0.5f;
 
-                int[] ys = pointUp ? new int[] { 5, 4, 1, 0 } : new int[] { 0, 1, 4, 5 }; 
+                int[] ys = pointUp ? new int[] { 5, 4, 1, 0 } : new int[] { 0, 1, 4, 5 };
 
-                bpBlueprint[1, ys[0]] = bpBlueprint[2, ys[0]] = bpBlueprint[3, ys[0]] = bpBlueprint[4, ys[0]] =  null;
+                bpBlueprint[1, ys[0]] = bpBlueprint[2, ys[0]] = bpBlueprint[3, ys[0]] = bpBlueprint[4, ys[0]] = null;
                 bpBlueprint[2, ys[1]] = bpBlueprint[3, ys[1]] = null;
                 bpBlueprint[0, ys[2]] = bpBlueprint[5, ys[2]] = null;
                 bpBlueprint[0, ys[3]] = bpBlueprint[1, ys[3]] = bpBlueprint[4, ys[3]] = bpBlueprint[5, ys[3]] = null;
@@ -878,17 +869,89 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             int v = region == Zone.Magic ? 4 : 3;
             for (int i = 0; i < bpBlueprint.GetLength(0); i++)
+            {
                 for (int j = 0; j < bpBlueprint.GetLength(1); j++)
-                    if (bpBlueprint[i,j] != null)
-                        bpBlueprint[i,j].color = i < 3 ? j < v ? 1 : 2 : j < v ? 3 : 4;
+                {
+                    if (bpBlueprint[i, j] != null)
+                        bpBlueprint[i, j].color = i < 3 ? j < v ? 1 : 2 : j < v ? 3 : 4;
+                }
+            }
+        }
+
+        private static List<BattleModManager.BattleModDefinition> SelectMods(List<BattleModManager.BattleModDefinition> mods, int difficulty, int randomSeed)
+        {
+            // For 1 and 2, just pick a single mod
+            if (difficulty <= 2)
+                return mods.Where(d => d.Difficulty == difficulty).OrderBy(d => SeededRandom.Value(randomSeed++)).Take(1).ToList();
+
+            int totalDiffulty = 0;
+            List<BattleModManager.BattleModDefinition> retval = new();
+            List<BattleModManager.BattleModDefinition> remaining = new List<BattleModManager.BattleModDefinition>(mods.OrderBy(d => SeededRandom.Value(randomSeed++)));
+
+            // The first two mods are purely randomly selected
+            while (retval.Count < 2 && totalDiffulty < difficulty)
+            {
+                BattleModManager.BattleModDefinition next = remaining.FirstOrDefault(d => d.Difficulty <= (difficulty - totalDiffulty));
+
+                if (next == null)
+                    break;
+
+                totalDiffulty += next.Difficulty;
+                retval.Add(next);
+                remaining.Remove(next);
+            }
+
+            // If we still have to make up room, add the last mod that gets us
+            // closest to the total we want.
+            if (totalDiffulty < difficulty && remaining.Count > 0)
+                retval.Add(remaining.OrderBy(d => Mathf.Abs(d.Difficulty - (difficulty - totalDiffulty))).First());
+
+            return retval;
+        }
+
+        private static void BuildBattleModifiers(List<HoloMapBlueprint> rooms, Zone region, int order, int seed)
+        {
+            // The goal is to create modded battles with a total difficulty matching:
+            // Which map this is (1-4) and number of difficulty challenges
+            // So if you have one "extra difficulty" on, and this is map 2, the total difficulty is 3
+            int difficultyKey = order + 1 + AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.BaseDifficulty);
+
+            List<BattleModManager.BattleModDefinition> validMods = BattleModManager.AllBattleMods.Where(d => d.Regions == null || d.Regions.Contains(region.ToTemple())).ToList();
+            int randomSeed = seed + 10;
+
+            // Only one battle gets modded per map by default
+            int numberOfModdedBattles = 1;
+
+            // But starting with difficulty 4, we add another battle.
+            // So the table looks like this:
+            // Difficulty 1-3: 1 battle
+            // Difficulty 4: 2 battles
+            // Difficulty 5: 3 battles
+            // Difficulty 6: 4 battles
+            // Note that EACH of these have the difficulty.
+            // So with both difficulty challenges on, in map four ALL FOUR battles
+            // have a +6 battle mod on them.
+            if (difficultyKey > 3)
+                numberOfModdedBattles += difficultyKey - 2;
+            numberOfModdedBattles = numberOfModdedBattles > 4 ? 4 : numberOfModdedBattles;
+            List<HoloMapBlueprint> targets = rooms.Where(bp => bp.IsBattleRoom && (order > 0 || bp.color != 1)).OrderBy(x => SeededRandom.Value(randomSeed++)).Take(numberOfModdedBattles).ToList();
+
+            // And now we move the difficulty key down by 1 if it's above 3
+            // Basically, at the difficult 4 step, the difficulty increases by the count
+            // of modded battles more so than the difficulty of the battles themselves
+            if (difficultyKey > 3)
+                difficultyKey -= 1;
+
+            foreach (HoloMapBlueprint bp in targets)
+                bp.battleMods.AddRange(SelectMods(validMods, difficultyKey, randomSeed++).Select(d => d.ID));
         }
 
         private static List<HoloMapBlueprint> BuildBlueprint(int order, Zone region, int seed, int stackDepth = 0)
         {
             string blueprintKey = $"ascensionBlueprint{order}{region}";
-            string savedBlueprint = ModdedSaveManager.RunState.GetValue(P03Plugin.PluginGuid, blueprintKey);
+            string savedBlueprint = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, blueprintKey);
 
-            if (savedBlueprint != default(string))
+            if (savedBlueprint != default)
                 return savedBlueprint.Split('|').Select(s => new HoloMapBlueprint(s)).ToList();
 
             if (region == Zone.Neutral)
@@ -903,10 +966,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             UnityEngine.Random.InitState(seed);
 
             // Start with a 6x6 grid
-            HoloMapBlueprint[,] bpBlueprint = new HoloMapBlueprint[6,6];
+            HoloMapBlueprint[,] bpBlueprint = new HoloMapBlueprint[6, 6];
             for (int i = 0; i < 6; i++)
-                for (int j = 0; j < 6; j ++)
-                    bpBlueprint[i, j] = new HoloMapBlueprint(seed + 10*i + 100*j) { x = i, y = j, arrowDirections = BLANK };
+            {
+                for (int j = 0; j < 6; j++)
+                    bpBlueprint[i, j] = new HoloMapBlueprint(seed + (10 * i) + (100 * j)) { x = i, y = j, arrowDirections = BLANK };
+            }
 
             // Reshape for region
             ShapeMapForRegion(bpBlueprint, region);
@@ -922,15 +987,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             HoloMapBlueprint startSpace = bpBlueprint[0, 2];
             List<HoloMapBlueprint> retval = new() { startSpace };
             for (int i = 0; i < bpBlueprint.GetLength(0); i++)
-                for (int j = 0; j < bpBlueprint.GetLength(1); j ++)
+            {
+                for (int j = 0; j < bpBlueprint.GetLength(1); j++)
+                {
                     if (bpBlueprint[i, j] != null && bpBlueprint[i, j] != startSpace)
                         retval.Add(bpBlueprint[i, j]);
+                }
+            }
 
             // Make sure that every room sees at least one other room 
             FixDisconnectedRooms(bpBlueprint, retval);
 
             startSpace.upgrade = TradeChipsNodeData.TradeChipsForCards;
-            
+
             // Do some special sequencing
             DiscoverAndCreateLandmarks(bpBlueprint, retval);
             DiscoverAndCreateBossRoom(bpBlueprint, retval, region);
@@ -938,16 +1007,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
 
             // Add four enemy encounters and rewards
-            int seedForChoice = seed * 2 + 10;
+            int seedForChoice = (seed * 2) + 10;
 
             List<int> colorsWithoutEnemies = new() { 1, 2, 3, 4 };
             List<int> usedIndices = new();
             int numberOfEncountersAdded = 0;
             while (colorsWithoutEnemies.Count > 0)
             {
-                UnityEngine.Random.InitState(seedForChoice + colorsWithoutEnemies.Count * 1000);
+                UnityEngine.Random.InitState(seedForChoice + (colorsWithoutEnemies.Count * 1000));
                 int colorToUse = colorsWithoutEnemies[UnityEngine.Random.Range(0, colorsWithoutEnemies.Count)];
-                HoloMapSpecialNode.NodeDataType type = colorsWithoutEnemies.Count <= 2 ? HoloMapSpecialNode.NodeDataType.AddCardAbility : REGION_DATA[region].defaultReward;
+                HoloMapNode.NodeDataType type = colorsWithoutEnemies.Count <= 2 ? HoloMapNode.NodeDataType.AddCardAbility : REGION_DATA[region].defaultReward;
                 if (DiscoverAndCreateEnemyEncounter(bpBlueprint, retval, order, region, type, usedIndices, colorToUse))
                     numberOfEncountersAdded += 1;
                 colorsWithoutEnemies.Remove(colorToUse);
@@ -955,10 +1024,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             int remainingEncountersToAdd = EventManagement.ENEMIES_TO_UNLOCK_BOSS - numberOfEncountersAdded;
             for (int i = 0; i < remainingEncountersToAdd; i++)
+            {
                 if (DiscoverAndCreateEnemyEncounter(bpBlueprint, retval, order, region, REGION_DATA[region].defaultReward, usedIndices))
                     numberOfEncountersAdded += 1;
+            }
 
             P03Plugin.Log.LogInfo($"I have created {numberOfEncountersAdded} enemy encounters");
+
+            BuildBattleModifiers(retval, region, order, seed);
+
+            P03Plugin.Log.LogInfo($"I have set up battle modifiers");
 
             // Add one trade node
             bool traded = DiscoverAndCreateTrade(bpBlueprint, retval);
@@ -978,17 +1053,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 HoloMapBlueprint node = retval.GetRandomPointOfInterest(bp => bp.color == i);
                 if (node != null)
                 {
-                    node.upgrade = HoloMapSpecialNode.NodeDataType.CardChoice;
+                    node.upgrade = HoloMapNode.NodeDataType.CardChoice;
                     cardChoiceNodes += 1;
                 }
             }
             for (int i = cardChoiceNodes; i < 4; i++) // Just in case we couldn't find a valid point of interest in every quadrant
-                retval.GetRandomPointOfInterest().upgrade = HoloMapSpecialNode.NodeDataType.CardChoice;
+                retval.GetRandomPointOfInterest().upgrade = HoloMapNode.NodeDataType.CardChoice;
 
             // And now we're just going to add one more regional upgrade
             retval.GetRandomPointOfInterest().upgrade = REGION_DATA[region].defaultReward;
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 3; i++)
                 retval.GetRandomPointOfInterest().upgrade = UnlockAscensionItemNodeData.UnlockItemsAscension;
 
             retval.GetRandomPointOfInterest().upgrade = AscensionRecycleCardNodeData.AscensionRecycleCard;
@@ -999,7 +1074,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 HoloMapBlueprint tbp2 = retval.GetRandomPointOfInterest();
                 if (tbp2 != null)
-                    tbp2.upgrade = HoloMapSpecialNode.NodeDataType.GainCurrency;
+                    tbp2.upgrade = HoloMapNode.NodeDataType.GainCurrency;
             }
 
             // Add one of each of the default upgrades for each completed zone
@@ -1024,7 +1099,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             savedBlueprint = string.Join("|", retval.Select(b => b.ToString()));
-            ModdedSaveManager.RunState.SetValue(P03Plugin.PluginGuid, blueprintKey, savedBlueprint);
+            P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, blueprintKey, savedBlueprint);
+            if (order >= 1)
+                EventManagement.SawMapInfo = true;
             SaveManager.SaveToFile();
             return retval;
         }
