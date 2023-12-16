@@ -256,18 +256,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return true;
         }
 
-        // [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.NewRun))]
-        // [HarmonyPrefix]
-        // [HarmonyAfter(new string[] { "cyantist.inscryption.api" })]
-        // private static void ResetOldRunStateIfP03Run()
-        // {
-        //     if (IsP03Run && OldRunState != null)
-        //     {
-        //         Dictionary<string, Dictionary<string, object>> internalData = GetInternalData(OldRunState);
-        //         CreateFromInternalData(ModdedSaveManager.RunState, internalData);
-        //     }
-        //     OldRunState = null;
-        // }
+        [HarmonyPatch(typeof(HoloMapArea), nameof(HoloMapArea.SaveData), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool AlwaysGetSaveDataDirectlyFromSaveFileForP03Mod(HoloMapArea __instance, ref Part3SaveData.MapAreaStateData __result)
+        {
+            if (!IsP03Run)
+                return true;
+
+            __result = Part3SaveData.Data.areaData.Find((Part3SaveData.MapAreaStateData x) => x.id == __instance.SaveId);
+            if (__result == null)
+            {
+                __result = new Part3SaveData.MapAreaStateData(__instance, __instance.CheckpointId);
+                Part3SaveData.Data.areaData.Add(__result);
+            }
+            return false;
+        }
 
         [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.TestSaveFileCorrupted))]
         [HarmonyPrefix]
@@ -493,13 +496,25 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     __instance.items ??= new List<string>();
 
                     if (MaxNumberOfItems >= 1)
+                    {
                         __instance.items.Add(ShockerItem.ItemData.name);
+                    }
 
                     if (MaxNumberOfItems >= 2)
-                        __instance.items.Add("ShieldGenerator");
+                    {
+                        if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("ufo"))
+                            __instance.items.Add(UfoItem.ItemData.name);
+                        else
+                            __instance.items.Add("ShieldGenerator");
+                    }
 
                     if (MaxNumberOfItems >= 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoHook))
-                        __instance.items.Add("BombRemote");
+                    {
+                        if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("rifle"))
+                            __instance.items.Add(RifleItem.ItemData.name);
+                        else
+                            __instance.items.Add("BombRemote");
+                    }
                 }
 
                 __instance.reachedCheckpoints.Add("NorthNeutralPath"); // This makes bounty hunters work properly

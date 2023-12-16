@@ -43,12 +43,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnTurnEnd(bool playerTurnEnd)
         {
+            View currentView = ViewManager.Instance.CurrentView;
             ViewManager.Instance.SwitchToView(View.Board, false, true);
             yield return new WaitForSeconds(0.15f);
             Card.SetCardbackSubmerged();
             Card.SetFaceDown(true, false);
             yield return new WaitForSeconds(0.3f);
             triggerPriority = int.MaxValue;
+            ViewManager.Instance.SwitchToView(currentView, false, false);
             yield break;
         }
     }

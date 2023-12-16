@@ -38,6 +38,11 @@ namespace Infiniscryption.P03KayceeRun.Quests
         public StoryEvent StateFailedEvent { get; private set; }
 
         /// <summary>
+        /// The name of an encounter that has to be cleared in order to succeed in this state
+        /// </summary>
+        public string EncounterId { get; set; }
+
+        /// <summary>
         /// The name of this state
         /// </summary>
         public string StateName { get; private set; }

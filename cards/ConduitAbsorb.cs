@@ -23,7 +23,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Splice Conduit";
             info.rulebookDescription = "If [creature] completes a circuit, all cards within that circuit are moved towards it, splicing with it if possible.";
             info.canStack = false;
-            info.powerLevel = 1;
+            info.powerLevel = 3;
             info.opponentUsable = true;
             info.conduitCell = false;
             info.conduit = true;

@@ -80,8 +80,18 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {"MoveArea_W (NORTH)", LookDirection.North}, {"MoveArea_W (SOUTH)", LookDirection.South}, {"MoveArea_E (NORTH)", LookDirection.North}, {"MoveArea_E (SOUTH)", LookDirection.South}
         };
 
-        private static IEnumerable<int> GetDirections(int compound, bool inclusive = true)
+        private static IEnumerable<int> GetDirections(int compound, bool inclusive = true, bool shuffle = false)
         {
+            if (shuffle)
+            {
+                List<int> unshuffled = GetDirections(compound, inclusive, false).ToList();
+                int start = UnityEngine.Random.Range(1, unshuffled.Count - 1);
+                foreach (int i in unshuffled.Skip(start))
+                    yield return i;
+                foreach (int i in unshuffled.Take(start))
+                    yield return i;
+                yield break;
+            }
             if (inclusive)
             {
                 if ((compound & NORTH) != 0) yield return NORTH;
@@ -91,14 +101,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 yield break;
             }
 
-            yield return NORTH | WEST;
-            yield return NORTH | EAST;
-            yield return SOUTH | WEST;
-            yield return SOUTH | EAST;
-            if ((compound & NORTH) == 0) yield return NORTH;
             if ((compound & EAST) == 0) yield return EAST;
-            if ((compound & SOUTH) == 0) yield return SOUTH;
             if ((compound & WEST) == 0) yield return WEST;
+            if ((compound & NORTH) == 0) yield return NORTH;
+            if ((compound & SOUTH) == 0) yield return SOUTH;
+            yield return NORTH | EAST;
+            yield return SOUTH | EAST;
+            yield return NORTH | WEST;
+            yield return SOUTH | WEST;
         }
 
         internal static string GetAscensionWorldbyId(Func<string, Zone> getRegionCodeFromWorldID) => throw new NotImplementedException();
@@ -512,7 +522,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             bossNode.bossAnim = null;
             bossNode.specialEncounterId = BossBattleSequencer.GetSequencerIdForBoss(BossManagement.P03FinalBossOpponent);
 
-            P03Plugin.Log.LogInfo("Setting boss type");
+            P03Plugin.Log.LogInfo($"Setting boss type. Boss node data is {bossNode.Data}");
+            P03Plugin.Log.LogInfo($"Type of data is {bossNode.Data.GetType()}");
             CardBattleNodeData data = bossNode.Data as CardBattleNodeData;
             data.specialBattleId = BossBattleSequencer.GetSequencerIdForBoss(BossManagement.P03FinalBossOpponent);
 
@@ -806,14 +817,22 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     node.encounterDifficulty = bp.encounterDifficulty;
                     node.bridgeBattle = (bp.specialTerrain & HoloMapBlueprint.FULL_BRIDGE) != 0;
 
-                    foreach (var id in bp.battleMods)
+                    foreach (BattleModManager.ID id in bp.battleMods)
                         BattleModManager.SetBlueprintRule(node.blueprintData.name, id);
 
                     if (bp.battleTerrainIndex > 0 && (bp.specialTerrain & HoloMapBlueprint.FULL_BRIDGE) == 0)
                     {
                         string[] terrain = genData.terrain[bp.battleTerrainIndex - 1];
-                        node.playerTerrain = terrain.Take(5).Select(s => s == default ? null : CardLoader.GetCardByName(s)).ToArray();
-                        node.opponentTerrain = terrain.Skip(5).Select(s => s == default ? null : CardLoader.GetCardByName(s)).ToArray();
+                        if (UnityEngine.Random.value > 0.5)
+                        {
+                            node.playerTerrain = terrain.Take(5).Select(s => s == default ? null : CardLoader.GetCardByName(s)).ToArray();
+                            node.opponentTerrain = terrain.Skip(5).Select(s => s == default ? null : CardLoader.GetCardByName(s)).ToArray();
+                        }
+                        else
+                        {
+                            node.playerTerrain = terrain.Take(5).Select(s => s == default ? null : CardLoader.GetCardByName(s)).Reverse().ToArray();
+                            node.opponentTerrain = terrain.Skip(5).Select(s => s == default ? null : CardLoader.GetCardByName(s)).Reverse().ToArray();
+                        }
                     }
                     else
                     {
@@ -881,7 +900,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // Add the normal scenery
             // For each section of the board that doesn't have an arrow on it
-            List<int> directions = GetDirections(bp.arrowDirections, false).ToList();
+            List<int> directions = GetDirections(bp.arrowDirections, false, true).ToList();
             int quadrants = directions.Count;
 
             while (directions.Count > 0)
@@ -889,7 +908,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 bool firstQuadrant = quadrants == directions.Count;
                 bool secondQuadrant = quadrants - 1 == directions.Count;
 
-                int dir = directions[UnityEngine.Random.Range(0, directions.Count)];
+                int dir = directions[0];
 
                 if (bp.specialTerrain == HoloMapBlueprint.BROKEN_GENERATOR && firstQuadrant)
                     dir = NORTH | EAST;
@@ -987,8 +1006,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 node.nodeId = node is MoveHoloMapAreaNode ? nodeId++ - 10 : nodeId++;
 
             if ((bp.specialTerrain & HoloMapBlueprint.FAST_TRAVEL_NODE) != 0)
+            {
                 if (!EventManagement.SawMapInfo)
                     areaData.firstEnterDialogueId = "P03FastTravelKaycee";
+            }
 
             area.SetActive(false);
             return area;
@@ -1027,6 +1048,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         public static Tuple<int, int> GetStartingSpace(Zone regionCode) => regionCode == Zone.Neutral ? new(0, 2) : new(0, 2);
 
+        [Obsolete]
         public static HoloMapWorldData GetAscensionWorldbyId(string id)
         {
             P03Plugin.Log.LogInfo($"Getting world for {id}");
@@ -1140,6 +1162,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(HoloMapDataLoader), "GetWorldById")]
         [HarmonyPrefix]
+        [Obsolete]
         private static bool PatchGetAscensionWorldById(ref HoloMapWorldData __result, string id)
         {
             if (id.ToLowerInvariant().StartsWith("ascension_"))

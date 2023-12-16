@@ -34,6 +34,8 @@ namespace Infiniscryption.P03KayceeRun
 
         internal string DebugCode => Config.Bind("P03KayceeMod", "DebugCode", "nothing", new BepInEx.Configuration.ConfigDescription("A special code to use for debugging purposes only. Don't change this unless your name is DivisionByZorro or he told you how it works.")).Value;
 
+        internal bool SkipCanvasFace => Config.Bind("P03KayceeMod", "SkipCanvasFace", true, new BepInEx.Configuration.ConfigDescription("If True, skips the creation of the face for the Unfinished Boss. You can change this if you really want to change his face.")).Value;
+
         internal string SecretCardComponents => Config.Bind("P03KayceeMod", "SecretCardComponents", "nothing", new BepInEx.Configuration.ConfigDescription("The secret code for the secret card")).Value;
 
         internal bool TurboMode => DebugCode.ToLowerInvariant().Contains("turbomode");

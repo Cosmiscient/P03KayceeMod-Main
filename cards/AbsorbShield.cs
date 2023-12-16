@@ -18,7 +18,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Shield Absorption";
             info.rulebookDescription = "When [creature] is played, all creatures lose their shields. This creature gains 1 attack for each shield lost this way.";
             info.canStack = false;
-            info.powerLevel = 1;
+            info.powerLevel = 2;
             info.opponentUsable = true;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };

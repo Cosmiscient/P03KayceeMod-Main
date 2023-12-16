@@ -57,7 +57,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         __result.Add(ab);
                 }
 
-                __result = __result.Distinct().Randomize().Take(8).ToList();
+                int randomSeed = P03AscensionSaveData.RandomSeed + 25;
+                __result = __result.Distinct().OrderBy(a => SeededRandom.Value(randomSeed++) * 1000).Take(8).ToList();
             }
         }
 
@@ -65,14 +66,29 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static bool OnAddPressedFix(ref AbilityScreenButton __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
             if (__instance.Ability == Ability.None)
             {
                 __instance.SetIconShown(true);
+                if (__instance.abilityChoices == null || __instance.abilityChoices.Count < 8)
+                    __instance.abilityChoices = BuildACardInfo.GetValidAbilities();
                 __instance.Ability = __instance.abilityChoices[0];
             }
             __instance.OnLeftOrRightPressed(false);
             return false;
         }
+
+        [HarmonyPatch(typeof(RecycleCardSequencer), nameof(RecycleCardSequencer.GetCardStatPointsValue))]
+        [HarmonyPostfix]
+        private static void AdjustSPBasedOnUselessMods(CardInfo info, ref int __result)
+        {
+            List<CardModificationInfo> uselessMods = info.Mods.Where(m => m.ModIsUseless()).ToList();
+            int uselessCount = uselessMods.Count();
+            __result -= uselessCount;
+        }
+
 
         public class BuildACardNameInputHandler : KeyboardInputHandler
         {

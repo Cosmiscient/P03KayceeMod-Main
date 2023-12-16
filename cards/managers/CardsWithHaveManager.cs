@@ -20,7 +20,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 requiredAbility = required;
                 gainedAbility = gained;
-                modId = $"{RuleKey}{required}Gains{gained}";
+                modId = required == Ability.None ? $"{RuleKey}Gains{gained}" : $"{RuleKey}{required}Gains{gained}";
                 AbilityIconBehaviours.DynamicAbilityCardModIds.Add(modId);
             }
         }
@@ -34,7 +34,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 foreach (Rule rule in rules)
                 {
-                    if (slot.Card.HasAbility(rule.requiredAbility))
+                    if (rule.requiredAbility == Ability.None || slot.Card.HasAbility(rule.requiredAbility))
                     {
                         if (!slot.Card.TemporaryMods.Any(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(rule.modId)))
                         {
@@ -52,7 +52,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 List<CardModificationInfo> modsToRemove = slot.Card.temporaryMods.Where(m =>
                     !string.IsNullOrEmpty(m.singletonId) &&
                     m.singletonId.StartsWith(RuleKey) &&
-                    !rules.Any(r => r.modId.Equals(m.singletonId) && slot.Card.HasAbility(r.requiredAbility))
+                    !rules.Any(r => r.modId.Equals(m.singletonId) && (r.requiredAbility == Ability.None || slot.Card.HasAbility(r.requiredAbility)))
                 ).ToList();
                 foreach (CardModificationInfo mod in modsToRemove)
                 {

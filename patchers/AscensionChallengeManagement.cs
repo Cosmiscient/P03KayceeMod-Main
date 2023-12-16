@@ -7,6 +7,7 @@ using DiskCardGame.CompositeRules;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Helpers;
+using Infiniscryption.P03KayceeRun.Items;
 using InscryptionAPI.Ascension;
 using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
@@ -671,7 +672,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static class HammerPatchPostSelect
         {
             [HarmonyPrefix]
-            private static void Prefix(ref HammerItem __instance, ref HammerItem __state) => __state = __instance;
+            private static void Prefix(ref HammerItem __instance, CardSlot targetSlot, ref HammerItem __state)
+            {
+                ItemSlotPatches.LastSlotHammered = targetSlot;
+                __state = __instance;
+            }
 
             [HarmonyPostfix]
             private static IEnumerator SpendHammerEnergy(IEnumerator sequence, HammerItem __state)
@@ -691,6 +696,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
 
                 yield return sequence;
+
+                ItemSlotPatches.LastSlotHammered = null;
+                yield break;
             }
         }
 

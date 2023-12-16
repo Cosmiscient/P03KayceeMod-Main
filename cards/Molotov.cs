@@ -1,11 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
-using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using Pixelplacement;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -35,7 +35,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public static IEnumerator BombCard(CardSlot target, PlayableCard attacker, int level = 2, float speed = 0.5f)
+        public static IEnumerator ThrowMolotov(CardSlot target, PlayableCard attacker, float speed = 0.35f)
         {
             GameObject bomb = Instantiate(AssetBundleManager.Prefabs["Molotov"]);
             OnboardDynamicHoloPortrait.HolofyGameObject(bomb, GameColors.instance.glowRed);
@@ -56,10 +56,28 @@ namespace Infiniscryption.P03KayceeRun.Cards
             GameObject fireball = Instantiate(AssetBundleManager.Prefabs["Fire_Ball"], target.transform);
             CustomCoroutine.WaitThenExecute(3f, delegate ()
             {
-                if (fireball != null)
+                if (!fireball.SafeIsUnityNull())
                     Destroy(fireball);
             });
+        }
 
+        public static IEnumerator BombCardsAsync(List<CardSlot> target, PlayableCard attacker, int level = 2, float speed = 0.35f)
+        {
+            foreach (CardSlot slot in target)
+                attacker.StartCoroutine(ThrowMolotov(slot, attacker, speed));
+
+            yield return new WaitForSeconds(speed * 2f);
+
+            foreach (CardSlot slot in target)
+                yield return slot.SetSlotModification(FireBomb.GetFireLevel(level, slot, attacker));
+
+            yield return new WaitForSeconds(speed / 2f);
+            yield break;
+        }
+
+        public static IEnumerator BombCard(CardSlot target, PlayableCard attacker, int level = 2, float speed = 0.35f)
+        {
+            yield return ThrowMolotov(target, attacker, speed);
             yield return new WaitForSeconds(speed * 2f);
             yield return target.SetSlotModification(FireBomb.GetFireLevel(level, target, attacker));
             yield return new WaitForSeconds(speed / 2f);

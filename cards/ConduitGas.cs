@@ -22,7 +22,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Gas Conduit";
             info.rulebookDescription = $"Cards within a circuit completed by [creature] have Fire Strike and Burnt Out.";
             info.canStack = false;
-            info.powerLevel = 1;
+            info.powerLevel = 2;
             info.opponentUsable = true;
             info.conduit = true;
             info.passive = false;

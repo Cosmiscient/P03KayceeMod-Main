@@ -19,7 +19,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public override IEnumerator PreHandDraw()
         {
             P03Plugin.Log.LogInfo($"Ascension Canvas Sequencer - is Ascension {SaveFile.IsAscension}");
-            if (SaveFile.IsAscension)
+            if (SaveFile.IsAscension && P03Plugin.Instance.SkipCanvasFace)
             {
                 // This skips the part of the battle where you pick the boss face.
                 if (!Part3SaveData.Data.ValidCanvasBossFace)

@@ -18,7 +18,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Phasers Ready";
             info.rulebookDescription = "When [creature] is played, create two Zap! cards in hand. Zap! is defined as a spell that costs 2 energy and deals 1 damage to any target.";
             info.canStack = false;
-            info.powerLevel = 1;
+            info.powerLevel = 2;
             info.opponentUsable = false;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };

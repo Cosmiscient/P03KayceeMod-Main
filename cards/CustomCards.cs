@@ -5,6 +5,7 @@ using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
+using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.Spells.Sigils;
 using InscryptionAPI.Card;
@@ -296,9 +297,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         [HarmonyPatch(typeof(Ouroboros), nameof(Ouroboros.OnDie))]
         [HarmonyPostfix]
-        private static IEnumerator OnlyIfDiedInCombat(IEnumerator sequence, PlayableCard killer)
+        private static IEnumerator OnlyIfDiedInCombat(IEnumerator sequence, Ouroboros __instance, PlayableCard killer)
         {
-            if (P03AscensionSaveData.IsP03Run && killer == null)
+            if (P03AscensionSaveData.IsP03Run && __instance.PlayableCard.Slot == ItemSlotPatches.LastSlotHammered)
             {
                 yield return EventManagement.SayDialogueOnce("P03HammerOrb", EventManagement.SAW_NEW_ORB);
                 SaveManager.SaveFile.OuroborosDeaths = SaveManager.SaveFile.OuroborosDeaths - 1;
@@ -489,7 +490,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.New(P03Plugin.CardPrefx, OLD_DATA, "UNSAFE.DAT", 0, 1)
                 .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_captivefile"))
-                .AddAbilities(LoseOnDeath.AbilityID)
+                .AddAbilities(LoseOnDeath.AbilityID, Ability.MadeOfStone)
                 .AddTraits(QuestCard)
                 .temple = CardTemple.Tech;
 
@@ -618,6 +619,32 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_opossum.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 2)
                 .SetNewBeastTransformer(0, -1);
+
+            CardManager.New(P03Plugin.CardPrefx, "Ghoulware", "Ghoulware", 0, 2)
+                .AddAppearances(OnboardDynamicHoloPortrait.ID)
+                .AddAbilities(Ability.Deathtouch, Ability.Sharp)
+                .SetCost(energyCost: 3)
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/map/holomapscenery/HoloZombieArm|prefabs/map/holomapscenery/HoloZombieArm|prefabs/map/holomapscenery/HoloZombieArm")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.ROTATION_KEY, "23,60,60|-15,60,60|0,80,60")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, "1.5,3,2.5|1.5,3,2.5|1.5,3,2.5")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.HIDE_CHILDREN, "HoloDirtPile_2|HoloDirtPile_2|HoloDirtPile_2")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "0,-0.45,0|0.45,-0.45,-.45|-.45,-.45,-.45")
+                .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, "MoxObelisk", "Mox Obelisk", 0, 4)
+                .AddAppearances(OnboardDynamicHoloPortrait.ID)
+                .AddAbilities(Ability.GainGemTriple)
+                .SetCost(energyCost: 3)
+                .AddTraits(Trait.Gem)
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/map/holomapscenery/HoloGemBlue|prefabs/map/holomapscenery/HoloGemGreen|prefabs/map/holomapscenery/HoloGemOrange|prefabs/map/holomapscenery/HoloRock_3")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.HIDE_CHILDREN, "Dirt|Dirt|Dirt|nothing")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "-0.2655,-0.0873,0.3273|0.3164,-0.2364,0.3055|0.4109,0.0437,0|0,-.5,0")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.ROTATION_KEY, "0,0,0|0,0,0|0,0,0|-90,0,0")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, "0.4,0.4,0.4|0.8,0.8,0.8|0.5,0.5,0.5|2.5,2.5,1.5")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.SHADER_KEY, "default|default|default|default")
+                .SetCardTemple(CardTemple.Tech);
+            // cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "0,-.39,0");
+            // cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, ".6,.6,.6");
 
             CardInfo cTower = CardManager.New(P03Plugin.CardPrefx, "StarterConduitTower", "Conduit Tower", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_conduit_tower.png", typeof(CustomCards).Assembly))
@@ -847,7 +874,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return info;
         }
 
-        private static string GetModCode(CardModificationInfo info)
+        internal static string GetModCode(CardModificationInfo info)
         {
             string retval = "";
             foreach (Ability ab in info.abilities)
@@ -927,6 +954,19 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 retval.attackAdjustment = 1;
             }
             return retval;
+        }
+
+        public static bool ModIsUseless(this CardModificationInfo info)
+        {
+            return (info.abilities == null || !info.abilities.Any(a => a != Ability.None))
+            && info.healthAdjustment == 0 && info.attackAdjustment == 0
+            && info.bloodCostAdjustment == 0 && info.energyCostAdjustment == 0 && info.bonesCostAdjustment == 0
+            && (info.addGemCost == null || info.addGemCost.Count <= 0)
+            && !info.nullifyGemsCost
+            && !info.gemify
+            && (info.negateAbilities == null || !info.negateAbilities.Any(a => a != Ability.None))
+            && (info.specialAbilities == null || info.specialAbilities.Count <= 0)
+            && info.statIcon == SpecialStatIcon.None && string.IsNullOrEmpty(info.transformerBeastCardId);
         }
 
         public static string ConvertCardToCompleteCode(CardInfo card) => "@" + card.name + string.Join("", card.Mods.Select(GetModCode));

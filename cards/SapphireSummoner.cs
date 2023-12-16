@@ -26,7 +26,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
 
-            SapphireEnergy.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(SapphireEnergy),
@@ -34,7 +34,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public override bool RespondsToResolveOnBoard() => BoardManager.Instance.GetSlots(!this.Card.OpponentCard).Any(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemBlue) || s.Card.HasAbility(Ability.GainGemTriple)));
+        public override bool RespondsToResolveOnBoard() => BoardManager.Instance.GetSlots(!Card.OpponentCard).Any(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemBlue) || s.Card.HasAbility(Ability.GainGemTriple)));
 
         public override IEnumerator OnResolveOnBoard()
         {
@@ -48,7 +48,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
 
             yield return LearnAbility();
-            foreach (var slot in BoardManager.Instance.GetSlots(!this.Card.OpponentCard).Where(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemBlue) || s.Card.HasAbility(Ability.GainGemTriple))))
+            foreach (CardSlot slot in BoardManager.Instance.GetSlots(!Card.OpponentCard).Where(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemBlue) || s.Card.HasAbility(Ability.GainGemTriple))))
             {
                 yield return CardSpawner.Instance.SpawnCardToHand(CardLoader.GetCardByName(ExpansionPackCards_2.CHARGE_CARD), null);
                 yield return new WaitForSeconds(0.25f);

@@ -356,24 +356,51 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.OpponentTurn))]
         [HarmonyPrefix]
-        private static void TurnStart() => CardBattleAchievementMonitor.Instance?.TurnStart(false);
+        private static void TurnStart()
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
+            CardBattleAchievementMonitor.Instance?.TurnStart(false);
+        }
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.PlayerTurn))]
         [HarmonyPrefix]
-        private static void TurnStartPlayer() => CardBattleAchievementMonitor.Instance?.TurnStart(true);
+        private static void TurnStartPlayer()
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
+            CardBattleAchievementMonitor.Instance?.TurnStart(true);
+        }
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
         [HarmonyPrefix]
-        private static void Cleanup() => CardBattleAchievementMonitor.Instance?.CleanUp();
+        private static void Cleanup()
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
+            CardBattleAchievementMonitor.Instance?.CleanUp();
+        }
 
         [HarmonyPatch(typeof(CombatPhaseManager), nameof(CombatPhaseManager.SlotAttackSlot))]
         [HarmonyPostfix]
-        private static void SlotAttack(CardSlot attackingSlot, CardSlot opposingSlot) => CardBattleAchievementMonitor.Instance?.SlotAttackSlot(attackingSlot, opposingSlot);
+        private static void SlotAttack(CardSlot attackingSlot, CardSlot opposingSlot)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
+            CardBattleAchievementMonitor.Instance?.SlotAttackSlot(attackingSlot, opposingSlot);
+        }
 
         [HarmonyPatch(typeof(ActivatedDealDamage), nameof(ActivatedDealDamage.Activate))]
         [HarmonyPrefix]
         private static void JimmyShot()
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (CardBattleAchievementMonitor.Instance != null)
             {
                 CardBattleAchievementMonitor.Instance.PlasmaJimmyAttacks += 1;

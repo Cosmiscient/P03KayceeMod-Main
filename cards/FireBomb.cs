@@ -24,6 +24,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private static List<SlotModificationManager.ModificationType> OnFire { get; set; }
 
+        public static bool SlotIsOnFire(CardSlot slot) => OnFire.Contains(slot.GetSlotModification());
+
         public static SlotModificationManager.ModificationType GetFireLevel(int fireLevel, CardSlot target, PlayableCard source = null)
         {
             if (source == null)
@@ -77,11 +79,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             public override IEnumerator OnTurnEnd(bool playerTurnEnd)
             {
                 List<CardSlot> slots = BoardManager.Instance.GetSlots(playerTurnEnd);
-                foreach (CardSlot slot in slots)
+                foreach (CardSlot slot in slots.Where(s => s != null))
                 {
                     if (OnFire.Contains(slot.GetSlotModification()))
                     {
-                        if (slot.Card != null)
+                        if (slot.Card != null && slot.Card.Info != null)
                         {
                             if (!CardIsFireproof(slot.Card))
                             {
@@ -101,7 +103,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
                                         DefaultQuestDefinitions.Pyromania.IncrementQuestCounter(onlyIfActive: true);
 
                                     yield return slot.Card.TakeDamage(1, null);
-                                    yield return new WaitForSeconds(0.25f);
+
+                                    if (slot.Card != null && !slot.Card.Dead)
+                                    {
+                                        if (slot.Card.HasAbility(Ability.SwapStats))
+                                        {
+                                            SwapStats component = slot.Card.GetComponent<SwapStats>();
+                                            if (component != null)
+                                                yield return component.OnTakeDamage(slot.Card);
+                                        }
+                                    }
+                                    yield return new WaitForSeconds(0.15f);
                                 }
                             }
                         }
@@ -111,7 +123,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                             ? slot.SetSlotModification(SlotModificationManager.ModificationType.NoModification)
                             : (object)slot.SetSlotModification(OnFire[idx - 1]);
 
-                        yield return new WaitForSeconds(0.25f);
+                        yield return new WaitForSeconds(0.15f);
                     }
                 }
             }
@@ -166,10 +178,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public bool RespondsToPostSingularSlotAttackSlot(CardSlot attackingSlot, CardSlot targetSlot) => attackingSlot == Card.Slot;
 
-        public IEnumerator OnPostSingularSlotAttackSlot(CardSlot attackingSlot, CardSlot targetSlot)
+        public static IEnumerator SetSlotOnFireBasic(int fireLevel, CardSlot targetSlot, CardSlot attackingSlot)
         {
-            //AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, targetSlot.transform.position, .7f);
-            // The fireball should play and then delete itself, but we'll destroy it after some time anyway
             GameObject fireball = Instantiate(AssetBundleManager.Prefabs["Fire_Ball"], targetSlot.transform);
             AudioController.Instance.PlaySound3D("fireball", MixerGroup.TableObjectsSFX, fireball.transform.position, 0.5f);
             CustomCoroutine.WaitThenExecute(3f, delegate ()
@@ -179,9 +189,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     Destroy(fireball);
                 }
             });
-            yield return new WaitForSeconds(1f);
-            yield return targetSlot.SetSlotModification(GetFireLevel(2, targetSlot, attackingSlot.Card));
-            yield return new WaitForSeconds(0.25f);
+            yield return new WaitForSeconds(0.3f);
+            yield return targetSlot.SetSlotModification(GetFireLevel(fireLevel, targetSlot, attackingSlot?.Card));
+            yield return new WaitForSeconds(0.05f);
+        }
+
+        public IEnumerator OnPostSingularSlotAttackSlot(CardSlot attackingSlot, CardSlot targetSlot)
+        {
+            //AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, targetSlot.transform.position, .7f);
+            // The fireball should play and then delete itself, but we'll destroy it after some time anyway
+            yield return SetSlotOnFireBasic(2, targetSlot, attackingSlot);
             yield break;
         }
     }

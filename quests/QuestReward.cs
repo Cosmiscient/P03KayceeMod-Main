@@ -190,12 +190,12 @@ namespace Infiniscryption.P03KayceeRun.Quests
             yield return new WaitForSeconds(0.2f);
             card.Anim.SetShaking(true);
 
-            List<CardModificationInfo> cardMods = new(info.Mods.Select(m => (CardModificationInfo)m.Clone()));
             CardInfo newCardInfo = CardLoader.GetCardByName(TransformIntoCardName);
+            foreach (CardModificationInfo mod in info.Mods)
+                newCardInfo.Mods.Add((CardModificationInfo)mod.Clone());
 
-            Part3SaveData.Data.deck.RemoveCard(info);
             Part3SaveData.Data.deck.AddCard(newCardInfo);
-            cardMods.ForEach(m => Part3SaveData.Data.deck.ModifyCard(newCardInfo, m));
+            Part3SaveData.Data.deck.RemoveCard(info);
 
             card.SetInfo(newCardInfo);
             yield return new WaitForSeconds(0.45f);

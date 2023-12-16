@@ -9,6 +9,7 @@ using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Card;
 using Pixelplacement;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -285,7 +286,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (IsInsideCombatPhase)
                 return true;
 
-            if (TurnManager.Instance != null && TurnManager.Instance.GameIsOver())
+            if (TurnManager.Instance == null || TurnManager.Instance.GameIsOver())
                 return true;
 
             List<CardSlot> slotsToCheck = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
@@ -389,10 +390,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // to reset colors when the boss dies, sometimes you do this while there are still cards on the
             // table. So if the game is essentially over, we can just leave the list of slots alone
 
-            if (TurnManager.Instance != null && TurnManager.Instance.GameIsOver())
+            if (TurnManager.Instance == null || TurnManager.Instance.GameIsOver())
                 return;
 
-            __result.RemoveAll(cs => cs.SlotCoveredByTripleCard());
+            if (__result.Any(cs => cs.SlotCoveredByTripleCard()))
+            {
+                __result = new(__result);
+                __result.RemoveAll(cs => cs.SlotCoveredByTripleCard());
+            }
         }
 
         [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.SacrificesCreateRoomForCard))]
@@ -433,9 +438,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 for (int i = 0; i < slots.Count; i++)
                 {
-                    if (i > 0 && opposingSlots[i - 1].SlotHasTripleCard())
-                        slots[i].opposingSlot = opposingSlots[i - 1];
-                    else slots[i].opposingSlot = i + 1 < opposingSlots.Count && opposingSlots[i + 1].SlotHasTripleCard() ? opposingSlots[i + 1] : opposingSlots[i];
+                    slots[i].opposingSlot = i > 0 && opposingSlots[i - 1].SlotHasTripleCard()
+                        ? opposingSlots[i - 1]
+                        : i + 1 < opposingSlots.Count && opposingSlots[i + 1].SlotHasTripleCard() ? opposingSlots[i + 1] : opposingSlots[i];
                 }
             }
             else
@@ -613,7 +618,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             PlayableCard card = __instance.gameObject.GetComponent<PlayableCard>();
 
-            if (card.Info.specialAbilities.Contains(AbilityID))
+            if (card.SafeIsUnityNull() || card.Info == null || card.Dead)
+            {
+                __result = false;
+                return;
+            }
+
+            if ((card.Info.specialAbilities?.Contains(AbilityID)).GetValueOrDefault())
             {
                 if (card.Slot != null && !TurnManager.Instance.GameEnding)
                 {

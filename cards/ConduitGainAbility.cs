@@ -172,5 +172,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
         [HarmonyPostfix]
         private static void CleanupActiveAbilities() => ActiveAbilities.Clear();
+
+        [HarmonyPatch(typeof(PhotographerSnapshotManager), nameof(PhotographerSnapshotManager.ApplySlotState))]
+        [HarmonyPostfix]
+        private static IEnumerator ResetAferPhotog(IEnumerator sequence)
+        {
+            yield return sequence;
+
+            ActiveAbilities = BoardManager.Instance.AllSlotsCopy.Where(s => s.Card != null).SelectMany(s => s.Card.GetComponents<ConduitGainAbility>()).ToList();
+            yield break;
+        }
     }
 }

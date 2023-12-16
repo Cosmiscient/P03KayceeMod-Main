@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using DiskCardGame.CompositeRules;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.CustomRules;
 using Infiniscryption.P03KayceeRun.Patchers;
 using UnityEngine;
 
@@ -20,9 +22,8 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 "Random Rule",
                 new List<string>() { "For this battle, I'm going to add an additional rule." },
                 typeof(CanvasRuleBattle),
-                difficulty: 4,
+                difficulty: 5,
                 bossValid: true,
-                regions: new() { },
                 iconPath: "p03kcm/prefabs/frame"
             );
             BattleModManager.SetGlobalActivationRule(ID,
@@ -44,19 +45,21 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 MakeCanvasRuleDisplayer();
 
             // Setup the battle rule at random
-            CompositeBattleRule currentRule = new CompositeBattleRule();
+            CompositeBattleRule currentRule = new();
             List<Effect> validEffects = new(CompositeBattleRule.AVAILABLE_EFFECTS);
             List<Trigger> validTriggers = new(CompositeBattleRule.AVAILABLE_TRIGGERS);
 
             if (TurnManager.Instance.Opponent is ArchivistBossOpponent)
             {
-                validEffects.Remove(CompositeBattleRule.AVAILABLE_EFFECTS[1]); // 5 damage to random card
-                validEffects.Remove(CompositeBattleRule.AVAILABLE_EFFECTS[4]); // All cards damaged by 1
+                validEffects = validEffects.Where(r => r is not RandomCardDestroyedEffect and not AllCardsDamagedEffect).ToList();
             }
 
             int randomSeed = P03AscensionSaveData.RandomSeed;
-            currentRule.effect = validEffects[SeededRandom.Range(0, validEffects.Count, randomSeed++)];
             currentRule.trigger = validTriggers[SeededRandom.Range(0, validTriggers.Count, randomSeed++)];
+
+            if (currentRule.trigger == Trigger.OtherCardResolve)
+                validEffects = validEffects.Where(r => r is not RandomCardDestroyedEffect and not RandomSalmon).ToList();
+            currentRule.effect = validEffects[SeededRandom.Range(0, validEffects.Count, randomSeed++)];
 
             Rules.Clear();
             Rules.Add(currentRule);

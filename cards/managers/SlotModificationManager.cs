@@ -89,6 +89,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
             //         BoardManager.Instance.gameObject.AddComponent(defn.SlotBehaviour);
             // }
 
+            // List<NonCardTriggerReceiver> receivers = new(GlobalTriggerHandler.Instance.nonCardReceivers);
+            // foreach (NonCardTriggerReceiver trigger in receivers)
+            // {
+            //     if (!trigger.SafeIsUnityNull() && trigger is ISlotModificationChanged ismc)
+            //     {
+            //         if (ismc.RespondsToSlotModificationChanged(slot, oldModification, modType))
+            //             yield return ismc.OnSlotModificationChanged(slot, oldModification, modType);
+            //     }
+            // }
+
+            // TODO: Go back to this when custom trigger finder is fixed
             yield return CustomTriggerFinder.TriggerAll(
                 false,
                 delegate (ISlotModificationChanged t)
@@ -193,9 +204,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             Dictionary<CardTemple, List<Texture>> lookup = slot.IsOpponentSlot() ? OpponentOverrideSlots : PlayerOverrideSlots;
             if (lookup.ContainsKey(temple))
-                slot.SetTexture(lookup[temple][slot.Index]);
+            {
+                try
+                {
+                    slot.SetTexture(lookup[temple][slot.Index]);
+                }
+                catch
+                {
+                    slot.SetTexture(DefaultSlotTextures[temple]);
+                }
+            }
             else
+            {
                 slot.SetTexture(DefaultSlotTextures[temple]);
+            }
         }
     }
 }

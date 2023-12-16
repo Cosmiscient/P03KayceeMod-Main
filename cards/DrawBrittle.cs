@@ -18,7 +18,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Brittle Summoner";
             info.rulebookDescription = "When [creature] is played, a random brittle card is created in your hand.";
             info.canStack = false;
-            info.powerLevel = 3;
+            info.powerLevel = 4;
             info.opponentUsable = false;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };

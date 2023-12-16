@@ -69,6 +69,8 @@ namespace Infiniscryption.P03KayceeRun.Items
             yield return new WaitForSeconds(0.5f);
 
             CardInfo info = CardLoader.Clone(targetSlot.Card.Info);
+            foreach (CardModificationInfo mod in targetSlot.Card.TemporaryMods)
+                info.Mods.Add((CardModificationInfo)mod.Clone());
             AudioController.Instance.PlaySound3D("ufo", MixerGroup.TableObjectsSFX, targetSlot.transform.position, sfxVolume);
             targetSlot.Card.ExitBoard(1.4f, Vector3.up * 3);
             Tween.Position(firstPersonItem.transform, firstPersonItem.transform.position + (Vector3.up * 3), 1.4f, 0f);

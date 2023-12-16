@@ -41,7 +41,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Launch Missile";
             info.rulebookDescription = "Skip your attack this turn to launch a missile that lands on the next turn, splashing damage to adjacent spaces. Use carefully - ammo is limited.";
             info.canStack = false;
-            info.powerLevel = 2;
+            info.powerLevel = 3;
             info.activated = true;
             info.opponentUsable = true;
             info.passive = false;

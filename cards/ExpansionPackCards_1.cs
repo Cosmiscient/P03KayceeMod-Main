@@ -346,6 +346,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Seed
             CardManager.New(EXP_1_PREFIX, "SEED", "Seed", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_seed.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetCost(energyCost: 1)
                 .AddSpecialAbilities(SeedBehaviour.AbilityID);
         }
     }

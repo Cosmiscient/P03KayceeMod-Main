@@ -17,11 +17,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static CardTemple ToTemple(this Zone zone)
         {
-            if (zone == Zone.Magic)
-                return CardTemple.Wizard;
-            if (zone == Zone.Nature)
-                return CardTemple.Nature;
-            return zone == Zone.Undead ? CardTemple.Undead : CardTemple.Tech;
+            return zone == Zone.Magic
+                ? CardTemple.Wizard
+                : zone == Zone.Nature ? CardTemple.Nature : zone == Zone.Undead ? CardTemple.Undead : CardTemple.Tech;
         }
 
         private static IEnumerable<HoloMapBlueprint> AdjacentToQuadrant(this HoloMapBlueprint[,] map, int x, int y)
@@ -260,8 +258,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static void DiscoverAndCreateBridge(HoloMapBlueprint[,] map, List<HoloMapBlueprint> nodes, Zone region)
         {
-            if (region == Zone.Nature)
-                return; // Nature doesn't have bridges
+            if (region is Zone.Nature or Zone.Tech)
+                return; // Nature doesn't have bridges for flavor, tech doesn't have bridges for mechanics
 
             // This is a goofy one. We're looking for a section on the map where the area could be a bridge.
             // If so, roll the dice and make a bridge
@@ -886,7 +884,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             int totalDiffulty = 0;
             List<BattleModManager.BattleModDefinition> retval = new();
-            List<BattleModManager.BattleModDefinition> remaining = new List<BattleModManager.BattleModDefinition>(mods.OrderBy(d => SeededRandom.Value(randomSeed++)));
+            List<BattleModManager.BattleModDefinition> remaining = new(mods.OrderBy(d => SeededRandom.Value(randomSeed++)));
 
             // The first two mods are purely randomly selected
             while (retval.Count < 2 && totalDiffulty < difficulty)

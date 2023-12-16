@@ -74,7 +74,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     lightColor = new Color(0.5802f, 0.8996f, 1f);
                     mainColor = new Color(0.1802f, 0.2778f, 0.5094f);
                     terrain = new string[][] {
-                        new string[] { null, null, null, null, null, null, null, null, null, null } // There's no terrain in the magic world
+                        new string[] { null, "P03KCM_MoxObelisk", null, null, null, null, null, null, "P03KCM_MoxObelisk", null }
                     };
                     landmarks = new string[][] {
                         new string[] { "WizardMainPath_3/Scenery/HoloGenerator" },
@@ -105,7 +105,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     };
                     terrain = new string[][] {
                         new string[] { null, "Tree_Hologram", null, "Tree_Hologram", null, null, "Tree_Hologram", null, "Tree_Hologram", null },
-                        new string[] { "Tree_Hologram_SnowCovered", null, "Tree_Hologram_SnowCovered", null, "Tree_Hologram_SnowCovered", "Tree_Hologram_SnowCovered", null, "Tree_Hologram_SnowCovered", null, "Tree_Hologram_SnowCovered" }
+                        new string[] { "Tree_Hologram_SnowCovered", null, "Tree_Hologram_SnowCovered", null, "Tree_Hologram_SnowCovered", "Tree_Hologram_SnowCovered", null, "Tree_Hologram_SnowCovered", null, "Tree_Hologram_SnowCovered" },
+                        new string[] { null, null, null, null, null, null, null, null, null, null }
                     };
                     landmarks = new string[][] {
                         new string[] { "NatureMainPath_2/Scenery/HoloGateway" },
@@ -120,7 +121,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     terrainRandoms = new string[] { };
                     objectRandoms = new string[] { };
                     terrain = new string[][] {
-                        new string[] { null, null, null, null, null, null, null, "ConduitTower", null, null},
                         new string[] { null, null, null, null, null, null, null, null, null, null }
                     };
                     lightColor = new Color(0.6934f, 0.9233f, 1f);
@@ -151,7 +151,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     wall = null;
                     terrain = new string[][] {
                         new string[] { null, "DeadTree", null, null, null, null, null, null, null, "DeadTree" },
-                        new string[] { null, null, null, null, null, null, "TombStone", null, "TombStone", null }
+                        new string[] { null, null, null, null, null, null, "TombStone", null, "TombStone", null },
+                        new string[] { null, "P03KCM_Ghoulware", null, null, null, null, null, null, "P03KCM_Ghoulware", null },
                     };
                     landmarks = new string[][] {
                         new string[] { "UndeadSmallDetour_2/Scenery/HoloTeslaCoil", "UndeadSmallDetour_2/Scenery/HoloTeslaCoil (1)", "UndeadSmallDetour_2/Scenery/HoloTeslaCoil (2)", "UndeadSmallDetour_2/Scenery/HoloTeslaCoil (3)", "UndeadSmallDetour_2/Scenery/HoloTeslaCoil (4)", "UndeadSmallDetour_2/Scenery/HoloMapLightning", "UndeadSmallDetour_2/Scenery/HoloMapLightning (2)", "UndeadSmallDetour_2/Scenery/HoloMapLightning (3)"},

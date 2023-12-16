@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards;
 using InscryptionAPI.Card;
 using InscryptionAPI.Triggers;
+using Sirenix.Serialization.Utilities;
 
 namespace Infiniscryption.P03KayceeRun.BattleMods
 {
@@ -25,18 +28,38 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             );
         }
 
-        public override bool RespondsToOtherCardResolve(PlayableCard otherCard) => otherCard.OpponentCard && !otherCard.HasTrait(Trait.Terrain);
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.QueueCardForSlot))]
+        [HarmonyPrefix]
+        private static void SetQueueMaybe(PlayableCard card)
+        {
+            List<NonCardTriggerReceiver> handlers = new(GlobalTriggerHandler.Instance.nonCardReceivers);
+            foreach (NonCardTriggerReceiver handler in handlers)
+            {
+                if (!handler.SafeIsUnityNull() && handler is LatchBattle lb)
+                {
+                    if (lb.RespondsToLatchCard(card))
+                    {
+                        lb.LatchCard(card);
+                    }
+                }
+            }
+        }
+
+
+        public bool RespondsToLatchCard(PlayableCard otherCard) => otherCard.OpponentCard && !otherCard.HasTrait(Trait.Terrain) && !otherCard.Info.Mods.Any(m => m.bountyHunterInfo != null);
 
         private Ability ChooseAbility(PlayableCard card)
         {
-            List<Ability> learnedAbilities = AbilitiesUtil.GetLearnedAbilities(false, 0, 5, SaveManager.SaveFile.IsPart1 ? AbilityMetaCategory.Part1Modular : AbilityMetaCategory.Part3Modular);
-            learnedAbilities.RemoveAll((Ability x) => x == Ability.RandomAbility || card.HasAbility(x));
+            List<Ability> learnedAbilities = AbilitiesUtil.GetLearnedAbilities(false, 0, 3, SaveManager.SaveFile.IsPart1 ? AbilityMetaCategory.Part1Modular : AbilityMetaCategory.Part3Modular);
+            learnedAbilities.RemoveAll((Ability x) => x == Ability.RandomAbility || x == TreeStrafe.AbilityID || card.HasAbility(x));
+            learnedAbilities.RemoveAll((Ability x) => !AbilitiesUtil.GetInfo(x).opponentUsable);
+
             return learnedAbilities.Count > 0
                 ? learnedAbilities[SeededRandom.Range(0, learnedAbilities.Count, GetRandomSeed())]
                 : Ability.Sharp;
         }
 
-        public override IEnumerator OnOtherCardResolve(PlayableCard otherCard)
+        public void LatchCard(PlayableCard otherCard)
         {
             CardModificationInfo mod = new(ChooseAbility(otherCard))
             {
@@ -45,7 +68,6 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             otherCard.Anim.ShowLatchAbility();
             otherCard.AddTemporaryMod(mod);
             otherCard.UpdateFaceUpOnBoardEffects();
-            yield break;
         }
 
         public bool RespondsToBellRung(bool playerCombatPhase) => !playerCombatPhase;

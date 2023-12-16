@@ -278,10 +278,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(Ability.MoveBeside, Ability.BuffNeighbours);
 
             // Flame Charmter
-            CardManager.New(EXP_2_PREFIX, "FlameCharmer", "Flamecharmer", 0, 4)
+            CardManager.New(EXP_2_PREFIX, "FlameCharmer", "Flamecharmer", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_flame_charmer.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
-                .AddAbilities(FireBomb.FlameStokerID, Ability.MadeOfStone)
+                .AddAbilities(FireBomb.FlameStokerID, FriendliesMadeOfStone.AbilityID)
                 .AddAppearances(RareDiscCardAppearance.ID)
                 .temple = CardTemple.Tech;
 
@@ -359,7 +359,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.BaseGameCards.First(c => c.name == "LeapBot").SetEvolve(lpneo, 1);
 
             // Encapsulator
-            CardManager.New(EXP_2_PREFIX, "Encapsulator", "Encapsulator", 0, 1)
+            CardManager.New(EXP_2_PREFIX, "Encapsulator", "Encapsulator", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_encapsulator.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_encapsulator.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)

@@ -134,6 +134,47 @@ And these aren't required, but **highly** recommended:
 <details>
 <summary>Changelog</summary>
 
+4.1.0
+- A number of bugs that had their roots in the API have been fixed. **Make sure you upgrade to the latest version of the API when installing this!!**
+- Updated the terrain (starting card conditions) for a number of battles. Also added two new terrain cards; one for the Gem region and one for the Undead region.
+- Added three new effects to the Canvas rule set.
+- Overhauled the encounters in the Resplendent Bastion zone to be slightly more intelligent.
+- Fixed an issue relating to the interaction between Seedbot and the Fecundity sigil.
+- In Latch Battles, the latched ability is now visible in the queue. This makes it easier to plan around your opponent's cards and makes their "on resolve on board" effects actually happen.
+- Fixed some broken stuff with Build-A-Bot that was making it better than it was supposed to be. Also fixed some bugs with the Build-A-Bot user interface.
+- Fixed a bug with the Photographer boss and Ability Conduits.
+- Fixed a bug with Explodenate breaking under certain conditions.
+- Fixed (hopefully for good) an issue where sometimes nodes on the map appeared on top of each other.
+- Updated the dialogue database to consistently apply punctuation
+
+4.0.4
+- Cards with flying will now be able to fly over Holo Traps during Holo Trap Battles.
+- Holo Trap Battles now deal 10 damage when the trap is sprung instead of outright killing it. This means you can survive them with a shield (e.g., shield generator) or tank it if you can somehow get enough health.
+- Fixed a defect with the burning slots that I accidentally introduced with the last patch.
+- Updated the texture of the Laser Rifle item.
+- Fixed an issue that could arise with some bosses where certain scene effects wouldn't reset after battle.
+- Made a small tweak to the boss scene effects for the final boss.
+
+4.0.3
+- Fire starting animations are faster across the board.
+- Fire now triggers the Swapper sigil, and I made another tweak to the Swapper sigil to make it behave a little better. With these changes, the Swapper starter deck is also changed.
+- One of the hidden quests was misbehaving - it should be fixed now.
+- G0ph3r, P00dl3, and Hellfire Commando have new portraits.
+- Flamecharmer is now 0/3 instead of 0/4, and gives all cards on your side of the board Made of Stone instead of just itself.
+- Overhauled some of the trigger management code to prevent some enumeration changed bugs from happening.
+- KNOWN ISSUE: There are problems with the latest version of the API and the way that shields behave. We are working on those as fast as we can.
+
+4.0.2
+- Some small tweaks to the way data is saved. This should hopefully make it safer to quit and reload in the middle of game sequences.
+- Tweak to the battle modification system to prevent occasional softlocks when battles tried to clean up.
+
+4.0.1
+- OP Bot: Rolling Overclock or Skeleclock now adds +1 to attack. These abilities also now behave properly and actually remove the card from your deck.
+- Latch Battles: Abilities that are not marked as usable by the opponent will no longer be assigned.
+- Swapper Sigil: This has been re-implemented and should behave as expected.
+- Keyboard Movement: Fixed some bugs related to keyboard movement.
+- Updated the power level of a number of sigils. This was a change I meant to do earlier and just forgot.
+
 4.0.0
 - Huge new update!
 - Expansion Pack 2 is now complete - with 50 (!!) new cards!
