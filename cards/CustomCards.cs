@@ -48,6 +48,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string PROGRAMMER = "P03KCM_PROGRAMMER";
         public const string ARTIST = "P03KCM_ARTIST";
         public const string FIREWALL = "P03KCM_FIREWALL";
+        public const string FIREWALL_SMALL = "P03KCM_FIREWALL_0";
+        public const string FIREWALL_MEDIUM = "P03KCM_FIREWALL_1";
+        public const string FIREWALL_LARGE = "P03KCM_FIREWALL_2";
         public const string FIREWALL_NORMAL = "P03KCM_FIREWALL_BATTLE";
         public const string BRAIN = "P03KCM_BOUNTYBRAIN";
         public const string BOUNTY_HUNTER_SPAWNER = "P03KCM_BOUNTY_SPAWNER";
@@ -562,6 +565,29 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 5)
                 .temple = CardTemple.Tech;
 
+            var basicFirewall = CardManager.New(P03Plugin.CardPrefx, FIREWALL_SMALL, "Firewall", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_mute_firewall.png", typeof(CustomCards).Assembly))
+                .AddAbilities(Ability.Reach, Ability.WhackAMole)
+                .SetCost(energyCost: 1)
+                .SetCardTemple(CardTemple.Tech);
+
+            var mediumFirewall = CardManager.New(P03Plugin.CardPrefx, FIREWALL_MEDIUM, "Replicating Firewall", 0, 3)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_replicating_firewall.png", typeof(CustomCards).Assembly))
+                .AddAbilities(Ability.Reach, Ability.WhackAMole)
+                .AddSpecialAbilities(ReplicatingFirewallBehavior.AbilityID)
+                .SetIceCube(basicFirewall)
+                .SetExtendedProperty(ReplicatingFirewallBehavior.NUMBER_OF_ADDITIONAL_COPIES, 2)
+                .SetCost(energyCost: 3)
+                .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, FIREWALL_LARGE, "Replicating Firewall", 0, 6)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_replicating_firewall.png", typeof(CustomCards).Assembly))
+                .AddAbilities(Ability.Reach, Ability.WhackAMole)
+                .AddSpecialAbilities(ReplicatingFirewallBehavior.AbilityID)
+                .SetIceCube(mediumFirewall)
+                .SetCost(energyCost: 6)
+                .SetCardTemple(CardTemple.Tech);
+
             CardManager.New(P03Plugin.CardPrefx, FIREWALL_NORMAL, "Firewall", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_firewall.png", typeof(CustomCards).Assembly))
                 .AddAbilities(Ability.PreventAttack, Ability.StrafeSwap)
@@ -702,7 +728,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             goobertCardBase.SetPortrait(TextureHelper.GetImageAsTexture("portrait_goobot.png", typeof(CustomCards).Assembly));
             goobertCardBase.AddAppearances(GooDiscCardAppearance.ID);
             goobertCardBase.AddSpecialAbilities(GoobertCenterCardBehaviour.AbilityID);
-            goobertCardBase.AddAbilities(TripleCardStrike.AbilityID, PowerDrain.AbilityID);
+            goobertCardBase.AddAbilities(TripleCardStrike.AbilityID);
             goobertCardBase.AddTraits(Unrotateable, Trait.Uncuttable);
             goobertCardBase.temple = CardTemple.Tech;
 
@@ -870,6 +896,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.SetExtendedProperty("DefaultAbilityColor", "gold");
             info.SetExtendedProperty("PortraitColor", "gold");
             info.SetExtendedProperty("Holofy", true);
+            info.SetCardTemple(CardTemple.Tech);
             info.hideAttackAndHealth = true;
             return info;
         }
@@ -986,20 +1013,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return retval;
         }
 
-        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.EnergyCost), MethodType.Getter)]
-        [HarmonyPostfix]
-        private static void AdjustCostForTempMods(ref PlayableCard __instance, ref int __result)
-        {
-            if (__instance.temporaryMods != null)
-            {
-                foreach (CardModificationInfo tMod in __instance.temporaryMods)
-                {
-                    __result += tMod.energyCostAdjustment;
-                }
-            }
+        // [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.EnergyCost), MethodType.Getter)]
+        // [HarmonyPostfix]
+        // private static void AdjustCostForTempMods(ref PlayableCard __instance, ref int __result)
+        // {
+        //     if (__instance.temporaryMods != null)
+        //     {
+        //         foreach (CardModificationInfo tMod in __instance.temporaryMods)
+        //         {
+        //             __result += tMod.energyCostAdjustment;
+        //         }
+        //     }
 
-            __result = Mathf.Max(0, __result);
-        }
+        //     __result = Mathf.Max(0, __result);
+        // }
 
         public static bool SlotHasTripleCard(this CardSlot slot) => slot.Card != null && slot.Card.Info.SpecialAbilities.Contains(GoobertCenterCardBehaviour.AbilityID);
 

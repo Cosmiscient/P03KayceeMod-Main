@@ -134,6 +134,90 @@ And these aren't required, but **highly** recommended:
 <details>
 <summary>Changelog</summary>
 
+4.2.9
+- Fixed a defect where the Eccentric Painter's painting would not clean up after boss fights.
+
+4.2.8
+- Fixed a visual defect in the third phase of the final boss fight when the Eccentric Painter challenge is active.
+- Fixed a visual defect in the second phase of the final boss fight when a certain effect of the Eccentric Painter challenge is active.
+- Fixed a visual defect with the painting displayer and the Eccentric Painter challenge.
+- Fixed a visual defect where NPC models always had the same configuration as the player's model.
+- Quests now have a fixed NPC face attached to each quest rather than a randomly generated face.
+- Tweaked the Splinter Cell encounter.
+
+4.2.7
+- Fixed a defect with the Missile Launcher sigil where opponent cards could fire missiles even when out of ammo.
+- Fixed a defect where the random bounty hunter ability was incorrectly calculating the energy cost of the bounty hunter.
+- Fixed a defect where the sticker customization screen was trying to display ability stickers and then softlocking.
+- Fixed a defect where Copypasta was not copying temporary mods.
+
+4.2.6
+- Fixed a defect where stickers in Sticker Battles sometimes didn't actually give the sticker ability to the card.
+
+4.2.5
+- The Eccentric Painter challenge paintings no longer orbit P03's face except during the Unfinished Boss.
+- Mr:Clock's ability now always rotates clockwise.
+
+4.2.4
+- Fixed a softlock when using stickers on your cards.
+
+4.2.3
+- Latch Battles have now been replaced with Sticker Battles. They are functionally the same as before, except the abilities are not granted with latches, which means your latches can still work during the battle.
+- The Eccentric Painter challenge now presents you with three randomly selected rules and asks you to pick one of them. This makes the challenge less difficult, but far more fair. As part of this change, all rules that had previously been banned are now unbanned.
+- Gem Auger is now a rare, and the Gem Strike sigil is part of the rare card pool. The rulebook entry for Gem Strike has been updated to match the behavior of the sigil - there are now no longer any restrictions how many times the card can attack.
+- Added a small delay between each of the molotovs when Sir Blast enters play.
+- Hellfire Commando now costs 4 energy instead of 5.
+- Made a small gameplay tweak to an early part of the P03 final boss battle.
+- Made a small cosmetic tweak to the third phase of the P03 final boss battle.
+- Fixed an issue where the Steel Trap sigil was accidentally giving out Wolf Pelts.
+- Fixed a bug with the Laser Rifle animation/position during the target selection sequence.
+- Fixed a bug with variable stat icons and the Photographer drone.
+- Fixed a bug with the audio in the Unfinished Boss when the Eccentric Painter rule is active.
+- Updated the icon for the Energy Hammer challenge and the No Remote challenge.
+
+4.2.2
+- Battle modifiers (latch battles, conveyor battles, etc) now appear less frequently and with lowered intensity.
+- One of the empty backpack challenges is replaced with the "Missing Remote" challenge. This means that a Scarlet Skull run will still start with only one item (the Amplification Coil) but can now buy up to a maximum of two items. Scarlet Skull is *still* bonkers difficult.
+- Fixed an animation issue with certain cards in the finale.
+- Fixed a defect where quest givers would not remove cards from your deck when their purpose was complete.
+- Tweaked the rewards for the Power Up The Tower quest.
+- Fixed a defect that allowed you to duplicate the Hunter Brain.
+- Updated the textures for slots on fire.
+
+4.2.1
+- A quick patch to fix the stats on one of the cards in the final boss.
+
+4.2.0
+- The final phase of the final boss has been modified to be a little bit harder.
+- Death Latch is no longer considered a negative ability.
+- The Electric sigil now rounds up instead of down.
+- SwapBot actually works now. But I've said that before. Many times.
+- Missile launchers fire faster now.
+
+4.1.2
+- In the last patch, I neglected to update the NPC dialogue to account for the change to quests. This is now fixed.
+- \[redacted\] has lost its negative ability.
+- Made a couple of small tweaks to how \[redacted\] are generated in the \[redacted\] region.
+- Fixed an issue where paying to reroll card choices for \[redacted\] resulted in the same choices.
+- Fixed a bug where abducting a card with a UFO did not cause gems to update.
+- Fixed a bug where sometimes the Green Mox Buff sigil softlocked the game.
+- Fixed a bug with the reward for the Bounty Target quest.
+- Fixed a bug (hopefully) where the Mr:Clock sigil would softlock the game if the card died or was otherwise removed at an unexpected time.
+- Fixed a bug where Conveyor Battles (and slot modifications in general) did not properly clean up when exiting to menu during battle.
+- Fixed a bug where Conveyor Battles were not properly in the randomly selected battle modification pool.
+- Fixed a bug where the missile launcher sigil breaks Build-a-Bot.
+- Took another stab at making SwapBot actually work right.
+- Added missing pixel art for Oil Jerry.
+
+4.1.1
+- If an NPC would give you an item as a quest reward, and your backpack is full, the NPC will now stick around until you have an empty slot to take the reward.
+- Quests that modified battles for 5 games now only require 3.
+- Fixed a bug where sometimes the Detonator ability would softlock the game in rare situations.
+- Fixed a bug where the "set slot on fire" Canvas rule would softlock the game in some situations.
+- Fixed a bug where the random Canvas rule challenge would break the Canvas boss.
+- Fixed a bug where a random Canvas rule could be selected a second time during the Canvas boss.
+- Fixed a bug where missiles don't cause Swapbot to swap under certain circumstances.
+
 4.1.0
 - A number of bugs that had their roots in the API have been fixed. **Make sure you upgrade to the latest version of the API when installing this!!**
 - Updated the terrain (starting card conditions) for a number of battles. Also added two new terrain cards; one for the Gem region and one for the Undead region.

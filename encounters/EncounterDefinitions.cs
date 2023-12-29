@@ -1511,24 +1511,28 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             techSplinterCells.AddTerrainRepeatRule(DefaultConduitRepeatBehavior);
 
             techSplinterCells.AddEnemyTerrain(new() {
-                Enemy("ConduitTower", overclock: 3, overclockAbility: Ability.DeathShield),
+                Enemy("ConduitTower", overclock: 6, overclockAbility: Ability.DeathShield),
                 null,
                 null,
                 null,
-                Enemy("ConduitTower", overclock: 3, overclockAbility: Ability.DeathShield),
+                Enemy("ConduitTower", overclock: 6, overclockAbility: Ability.DeathShield),
             });
             techSplinterCells.AddEnemyTerrainQueue(new() {
-                Enemy(null, replacement: "ConduitTower", difficulty: 1, overclock: 4, overclockAbility: Ability.DeathShield),
+                Enemy(null, replacement: "ConduitTower", difficulty: 1, overclock: 6, overclockAbility: Ability.DeathShield),
                 null,
                 null,
                 null,
-                Enemy(null, replacement: "ConduitTower", difficulty: 1, overclock: 4, overclockAbility: Ability.DeathShield),
+                Enemy(null, replacement: "ConduitTower", difficulty: 1, overclock: 6, overclockAbility: Ability.DeathShield),
             });
 
             // TURN 1
             techSplinterCells.turns.AddTurn(
-                Enemy("CellTri"),
-                Enemy(null, replacement: "Automaton", difficulty: 6)
+                Enemy("CellTri")
+            );
+
+            // TURN 1.5
+            techSplinterCells.turns.AddTurn(
+                Enemy(null, replacement: "Automaton", difficulty: 5)
             );
 
             // TURN 2

@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.CustomRules;
 using InscryptionAPI.Card;
 using Pixelplacement;
 using UnityEngine;
@@ -18,6 +20,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private GameObject GetPrefab()
         {
             string key = Card.Info.name;
+            if (key.Equals(RandomSalmon.SalmonNames[CardTemple.Wizard]))
+                return ResourceBank.Get<GameObject>("p03kcm/prefabs/koi");
             try
             {
                 return ResourceBank.Get<GameObject>($"prefabs/finalemagnificus/Wizard3DPortrait_{key}");
@@ -26,6 +30,19 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 P03Plugin.Log.LogInfo($"Could not find wizard model for {key}");
                 return null;
+            }
+        }
+
+        public void DestroyModel(float delay = 0.15f)
+        {
+            if (Card.Anim is WizardCardAnimationController wcac && Card is PlayableCard pCard && pCard.OnBoard)
+            {
+                Transform animationParent = pCard.transform.Find("CustomAnimationParent");
+                if (animationParent != null)
+                {
+                    animationParent.SetParent(BoardManager.Instance.gameObject.transform, worldPositionStays: true);
+                    Tween.LocalScale(animationParent, Vector3.zero, delay, 0f, completeCallback: () => GameObject.Destroy(animationParent.gameObject));
+                }
             }
         }
 
@@ -47,6 +64,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     GameObject wizard = Instantiate(prefab, anim.transform);
                     wizard.transform.Find("Anim")?.gameObject.SetActive(true);
                     wcac.WizardPortrait = wizard.GetComponent<WizardBattle3DPortrait>();
+                    if (wcac.WizardPortrait == null)
+                    {
+                        wcac.WizardPortrait = wizard.AddComponent<WizardBattle3DPortrait>();
+                        wcac.WizardPortrait.anim = wizard.GetComponent<Animator>();
+                        wcac.WizardPortrait.projectileSpawnPoint = wizard.transform;
+                        wcac.WizardPortrait.gemType = GemType.Orange;
+                        wcac.WizardPortrait.enabled = true;
+                    }
                     //wizard.SetActive(false);
                 }
             }
@@ -57,6 +82,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
         static OnboardWizardCardModel()
         {
             ID = CardAppearanceBehaviourManager.Add(P03Plugin.PluginGuid, "OnboardWizardCardModel", typeof(OnboardWizardCardModel)).Id;
+        }
+
+        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.TransformIntoCard))]
+        [HarmonyPostfix]
+        private static IEnumerator KillExistingModel(IEnumerator sequence, PlayableCard __instance)
+        {
+            __instance.GetComponent<OnboardWizardCardModel>()?.DestroyModel();
+            yield return sequence;
         }
 
         [HarmonyPatch(typeof(WizardCardAnimationController), nameof(WizardCardAnimationController.PlayAttackAnimation), typeof(bool), typeof(CardSlot))]
@@ -83,7 +116,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 //__instance.WizardPortrait.gameObject.SetActive(true);
                 __instance.WizardPortrait.PlayHitAnimation();
-                //CustomCoroutine.WaitThenExecute(0.25f, () => __instance.WizardPortrait.gameObject.SetActive(false));
+                CustomCoroutine.WaitThenExecute(0.25f, () => Traverse.Create(__instance).Field("<DoingAttackAnimation>k__BackingField").SetValue(false));
                 return false;
             }
             return true;

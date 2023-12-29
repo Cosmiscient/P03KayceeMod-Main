@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 874434064
+CRC: 2678491100
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: b64000ea0fa21675f0fd17d5ab22e3fc
+    Hash: 3679c2b29d72108276118ad66252d184
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 8c5b7327d4a845eb9a034ee9c89524e4
+    Hash: 10caaafd0ad3fcdc9870467d863128a4
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -25,9 +25,15 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 48
   Script: {instanceID: 0}
+- Class: 74
+  Script: {instanceID: 0}
+- Class: 91
+  Script: {instanceID: 0}
 - Class: 95
   Script: {instanceID: 0}
 - Class: 136
+  Script: {instanceID: 0}
+- Class: 137
   Script: {instanceID: 0}
 - Class: 198
   Script: {instanceID: 0}
@@ -36,12 +42,14 @@ ClassTypes:
 SerializeReferenceClassIdentifiers: []
 Assets:
 - Assets/Shaders/ProjectedUnstenciledSticker.shader
+- Assets/Prefabs/Question.prefab
 - Assets/Textures/Tractorbeam.mat
 - Assets/Prefabs/Molotov.prefab
 - Assets/Prefabs/UFO.prefab
 - Assets/Textures/UFO_Black_Down.mat
 - Assets/Prefabs/arrow-repeat.prefab
 - Assets/Shaders/StandardWithStencil.shader
+- Assets/Prefabs/koi.prefab
 - Assets/Shaders/LightProjectorShader.shader
 - Assets/Prefabs/latcher-claw.prefab
 - Assets/Effects/Fire_Flamethrower.prefab

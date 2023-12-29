@@ -25,6 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.opponentUsable = true;
             info.flipYIfOpponent = true;
             info.passive = false;
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_fullofoil.png", typeof(FullyLoaded).Assembly));
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(

@@ -287,7 +287,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                     PlayableCard card = CardSpawner.SpawnPlayableCard(info);
                     card.gameObject.transform.localPosition = new Vector3(card.gameObject.transform.localPosition.x + xOffset, card.gameObject.transform.localPosition.y, card.gameObject.transform.localPosition.z);
-                    renderPosition = card.gameObject.transform.localPosition;
+                    renderPosition = card.gameObject.transform.localPosition + new Vector3(0f, 0.5f, 0f);
                     card.gameObject.transform.localPosition = card.gameObject.transform.localPosition + new Vector3(0, 10, 0);
                     currentBatch.Add(card);
                     yield return new WaitForEndOfFrame();

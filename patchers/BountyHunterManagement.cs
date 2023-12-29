@@ -27,7 +27,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (P03AscensionSaveData.IsP03Run)
             {
-                if (BoardManager.Instance.AllSlotsCopy.Any(SlotHasBrain))
+                if (BoardManager.Instance.AllSlotsCopy.Any(SlotHasBrain) && !Part3SaveData.Data.deck.Cards.Any(ci => ci.name.Equals(CustomCards.BRAIN)))
                 {
                     yield return TextDisplayer.Instance.PlayDialogueEvent("P03BountyHunterBrain", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                     CardInfo brain = CardLoader.GetCardByName(CustomCards.BRAIN);

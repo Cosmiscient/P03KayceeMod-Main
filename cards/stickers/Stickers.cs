@@ -7,6 +7,7 @@ using HarmonyLib;
 using Infiniscryption.Achievements;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
+using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using Pixelplacement;
@@ -26,6 +27,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         internal static readonly Shader STENCIL_SHADER = AssetBundleManager.Shaders.Find(sh => sh.name.Equals("P03/Projector/StickerStencilApply"));
         internal static readonly Shader STANDARD_STENCIL_SHADER = AssetBundleManager.Shaders.Find(sh => sh.name.Equals("P03/Projector/StandardWithShader"));
+
+        public const string STICKER_PROPERTY_KEY = "AbilityManager.Sticker";
 
         private static Texture2D _transparentTexture;
         internal static Texture2D TRANSPARENT_TEXTURE
@@ -100,6 +103,22 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             { "sticker_winged_shoes", P03AchievementManagement.FAST_GENERATOR }
         };
 
+        internal static string AddAbilitySticker(AbilityManager.FullAbility ability)
+        {
+            string newName = "abilitysticker_" + ability.Info.rulebookName.Replace(" ", "_");
+            if (AllStickers.Any(t => t.name == newName))
+                return newName;
+
+            Texture2D stickerTexture = GetStickerTexture(ability.Id);
+            stickerTexture.name = newName;
+            ability.Info.SetExtendedProperty(STICKER_PROPERTY_KEY, newName);
+
+            AllStickers.Add(stickerTexture);
+            AllFadedStickers.Add(MakeFadedTexture(stickerTexture));
+            AllShadowStickers.Add(MakeShadowTexture(stickerTexture));
+            return newName;
+        }
+
         /// <summary>
         /// Adds a new sticker to the sticker book
         /// </summary>
@@ -122,7 +141,83 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         internal static readonly List<string> AllStickerKeys = new(StickerRewards.Keys);
 
-        private static Texture2D GetStickerTexture(string keyName)
+        private static bool HasWithin(Texture2D compTexture, int x, int y, int d)
+        {
+            for (int i = x - d; i <= x + d; i++)
+            {
+                for (int j = y - d; j <= y + d; j++)
+                {
+                    if (i < 0)
+                        continue;
+                    if (i >= compTexture.width)
+                        continue;
+                    if (j < 0)
+                        continue;
+                    if (j >= compTexture.height)
+                        continue;
+                    if (compTexture.GetPixel(i, j).a > 0)
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        internal static Texture2D GetStickerTexture(Ability ability)
+        {
+            int border = 5;
+            Texture2D abilityTexture = TextureHelper.DuplicateTexture(AbilitiesUtil.LoadAbilityIcon(ability.ToString(), false, false) as Texture2D);
+            Texture2D retval = new(abilityTexture.width + (border * 2), abilityTexture.height + (border * 2), TextureFormat.RGBA32, false)
+            {
+                name = abilityTexture.name,
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Trilinear
+            };
+
+            // Ensure it all starts transparent
+            for (int x = 0; x < retval.width; x++)
+            {
+                for (int y = 0; y < retval.height; y++)
+                {
+                    retval.SetPixel(x, y, TRANSPARENT_COLOR);
+                }
+            }
+
+            // If there is a pixel within 2, set a black pixel
+            for (int x = 0; x < retval.width; x++)
+            {
+                for (int y = 0; y < retval.height; y++)
+                {
+                    if (HasWithin(abilityTexture, x - border, y - border, 2))
+                        retval.SetPixel(x, y, Color.black);
+                }
+            }
+
+            // If there is a pixel within 1, set a beige pixel
+            for (int x = 0; x < retval.width; x++)
+            {
+                for (int y = 0; y < retval.height; y++)
+                {
+                    if (HasWithin(abilityTexture, x - border, y - border, 1))
+                        retval.SetPixel(x, y, new(0.921875f, 0.81640625f, 0.76171875f, 1f));
+                }
+            }
+
+            // Copy the original
+            for (int x = 0; x < abilityTexture.width; x++)
+            {
+                for (int y = 0; y < abilityTexture.height; y++)
+                {
+                    if (abilityTexture.GetPixel(x, y).a > 0)
+                        retval.SetPixel(x + border, y + border, new(0.49609375f, 0f, 0f, 1f));
+                }
+            }
+
+            retval.Apply();
+            GameObject.Destroy(abilityTexture);
+            return retval;
+        }
+
+        internal static Texture2D GetStickerTexture(string keyName)
         {
             Texture2D tempTexture = TextureHelper.GetImageAsTexture($"{keyName}.png", typeof(Stickers).Assembly);
             Texture2D retval = new(tempTexture.width + 2, tempTexture.height + 2, TextureFormat.RGBA32, false)
@@ -208,9 +303,22 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         public class CardStickerData
         {
-            public Dictionary<string, Vector3> Positions { get; set; }
-            public Dictionary<string, Vector3> Rotations { get; set; }
-            public Dictionary<string, Vector3> Scales { get; set; }
+            public Dictionary<string, Vector3> Positions { get; set; } = new();
+            public Dictionary<string, Vector3> Rotations { get; set; } = new();
+            public Dictionary<string, Vector3> Scales { get; set; } = new();
+            public Dictionary<string, Ability> Ability { get; set; } = new();
+
+            public override string ToString()
+            {
+                string retval = "Stickers";
+                retval += $"[StickerPositions:{FormatVectorMap(Positions)}]";
+                retval += $"[StickerRotations:{FormatVectorMap(Rotations)}]";
+                retval += $"[StickerScales:{FormatVectorMap(Scales)}]";
+
+                string stickerAbilities = String.Join(",", Ability.Select(kvp => $"{kvp.Key}:{(int)kvp.Value}"));
+                retval += $"[StickerAbility:{stickerAbilities}]";
+                return retval;
+            }
         }
 
         private static Dictionary<string, Vector3> ParseVectorMap(string parsed)
@@ -252,6 +360,19 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         internal static bool IsStickerApplied(string stickerName) => Part3SaveData.Data.deck.Cards.Any(ci => ci.GetStickerData().Positions.ContainsKey(stickerName));
 
+        private static CardModificationInfo GetStickerMod(this PlayableCard card)
+        {
+            foreach (CardModificationInfo cardMod in card.TemporaryMods)
+            {
+                if (string.IsNullOrEmpty(cardMod.singletonId))
+                    continue;
+
+                if (cardMod.singletonId.StartsWith("Stickers"))
+                    return cardMod;
+            }
+            return card.Info.GetStickerMod();
+        }
+
         private static CardModificationInfo GetStickerMod(this CardInfo info, bool force = false)
         {
             foreach (CardModificationInfo cardMod in info.Mods)
@@ -291,6 +412,62 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             return null;
         }
 
+        private static Dictionary<string, Ability> GetStickerAbility(this CardModificationInfo stickerMod)
+        {
+            string keyStart = "[StickerAbility:";
+            Dictionary<string, Ability> retval = new();
+            if (stickerMod.singletonId.Contains(keyStart))
+            {
+                int startIndex = stickerMod.singletonId.IndexOf(keyStart);
+                string vectorData = stickerMod.singletonId.Substring(startIndex).Replace(keyStart, "");
+                if (vectorData.Contains("]"))
+                {
+                    int endIndex = vectorData.IndexOf("]");
+                    vectorData = vectorData.Substring(0, endIndex).Replace("]", "");
+
+                    string[] stickerMatches = vectorData.Split(',');
+
+                    foreach (string pair in stickerMatches)
+                    {
+                        string[] pairParts = pair.Split(':');
+                        if (pairParts.Length != 2)
+                            continue;
+                        if (int.TryParse(pairParts[1], out int abilityNumber))
+                        {
+                            retval[pairParts[0]] = (Ability)abilityNumber;
+                        }
+                        else
+                        {
+                            string[] splits = pairParts[1].Split('_');
+                            if (splits.Length != 2)
+                                continue;
+                            retval[pairParts[0]] = GuidManager.GetEnumValue<Ability>(splits[0], splits[1]);
+                        }
+                    }
+                }
+            }
+            return retval;
+        }
+
+        internal static CardStickerData GetStickerData(this Card card)
+        {
+            if (card is PlayableCard pCard)
+            {
+                CardModificationInfo stickerMod = pCard.GetStickerMod();
+                return new CardStickerData()
+                {
+                    Positions = stickerMod?.GetStickerVectors("Positions") ?? new(),
+                    Rotations = stickerMod?.GetStickerVectors("Rotations") ?? new(),
+                    Scales = stickerMod?.GetStickerVectors("Scales") ?? new(),
+                    Ability = stickerMod?.GetStickerAbility() ?? new()
+                };
+            }
+            else
+            {
+                return card.Info.GetStickerData();
+            }
+        }
+
         internal static CardStickerData GetStickerData(this CardInfo info)
         {
             CardModificationInfo stickerMod = info.GetStickerMod();
@@ -298,17 +475,15 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             {
                 Positions = stickerMod?.GetStickerVectors("Positions") ?? new(),
                 Rotations = stickerMod?.GetStickerVectors("Rotations") ?? new(),
-                Scales = stickerMod?.GetStickerVectors("Scales") ?? new()
+                Scales = stickerMod?.GetStickerVectors("Scales") ?? new(),
+                Ability = stickerMod?.GetStickerAbility() ?? new()
             };
         }
 
         internal static CardInfo SetStickerData(this CardInfo info, CardStickerData data)
         {
             CardModificationInfo stickerMod = info.GetStickerMod(force: true);
-            stickerMod.singletonId = "Stickers";
-            stickerMod.singletonId += $"[StickerPositions:{FormatVectorMap(data.Positions)}]";
-            stickerMod.singletonId += $"[StickerRotations:{FormatVectorMap(data.Rotations)}]";
-            stickerMod.singletonId += $"[StickerScales:{FormatVectorMap(data.Scales)}]";
+            stickerMod.singletonId = data.ToString();
             return info;
         }
 
@@ -370,7 +545,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             textureRenderer.material.renderQueue = 3000;
         }
 
-        internal static GameObject GetSticker(string stickerName, bool interactable, bool project, StickerStyle style, int stencilNumber = StickerInterfaceManager.INTERFACE_STENCIL_NUMBER)
+        internal static GameObject GetSticker(string stickerName, bool interactable, bool project, StickerStyle style, int stencilNumber = StickerInterfaceManager.INTERFACE_STENCIL_NUMBER, Ability ability = Ability.None, PlayableCard card = null)
         {
             Texture2D texture = AllStickerTypes[style].FirstOrDefault(t => t.name.Equals(stickerName));
             if (texture == null)
@@ -445,10 +620,17 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 {
                     projectorObject.AddComponent<Camera>().depth = -5;
                     projectorObject.AddComponent<StickerProjector>();
+
+                    if (ability != Ability.None)
+                    {
+                        StickerRulebook rulebook = sticker.AddComponent<StickerRulebook>();
+                        rulebook.Ability = ability;
+                        rulebook.Card = card;
+                    }
                 }
             }
 
-            if (!interactable)
+            if (!interactable && ability == Ability.None)
             {
                 UnityEngine.Object.Destroy(sticker.GetComponent<MeshCollider>());
             }
@@ -597,7 +779,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 UnityEngine.Object.Destroy(proj.transform.parent.gameObject);
             }
 
-            CardStickerData data = __instance.Info.GetStickerData();
+            CardStickerData data = __instance.GetStickerData();
             bool activeInterface = StickerInterfaceManager.Instance != null && StickerInterfaceManager.Instance.StickerInterfaceActive;
             bool cardHasStickers = data.Positions.Count > 0;
 
@@ -671,11 +853,12 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
                 foreach (string stickerKey in data.Positions.Keys)
                 {
-                    GameObject sticker = GetSticker(stickerKey, activeInterface, true, StickerStyle.Standard, LAST_STENCIL_NUMBER);
+                    Ability ability = data.Ability.ContainsKey(stickerKey) ? data.Ability[stickerKey] : Ability.None;
+                    GameObject sticker = GetSticker(stickerKey, activeInterface, true, StickerStyle.Standard, LAST_STENCIL_NUMBER, ability, __instance as PlayableCard);
                     sticker.transform.SetParent(__instance.StatsLayer.transform);
                     if (activeInterface)
                         sticker.GetComponent<StickerDrag>().Initialize();
-                    sticker.transform.localPosition = data.Positions[stickerKey];
+                    sticker.transform.localPosition = data.Positions[stickerKey] + new Vector3(0f, 0f, 0.1f);
                     sticker.transform.localEulerAngles = new(0f, 180f, 90f);
 
                     if (data.Scales.ContainsKey(stickerKey))

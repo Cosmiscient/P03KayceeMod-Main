@@ -22,7 +22,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 "Traps",
                 new List<string>() { "It seems there are some [c:bR]traps[c:] here", "Your bots will have to fight past them to get to me" },
                 typeof(BearTrapBattle),
-                difficulty: 3,
+                difficulty: 2,
                 iconPath: "p03kcm/prefabs/mantrap"
             );
         }

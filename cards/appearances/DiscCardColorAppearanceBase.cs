@@ -280,13 +280,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static IEnumerator FixMiddleColor(IEnumerator sequence, CardRenderCamera __instance, RenderStatsLayer layer, CardRenderInfo info, PlayableCard playableCard, bool updateMain, bool updateEmission)
         {
-            if (!P03AscensionSaveData.IsP03Run || layer is not DiskRenderStatsLayer drsl)
+            if (!P03AscensionSaveData.IsP03Run || layer == null || layer is not DiskRenderStatsLayer drsl)
             {
                 yield return sequence;
                 yield break;
             }
 
-            DiscCardColorAppearance appearance = drsl.gameObject.transform.parent.parent.gameObject.GetComponent<DiscCardColorAppearance>();
+            DiscCardColorAppearance appearance = drsl.GetComponentInParent<DiscCardColorAppearance>();
 
             Color myBarColor = drsl.defaultLightColor;
             if (appearance != null && appearance.BorderColor.HasValue)
@@ -309,9 +309,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 __instance.cardDisplayer.DisplayInfo(info, playableCard);
 
                 // Also change the bar color here.
-                GameObject delimiter = __instance.transform.Find("CardsPlane/Base/Delimiter").gameObject;
-                SpriteRenderer renderer = delimiter.GetComponent<SpriteRenderer>();
-                renderer.color = myBarColor;
+                Transform delimiter = __instance.transform.Find("CardsPlane/Base/Delimiter");
+                if (delimiter != null)
+                {
+                    SpriteRenderer renderer = delimiter.GetComponent<SpriteRenderer>();
+                    renderer.color = myBarColor;
+                }
                 yield return new WaitForEndOfFrame();
             }
 

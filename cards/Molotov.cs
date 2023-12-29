@@ -35,8 +35,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public static IEnumerator ThrowMolotov(CardSlot target, PlayableCard attacker, float speed = 0.35f)
+        public static IEnumerator ThrowMolotov(CardSlot target, PlayableCard attacker, float speed = 0.35f, float delay = 0f)
         {
+            if (delay > 0)
+                yield return new WaitForSeconds(delay);
+
             GameObject bomb = Instantiate(AssetBundleManager.Prefabs["Molotov"]);
             OnboardDynamicHoloPortrait.HolofyGameObject(bomb, GameColors.instance.glowRed);
             bomb.transform.position = attacker.transform.position + (Vector3.up * 0.1f);
@@ -49,7 +52,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             Tween.LocalRotation(bomb.transform, Quaternion.Euler(new(90f, 0f, 0f)), speed, 0f, Tween.EaseLinear, Tween.LoopType.None, null, null, true);
 
             yield return new WaitForSeconds(speed);
+
             AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, target.transform.position, .7f);
+
             target.Card?.Anim.PlayHitAnimation();
 
             // The fireball should play and then delete itself, but we'll destroy it after some time anyway
@@ -63,8 +68,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public static IEnumerator BombCardsAsync(List<CardSlot> target, PlayableCard attacker, int level = 2, float speed = 0.35f)
         {
-            foreach (CardSlot slot in target)
-                attacker.StartCoroutine(ThrowMolotov(slot, attacker, speed));
+            for (int i = 0; i < target.Count; i++)
+                attacker.StartCoroutine(ThrowMolotov(target[i], attacker, speed, 0.05f * (float)i));
 
             yield return new WaitForSeconds(speed * 2f);
 

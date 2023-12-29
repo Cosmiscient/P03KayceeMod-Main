@@ -40,15 +40,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             int shields = 0;
             foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
             {
-                if (slot.Card != null && slot.Card.HasShield())
+                while (slot.Card != null && slot.Card.HasShield())
                 {
-                    slot.Card.Status.lostShield = true;
-                    slot.Card.Anim.StrongNegationEffect();
-                    if (slot.Card.Info.name == "MudTurtle")
-                    {
-                        slot.Card.SwitchToAlternatePortrait();
-                    }
-                    slot.Card.UpdateFaceUpOnBoardEffects();
+                    yield return slot.Card.TakeDamage(1, null);
                     shields += 1;
                 }
             }

@@ -30,7 +30,7 @@ namespace Infiniscryption.P03KayceeRun.CustomRules
             // Get all slots of yours that are not on fire first
             int randomSeed = P03AscensionSaveData.RandomSeed + (10 * TurnManager.Instance.TurnNumber);
             List<CardSlot> notOnFireSlots = playerSlots.Where(s => !FireBomb.SlotIsOnFire(s)).OrderBy(s => SeededRandom.Value(randomSeed++) * 100).ToList();
-            List<CardSlot> onFireSlots = playerSlots.Where(s => !FireBomb.SlotIsOnFire(s)).OrderBy(s => SeededRandom.Value(randomSeed++) * 100).ToList();
+            List<CardSlot> onFireSlots = playerSlots.Where(s => FireBomb.SlotIsOnFire(s)).OrderBy(s => SeededRandom.Value(randomSeed++) * 100).ToList();
 
             ViewManager.Instance.SwitchToView(View.Board, false, false);
             yield return new WaitForSeconds(0.1f);

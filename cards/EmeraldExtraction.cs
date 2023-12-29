@@ -38,7 +38,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnResolveOnBoard()
         {
-            if (Card.TemporaryMods.Any(m => m.singletonId.Equals(nameof(EmeraldExtraction))))
+            if (Card.TemporaryMods.Any(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(nameof(EmeraldExtraction))))
                 yield break;
 
             int healthBuff = BoardManager.Instance.GetSlots(!Card.OpponentCard).Where(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemGreen) || s.Card.HasAbility(Ability.GainGemTriple))).Count();

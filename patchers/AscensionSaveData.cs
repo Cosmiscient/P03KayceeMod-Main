@@ -500,20 +500,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         __instance.items.Add(ShockerItem.ItemData.name);
                     }
 
-                    if (MaxNumberOfItems >= 2)
+                    if (MaxNumberOfItems >= 2 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoHook))
                     {
                         if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("ufo"))
                             __instance.items.Add(UfoItem.ItemData.name);
                         else
-                            __instance.items.Add("ShieldGenerator");
+                            __instance.items.Add("BombRemote");
                     }
 
-                    if (MaxNumberOfItems >= 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoHook))
+                    if (MaxNumberOfItems >= 3)
                     {
                         if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("rifle"))
                             __instance.items.Add(RifleItem.ItemData.name);
                         else
-                            __instance.items.Add("BombRemote");
+                            __instance.items.Add("ShieldGenerator");
                     }
                 }
 

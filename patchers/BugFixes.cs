@@ -435,6 +435,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         // [HarmonyPrefix]
         // private static bool DontDoThisForP03() => !P03AscensionSaveData.IsP03Run;
 
+        private static bool ShouldCountTempMod(CardModificationInfo mod)
+        {
+            if (string.IsNullOrEmpty(mod.singletonId))
+                return true;
+
+            if (mod.singletonId.Equals("zeroout") || mod.singletonId.Equals("statswap"))
+                return false;
+
+            return true;
+        }
+
         [HarmonyPatch(typeof(SwapStats), nameof(SwapStats.OnTakeDamage))]
         [HarmonyPostfix]
         private static IEnumerator SimpleSwapStatsFixHopefully(IEnumerator sequence, SwapStats __instance)
@@ -462,8 +473,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             int health = __instance.Card.Health - __instance.Card.GetPassiveHealthBuffs();
             __instance.Card.HealDamage(__instance.Card.Status.damageTaken);
             int attack = __instance.Card.Attack - __instance.Card.GetPassiveAttackBuffs();
-            __instance.mod.attackAdjustment = health;
-            __instance.mod.healthAdjustment = attack;
+            __instance.mod.attackAdjustment = health - __instance.Card.TemporaryMods.Where(ShouldCountTempMod).Select(m => m.attackAdjustment).Sum();
+            __instance.mod.healthAdjustment = attack - __instance.Card.TemporaryMods.Where(ShouldCountTempMod).Select(m => m.healthAdjustment).Sum();
             __instance.Card.OnStatsChanged();
             __instance.Card.Anim.StrongNegationEffect();
             yield return new WaitForSeconds(0.25f);
@@ -484,6 +495,59 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             __instance.UpdateModDictionary();
             __result = cardInfo;
             return false;
+        }
+
+        [HarmonyPatch(typeof(DrawCopy), nameof(DrawCopy.CardToDrawTempMods), MethodType.Getter)]
+        [HarmonyPostfix]
+        private static void EnsureAllFecundityOverrides(ref List<CardModificationInfo> __result)
+        {
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                __result[0].negateAbilities.Add(Ability.DrawCopy);
+            }
+        }
+
+
+        [HarmonyPatch(typeof(ExplodeOnDeath), nameof(ExplodeOnDeath.BombCard))]
+        [HarmonyPostfix]
+        private static IEnumerator PreventErrors(IEnumerator sequence, ExplodeOnDeath __instance, PlayableCard target, PlayableCard attacker)
+        {
+            if (target == null || attacker == null || __instance.bombPrefab == null || target.Anim == null)
+                yield break;
+
+            while (sequence.MoveNext())
+            {
+                if (target == null || attacker == null || __instance.bombPrefab == null || target.Anim == null)
+                    yield break;
+
+                yield return sequence.Current;
+            }
+            yield break;
+        }
+
+        [HarmonyPatch(typeof(PhotographerSnapshotManager), nameof(PhotographerSnapshotManager.ApplySlotState))]
+        [HarmonyPostfix]
+        private static IEnumerator DontLetTempModsGetOverwritten(IEnumerator sequence, BoardState.SlotState slotState, CardSlot slot)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            yield return BoardManager.Instance.CreateCardInSlot(slotState.card.info, slot, 0f, false);
+            PlayableCard card = slot.Card;
+            (card.Anim as DiskCardAnimationController).Expand(true);
+            foreach (var mod in slotState.card.temporaryMods)
+            {
+                if (string.IsNullOrEmpty(mod.singletonId) || !card.TemporaryMods.Any(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(mod.singletonId)))
+                    card.TemporaryMods.Add(mod);
+            }
+            //card.TemporaryMods = new List<CardModificationInfo>(slotState.card.temporaryMods);
+            card.Status = new PlayableCardStatus(slotState.card.status);
+            card.OnStatsChanged();
+            ResourcesManager.Instance.ForceGemsUpdate();
+            yield break;
         }
     }
 }

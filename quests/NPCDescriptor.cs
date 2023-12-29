@@ -14,6 +14,15 @@ namespace Infiniscryption.P03KayceeRun.Quests
         public CompositeFigurine.FigurineType arms;
         public CompositeFigurine.FigurineType body;
 
+        public NPCDescriptor(P03ModularNPCFace.FaceSet face, CompositeFigurine.FigurineType figureType) : this(face, figureType, figureType, figureType) { }
+        public NPCDescriptor(P03ModularNPCFace.FaceSet face, CompositeFigurine.FigurineType headPart, CompositeFigurine.FigurineType armsPart, CompositeFigurine.FigurineType bodyPart)
+        {
+            faceCode = $"{(int)face}-{(int)face}-{(int)face}";
+            head = headPart;
+            arms = armsPart;
+            body = bodyPart;
+        }
+
         public NPCDescriptor(string code)
         {
             string[] pieces = code.Split('|');
@@ -32,6 +41,10 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// this run, it will reuse the same descriptor you saw before.</remarks>
         public static NPCDescriptor GetDescriptorForNPC(SpecialEvent se)
         {
+            var defn = QuestManager.Get(se);
+            if (defn.ForcedNPCDescriptor != null)
+                return defn.ForcedNPCDescriptor;
+
             string descriptorString = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, $"NPC{se}");
             if (!string.IsNullOrEmpty(descriptorString))
                 return new NPCDescriptor(descriptorString);
@@ -53,7 +66,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// </summary>
         /// <param name="dialogueCode"></param>
         /// <returns></returns>
-        public static IEnumerator SayDialogue(SpecialEvent questParent, string dialogueCode, bool switchViews = true)
+        public static IEnumerator SayDialogue(SpecialEvent questParent, string dialogueCode, bool switchViews = true, string[] variableStrings = null)
         {
             string faceCode = GetDescriptorForNPC(questParent).faceCode;
             P03ModularNPCFace.Instance.SetNPCFace(faceCode);
@@ -67,7 +80,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
             P03AnimationController.Instance.SwitchToFace(P03ModularNPCFace.ModularNPCFace, true, true);
             yield return new WaitForSeconds(0.1f);
-            yield return TextDisplayer.Instance.PlayDialogueEvent(dialogueCode, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            yield return TextDisplayer.Instance.PlayDialogueEvent(dialogueCode, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, variableStrings, null);
             yield return new WaitForSeconds(0.1f);
 
             if (switchViews)

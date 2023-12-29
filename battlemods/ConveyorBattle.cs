@@ -25,7 +25,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 new List<string>() { "It appears someone activated the [c:bR]conveyor belt[c:]", "Cards will rotate clockwise every turn" },
                 typeof(ConveyorBattle),
                 difficulty: 1,
-                new() { CardTemple.Tech },
+                new() { CardTemple.Nature, CardTemple.Undead, CardTemple.Wizard },
                 iconPath: "p03kcm/prefabs/arrow-repeat"
             );
             BattleModManager.SetGlobalActivationRule(ID,
@@ -68,7 +68,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         public IEnumerator OnBattleModSetup()
         {
-            SlotModificationManager.OverrideDefaultSlotTexture(CardTemple.Tech, PLAYER_CONVEYOR_SLOTS, OPPONENT_CONVEYOR_SLOTS);
+            SlotModificationManager.Instance.OverrideDefaultSlotTexture(CardTemple.Tech, PLAYER_CONVEYOR_SLOTS, OPPONENT_CONVEYOR_SLOTS);
             foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
             {
                 slot.ResetSlotTexture();
@@ -80,7 +80,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         public IEnumerator OnBattleModCleanup()
         {
-            SlotModificationManager.ResetDefaultSlotTexture(CardTemple.Tech);
+            SlotModificationManager.Instance.ResetDefaultSlotTexture(CardTemple.Tech);
             foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
             {
                 slot.ResetSlotTexture();
@@ -148,5 +148,16 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         public void ModifyPlayerTerrain(CardInfo[] terrain) => Shift(terrain, left: false);
         public void ModifyOpponentTerrain(CardInfo[] terrain) => Shift(terrain, left: true);
         public void ModifyOpponentQueuedTerrain(CardInfo[] terrain) => Shift(terrain, left: true);
+
+        [HarmonyPatch(typeof(CanvasBossOpponent), nameof(CanvasBossOpponent.FadeInAudioLayer))]
+        [HarmonyPrefix]
+        private static bool FixAudioWithExtraRule(int index)
+        {
+            if (!P03AscensionSaveData.IsP03Run || !BattleModManager.RuleIsActive(ID))
+                return true;
+
+            AudioController.Instance.SetLoopVolume(0.4f, 0.5f, Mathf.Clamp(index - 1, 1, 3), true);
+            return false;
+        }
     }
 }

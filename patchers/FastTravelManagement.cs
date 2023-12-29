@@ -277,7 +277,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         Transform nodeTransform = arrowsParent.Find($"MoveArea_{move.Value}");
                         if (move.Value.Equals("W") && nodeTransform == null)
                             nodeTransform = arrowsParent.Find($"MoveArea_W (NORTH)");
-                        if (nodeTransform == null || !nodeTransform.gameObject.activeSelf)
+                        if (nodeTransform == null || (!nodeTransform.gameObject.activeSelf && !Input.GetKey(KeyCode.LeftControl)))
                             return true;
 
                         MoveHoloMapAreaNode node = nodeTransform.GetComponent<MoveHoloMapAreaNode>();

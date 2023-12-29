@@ -413,7 +413,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // NPC
             //GameObject npcObject = GameObject.Instantiate(Resources.Load<GameObject>("prefabs/map/holomapscenery/holomapnpc"), parent);
-            GameObject npcBase = Resources.Load<GameObject>("prefabs/map/holoplayermarker");
+            GameObject npcBase = ResourceBank.Get<GameObject>("prefabs/map/holoplayermarker");
             GameObject npcObject = UnityEngine.Object.Instantiate(npcBase.transform.Find("Anim/Model").gameObject);
             npcObject.transform.SetParent(sceneryParent);
             npcObject.transform.localPosition = new Vector3(x, 0.1f, z);
@@ -426,9 +426,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             figure.definedHead = descriptor.head;
             figure.definedBody = descriptor.body;
 
-            figure.armsRenderer.SetMaterial(Resources.Load<Material>("art/materials/hologram/Hologram_MapSceneryBlue"));
-            figure.bodyRenderer.SetMaterial(Resources.Load<Material>("art/materials/hologram/Hologram_MapSceneryBlue"));
-            figure.headRenderer.SetMaterial(Resources.Load<Material>("art/materials/hologram/Hologram_MapSceneryBlue"));
+            figure.Generate(descriptor.head, descriptor.arms, descriptor.body);
+            figure.generateAsPlayer = false;
+
+            // figure.armsRenderer.SetMaterial(Resources.Load<Material>("art/materials/hologram/Hologram_MapSceneryBlue"));
+            // figure.bodyRenderer.SetMaterial(Resources.Load<Material>("art/materials/hologram/Hologram_MapSceneryBlue"));
+            // figure.headRenderer.SetMaterial(Resources.Load<Material>("art/materials/hologram/Hologram_MapSceneryBlue"));
+
             dialogue.npc = npcObject;
 
             float yRotate = (x < 0)
@@ -717,7 +721,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // This is just a failsafe. The index should always match UNLESS you uninstalled a mod partway through a run.
             // I could just let this fail because you're a dumbass, but I'm a nice guy.
-            if (encounterIndex == -1 || encounterIndex >= REGION_DATA[regionZone].encounters.Length)
+            if (encounterIndex <= -1 || encounterIndex >= REGION_DATA[regionZone].encounters.Length)
             {
                 string[] encounters = REGION_DATA[regionZone].encounters;
                 encounterName = encounters[UnityEngine.Random.Range(0, encounters.Length)];

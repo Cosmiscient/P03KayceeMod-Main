@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Pixelplacement;
 using UnityEngine;
@@ -11,14 +12,47 @@ namespace Infiniscryption.P03KayceeRun.Quests
 {
     public abstract class QuestReward
     {
-        public abstract IEnumerator GrantReward();
+        public QuestState ParentState { get; internal set; }
+
+        protected int RewardIndex => ParentState.Rewards.IndexOf(this);
+
+        public bool HasBeenGranted
+        {
+            get => P03AscensionSaveData.RunStateData.GetValueAsBoolean(ParentState.ParentQuest.ModGuid, String.Format("{0}_{1}_RewardStatus", ParentState.SaveKey, RewardIndex));
+            set => P03AscensionSaveData.RunStateData.SetValue(ParentState.ParentQuest.ModGuid, String.Format("{0}_{1}_RewardStatus", ParentState.SaveKey, RewardIndex), value);
+        }
+
+        public IEnumerator GrantReward()
+        {
+            if (this.HasBeenGranted)
+                yield break;
+
+            if (this.CanGrantReward())
+            {
+                this.HasBeenGranted = true;
+                yield return GrantRewardSequence();
+            }
+            else
+            {
+                yield return CannotGrantRewardSequence();
+            }
+        }
+
+        protected virtual IEnumerator CannotGrantRewardSequence()
+        {
+            yield return NPCDescriptor.SayDialogue(ParentState.ParentQuest.EventId, "NPCCannotGiveReward");
+        }
+
+        protected virtual bool CanGrantReward() => true;
+
+        protected abstract IEnumerator GrantRewardSequence();
     }
 
     public class QuestRewardCoins : QuestReward
     {
         public virtual int Amount { get; set; }
 
-        public override IEnumerator GrantReward()
+        protected override IEnumerator GrantRewardSequence()
         {
             if (Amount != 0)
             {
@@ -63,7 +97,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
         protected virtual IEnumerator DoCardAction(SelectableCard card, CardInfo info)
         {
-            Part3SaveData.Data.deck.AddCard(CardLoader.GetCardByName(CardName));
+            Part3SaveData.Data.deck.AddCard(CustomCards.ConvertCodeToCard(CardName));
 
             yield return String.IsNullOrEmpty(DialogueId)
                 ? new WaitForSeconds(1.5f)
@@ -94,12 +128,12 @@ namespace Infiniscryption.P03KayceeRun.Quests
             yield return new WaitForSeconds(0.25f);
         }
 
-        public override IEnumerator GrantReward()
+        protected override IEnumerator GrantRewardSequence()
         {
             if (String.IsNullOrEmpty(CardName))
                 yield break;
 
-            CardInfo cardInfo = CardLoader.GetCardByName(CardName);
+            CardInfo cardInfo = CustomCards.ConvertCodeToCard(CardName);
 
             yield return DisplayCard(cardInfo);
             yield return DoCardAction(lastCreatedCard, cardInfo);
@@ -118,12 +152,12 @@ namespace Infiniscryption.P03KayceeRun.Quests
             yield break;
         }
 
-        public override IEnumerator GrantReward()
+        protected override IEnumerator GrantRewardSequence()
         {
             if (!Part3SaveData.Data.deck.Cards.Any(c => c.name == CardName))
                 yield break;
 
-            yield return base.GrantReward();
+            yield return base.GrantRewardSequence();
         }
     }
 
@@ -131,7 +165,15 @@ namespace Infiniscryption.P03KayceeRun.Quests
     {
         public string ItemName { get; set; }
 
-        public override IEnumerator GrantReward()
+        protected override bool CanGrantReward() => Part3SaveData.Data.items.Count < P03AscensionSaveData.MaxNumberOfItems;
+
+        protected override IEnumerator CannotGrantRewardSequence()
+        {
+            var data = ItemsUtil.GetConsumableByName(ItemName);
+            yield return NPCDescriptor.SayDialogue(ParentState.ParentQuest.EventId, "NPCCannotGiveItem", variableStrings: new string[] { data.rulebookName });
+        }
+
+        protected override IEnumerator GrantRewardSequence()
         {
             if (!string.IsNullOrEmpty(ItemName))
             {
@@ -155,7 +197,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
     public class QuestRewardLoseItem : QuestRewardItem
     {
-        public override IEnumerator GrantReward()
+        protected override IEnumerator GrantRewardSequence()
         {
             if (!string.IsNullOrEmpty(ItemName))
             {
@@ -204,7 +246,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             yield return new WaitForSeconds(1.5f);
         }
 
-        public override IEnumerator GrantReward()
+        protected override IEnumerator GrantRewardSequence()
         {
             CardInfo startCard = Part3SaveData.Data.deck.Cards.FirstOrDefault(ci => ci.name == CardName);
             if (startCard != null)
@@ -249,7 +291,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             yield return new WaitForSeconds(1.5f);
         }
 
-        public override IEnumerator GrantReward()
+        protected override IEnumerator GrantRewardSequence()
         {
             if (NumberOfCards > 0)
             {
@@ -279,7 +321,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
     {
         public Action RewardAction { get; set; }
 
-        public override IEnumerator GrantReward()
+        protected override IEnumerator GrantRewardSequence()
         {
             RewardAction?.Invoke();
             yield break;

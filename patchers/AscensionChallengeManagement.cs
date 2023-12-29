@@ -125,7 +125,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 // Backpack, second instance
                 new() {
-                    Challenge = ChallengeManager.BaseGameChallenges.First(fc => fc.Challenge.challengeType == AscensionChallenge.LessConsumables),
+                    Challenge = new() {
+                        challengeType = AscensionChallenge.NoHook,
+                        title = "Missing Remote",
+                        description = "You do not start with Mrs. Bomb's Remote",
+                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_nohook.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_nohook_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 5
+                    },
                     AppearancesInChallengeScreen = 1,
                     UnlockLevel = 1
                 },

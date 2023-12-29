@@ -304,7 +304,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Hellfire Droid
             CardManager.New(EXP_2_PREFIX, "HellfireDroid", "Hellfire Commando", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_hellfire_droid.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 5)
+                .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Undead)
                 .SetRare()
                 .AddAbilities(MissileStrikeSelf.AbilityID, Ability.Deathtouch);
@@ -354,6 +354,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo lpneo = CardManager.New(EXP_2_PREFIX, "LeapBotNeo", "L33pB0t Neo", 2, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_leapbot_neo.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
+                .SetCardTemple(CardTemple.Tech)
                 .AddAbilities(Ability.Reach, Hopper.AbilityID);
 
             CardManager.BaseGameCards.First(c => c.name == "LeapBot").SetEvolve(lpneo, 1);
@@ -438,6 +439,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(EXP_2_PREFIX, "GemAugur", "Gem Auger", 2, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gem_augur.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 6)
+                .SetRare()
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(GemStrike.AbilityID);
 

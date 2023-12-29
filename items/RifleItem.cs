@@ -79,7 +79,7 @@ namespace Infiniscryption.P03KayceeRun.Items
 
         public override Vector3 FirstPersonItemPos => new(0f, 0f, 4f);
 
-        public override Vector3 FirstPersonItemEulers => new(-90f, 90f, 0f);
+        public override Vector3 FirstPersonItemEulers => new(0f, 270f, 180f);
 
         public override View SelectionView => BoardManager.Instance.CombatView;
 

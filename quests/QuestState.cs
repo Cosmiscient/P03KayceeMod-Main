@@ -67,7 +67,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// </summary>
         public QuestDefinition ParentQuest { get; private set; }
 
-        private string SaveKey => String.Format("{0}_{1}", ParentQuest.QuestName, StateName);
+        internal string SaveKey => String.Format("{0}_{1}", ParentQuest.QuestName, StateName);
 
         /// <summary>
         /// Optional. A dynamic state to be calculated at lookup time. 
@@ -99,14 +99,14 @@ namespace Infiniscryption.P03KayceeRun.Quests
             set => P03AscensionSaveData.RunStateData.SetValue(ParentQuest.ModGuid, $"{SaveKey}_Status", (int)value);
         }
 
-        /// <summary>
-        /// /// Indicates if this quest state has already given out its rewards or not. This is a safety check.
-        /// </summary>
-        public bool HasGivenRewwards
-        {
-            get => P03AscensionSaveData.RunStateData.GetValueAsBoolean(ParentQuest.ModGuid, String.Format("{0}_RewardStatus", SaveKey));
-            set => P03AscensionSaveData.RunStateData.SetValue(ParentQuest.ModGuid, String.Format("{0}_RewardStatus", SaveKey), value);
-        }
+        // /// <summary>
+        // /// /// Indicates if this quest state has already given out its rewards or not. This is a safety check.
+        // /// </summary>
+        // public bool HasGivenRewwards
+        // {
+        //     get => P03AscensionSaveData.RunStateData.GetValueAsBoolean(ParentQuest.ModGuid, String.Format("{0}_RewardStatus", SaveKey));
+        //     set => P03AscensionSaveData.RunStateData.SetValue(ParentQuest.ModGuid, String.Format("{0}_RewardStatus", SaveKey), value);
+        // }
 
         /// <summary>
         /// This list of rewards granted by this quest
@@ -135,6 +135,23 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// any state. So this state could have a status of success and still be a fail state because it was 
         /// reached by failing a previous state of the quest.</remarks>
         public bool IsFailState { get; private set; }
+
+        /// <summary>
+        /// Indicates if this quest state has rewards that the player has not yet received
+        /// </summary>
+        public bool HasUngrantedRewards
+        {
+            get
+            {
+                foreach (var reward in this.Rewards)
+                {
+                    reward.ParentState = this;
+                    if (!reward.HasBeenGranted)
+                        return true;
+                }
+                return false;
+            }
+        }
 
         /// <summary>
         /// Defines what state comes next based on how this state concludes. Overrides any previous definition.
@@ -184,13 +201,16 @@ namespace Infiniscryption.P03KayceeRun.Quests
             // point, we're always going to be in that status moving forward.
             Status = Status;
 
-            if (Status != QuestStateStatus.Success || HasGivenRewwards)
+            if (Status != QuestStateStatus.Success)
                 yield break;
 
-            HasGivenRewwards = true;
-
             foreach (QuestReward reward in Rewards)
-                yield return reward.GrantReward();
+            {
+                // Make sure that the quest reward is connected here
+                reward.ParentState = this;
+                if (!reward.HasBeenGranted)
+                    yield return reward.GrantReward();
+            }
 
             yield break;
         }

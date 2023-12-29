@@ -409,7 +409,25 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 if (enemyNode.color == 1)
                 {
-                    enemyNode.encounterIndex = UnityEngine.Random.Range(0, REGION_DATA[Zone.Neutral].encounters.Length);
+                    bool assigned = false;
+                    if (P03Plugin.Instance.DebugCode.Contains("neutralencounter["))
+                    {
+                        int startIndex = P03Plugin.Instance.DebugCode.IndexOf("neutralencounter[");
+                        string encounterDataString = P03Plugin.Instance.DebugCode.Substring(startIndex).Replace("neutralencounter[", "").Split(']')[0];
+                        for (int i = 0; i < REGION_DATA[Zone.Neutral].encounters.Length; i++)
+                        {
+                            if (REGION_DATA[Zone.Neutral].encounters[i].Equals(encounterDataString, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                enemyNode.encounterIndex = i;
+                                assigned = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!assigned)
+                    {
+                        enemyNode.encounterIndex = UnityEngine.Random.Range(0, REGION_DATA[Zone.Neutral].encounters.Length);
+                    }
                     //enemyNode.encounterIndex = REGION_DATA[Zone.Neutral].encounters.Length - 1;
                 }
                 else
@@ -879,30 +897,37 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static List<BattleModManager.BattleModDefinition> SelectMods(List<BattleModManager.BattleModDefinition> mods, int difficulty, int randomSeed)
         {
             // For 1 and 2, just pick a single mod
+            if (difficulty == 1 && P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("conveyor"))
+                return mods.Where(d => d.ID == ConveyorBattle.ID).ToList();
+
             if (difficulty <= 2)
                 return mods.Where(d => d.Difficulty == difficulty).OrderBy(d => SeededRandom.Value(randomSeed++)).Take(1).ToList();
 
-            int totalDiffulty = 0;
+            int totalDifficulty = 0;
             List<BattleModManager.BattleModDefinition> retval = new();
             List<BattleModManager.BattleModDefinition> remaining = new(mods.OrderBy(d => SeededRandom.Value(randomSeed++)));
 
             // The first two mods are purely randomly selected
-            while (retval.Count < 2 && totalDiffulty < difficulty)
+            while (retval.Count < 2 && totalDifficulty < difficulty)
             {
-                BattleModManager.BattleModDefinition next = remaining.FirstOrDefault(d => d.Difficulty <= (difficulty - totalDiffulty));
+                BattleModManager.BattleModDefinition next = remaining.FirstOrDefault(d => d.Difficulty <= (difficulty - totalDifficulty));
 
                 if (next == null)
                     break;
 
-                totalDiffulty += next.Difficulty;
+                totalDifficulty += next.Difficulty;
                 retval.Add(next);
                 remaining.Remove(next);
             }
 
+            // At this point, add two more difficulty to the total.
+            // We've added two modifiers already. That's a lot. A third is a LOT
+            totalDifficulty += 2;
+
             // If we still have to make up room, add the last mod that gets us
             // closest to the total we want.
-            if (totalDiffulty < difficulty && remaining.Count > 0)
-                retval.Add(remaining.OrderBy(d => Mathf.Abs(d.Difficulty - (difficulty - totalDiffulty))).First());
+            if (totalDifficulty < difficulty && remaining.Count > 0)
+                retval.Add(remaining.OrderBy(d => Mathf.Abs(d.Difficulty - (difficulty - totalDifficulty))).First());
 
             return retval;
         }
@@ -922,16 +947,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // But starting with difficulty 4, we add another battle.
             // So the table looks like this:
-            // Difficulty 1-3: 1 battle
-            // Difficulty 4: 2 battles
-            // Difficulty 5: 3 battles
-            // Difficulty 6: 4 battles
+            // Difficulty 1-4: 1 battle
+            // Difficulty 5-6: 2 battles
             // Note that EACH of these have the difficulty.
             // So with both difficulty challenges on, in map four ALL FOUR battles
             // have a +6 battle mod on them.
-            if (difficultyKey > 3)
-                numberOfModdedBattles += difficultyKey - 2;
-            numberOfModdedBattles = numberOfModdedBattles > 4 ? 4 : numberOfModdedBattles;
+            if (difficultyKey >= 5)
+                numberOfModdedBattles = 2;
             List<HoloMapBlueprint> targets = rooms.Where(bp => bp.IsBattleRoom && (order > 0 || bp.color != 1)).OrderBy(x => SeededRandom.Value(randomSeed++)).Take(numberOfModdedBattles).ToList();
 
             // And now we move the difficulty key down by 1 if it's above 3

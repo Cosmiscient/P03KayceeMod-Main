@@ -41,6 +41,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         internal static readonly List<BattleModDefinition> AllBattleMods = new();
         private static readonly Dictionary<string, List<ID>> AssignedBattleMods = new();
+        private static readonly Dictionary<ID, NonCardTriggerReceiver> ActiveReceivers = new();
 
         static BattleModManager()
         {
@@ -51,6 +52,26 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             hazard.SetActive(false);
             UnityEngine.Object.DontDestroyOnLoad(hazard);
             ResourceBankManager.Add(P03Plugin.PluginGuid, DEFAULT_ICON_PATH, hazard, true);
+        }
+
+        public static bool RuleIsActive(ID ruleId)
+        {
+            var modInfo = AllBattleMods.First(bmd => bmd.ID == ruleId);
+            if (!BoardManager.Instance.SafeIsUnityNull())
+            {
+                var component = BoardManager.Instance.gameObject.GetComponent(modInfo.Behavior);
+                if (component != null)
+                    return true;
+            }
+            return false;
+        }
+
+        public static NonCardTriggerReceiver GetActiveReceiver(ID id)
+        {
+            if (ActiveReceivers.ContainsKey(id))
+                return ActiveReceivers[id];
+
+            return null;
         }
 
         public static ID New(string modGuid, string title, List<string> introDialogue, Type behaviour, int difficulty = 1, List<CardTemple> regions = null, bool bossValid = false, string iconPath = DEFAULT_ICON_PATH)
@@ -165,8 +186,11 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 if (defn == null)
                     continue;
 
-                allMods.Add(BoardManager.Instance.gameObject.GetComponent(defn.Behavior)
-                            ?? BoardManager.Instance.gameObject.AddComponent(defn.Behavior));
+                var component = BoardManager.Instance.gameObject.GetComponent(defn.Behavior)
+                            ?? BoardManager.Instance.gameObject.AddComponent(defn.Behavior);
+                ActiveReceivers[id] = component as NonCardTriggerReceiver;
+
+                allMods.Add(component);
             }
 
             yield return sequence;

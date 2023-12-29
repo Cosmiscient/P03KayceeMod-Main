@@ -20,7 +20,7 @@ Part3AscensionDeathPay3,Happy,,No robobucks?
 ,Default,,Next time don't waste it all.
 Part3AscensionDeath,Happy,,You're every bit as bad at this as I thought you would be.
 Part3AscensionDeath2,Default,,"Alright, it's back to square one for you."
-Part3AscensionDeath3,Default,,"Say goodbye to that ""impressive"" deck of yours."
+Part3AscensionDeath3,Default,,"Say goodbye to that 'impressive' deck of yours."
 Part3AscensionDeath4,Default,,It's not like I'm not enjoying watching you struggle…
 ,Angry,,But really? You lost [c:bR]there?[c:]
 Part3AscensionDeath5,Angry,,I'm actually a little disappointed…
@@ -237,7 +237,7 @@ P03RadioTowerOnBoard,NPC,,The signal is starting to come through. Just keep it a
 P03RadioTowerDied,NPC,,I lost the last signal we collected. What happened??
 P03RadioQuestStart,NPC,,"Greetings, my friend!"
 ,,,I am researching the communication protocols of the robots in this world.
-,,,"I could use a [c:bR]research assistant[c:], if you're interesting in helping out."
+,,,"I could use a [c:bR]research assistant[c:], if you're interested in helping out."
 ,,,Just speak to me again if you want to give it a try.
 P03RadioQuestAccepted,NPC,,You are now my official [c:bR]research assistant[c:]!
 ,,,I've added a radio tower to your deck.
@@ -264,7 +264,7 @@ P03TooEasyQuest,NPC,,I know this might sound a little rude but…
 ,,,Doesn't it seem like this is all just a little too easy for you?
 ,,,Talk to me again if you want a challenge.
 P03TooEasyAccepted,NPC,,I knew you were no coward.
-,,,"For the next [c:bR]five[c:] battles, you will start with a disadvantage."
+,,,"For the next [c:bR]three[c:] battles, you will start with a disadvantage."
 ,,,"Complete those battles, then come see me for a reward."
 P03TooEasyInProgress,NPC,,"Be honest - the game is more fun when the battles are harder, is it not?"
 ,,,"Keep fighting, and come see me when you've completed enough battles."
@@ -397,10 +397,10 @@ P03ConveyorQuestStart,NPC,,Greetings! I'm a field researcher for [c:lGr]Global C
 ,,,"Naturally, these tests would have to happen during [c:bR]actual combat[c:]!"
 ,,,"If that's something you would be interested in, please speak to me again."
 P03ConveyorQuestStarting,NPC,,Oh fantastic! We will begin our [c:bR]combat trials[c:] immediately.
-,,,We will collect field trial data for your next [c:bR]five[c:] battles.
+,,,We will collect field trial data for your next [c:bR]three[c:] battles.
 ,,,"Once that is complete, come and see me again."
 P03ConveyorQuestActive,NPC,,Our data is still not yet complete.
-,,,You have only completed [c:bR][v:0][c:] battles out of the required [c:bR]5[c:].
+,,,You have only completed [c:bR][v:0][c:] battles out of the required [c:bR]3[c:].
 ,,,"Please, continue the [c:bR]combat trials[c:] and see me when they are complete."
 P03ConveyorQuestComplete,NPC,,The trials were a smashing success!!
 ,,,The [c:lGr]Global Conveyor Consortium[c:] is tremendously grateful for your contribution to our efforts.
@@ -422,7 +422,7 @@ P03BountyQuestComplete,NPC,,"Well done, partner!"
 ,,,"Here's your bounty, as promised."
 P03UFOInvalid,Default,,It's a little too heavy - try something else.
 P03LeapBotQuest,NPC,,Dear traveler - I see you too have a love for the glorious [c:lGr]L33pB0t[c:]!
-,,,Yours has served you well in battle, it seems.
+,,,"Yours has served you well in battle, it seems."
 ,,,Allow me to show you its true potential...
 P03LeapBotQuestFailed,NPC,,I don't even know what to say to you!
 ,,,You had the most glorious [c:lGr]L33pB0t[c:] in your posession...
@@ -436,10 +436,10 @@ P03BombQuestStart,NPC,,"I just love watching things [c:bR]explode[c:], don't you
 ,,,I think we could spice up your [c:bR]battles[c:] and make things truly interesting.
 ,,,Talk to me again if you're interested in some truly explosive gameplay.
 P03BombQuestStarting,NPC,,Ohhh yeah let's do it baby!
-,,,I'm going to light a fuse on every card for the next [c:bR]five[c:] battles.
+,,,I'm going to light a fuse on every card for the next [c:bR]three[c:] battles.
 ,,,Come find me again when that's complete!
 P03BombQuestActive,NPC,,I'm just buzzing with anticipation to see what happens next.
-,,,You've finished [c:bR][v:0][c:] battles out of [c:bR]5[c:].
+,,,You've finished [c:bR][v:0][c:] battles out of [c:bR]3[c:].
 ,,,"Keep going, and see me when it's done!"
 P03BombQuestComplete,NPC,,That was some truly explosive gameplay!
 ,,,Here's a little something for your trouble.
@@ -448,3 +448,11 @@ P03FastTravelKaycee,Default,,That [c:bR]warp node[c:] will unlock when you defea
 ,,,"And by the way, I upgraded that [c:bR]minimap[c:] recently..."
 ,,,You can click any room you've visited before to travel there instantly.
 P03NoBatteryRoom,Default,,You already have full energy. It won't do you any good to play that right now.
+NPCCannotGiveReward,NPC,,"I've got something else to give you, but I can't right now. Come see me later!"
+NPCCannotGiveItem,NPC,,"I have a [c:bR][v:0][c:] for you, but you don't have room in your backback. Come see me when you do!"
+P03ChooseCanvasDefault,Default,,"Choose which [c:bR]extra challenge rule[c:] will be applied to this battle."
+P03ChooseCanvasMycologist,MycologistTalkingMain,,"We require you to select one [c:bR]additional experimental parameter[c:]."
+P03ChooseCanvasArchivist,ArchivistBoss,,"My librarians have asked you to choose [c:bR]which of these rules[c:] is your favorite."
+P03ChooseCanvasTelegrapher,TelegrapherBoss,,"Wow! These paintings are so pretty! Why don't you [c:bR]pick one[c:] for us to keep?"
+P03ChooseCanvasCanvas,CanvasBlank,,"Select [c:bR]one of my paintings[c:] to add to your collection."
+P03ChooseCanvasPhotographer,PhotographerBoss,,"But first - you must [c:bR]choose a painting[c:] to be the background of our photographs."
