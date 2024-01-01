@@ -43,7 +43,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ViewManager.Instance.SwitchToView(View.Default, false, false);
             yield return new WaitForSeconds(0.1f);
             //int index = EventManagement.CompletedZones.Count;
-            int damage = 1;
+            int damage = Card.OpponentCard ? -1 : 1;
             string prefabSuffix = "B";
             CustomCoroutine.WaitThenExecute(0.15f, delegate
             {

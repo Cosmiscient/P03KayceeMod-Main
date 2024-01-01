@@ -134,6 +134,19 @@ And these aren't required, but **highly** recommended:
 <details>
 <summary>Changelog</summary>
 
+4.3.0
+- Balance Change: Shield Smuggler now has 3 health instead of 4.
+- Challenge Update: Both of the Bounty Hunter wanted level challenges have been combined into one. A new challenge: "Strange Encounters" has been added. Battle modifiers (Sticker Battles, Trap Battles, etc) are no longer active by default; they are now gated behind this challenge.
+- A number of challenge points have been modified. This doesn't change the challenge itself, but the amount of points its worth.
+- Fixed a defect with the Eccentric Painter challenge and the composite rule infinite loop trigger.
+- Properly fixed the audio layering defect with the Eccentric Painter challenge and the Unfinished Boss fight.
+- The Dead Byte sigil now always damages its owner instead of always damaging the player.
+- Fixed a defect with the interaction between Big Strike and Flying.
+- The "reroll" purchase button now disappears correctly during the trade cards sequence.
+- Fixed yet antoher defect with cleaning up the Eccentric Painter's paintings at the end of the battle. The battle with these bugs continues on...
+- Fixed a visual defect with \[redacted\]
+- Fixed a defect with the map generation algorithm
+
 4.2.9
 - Fixed a defect where the Eccentric Painter's painting would not clean up after boss fights.
 

@@ -5,6 +5,7 @@ using DiskCardGame;
 using DiskCardGame.CompositeRules;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.CustomRules;
+using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Pixelplacement;
 using UnityEngine;
@@ -29,9 +30,12 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 bossValid: true,
                 iconPath: "p03kcm/prefabs/frame"
             );
+
             BattleModManager.SetGlobalActivationRule(ID,
                 () => AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.PAINTING_CHALLENGE)
                       && TurnManager.Instance.opponent != null && TurnManager.Instance.opponent is Part3BossOpponent);
+
+            BattleModManager.SetGlobalActivationRule(ID, () => true);
         }
 
         private GameObject effects = null;
@@ -142,14 +146,22 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 if (currentRule.trigger == Trigger.OtherCardResolve)
                     validEffects = validEffects.Where(r => r is not RandomCardDestroyedEffect and not RandomSalmon).ToList();
                 currentRule.effect = validEffects[SeededRandom.Range(0, validEffects.Count, randomSeed++)];
+
+                // TODO: REMOVE
+                if (i == 0)
+                    currentRule.effect = validEffects.FirstOrDefault(e => e is RandomSalmon);
                 validEffects.Remove(currentRule.effect);
 
                 yield return SpawnPainting(RulePaintingManager.Instance, currentRule);
-                RulePaintingManager.Instance.placementMarkers[i].GetChild(0).localScale = Vector3.zero;
+                Transform marker = RulePaintingManager.Instance.placementMarkers[i].GetChild(0);
+                marker.localScale = Vector3.zero;
                 yield return new WaitForSeconds(0.3f);
-                RulePaintingManager.Instance.placementMarkers[i].GetChild(0).localScale = new(0.5f, 0.5f, 0.5f);
-                RulePaintingManager.Instance.placementMarkers[i].GetChild(0).localPosition = new(0f, 7f, 0f);
-                Tween.LocalPosition(RulePaintingManager.Instance.placementMarkers[i].GetChild(0), Vector3.zero, 1f, 0f, Tween.EaseOutBack);
+                marker.localScale = new(0.5f, 0.5f, 0.5f);
+                marker.localPosition = new(0f, 3.7f, 0f);
+                Tween.LocalPosition(RulePaintingManager.Instance.placementMarkers[i].GetChild(0), Vector3.zero, 1f, 0f, AnimationCurves.EaseOutBackElastic);//Tween.EaseOutBack);
+
+                // var animFunc = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseInOutElastic);
+                // Tween.Value(0f, 1f, (float f) => marker.localPosition = new(0f, animFunc(3.7f, 0f, f), 0f), 1f, 0f);
 
 
                 rules.Add(currentRule);
@@ -232,7 +244,11 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         {
             if (RulePaintingManager.Instance != null)
             {
-                RulePaintingManager.Instance.ShowMostRecentPaintingCancelled();
+                try
+                {
+                    RulePaintingManager.Instance.ShowMostRecentPaintingCancelled();
+                }
+                catch { }
                 RulePaintingManager.Instance.SetPaintingsShown(false);
             }
 
@@ -253,6 +269,42 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             }
 
             yield break;
+        }
+
+        [HarmonyPatch(typeof(CompositeRuleTriggerHandler), nameof(CompositeRuleTriggerHandler.BreakInfiniteLoop))]
+        [HarmonyPostfix]
+        private static IEnumerator DontDeleteRuleIfNotCanvasBoss(IEnumerator sequence, CompositeRuleTriggerHandler __instance)
+        {
+            if (TurnManager.Instance.opponent is CanvasBossOpponent)
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            // This is the same sequnece as the original, except it does not remove the most recent rule
+            ViewManager.Instance.SwitchToView(View.P03Face, false, false);
+            yield return new WaitForSeconds(0.1f);
+            yield return TextDisplayer.Instance.PlayDialogueEvent("CanvasStopInfiniteLoop", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+            __instance.triggersThisTurn = 0;
+            __instance.triggeringDisabled = true;
+            CustomCoroutine.WaitOnConditionThenExecute(() => Singleton<GlobalTriggerHandler>.Instance.StackSize == 0, delegate
+            {
+                __instance.triggeringDisabled = false;
+            });
+            ViewManager.Instance.SwitchToView(View.Default, false, false);
+            yield return new WaitForSeconds(0.25f);
+            yield break;
+        }
+
+        [HarmonyPatch(typeof(CanvasBossOpponent), nameof(CanvasBossOpponent.FadeInAudioLayer))]
+        [HarmonyPrefix]
+        private static bool FixAudioWithExtraRule(int index)
+        {
+            if (!P03AscensionSaveData.IsP03Run || !BattleModManager.RuleIsActive(ID))
+                return true;
+
+            AudioController.Instance.SetLoopVolume(0.4f, 0.5f, Mathf.Clamp(index - 1, 1, 3), true);
+            return false;
         }
     }
 }

@@ -39,7 +39,18 @@ namespace Infiniscryption.P03KayceeRun.CustomRules
                 yield return new WaitForSeconds(0.1f);
                 CardSlot cardSlot = validSlots[Random.Range(0, validSlots.Count)];
                 CardInfo salmon = CardLoader.GetCardByName(SalmonNames[cardSlot.Card.Info.temple]);
-                yield return cardSlot.Card.TransformIntoCard(salmon);
+                cardSlot.Card.ExitBoard()
+                yield return cardSlot.Card.TransformIntoCard(salmon, preTransformCallback: delegate ()
+                {
+                    cardSlot.Card.RenderInfo.prefabPortrait = null;
+                    cardSlot.Card.RenderInfo.portraitOverride = null;
+
+                    List<CardModificationInfo> tempMods = new(cardSlot.Card.TemporaryMods);
+                    foreach (var mod in tempMods)
+                    {
+                        cardSlot.Card.RemoveTemporaryMod(mod);
+                    }
+                });
                 yield return new WaitForSeconds(0.5f);
             }
             yield break;

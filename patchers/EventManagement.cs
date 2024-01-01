@@ -95,6 +95,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (!string.IsNullOrEmpty(P03Plugin.Instance.SecretCardComponents) && P03Plugin.Instance.SecretCardComponents.StartsWith("@"))
                     key = P03Plugin.Instance.SecretCardComponents;
 
+                P03Plugin.Log.LogInfo($"MycoTestSubjects are {key}");
+
                 if (string.IsNullOrEmpty(key))
                     return retval;
 

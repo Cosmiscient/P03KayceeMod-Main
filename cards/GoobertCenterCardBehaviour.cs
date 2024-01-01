@@ -110,7 +110,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ConsumableItem itemcontroller = goobert.GetComponentInChildren<ConsumableItem>();
             Destroy(itemcontroller);
             Destroy(goobert.GetComponentInChildren<GooWizardAnimationController>());
-            Destroy(goobert.GetComponentInChildren<Animator>());
+
+            Animator[] animators = goobert.GetComponentsInChildren<Animator>();
+            foreach (Animator anim in animators)
+                Destroy(anim);
             goobert.transform.Find("GooBottleItem(Clone)/GooWizardBottle/GooWizard/Bottle").gameObject.SetActive(false);
             goobert.transform.Find("GooBottleItem(Clone)/GooWizardBottle/GooWizard/Cork").gameObject.SetActive(false);
             OnboardDynamicHoloPortrait.HolofyGameObject(goobert, GameColors.Instance.brightLimeGreen);
@@ -174,9 +177,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             Tween.LocalScale(gameObject.transform.Find("Anim/CardBase/Top/Name"), new Vector3(0.5f, -1f, 1f), 0.3f, 0f);
 
             if (TurnManager.Instance.opponent is MycologistAscensionBossOpponent)
-                PlayableCard.temporaryMods.Add(GetExperimentModInfo());
+                PlayableCard.AddTemporaryMod(GetExperimentModInfo());
 
-            PlayableCard.SetInfo(PlayableCard.Info);
+            //PlayableCard.SetInfo(PlayableCard.Info);
 
             AudioController.Instance.PlaySound3D("mushroom_large_appear", MixerGroup.TableObjectsSFX, gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
 

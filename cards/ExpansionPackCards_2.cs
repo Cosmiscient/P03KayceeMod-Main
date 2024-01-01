@@ -156,7 +156,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(FireBomb.AbilityID, Ability.Strafe);
 
             // Give-A-Way
-            CardManager.New(EXP_2_PREFIX, "GiveAWay", "Shield Smuggler", 2, 4)
+            CardManager.New(EXP_2_PREFIX, "GiveAWay", "Shield Smuggler", 2, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_giveaway.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_giveaway.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)

@@ -94,6 +94,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return BoardManager.Instance.CreateCardInSlot(rightConduit, BoardManager.Instance.opponentSlots[4], resolveTriggers: false);
             yield return new WaitForSeconds(0.9f);
 
+            ViewManager.Instance.SwitchToView(View.BoardCentered, false, true);
+
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistBrainOnline", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             CardInfo brain = CardLoader.GetCardByName(CustomCards.BRAIN);
             yield return BoardManager.Instance.CreateCardInSlot(brain, BoardManager.Instance.opponentSlots[2], resolveTriggers: false);
@@ -104,7 +106,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return BoardManager.Instance.CreateCardInSlot(cards[0], BoardManager.Instance.opponentSlots[1], resolveTriggers: false);
             yield return new WaitForSeconds(0.3f);
             yield return BoardManager.Instance.CreateCardInSlot(cards[1], BoardManager.Instance.opponentSlots[3], resolveTriggers: false);
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.2f);
+            yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistTestSubjectsThanks", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
+
+            ViewManager.Instance.SwitchToView(View.Default, false, true);
 
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistsBossCombine", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 

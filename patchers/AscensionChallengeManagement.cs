@@ -26,6 +26,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly AscensionChallenge ENERGY_HAMMER = GuidManager.GetEnumValue<AscensionChallenge>(P03Plugin.PluginGuid, "EnergyHammer");
         public static AscensionChallenge TRADITIONAL_LIVES { get; private set; }
         public static readonly AscensionChallenge BROKEN_BRIDGE = GuidManager.GetEnumValue<AscensionChallenge>(P03Plugin.PluginGuid, "BrokenBridge");
+        public static readonly AscensionChallenge BATTLE_MODIFIERS = GuidManager.GetEnumValue<AscensionChallenge>(P03Plugin.PluginGuid, "BattleModifiers");
         public static readonly AscensionChallenge LEEPBOT_SIDEDECK = GuidManager.GetEnumValue<AscensionChallenge>(P03Plugin.PluginGuid, "LeepbotSidedeck");
         public static readonly AscensionChallenge TURBO_VESSELS = GuidManager.GetEnumValue<AscensionChallenge>(P03Plugin.PluginGuid, "TurboVessels");
         public static readonly AscensionChallenge PAINTING_CHALLENGE = GuidManager.GetEnumValue<AscensionChallenge>(P03Plugin.PluginGuid, "PaintingChallenge");
@@ -173,7 +174,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         description = "All upgrades cost more",
                         iconSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_expensivepelts"), TextureHelper.SpriteType.ChallengeIcon),
                         activatedSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_activated_default"), TextureHelper.SpriteType.ChallengeIcon),
-                        pointValue = 10
+                        pointValue = 15
                     },
                     AppearancesInChallengeScreen = 1,
                     UnlockLevel = 2
@@ -194,7 +195,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         description = "All bosses start with a random canvas rule.",
                         iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_eccentricpainter.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
                         activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_eccentricpainter_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                        pointValue = 35
+                        pointValue = 25
                     },
                     AppearancesInChallengeScreen = 1,
                     UnlockLevel = 3
@@ -235,7 +236,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         description = "The cost for additional respawns is tripled",
                         iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_oneup.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
                         activatedSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_activated_default"), TextureHelper.SpriteType.ChallengeIcon),
-                        pointValue = 20
+                        pointValue = 25
                     },
                     AppearancesInChallengeScreen = 1,
                     UnlockLevel = 5,
@@ -260,10 +261,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     Challenge = new() {
                         challengeType = BOUNTY_HUNTER,
                         title = "Wanted Fugitive",
-                        description = "Your bounty level is permanently increased by 1",
+                        description = "Your bounty level is permanently increased by 2",
                         iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_bounthunter.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
                         activatedSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_activated_default"), TextureHelper.SpriteType.ChallengeIcon),
-                        pointValue = 10
+                        pointValue = 20
                     },
                     AppearancesInChallengeScreen = 1,
                     UnlockLevel = 6
@@ -271,12 +272,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 new() {
                     Challenge = new() {
-                        challengeType = BOUNTY_HUNTER,
-                        title = "Wanted Fugitive",
-                        description = "Your bounty level is permanently increased by 1",
-                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_bounthunter.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
-                        activatedSprite = TextureHelper.ConvertTexture(Resources.Load<Texture2D>("art/ui/ascension/ascensionicon_activated_default"), TextureHelper.SpriteType.ChallengeIcon),
-                        pointValue = 10
+                        challengeType = BATTLE_MODIFIERS,
+                        title = "Strange Encounters",
+                        description = "Some battles on each map will have additional effects",
+                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_modifiers.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_modifiers_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 20
                     },
                     AppearancesInChallengeScreen = 1,
                     UnlockLevel = 6

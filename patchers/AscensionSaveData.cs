@@ -529,7 +529,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
 
                 if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOUNTY_HUNTER))
-                    __instance.bounty = 45 * AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallengeManagement.BOUNTY_HUNTER); // Good fucking luck
+                    __instance.bounty = 45 * 2;//AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallengeManagement.BOUNTY_HUNTER); // Good fucking luck
             }
         }
 

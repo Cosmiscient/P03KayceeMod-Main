@@ -37,7 +37,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOUNTY_HUNTER))
             {
                 ChallengeActivationUI.Instance.ShowActivation(AscensionChallengeManagement.BOUNTY_HUNTER);
-                Part3SaveData.Data.bounty = 45 * AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallengeManagement.BOUNTY_HUNTER); // good fucking luck
+                Part3SaveData.Data.bounty = 45 * 2;//AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallengeManagement.BOUNTY_HUNTER); // good fucking luck
             }
         }
 
@@ -177,7 +177,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             Part3SaveData.Data.playerLives = 1;
 
             //Reset Bounty score
-            Part3SaveData.Data.bounty = 45 * AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallengeManagement.BOUNTY_HUNTER);
+            Part3SaveData.Data.bounty = 45 * 2 * AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallengeManagement.BOUNTY_HUNTER);
 
             HoloMapAreaManager.Instance.CurrentArea.OnAreaActive();
             HoloMapAreaManager.Instance.CurrentArea.OnAreaEnabled();

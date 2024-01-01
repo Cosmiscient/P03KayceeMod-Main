@@ -42,6 +42,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         internal static readonly List<BattleModDefinition> AllBattleMods = new();
         private static readonly Dictionary<string, List<ID>> AssignedBattleMods = new();
         private static readonly Dictionary<ID, NonCardTriggerReceiver> ActiveReceivers = new();
+        private static bool CanShowActivation = false;
 
         static BattleModManager()
         {
@@ -133,6 +134,12 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         public static IEnumerator GiveOneTimeIntroduction(ID id, View targetView = View.P03Face)
         {
+            if (CanShowActivation)
+            {
+                if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BATTLE_MODIFIERS))
+                    ChallengeActivationUI.TryShowActivation(AscensionChallengeManagement.BATTLE_MODIFIERS);
+                CanShowActivation = false;
+            }
             string hasSeenIntroId = $"HasSeenBattleModIntro_{id}";
             if (ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, hasSeenIntroId))
                 yield break;
@@ -166,6 +173,8 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 yield return sequence;
                 yield break;
             }
+
+            CanShowActivation = true;
 
             // Guarantee we can't accidentally carry over a battlemod from a previous run
             foreach (BattleModDefinition defn in AllBattleMods)
@@ -244,6 +253,8 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 yield return sequence;
                 yield break;
             }
+
+            CanShowActivation = false;
 
             // List<NonCardTriggerReceiver> receivers = new(GlobalTriggerHandler.Instance.nonCardReceivers);
             // foreach (NonCardTriggerReceiver trigger in receivers)

@@ -186,15 +186,16 @@ P03GoobertHome,NPC,,Thank you so much for rescuing my [c:blGr]friend[c:]
 ,,,I hope this meager reward is sufficient for your kindness.
 P03BountyHunterBrain,Default,,Interesting. The [c:G]brain[c:] is still intact.
 ,,,Perhaps you can make use of that.
-P03ProspectorPrepareGold,NPC,,Do you…do you have [c:G]GOLD[c:] on you?
+P03ProspectorPrepareGold,NPCcurious,,Do ye...Do ye got any [c:G]GOLD[c:] on ye?
+,,,"I sure ye do, I can smell it!"
+,,,"I can make some pretty lookin' bots out o' that there gold."
+,,,"Talk to me again, I'll fix it right up for ye."
 ,,,I can make such wonderful things out of that [c:G]gold[c:]
 ,,,"If you talk to me again, I'll fix it right up for you."
-P03ProspectorReplaceGold,NPC,,Such wonderful [c:G]GOLD[c:]...
-,,,I can make that thing whole again.
-P03ProspectorWantGold,NPC,,Do you know where I could find [c:G]GOLD[c:]?
-,,,I would so love to make something from some [c:G]gold[c:].
-P03ProspectorNoMoreGold,NPC,,Did...did you lose your [c:G]gold[c:]?
-,,,I would have loved to have made something wonderful from that.
+P03ProspectorReplaceGold,NPCcurious,,Such beautiful [c:G]gold[c:]...
+,,,I can make it whole again.
+P03ProspectorWantGold,NPCcurious,,"Do ye...Do ye got any [c:G]GOLD[c:] on ye??"
+P03ProspectorNoMoreGold,NPCcurious,,"Did ye...did ye lose your [c:G]gold[c:]???"
 P03WhiteFlagSetup,NPC,,Are you the one going around here taking care of our robot infestation?
 ,,,Your deck looks really powerful - almost too powerful if you ask me.
 ,,,I wonder - is it possible to convince the robots to [c:bR]give up?[c:]
@@ -351,6 +352,7 @@ MycologistPartTwoIntro,MycologistTalkingMain,,It is time for our newest experime
 MycologistPowerOnline,MycologistTalkingMain,,Bring the power online!
 MycologistBrainOnline,MycologistTalkingMain,,Summon the neural facsimile!
 MycologistTestSubjects,MycologistTalkingMain,,Align the test subjects!
+MycologistTestSubjectsThanks,MycologistTalkingSide,,We thank you for these test subjects
 MycologistSummonGoo,MycologistTalkingMain,,And now for the most important component...
 ,MycologistTalkingSide,,The secret ingredient...
 ,MycologistTalkingMain,,The sentient [c:blGr]organic material[c:] you brought us.

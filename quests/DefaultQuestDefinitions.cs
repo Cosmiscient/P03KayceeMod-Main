@@ -132,7 +132,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     .AddNamedState("CheckingForAvailableCash", "SPARE SOME CASH?", "P03DonationNotEnough")
                     .SetDynamicStatus(() =>
                     {
-                        return Part3SaveData.Data.currency > 10 ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Active;
+                        return Part3SaveData.Data.currency >= 10 ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Active;
                     })
                     .AddDialogueState("SPARE SOME CASH?", "P03DonationComplete")
                     .AddMonetaryReward(-10);

@@ -148,16 +148,5 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         public void ModifyPlayerTerrain(CardInfo[] terrain) => Shift(terrain, left: false);
         public void ModifyOpponentTerrain(CardInfo[] terrain) => Shift(terrain, left: true);
         public void ModifyOpponentQueuedTerrain(CardInfo[] terrain) => Shift(terrain, left: true);
-
-        [HarmonyPatch(typeof(CanvasBossOpponent), nameof(CanvasBossOpponent.FadeInAudioLayer))]
-        [HarmonyPrefix]
-        private static bool FixAudioWithExtraRule(int index)
-        {
-            if (!P03AscensionSaveData.IsP03Run || !BattleModManager.RuleIsActive(ID))
-                return true;
-
-            AudioController.Instance.SetLoopVolume(0.4f, 0.5f, Mathf.Clamp(index - 1, 1, 3), true);
-            return false;
-        }
     }
 }

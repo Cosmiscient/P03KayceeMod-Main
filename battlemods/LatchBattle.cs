@@ -5,6 +5,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Cards.Stickers;
+using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
@@ -21,6 +22,8 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         public static readonly AbilityMetaCategory STICKER_ABILITY = GuidManager.GetEnumValue<AbilityMetaCategory>(P03Plugin.PluginGuid, "StickerAbility");
 
+        private int randomSeed = P03AscensionSaveData.RandomSeed;
+
         static LatchBattle()
         {
             ID = BattleModManager.New(
@@ -29,7 +32,6 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 new List<string>() { "See those [c:bR]stickers[c:]? They give my cards extra abilities.", "You don't mind an extra challenge, do you?" },
                 typeof(LatchBattle),
                 difficulty: 1,
-                regions: new() { CardTemple.Tech, CardTemple.Nature, CardTemple.Wizard },
                 iconPath: "p03kcm/prefabs/question"
             );
 
@@ -74,7 +76,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             learnedAbilities.RemoveAll((Ability x) => string.IsNullOrEmpty(AbilitiesUtil.GetInfo(x).GetExtendedProperty(Stickers.STICKER_PROPERTY_KEY)));
 
             return learnedAbilities.Count > 0
-                ? learnedAbilities[SeededRandom.Range(0, learnedAbilities.Count, GetRandomSeed())]
+                ? learnedAbilities[SeededRandom.Range(0, learnedAbilities.Count, randomSeed++)]
                 : Ability.Sharp;
         }
 
@@ -99,9 +101,8 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             string stickerName = AbilitiesUtil.GetInfo(mod.abilities[0]).GetExtendedProperty(Stickers.STICKER_PROPERTY_KEY);
 
             var stickerData = new Stickers.CardStickerData();
-            stickerData.Rotations[stickerName] = new Vector3(0f, 180f, 117.06f);
-            stickerData.Positions[stickerName] = new Vector3(0.2301786f, -0.2767847f, 0f);
-            //stickerData.Scales[stickerName] = new Vector3(10f, 10f, 10f);
+            stickerData.Rotations[stickerName] = new Vector3(0f, 180f, 110f + SeededRandom.Value(randomSeed++) * 20f);
+            stickerData.Positions[stickerName] = new Vector3(0.2301786f + (SeededRandom.Value(randomSeed++) / 10f), -0.2767847f + (SeededRandom.Value(randomSeed++) / 10f), 0f);
             stickerData.Ability[stickerName] = mod.abilities[0];
 
             mod.singletonId = stickerData.ToString();

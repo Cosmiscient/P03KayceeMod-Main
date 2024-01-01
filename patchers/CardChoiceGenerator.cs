@@ -248,6 +248,22 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             yield break;
         }
 
+        [HarmonyPatch(typeof(TradeCardsSequencer), nameof(TradeCardsSequencer.AddCardToDeckAndCleanUp))]
+        [HarmonyPostfix]
+        private static IEnumerator RemoveCloverDuringTrade(IEnumerator sequence, TradeCardsSequencer __instance)
+        {
+            if (__instance.rerollInteractable == null || !P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            __instance.rerollInteractable?.gameObject?.SetActive(false);
+            __instance.GetComponentInChildren<HoloFloatingLabel>()?.gameObject.SetActive(false);
+
+            yield return sequence;
+        }
+
         [HarmonyPatch(typeof(CardSingleChoicesSequencer), nameof(CardSingleChoicesSequencer.OnCursorEnterRerollInteractable))]
         [HarmonyPrefix]
         private static bool AllowNullAnimReroll(CardSingleChoicesSequencer __instance) => __instance.rerollAnim != null;

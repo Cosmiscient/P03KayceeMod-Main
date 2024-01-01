@@ -24,7 +24,30 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 ? Emotion.Neutral
                 : face == P03AnimationController.Face.MycologistAngry
                 ? Emotion.Anger
-                : face == P03AnimationController.Face.MycologistLaughing ? Emotion.Laughter : Emotion.Neutral;
+                : face == P03AnimationController.Face.MycologistLaughing
+                ? Emotion.Laughter
+                : face == P03AnimationController.Face.TelegrapherBoss
+                ? Emotion.Curious
+                : face == P03AnimationController.Face.PhotographerBoss
+                ? Emotion.Anger
+                : Emotion.Neutral;
+        }
+
+        private static Emotion ParseEmotion(this string face)
+        {
+            if (face.ToLowerInvariant().Contains("leshy"))
+                return Emotion.Neutral;
+            if (face.ToLowerInvariant().Contains("goocurious"))
+                return Emotion.Neutral;
+            if (face.ToLowerInvariant().Contains("goo"))
+                return Emotion.Anger;
+            if (face.ToLowerInvariant().Contains("curious"))
+                return Emotion.Curious;
+            if (face.ToLowerInvariant().Contains("frustrated"))
+                return Emotion.Anger;
+            if (face.ToLowerInvariant().Contains("laughter"))
+                return Emotion.Laughter;
+            return face.ParseFace().FaceEmotion();
         }
 
         private static P03AnimationController.Face ParseFace(this string face)
@@ -60,8 +83,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             bool leshy = speaker is DialogueEvent.Speaker.Leshy or DialogueEvent.Speaker.Goo;
 
-            Emotion leshyEmotion = faces.Exists(s => s.ToLowerInvariant().Contains("goocurious")) ? Emotion.Curious : Emotion.Neutral;
-
             if (string.IsNullOrEmpty(id))
                 return;
 
@@ -95,7 +116,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     specialInstruction = "",
                     p03Face = leshy ? P03AnimationController.Face.NoChange : ParseFace(face),
                     speakerIndex = 1,
-                    emotion = leshy ? leshyEmotion : ParseFace(face).FaceEmotion()
+                    emotion = ParseEmotion(face)
                 })
                 .Zip(dialogueWavies, delegate (DialogueEvent.Line line, string wavy)
                 {

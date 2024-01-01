@@ -1051,10 +1051,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             P03Plugin.Log.LogInfo($"I have created {numberOfEncountersAdded} enemy encounters");
 
-            BuildBattleModifiers(retval, region, order, seed);
-
-            P03Plugin.Log.LogInfo($"I have set up battle modifiers");
-
             // Add one trade node
             bool traded = DiscoverAndCreateTrade(bpBlueprint, retval);
             P03Plugin.Log.LogInfo($"Created a trade node? {traded}");
@@ -1063,6 +1059,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 traded = ForceTrade(bpBlueprint, retval);
                 P03Plugin.Log.LogInfo($"Forcing a trade. Successful? {traded}");
+            }
+
+            if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BATTLE_MODIFIERS))
+            {
+                BuildBattleModifiers(retval, region, order, seed);
+                P03Plugin.Log.LogInfo($"I have set up battle modifiers");
             }
 
             // Add four card choice nodes
