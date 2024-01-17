@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 2678491100
+CRC: 2280041490
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 3679c2b29d72108276118ad66252d184
+    Hash: 71932a4a11cec58f0c85cde773e696e8
   TypeTreeHash:
     serializedVersion: 2
     Hash: 10caaafd0ad3fcdc9870467d863128a4
@@ -52,6 +52,7 @@ Assets:
 - Assets/Prefabs/koi.prefab
 - Assets/Shaders/LightProjectorShader.shader
 - Assets/Prefabs/latcher-claw.prefab
+- Assets/Models/FingerGun.obj
 - Assets/Effects/Fire_Flamethrower.prefab
 - Assets/Effects/Fire_Ball.prefab
 - Assets/Effects/Fire_Glow.mat

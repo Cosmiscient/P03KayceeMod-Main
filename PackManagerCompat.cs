@@ -89,6 +89,27 @@ namespace Infiniscryption.PackManagerP03Plugin
             expPack2.ValidFor.Add(PackInfo.PackMetacategory.P03Pack);
             expPack2.SetTexture(TextureHelper.GetImageAsTexture("PKCMexpansion2pack.png", typeof(PackPlugin).Assembly));
 
+            EncounterPackInfo defEncPack = PackManager.GetDefaultPackInfo<EncounterPackInfo>(CardTemple.Tech);
+            defEncPack.Title = "Inscryption: Rogue Bots of Botopia";
+            defEncPack.Description = "Botopia has become overrun with rogue bots! These [count] encounters have been rebalanced for Kaycee's Mod.";
+            defEncPack.ValidFor.Clear();
+            defEncPack.ValidFor.Add(PackInfo.PackMetacategory.P03Pack);
+            defEncPack.SetTexture(TextureHelper.GetImageAsTexture("p03_encounter_pack.png", typeof(PackPlugin).Assembly));
+
+            EncounterPackInfo xp1EncPack = PackManager.GetPackInfo<EncounterPackInfo>("P03KCMXP1");
+            xp1EncPack.Title = "Kaycee's P03 Encounter Expansion #1";
+            xp1EncPack.Description = "[count] additional encounters that feature cards from the first official P03 expansion pack.";
+            xp1EncPack.ValidFor.Clear();
+            xp1EncPack.ValidFor.Add(PackInfo.PackMetacategory.P03Pack);
+            xp1EncPack.SetTexture(TextureHelper.GetImageAsTexture("p03_encounter_pack1.png", typeof(PackPlugin).Assembly));
+
+            EncounterPackInfo xp2EncPack = PackManager.GetPackInfo<EncounterPackInfo>("P03KCMXP2");
+            xp2EncPack.Title = "Kaycee's P03 Encounter Expansion #2";
+            xp2EncPack.Description = "[count] additional encounters that feature cards from the second official P03 expansion pack.";
+            xp2EncPack.ValidFor.Clear();
+            xp2EncPack.ValidFor.Add(PackInfo.PackMetacategory.P03Pack);
+            xp2EncPack.SetTexture(TextureHelper.GetImageAsTexture("p03_encounter_pack2.png", typeof(PackPlugin).Assembly));
+
             Logger.LogInfo($"Plugin {PluginName} is loaded!");
         }
     }

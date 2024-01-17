@@ -87,21 +87,21 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(Ability.Reach, DeadByte.AbilityID);
 
             // Ruby Guardian
-            CardManager.New(EXP_2_PREFIX, "RubyGuardian", "Ruby Guardian", 2, 2)
+            CardManager.New(EXP_2_PREFIX, "RubyGuardian", "Ruby Sentinel", 2, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ruby_guardian.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 6)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(RubyWarrior.AbilityID);
 
             // Emerald Guardian
-            CardManager.New(EXP_2_PREFIX, "EmeraldGuardian", "Emerald Guardian", 2, 2)
+            CardManager.New(EXP_2_PREFIX, "EmeraldGuardian", "Emerald Sentinel", 1, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_emerald_guardian.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 5)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(EmeraldExtraction.AbilityID);
 
             // Sapphire Guardian
-            CardManager.New(EXP_2_PREFIX, "SapphireGuardian", "Sapphire Guardian", 1, 1)
+            CardManager.New(EXP_2_PREFIX, "SapphireGuardian", "Sapphire Sentinel", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_sapphire_guardian.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 3)
                 .SetRegionalP03Card(CardTemple.Wizard)
@@ -237,7 +237,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(RefillBattery.AbilityID);
 
             // Weeper
-            CardManager.New(EXP_2_PREFIX, "Weeper", "Weeper", 0, 3)
+            CardManager.New(EXP_2_PREFIX, "Weeper", "Weeper", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_weeper.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_weeper.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
@@ -322,6 +322,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_orange_moxduster.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Wizard)
+                .AddTraits(Trait.Gem)
                 .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_orange_moxduster.png", typeof(ExpansionPackCards_2).Assembly))
                 .AddAbilities(Ability.GainGemOrange, MagicDust.AbilityID);
 
@@ -360,7 +361,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.BaseGameCards.First(c => c.name == "LeapBot").SetEvolve(lpneo, 1);
 
             // Encapsulator
-            CardManager.New(EXP_2_PREFIX, "Encapsulator", "Encapsulator", 0, 2)
+            CardManager.New(EXP_2_PREFIX, "Encapsulator", "Encapsulator", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_encapsulator.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_encapsulator.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)

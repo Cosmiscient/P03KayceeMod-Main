@@ -144,8 +144,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         internal void OverrideDefaultSlotTexture(CardTemple temple, List<Texture> playerSlots, List<Texture> opponentSlots)
         {
-            PlayerOverrideSlots[temple] = playerSlots;
-            OpponentOverrideSlots[temple] = opponentSlots;
+            PlayerOverrideSlots[temple] = new(playerSlots);
+            OpponentOverrideSlots[temple] = new(opponentSlots);
         }
 
         internal void ResetDefaultSlotTexture(CardTemple temple)

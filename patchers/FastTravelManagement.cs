@@ -356,6 +356,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             Part3SaveData.Data.checkpointPos = worldPosition;
 
             yield return new WaitForSeconds(1.75f);
+            ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
 
             SaveManager.SaveToFile();
         }

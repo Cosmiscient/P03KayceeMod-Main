@@ -51,6 +51,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return new WaitForSeconds(0.3f);
             triggerPriority = int.MaxValue;
             ViewManager.Instance.SwitchToView(currentView, false, false);
+            ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
             yield break;
         }
     }

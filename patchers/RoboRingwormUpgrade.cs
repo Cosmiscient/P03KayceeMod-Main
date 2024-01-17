@@ -60,6 +60,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                                                               .ToList();
                 allBustedAbilities.Add(Ability.TriStrike);
                 allBustedAbilities.Add(Ability.Evolve);
+                allBustedAbilities.Add(TreeStrafe.AbilityID);
                 allBustedAbilities.Remove(Ability.Transformer);
                 allBustedAbilities = allBustedAbilities.Distinct().ToList();
 

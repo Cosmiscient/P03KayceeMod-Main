@@ -144,10 +144,10 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             return RunBasedHoloMap.Zone.Neutral;
         }
 
-        internal static void SetEncounterRegion(RunBasedHoloMap.Zone zone, string encounterId)
+        internal static void SetEncounterRegion(RunBasedHoloMap.Zone zone, EncounterBlueprintData data)
         {
-            if (!RegionGeneratorData.EncountersForZone[zone].Contains(encounterId))
-                RegionGeneratorData.EncountersForZone[zone].Add(encounterId);
+            if (!RegionGeneratorData.DummyRegionsForZone[zone].encounters.Any(ebd => ebd.name.Equals(data.name)))
+                RegionGeneratorData.DummyRegionsForZone[zone].encounters.Add(data);
         }
 
         public static List<List<EncounterBlueprintData.CardBlueprint>> AddTurn(this List<List<EncounterBlueprintData.CardBlueprint>> blueprint, params IEnumerable<EncounterBlueprintData.CardBlueprint>[] input)
@@ -198,7 +198,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         /// <returns>Marking an encounter as being valid for P03 means that it CANNOT be generated in a Leshy run.</returns>
         public static EncounterBlueprintData SetP03Encounter(this EncounterBlueprintData data, CardTemple? region = null)
         {
-            SetEncounterRegion(region.TempleToZone(), data.name);
+            SetEncounterRegion(region.TempleToZone(), data);
 
             HolyHackerole[data.name] = data;
 

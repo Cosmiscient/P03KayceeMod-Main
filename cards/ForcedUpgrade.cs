@@ -34,13 +34,26 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override bool RespondsToSlotTargetedForAttack(CardSlot slot, PlayableCard attacker) => slot.Card != null && slot.IsOpponentSlot() == Card.OpponentCard;
 
+        private CardInfo Cleanse(CardInfo info)
+        {
+            CardInfo cleansed = CardLoader.Clone(info);
+            if (cleansed.abilities.Contains(Ability.Transformer))
+            {
+                cleansed.abilities.Remove(Ability.Transformer);
+                if (info.name.ToLowerInvariant().Contains("xformer") && !info.HasCardMetaCategory(CardMetaCategory.ChoiceNode))
+                    cleansed.evolveParams = null;
+            }
+            return cleansed;
+        }
+
         private CardInfo GetEvolution(PlayableCard target)
         {
-            CardInfo baseInfo = (!target.HasAbility(Ability.Transformer) || target.Info.HasCardMetaCategory(CardMetaCategory.ChoiceNode)) && target.Info.evolveParams != null
-                        ? CardLoader.Clone(target.Info.evolveParams.evolution)
-                        : EvolveParams.GetDefaultEvolution(target.Info);
+            CardInfo cleansedTargetInfo = Cleanse(target.Info);
+            CardInfo baseInfo = cleansedTargetInfo.evolveParams != null
+                        ? CardLoader.Clone(cleansedTargetInfo.evolveParams.evolution)
+                        : EvolveParams.GetDefaultEvolution(cleansedTargetInfo);
 
-            if (target.HasAbility(Ability.Transformer))
+            if (baseInfo.HasAbility(Ability.Transformer))
                 baseInfo.mods.Add(new() { negateAbilities = new() { Ability.Transformer } });
 
             return baseInfo;

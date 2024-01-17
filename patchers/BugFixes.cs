@@ -547,7 +547,54 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             card.Status = new PlayableCardStatus(slotState.card.status);
             card.OnStatsChanged();
             ResourcesManager.Instance.ForceGemsUpdate();
+            foreach (var restorer in card.GetComponents<IRestoreFromSnapshot>())
+                restorer?.RestoreFromSnapshot(slotState.card);
             yield break;
+        }
+
+        [HarmonyPatch(typeof(CardInfo), nameof(CardInfo.HasTrait))]
+        [HarmonyPostfix]
+        private static void ChangeGemTraitBehavior(CardInfo __instance, Trait trait, ref bool __result)
+        {
+            if (P03AscensionSaveData.IsP03Run && trait == Trait.Gem && !__result)
+            {
+                if (__instance.HasAnyOfAbilities(Ability.GainGemBlue, Ability.GainGemGreen, Ability.GainGemOrange, Ability.GainGemTriple))
+                {
+                    __result = true;
+                    return;
+                }
+
+                if (TurnManager.Instance != null && TurnManager.Instance.opponent != null)
+                {
+                    foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
+                    {
+                        if (slot.Card != null && slot.Card.Info == __instance)
+                        {
+                            if (slot.Card.HasAnyOfAbilities(Ability.GainGemBlue, Ability.GainGemGreen, Ability.GainGemOrange, Ability.GainGemTriple))
+                            {
+                                __result = true;
+                                return;
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(FriendCardCreator), nameof(FriendCardCreator.FriendToCard))]
+        [HarmonyPrefix]
+        private static void MaxEnergyCostOfSix(CardInfo __result)
+        {
+            __result.Mods.ForEach(m => m.energyCostAdjustment = Mathf.Min(m.energyCostAdjustment, 6));
+        }
+
+        [HarmonyPatch(typeof(TextDisplayer), nameof(TextDisplayer.ManagedUpdate))]
+        [HarmonyPrefix]
+        private static void AdvanceTextWithSpacebar(TextDisplayer __instance)
+        {
+            if (InputButtons.GetButtonUp(Button.EndTurn))
+                __instance.continuePressed = true;
         }
     }
 }

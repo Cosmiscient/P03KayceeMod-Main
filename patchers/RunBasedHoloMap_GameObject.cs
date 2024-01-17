@@ -602,9 +602,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 GameObject blockIcon = UnityEngine.Object.Instantiate(BLOCK_ICON, area.transform);
                 blockIcons.Add(blockIcon);
-                Vector3 pos = REGION_DATA[Zone.Neutral].wallOrientations[direction].Item1;
+                Vector3 pos = REGION_DATA[Zone.Neutral].WallOrientations[direction].Item1;
                 blockIcon.transform.localPosition = new(pos.x, 0.3f, pos.z);
-                blockIcon.transform.localEulerAngles = REGION_DATA[Zone.Neutral].wallOrientations[direction].Item2;
+                blockIcon.transform.localEulerAngles = REGION_DATA[Zone.Neutral].WallOrientations[direction].Item2;
             }
 
             BlockDirectionsAreaSequencer sequencer = area.AddComponent<BlockDirectionsAreaSequencer>();
@@ -721,14 +721,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // This is just a failsafe. The index should always match UNLESS you uninstalled a mod partway through a run.
             // I could just let this fail because you're a dumbass, but I'm a nice guy.
-            if (encounterIndex <= -1 || encounterIndex >= REGION_DATA[regionZone].encounters.Length)
+            if (encounterIndex <= -1 || encounterIndex >= REGION_DATA[regionZone].Region.encounters.Count)
             {
-                string[] encounters = REGION_DATA[regionZone].encounters;
-                encounterName = encounters[UnityEngine.Random.Range(0, encounters.Length)];
+                List<string> encounters = REGION_DATA[regionZone].Region.encounters.Select(ebd => ebd.name).ToList();
+                encounterName = encounters[UnityEngine.Random.Range(0, encounters.Count)];
             }
             else
             {
-                encounterName = REGION_DATA[regionZone].encounters[encounterIndex];
+                encounterName = REGION_DATA[regionZone].Region.encounters[encounterIndex].name;
             }
 
             // Get the encounter from the manager based on the name
@@ -826,7 +826,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                     if (bp.battleTerrainIndex > 0 && (bp.specialTerrain & HoloMapBlueprint.FULL_BRIDGE) == 0)
                     {
-                        string[] terrain = genData.terrain[bp.battleTerrainIndex - 1];
+                        string[] terrain = genData.Terrain[bp.battleTerrainIndex - 1];
                         if (UnityEngine.Random.value > 0.5)
                         {
                             node.playerTerrain = terrain.Take(5).Select(s => s == default ? null : CardLoader.GetCardByName(s)).ToArray();
@@ -848,7 +848,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             P03Plugin.Log.LogInfo($"Setting arrows and walls active");
             Transform scenery = area.transform.Find("Scenery");
-            if (genData.wallPrefabs != null && genData.wallPrefabs.Keys.Count > 0)
+            if (genData.WallPrefabs != null && genData.WallPrefabs.Keys.Count > 0)
             {
                 foreach (int key in DIR_LOOKUP.Keys)
                 {
@@ -860,14 +860,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                     if ((bp.arrowDirections & key) == 0)
                     {
-                        foreach (string wallPrefabKey in genData.wallPrefabs[key])
+                        foreach (string wallPrefabKey in genData.WallPrefabs[key])
                             UnityEngine.Object.Instantiate(GetGameObject(wallPrefabKey), scenery);
                     }
                 }
             }
             else
             {
-                GameObject wall = GetGameObject(genData.wall);
+                GameObject wall = GetGameObject(genData.Wall);
                 foreach (int key in DIR_LOOKUP.Keys)
                 {
                     // Set only the correct arrows active
@@ -883,8 +883,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         if ((bp.arrowDirections & key) == 0)
                         {
                             GameObject wallClone = UnityEngine.Object.Instantiate(wall, scenery);
-                            wallClone.transform.localPosition = genData.wallOrientations[key].Item1;
-                            wallClone.transform.localEulerAngles = genData.wallOrientations[key].Item2;
+                            wallClone.transform.localPosition = genData.WallOrientations[key].Item1;
+                            wallClone.transform.localEulerAngles = genData.WallOrientations[key].Item2;
                         }
                     }
                 }
@@ -898,7 +898,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // Add the landmarks if necessary
             if ((bp.specialTerrain & HoloMapBlueprint.LANDMARKER) != 0)
             {
-                foreach (string objId in genData.landmarks[bp.color - 1])
+                foreach (string objId in genData.Landmarks[bp.color - 1])
                     UnityEngine.Object.Instantiate(GetGameObject(objId), scenery);
             }
 
@@ -968,7 +968,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         continue;
                     }
 
-                    string[] scenerySource = firstObject && bp.specialTerrain != HoloMapBlueprint.BROKEN_GENERATOR ? genData.objectRandoms : genData.terrainRandoms;
+                    string[] scenerySource = firstObject && bp.specialTerrain != HoloMapBlueprint.BROKEN_GENERATOR ? genData.ObjectRandoms : genData.TerrainRandoms;
 
                     firstObject = false;
 
@@ -996,10 +996,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             HoloMapArea areaData = area.GetComponent<HoloMapArea>();
             areaData.GridX = bp.x;
             areaData.GridY = bp.y;
-            areaData.audioLoopsConfig = genData.audioConfig;
-            areaData.screenPrefab = genData.screenPrefab;
-            areaData.mainColor = genData.mainColor;
-            areaData.lightColor = genData.mainColor;
+            areaData.audioLoopsConfig = genData.AudioConfig;
+            areaData.screenPrefab = genData.ScreenPrefab;
+            areaData.mainColor = genData.MainColor;
+            areaData.lightColor = genData.MainColor;
 
             if (bp.blockedDirections != BLANK)
                 BlockDirections(area, areaData, bp.blockedDirections, EventManagement.ALL_ZONE_ENEMIES_KILLED);

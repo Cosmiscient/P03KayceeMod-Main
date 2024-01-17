@@ -34,8 +34,6 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             BattleModManager.SetGlobalActivationRule(ID,
                 () => AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.PAINTING_CHALLENGE)
                       && TurnManager.Instance.opponent != null && TurnManager.Instance.opponent is Part3BossOpponent);
-
-            BattleModManager.SetGlobalActivationRule(ID, () => true);
         }
 
         private GameObject effects = null;
@@ -147,9 +145,6 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                     validEffects = validEffects.Where(r => r is not RandomCardDestroyedEffect and not RandomSalmon).ToList();
                 currentRule.effect = validEffects[SeededRandom.Range(0, validEffects.Count, randomSeed++)];
 
-                // TODO: REMOVE
-                if (i == 0)
-                    currentRule.effect = validEffects.FirstOrDefault(e => e is RandomSalmon);
                 validEffects.Remove(currentRule.effect);
 
                 yield return SpawnPainting(RulePaintingManager.Instance, currentRule);
@@ -244,17 +239,12 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         {
             if (RulePaintingManager.Instance != null)
             {
-                try
-                {
-                    RulePaintingManager.Instance.ShowMostRecentPaintingCancelled();
-                }
-                catch { }
                 RulePaintingManager.Instance.SetPaintingsShown(false);
             }
 
             if (this.offsitePainting != null)
             {
-                Tween.LocalPosition(this.offsitePainting.transform, Vector3.up * 10f, .35f, 0f, Tween.EaseInBack);
+                Tween.LocalPosition(this.offsitePainting.transform, Vector3.up * 4f, .35f, 0f, Tween.EaseInBack);
             }
 
             if (this.effects != null || this.offsitePainting != null)

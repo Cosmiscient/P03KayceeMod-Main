@@ -142,6 +142,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetEmissivePortrait(TextureHelper.GetImageAsTexture("portrait_salmon_nature_emission.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCardTemple(CardTemple.Nature);
 
+            CardManager.New(EXP_1_PREFIX, "Salmon_Golly", "Salmon", 0, 1)
+                .SetAltPortrait(TextureHelper.GetImageAsTexture("portrait_golly_salmon.png", typeof(CustomCards).Assembly, FilterMode.Trilinear))
+                .AddAppearances(HighResAlternatePortrait.ID)
+                .SetWeaponMesh(DiskCardWeapon.Fish)
+                .temple = CardTemple.Tech;
 
             // Salmon and beastmaster
             CardManager.New(EXP_1_PREFIX, "Salmon", "S4LM0N", 0, 1)
@@ -150,6 +155,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 1)
                 .AddMetaCategories(CardMetaCategory.Part3Random)
                 .SetCardTemple(CardTemple.Tech)
+                .SetWeaponMesh(DiskCardWeapon.Fish)
                 .SetEvolve("Angler_Fish_More", 1);
 
             CardManager.BaseGameCards.CardByName("Angler_Fish_More").SetEvolve("Angler_Fish_Good", 1);

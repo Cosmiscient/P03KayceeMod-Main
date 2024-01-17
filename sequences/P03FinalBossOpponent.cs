@@ -1016,11 +1016,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 Transform firstPersonItem = FirstPersonController.Instance.AnimController.SpawnFirstPersonAnimation(hammer.FirstPersonPrefabId, null).transform;
                 firstPersonItem.localPosition = hammer.FirstPersonItemPos + (Vector3.right * 3f) + (Vector3.forward * 1f);
                 firstPersonItem.localEulerAngles = hammer.FirstPersonItemEulers;
-                yield return new WaitForSeconds(0.3f);
+                yield return new WaitForSeconds(0.15f);
                 hammer.MoveItemToPosition(firstPersonItem, slot.transform.position);
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.25f);
                 yield return hammer.OnValidTargetSelected(slot, firstPersonItem.gameObject);
-                yield return new WaitForSeconds(1f);
+                yield return new WaitForSeconds(.5f);
                 Destroy(firstPersonItem.gameObject);
                 yield return new WaitForEndOfFrame();
                 yield return new WaitForEndOfFrame();

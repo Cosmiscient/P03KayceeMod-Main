@@ -47,6 +47,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
 
+        private static string GetSkeleName(string currentName)
+        {
+            if (currentName.ToLowerInvariant().Contains("skel-e"))
+                return "Skel-E-" + currentName.Replace(" ", "-");
+
+            return "Skele " + currentName;
+        }
+
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
             if (Card.HasAbility(Ability.DrawCopy) || Card.HasAbility(Ability.DrawCopyOnDeath))
@@ -71,7 +79,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo replacement = CardLoader.GetCardByName("RoboSkeleton");
             CardModificationInfo mod = new()
             {
-                abilities = new(card.Abilities.Where(ab => ab != AbilityID && !NOT_COPYABLE_ABILITIES.Contains(ab)).Take(3))
+                abilities = new(card.Abilities.Where(ab => ab != AbilityID && !NOT_COPYABLE_ABILITIES.Contains(ab)).Take(3)),
+                nameReplacement = GetSkeleName(card.displayedName)
             };
             replacement.mods.Add(mod);
             deck.AddCard(replacement);

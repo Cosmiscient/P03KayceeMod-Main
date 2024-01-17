@@ -248,8 +248,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return TextDisplayer.Instance.PlayDialogueEvent("MycologistCompleteSuccess", TextDisplayer.MessageAdvanceMode.Auto, TextDisplayer.EventIntersectMode.Wait, null, null);
 
             var mycoCard = CardLoader.GetCardByName(CustomCards.MYCO_CONSTRUCT_BASE);
+            mycoCard.Mods.Add(GoobertCenterCardBehaviour.GetExperimentModInfo());
             Part3SaveData.Data.deck.AddCard(mycoCard);
-            Part3SaveData.Data.deck.ModifyCard(mycoCard, GoobertCenterCardBehaviour.GetExperimentModInfo());
+            //Part3SaveData.Data.deck.ModifyCard(mycoCard, GoobertCenterCardBehaviour.GetExperimentModInfo());
             AchievementManager.Unlock(P03AchievementManagement.MYCOLOGISTS_COMPLETED);
             StoryEventsData.SetEventCompleted(EventManagement.MYCO_DEFEATED);
             yield return UnInfectP03();

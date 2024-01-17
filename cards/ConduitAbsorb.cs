@@ -45,8 +45,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             return new CardModificationInfo()
             {
-                attackAdjustment = cardToMerge.Info.Attack,
-                healthAdjustment = cardToMerge.Info.Health,
+                attackAdjustment = cardToMerge.Attack,
+                healthAdjustment = cardToMerge.Health,
                 abilities = new(cardToMerge.AllAbilities().Where(ab => ab != Ability.ConduitNull))
             };
         }

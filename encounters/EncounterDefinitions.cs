@@ -318,7 +318,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
 
             // Encounter: Nature_Zoo
-            EncounterBlueprintData natureZoo = EncounterManager.New("P03KCM_Nature_Zoo", addToPool: true);
+            EncounterBlueprintData natureZoo = EncounterManager.New("P03KCMXP1_Nature_Zoo", addToPool: true);
             natureZoo.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Nature);
             natureZoo.turns = new();
 
@@ -381,7 +381,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
 
             // Encounter: Nature_SnakeTransformers
-            EncounterBlueprintData natureSnakeTransformers = EncounterManager.New("P03KCM_Nature_SnakeTransformers", addToPool: true);
+            EncounterBlueprintData natureSnakeTransformers = EncounterManager.New("P03KCMXP1_Nature_SnakeTransformers", addToPool: true);
             natureSnakeTransformers.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Nature);
             natureSnakeTransformers.turns = new();
 
@@ -508,7 +508,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
 
             // Encounter: Neutral_BombsAndShields
-            EncounterBlueprintData neutralBombsAndShields = EncounterManager.New("P03KCM_Neutral_BombsAndShields", addToPool: true);
+            EncounterBlueprintData neutralBombsAndShields = EncounterManager.New("P03KCMXP2_Neutral_BombsAndShields", addToPool: true);
             neutralBombsAndShields.SetDifficulty(0, 6).SetP03Encounter();
             neutralBombsAndShields.AddRandomReplacementCards("Shieldbot", "Bombbot", "SentryBot");
             neutralBombsAndShields.turns = new();
@@ -758,7 +758,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
 
             // Encounter: Neutral_Swapbots
-            EncounterBlueprintData neutralSwapbots = EncounterManager.New("P03KCM_Neutral_Swapbots", addToPool: true);
+            EncounterBlueprintData neutralSwapbots = EncounterManager.New("P03KCMXP1_Neutral_Swapbots", addToPool: true);
             neutralSwapbots.SetDifficulty(0, 6).SetP03Encounter();
             neutralSwapbots.AddRandomReplacementCards("Automaton", "Bombbot", "MineCart");
             neutralSwapbots.turns = new();
@@ -817,7 +817,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
 
             // Encounter: Neutral_Clockbots
-            EncounterBlueprintData neutralClockbots = EncounterManager.New("P03KCM_Neutral_Clockbots", addToPool: true);
+            EncounterBlueprintData neutralClockbots = EncounterManager.New("P03KCMXP1_Neutral_Clockbots", addToPool: true);
             neutralClockbots.SetDifficulty(0, 6).SetP03Encounter();
             neutralClockbots.turns = new();
 
@@ -874,7 +874,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
 
             // Encounter: Neutral_SpyPlanes
-            EncounterBlueprintData neutralSpyPlanes = EncounterManager.New("P03KCM_Neutral_SpyPlanes", addToPool: true);
+            EncounterBlueprintData neutralSpyPlanes = EncounterManager.New("P03KCMXP1_Neutral_SpyPlanes", addToPool: true);
             neutralSpyPlanes.SetDifficulty(0, 6).SetP03Encounter();
             neutralSpyPlanes.turns = new();
 
@@ -1289,7 +1289,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             );
 
             // Encounter: Tech_AttackConduits
-            EncounterBlueprintData techObnoxiousConduits = EncounterManager.New("P03KCM_Tech_ObnoxiousConduits", addToPool: true);
+            EncounterBlueprintData techObnoxiousConduits = EncounterManager.New("P03KCMXP2_Tech_ObnoxiousConduits", addToPool: true);
             techObnoxiousConduits.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Tech);
             techObnoxiousConduits.AddTerrainRepeatRule(DefaultConduitRepeatBehavior);
 
@@ -1580,7 +1580,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
 
             // Encounter: Tech_ProtectConduits
-            EncounterBlueprintData techProtectConduits = EncounterManager.New("P03KCM_Tech_ProtectConduits", addToPool: true);
+            EncounterBlueprintData techProtectConduits = EncounterManager.New("P03KCMXP1_Tech_ProtectConduits", addToPool: true);
             techProtectConduits.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Tech);
             techProtectConduits.turns = new();
             techProtectConduits.AddTerrainRepeatRule(DefaultConduitRepeatBehavior);
@@ -1645,7 +1645,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
 
             // Encounter: Tech_StinkyConduits
-            EncounterBlueprintData techStinkyConduits = EncounterManager.New("P03KCM_Tech_StinkyConduits", addToPool: true);
+            EncounterBlueprintData techStinkyConduits = EncounterManager.New("P03KCM1_Tech_StinkyConduits", addToPool: true);
             techStinkyConduits.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Tech);
             techStinkyConduits.turns = new();
             techStinkyConduits.AddTerrainRepeatRule(DefaultConduitRepeatBehavior);
@@ -1842,7 +1842,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             );
 
             // Encounter: Undead_FlamingSkeleSwarm
-            EncounterBlueprintData undeadFlamingSkeleSwarm = EncounterManager.New("P03KCM_Undead_Flaming_SkeleSwarm", addToPool: true);
+            EncounterBlueprintData undeadFlamingSkeleSwarm = EncounterManager.New("P03KCMXP2_Undead_Flaming_SkeleSwarm", addToPool: true);
             undeadFlamingSkeleSwarm.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Undead);
             undeadFlamingSkeleSwarm.turns = new();
 
@@ -1970,7 +1970,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 P03Plugin.Log.LogInfo($"Turn 7 of Skeleswarm. ORIGINAL of {cbp.card.name} has {cbp.card.mods.Count} mods");
 
             // Encounter: Undead_WingLatchers
-            EncounterBlueprintData undeadWingLatchers = EncounterManager.New("P03KCM_Undead_WingLatchers", addToPool: true);
+            EncounterBlueprintData undeadWingLatchers = EncounterManager.New("P03KCMXP1_Undead_WingLatchers", addToPool: true);
             undeadWingLatchers.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Undead);
             undeadWingLatchers.turns = new();
 
@@ -2019,7 +2019,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
 
             // Encounter: Undead_StrafeLatchers
-            EncounterBlueprintData undeadStrafeLatchers = EncounterManager.New("P03KCM_Undead_StrafeLatchers", addToPool: true);
+            EncounterBlueprintData undeadStrafeLatchers = EncounterManager.New("P03KCMXP1_Undead_StrafeLatchers", addToPool: true);
             undeadStrafeLatchers.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Undead);
             undeadStrafeLatchers.turns = new();
 
@@ -2269,7 +2269,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             );
 
             // Encounter: Wizard_Guardians
-            EncounterBlueprintData wizardGuardians = EncounterManager.New("P03KCM_Wizard_Guardians", addToPool: true);
+            EncounterBlueprintData wizardGuardians = EncounterManager.New("P03KCMXP2_Wizard_Guardians", addToPool: true);
             wizardGuardians.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Wizard);
             wizardGuardians.turns = new();
 

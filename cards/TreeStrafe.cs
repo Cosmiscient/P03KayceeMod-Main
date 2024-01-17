@@ -21,7 +21,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.powerLevel = 3;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_treestrafe.png", typeof(TreeStrafe).Assembly));
 
             AbilityID = AbilityManager.Add(

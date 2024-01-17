@@ -134,6 +134,28 @@ And these aren't required, but **highly** recommended:
 <details>
 <summary>Changelog</summary>
 
+4.3.3
+- Refactored how encounters are managed internally to be compatible with the latest version of Pack Manager.
+- Added three encounter packs to be compatible with the latest version of Pack Manager.
+
+4.3.2
+- Fixed a defect with Splice Conduit. It now correctly reads the card's current attack and health when splicing instead of its base attack and health.
+
+4.3.1
+- Balance Change: Emerald Guardian now has 1 power instead of 2.
+- Balance Change: Green Mox Buff now grants 2 health per gem instead of 1.
+- Balance Change: Weeper now has 2 health instead of 3.
+- Balance Change: Encapsulator now has 3 health instead of 2.
+- Balance Change: Any card which has a gem now counts as as Gem Vessel. The biggest impact this will have is that Gem Dependent is easier to work with now.
+- Tweaked the color balance of rare cards.
+- A new cosmetic reward has been added for completing the Scarlet Skull achievement.
+- Fixed some defects with the random salmon painting rule.
+- Fixed some defects with the minimap where sometimes you could trigger fast travel at the wrong time.
+- Fixed some edge case defects with the \[redacted\] card.
+- Fixed a defect where the Vessel Heart (Box Bot sigil) ability was not correctly working with slot modification abilities.
+- Fixed a visual defect that affected SeedBot during the final boss.
+- G0lly no longer makes an unnecessary connection to the game's back end server.
+
 4.3.0
 - Balance Change: Shield Smuggler now has 3 health instead of 4.
 - Challenge Update: Both of the Bounty Hunter wanted level challenges have been combined into one. A new challenge: "Strange Encounters" has been added. Battle modifiers (Sticker Battles, Trap Battles, etc) are no longer active by default; they are now gated behind this challenge.

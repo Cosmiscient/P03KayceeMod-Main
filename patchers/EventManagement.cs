@@ -37,6 +37,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly StoryEvent SAW_P03_BOSSPAIDRESPAWN_EXPLAIN = NewStory("SawP03PaidRespawnExplain", save: true);
         public static readonly StoryEvent GOLLY_NFT = NewStory("GollyNFTIntro", save: true);
         public static readonly StoryEvent DEFEATED_P03 = NewStory("DefeatedP03");
+        public static readonly StoryEvent DEFEATED_P03_MULTIVERSE = NewStory("DefeatedP03Multiverse");
         public static readonly StoryEvent ONLY_ONE_BOSS_LIFE = NewStory("P03AscensionOneBossLife", save: true);
         public static readonly StoryEvent OVERCLOCK_CHANGES = NewStory("P03AscensionOverclock", save: true);
         public static readonly StoryEvent TRANSFORMER_CHANGES = NewStory("P03AscensionTransformer", save: true);

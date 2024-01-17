@@ -35,8 +35,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static Emotion ParseEmotion(this string face)
         {
-            if (face.ToLowerInvariant().Contains("leshy"))
-                return Emotion.Neutral;
             if (face.ToLowerInvariant().Contains("goocurious"))
                 return Emotion.Neutral;
             if (face.ToLowerInvariant().Contains("goo"))
@@ -47,6 +45,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return Emotion.Anger;
             if (face.ToLowerInvariant().Contains("laughter"))
                 return Emotion.Laughter;
+            if (face.ToLowerInvariant().Contains("grimora"))
+                return Emotion.Neutral;
+            if (face.ToLowerInvariant().Contains("magnificus"))
+                return Emotion.Neutral;
+            if (face.ToLowerInvariant().Contains("leshy"))
+                return Emotion.Neutral;
             return face.ParseFace().FaceEmotion();
         }
 
@@ -66,6 +70,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             DialogueEvent.Speaker speaker = DialogueEvent.Speaker.P03;
             if (faces.Exists(s => s.ToLowerInvariant().Contains("leshy")))
                 speaker = DialogueEvent.Speaker.Leshy;
+            else if (faces.Exists(s => s.ToLowerInvariant().Contains("grimora")))
+                speaker = DialogueEvent.Speaker.Grimora;
+            else if (faces.Exists(s => s.ToLowerInvariant().Contains("magnificus")))
+                speaker = DialogueEvent.Speaker.Magnificus;
             else if (faces.Exists(s => s.ToLowerInvariant().Contains("telegrapher")))
                 speaker = DialogueEvent.Speaker.P03Telegrapher;
             else if (faces.Exists(s => s.ToLowerInvariant().Contains("archivist")))
@@ -81,7 +89,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             else if (faces.Exists(s => s.ToLowerInvariant().Contains("mycolo")))
                 speaker = DialogueEvent.Speaker.P03MycologistMain;
 
-            bool leshy = speaker is DialogueEvent.Speaker.Leshy or DialogueEvent.Speaker.Goo;
+            bool leshy = speaker is DialogueEvent.Speaker.Leshy or DialogueEvent.Speaker.Goo or DialogueEvent.Speaker.Grimora or DialogueEvent.Speaker.Magnificus;
 
             if (string.IsNullOrEmpty(id))
                 return;

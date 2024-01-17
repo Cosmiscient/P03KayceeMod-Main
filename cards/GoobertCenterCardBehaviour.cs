@@ -8,6 +8,7 @@ using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Card;
+using InscryptionAPI.Helpers.Extensions;
 using Pixelplacement;
 using Sirenix.Serialization.Utilities;
 using UnityEngine;
@@ -15,7 +16,7 @@ using UnityEngine;
 namespace Infiniscryption.P03KayceeRun.Cards
 {
     [HarmonyPatch]
-    public class GoobertCenterCardBehaviour : SpecialCardBehaviour
+    public class GoobertCenterCardBehaviour : SpecialCardBehaviour, IRestoreFromSnapshot
     {
         public static SpecialTriggeredAbility AbilityID { get; private set; }
 
@@ -42,9 +43,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override bool RespondsToResolveOnBoard() => true;
 
-        private float GetGoobertEntrySpeed() => IsInMycoBoss ? 3f : 1f;
+        private float GetGoobertEntrySpeed() => IsInMycoBoss ? 3f : restoredFromSnapshot ? 0.001f : 1f;
 
-        private float GetArmEntrySpeed() => IsInMycoBoss ? 2f : 0.7f;
+        private float GetArmEntrySpeed() => IsInMycoBoss ? 2f : restoredFromSnapshot ? 0.001f : 0.7f;
 
         internal static CardModificationInfo GetExperimentModInfo()
         {
@@ -101,7 +102,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             PlayableCard.RenderInfo.hidePortrait = true;
             PlayableCard.SetInfo(PlayableCard.Info);
 
-            if (!IsInMycoBoss)
+            if (!IsInMycoBoss && !restoredFromSnapshot)
                 ViewManager.Instance.SwitchToView(View.Default, false, true);
 
             // Get the goobert face
@@ -141,8 +142,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
 
             // Make room for the left and right halves of the card
-            List<CardSlot> friendlySlots = BoardManager.Instance.GetSlots(!PlayableCard.OpponentCard);
-            int mySlot = PlayableCard.Slot.Index;
+            List<CardSlot> friendlySlots = new(PlayableCard.OpponentCard ? BoardManager.Instance.opponentSlots : BoardManager.Instance.playerSlots);
+            int mySlot = friendlySlots.IndexOf(PlayableCard.Slot);
 
             int leftSlot = mySlot - 1;
             yield return MakeSlotEmpty(friendlySlots[leftSlot], true);
@@ -165,16 +166,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
             SwapAnimationController(PlayableCard, true);
 
             // Rotate the arm into place
-            Tween.LocalPosition(leftArm.transform, new Vector3(1.14f, -0.08f, 0f), 0.3f, 0f);
-            Tween.LocalRotation(leftArm.transform, new Vector3(0f, 180f, 34f), 0.3f, 0f);
-            Tween.LocalPosition(rightArm.transform, new Vector3(-1.14f, -0.08f, 0f), 0.3f, 0f);
-            Tween.LocalRotation(rightArm.transform, new Vector3(0f, 0f, 34f), 0.3f, 0f);
+            Tween.LocalPosition(leftArm.transform, new Vector3(1.14f, -0.08f, 0f), restoredFromSnapshot ? 0.001f : 0.3f, 0f);
+            Tween.LocalRotation(leftArm.transform, new Vector3(0f, 180f, 34f), restoredFromSnapshot ? 0.001f : 0.3f, 0f);
+            Tween.LocalPosition(rightArm.transform, new Vector3(-1.14f, -0.08f, 0f), restoredFromSnapshot ? 0.001f : 0.3f, 0f);
+            Tween.LocalRotation(rightArm.transform, new Vector3(0f, 0f, 34f), restoredFromSnapshot ? 0.001f : 0.3f, 0f);
 
             // Scale the cards
-            Tween.LocalScale(gameObject.transform.Find("Anim/CardBase"), new Vector3(0.5263f, 2.5f, 1f), 0.3f, 0f);
-            Tween.LocalScale(gameObject.transform.Find("Anim/ShieldEffect"), new Vector3(6f, 7.9f, 1.7f), 0.3f, 0f);
-            Tween.LocalScale(gameObject.transform.Find("Anim/CardBase/HoloportraitParent"), new Vector3(.8f / 2.5f, 1f, 1f), 0.3f, 0f);
-            Tween.LocalScale(gameObject.transform.Find("Anim/CardBase/Top/Name"), new Vector3(0.5f, -1f, 1f), 0.3f, 0f);
+            Tween.LocalScale(gameObject.transform.Find("Anim/CardBase"), new Vector3(0.5263f, 2.5f, 1f), restoredFromSnapshot ? 0.001f : 0.3f, 0f);
+            Tween.LocalScale(gameObject.transform.Find("Anim/ShieldEffect"), new Vector3(6f, 7.9f, 1.7f), restoredFromSnapshot ? 0.001f : 0.3f, 0f);
+            Tween.LocalScale(gameObject.transform.Find("Anim/CardBase/HoloportraitParent"), new Vector3(.8f / 2.5f, 1f, 1f), restoredFromSnapshot ? 0.001f : 0.3f, 0f);
+            Tween.LocalScale(gameObject.transform.Find("Anim/CardBase/Top/Name"), new Vector3(0.5f, -1f, 1f), restoredFromSnapshot ? 0.001f : 0.3f, 0f);
 
             if (TurnManager.Instance.opponent is MycologistAscensionBossOpponent)
                 PlayableCard.AddTemporaryMod(GetExperimentModInfo());
@@ -183,14 +184,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             AudioController.Instance.PlaySound3D("mushroom_large_appear", MixerGroup.TableObjectsSFX, gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.Small), null, null, null, false);
 
-            yield return new WaitForSeconds(0.3f);
+            if (!restoredFromSnapshot)
+                yield return new WaitForSeconds(0.3f);
 
             AddMushroom(-1.78f, -.26f, dcac.holoPortraitParent);
             AddMushroom(-.97f, .2436f, dcac.holoPortraitParent);
             AddMushroom(1.7f, .4f, dcac.holoPortraitParent);
             AddMushroom(.8f, -.12f, dcac.holoPortraitParent);
 
-            yield return new WaitForSeconds(1.5f);
+            if (!restoredFromSnapshot)
+                yield return new WaitForSeconds(1.5f);
 
             ResolveOpposingSlotsForTripleCard();
 
@@ -244,8 +247,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (slot.Card == null)
                 yield break;
 
-            List<CardSlot> friendlySlots = BoardManager.Instance.GetSlots(!slot.Card.OpponentCard);
-            int index = slot.Index;
+            List<CardSlot> friendlySlots = new(slot.Card.OpponentCard ? BoardManager.Instance.opponentSlots : BoardManager.Instance.playerSlots);
+            int index = friendlySlots.IndexOf(slot);
             int nextIndex = left ? index - 1 : index + 1;
 
             if (index < 0 || index >= friendlySlots.Count)
@@ -382,6 +385,68 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return true;
         }
 
+        // [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.OpponentSlotsCopy), MethodType.Getter)]
+        // [HarmonyPostfix]
+        // private static void FilterOutCoveredOpponentSlots(ref List<CardSlot> __result)
+        // {
+        //     if (!P03AscensionSaveData.IsP03Run)
+        //         return;
+
+        //     if (TurnManager.Instance == null || TurnManager.Instance.opponent == null || TurnManager.Instance.GameIsOver())
+        //         return;
+
+        //     // This cannot use ANY properties, method, or extension methods of slots
+        //     // Or risk an infinite loop
+        //     List<CardSlot> slotsToRemove = new();
+        //     for (int i = 0; i < __result.Count; i++)
+        //     {
+        //         if (__result[i].Card != null && __result[i].Card.HasSpecialAbility(AbilityID))
+        //         {
+        //             if (i > 0)
+        //                 slotsToRemove.Add(__result[i - 1]);
+        //             if (i < __result.Count - 1)
+        //                 slotsToRemove.Add(__result[i + 1]);
+        //         }
+        //     }
+        //     if (slotsToRemove.Count > 0)
+        //     {
+        //         __result = new(__result);
+        //         foreach (var slot in slotsToRemove)
+        //             __result.Remove(slot);
+        //     }
+        // }
+
+        // [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.PlayerSlotsCopy), MethodType.Getter)]
+        // [HarmonyPostfix]
+        // private static void FilterOutCoveredPlayerSlots(ref List<CardSlot> __result)
+        // {
+        //     if (!P03AscensionSaveData.IsP03Run)
+        //         return;
+
+        //     if (TurnManager.Instance == null || TurnManager.Instance.opponent == null || TurnManager.Instance.GameIsOver())
+        //         return;
+
+        //     // This cannot use ANY properties, method, or extension methods of slots
+        //     // Or risk an infinite loop
+        //     List<CardSlot> slotsToRemove = new();
+        //     for (int i = 0; i < __result.Count; i++)
+        //     {
+        //         if (__result[i].Card != null && __result[i].Card.HasSpecialAbility(AbilityID))
+        //         {
+        //             if (i > 0)
+        //                 slotsToRemove.Add(__result[i - 1]);
+        //             if (i < __result.Count - 1)
+        //                 slotsToRemove.Add(__result[i + 1]);
+        //         }
+        //     }
+        //     if (slotsToRemove.Count > 0)
+        //     {
+        //         __result = new(__result);
+        //         foreach (var slot in slotsToRemove)
+        //             __result.Remove(slot);
+        //     }
+        // }
+
         [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.AllSlots), MethodType.Getter)]
         [HarmonyPostfix]
         private static void FilterOutCoveredSlots(ref List<CardSlot> __result)
@@ -393,7 +458,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // to reset colors when the boss dies, sometimes you do this while there are still cards on the
             // table. So if the game is essentially over, we can just leave the list of slots alone
 
-            if (TurnManager.Instance == null || TurnManager.Instance.GameIsOver())
+            if (TurnManager.Instance == null || TurnManager.Instance.opponent == null || TurnManager.Instance.GameIsOver())
                 return;
 
             if (__result.Any(cs => cs.SlotCoveredByTripleCard()))
@@ -503,6 +568,29 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 return;
 
             ResolveOpposingSlotsForTripleCard(reset: true);
+        }
+
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.CreateCardInSlot))]
+        [HarmonyPostfix]
+        private static IEnumerator EnsureNoMisaligns(IEnumerator sequence, CardInfo info, CardSlot slot, float transitionLength = 0.1f, bool resolveTriggers = true)
+        {
+            if (!P03AscensionSaveData.IsP03Run || !slot.SlotCoveredByTripleCard())
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            // This means the slot **is** covered
+            // Try to find another slot?
+            List<CardSlot> possibles = BoardManager.Instance.GetSlotsCopy(slot.IsPlayerSlot)
+                                                   .Where(s => s.Card == null && !s.SlotCoveredByTripleCard())
+                                                   .OrderBy(s => Mathf.Abs(s.Index - slot.Index))
+                                                   .ToList();
+
+            if (possibles.Count > 0)
+                yield return BoardManager.Instance.CreateCardInSlot(info, possibles[0], transitionLength, resolveTriggers);
+
+            yield break;
         }
 
         [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.AssignCardToSlot))]
@@ -721,6 +809,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
 
             yield break;
+        }
+
+        private bool restoredFromSnapshot = false;
+        public void RestoreFromSnapshot(BoardState.CardState state)
+        {
+            restoredFromSnapshot = true;
+            StartCoroutine(OnResolveOnBoard());
         }
     }
 }

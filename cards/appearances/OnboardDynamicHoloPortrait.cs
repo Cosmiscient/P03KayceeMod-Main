@@ -66,9 +66,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         }
 
-        private Vector3 GetVector3(string key, int index, bool zeroDefault = true)
+        internal static Vector3 GetVector3(Card card, string key, int index, bool zeroDefault = true)
         {
-            string offset = Card.Info.GetExtendedProperty(key);
+            string offset = card.Info.GetExtendedProperty(key);
             if (string.IsNullOrEmpty(offset))
                 return zeroDefault ? Vector3.zero : Vector3.one;
 
@@ -173,9 +173,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 GameObject child = Instantiate(prefab[i], gameObject.transform);
                 CleanGameObject(child, i);
-                child.transform.localPosition = GetVector3(OFFSET_KEY, i);
-                child.transform.localEulerAngles = GetVector3(ROTATION_KEY, i);
-                child.transform.localScale = GetVector3(SCALE_KEY, i, false);
+                child.transform.localPosition = GetVector3(Card, OFFSET_KEY, i);
+                child.transform.localEulerAngles = GetVector3(Card, ROTATION_KEY, i);
+                child.transform.localScale = GetVector3(Card, SCALE_KEY, i, false);
                 child.SetActive(true);
 
                 if (i < childrenToHide.Count)

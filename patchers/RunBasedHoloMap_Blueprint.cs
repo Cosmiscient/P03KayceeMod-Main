@@ -414,9 +414,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     {
                         int startIndex = P03Plugin.Instance.DebugCode.IndexOf("neutralencounter[");
                         string encounterDataString = P03Plugin.Instance.DebugCode.Substring(startIndex).Replace("neutralencounter[", "").Split(']')[0];
-                        for (int i = 0; i < REGION_DATA[Zone.Neutral].encounters.Length; i++)
+                        for (int i = 0; i < REGION_DATA[Zone.Neutral].Region.encounters.Count; i++)
                         {
-                            if (REGION_DATA[Zone.Neutral].encounters[i].Equals(encounterDataString, StringComparison.InvariantCultureIgnoreCase))
+                            if (REGION_DATA[Zone.Neutral].Region.encounters[i].name.Equals(encounterDataString, StringComparison.InvariantCultureIgnoreCase))
                             {
                                 enemyNode.encounterIndex = i;
                                 assigned = true;
@@ -426,17 +426,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     }
                     if (!assigned)
                     {
-                        enemyNode.encounterIndex = UnityEngine.Random.Range(0, REGION_DATA[Zone.Neutral].encounters.Length);
+                        enemyNode.encounterIndex = UnityEngine.Random.Range(0, REGION_DATA[Zone.Neutral].Region.encounters.Count);
                     }
                     //enemyNode.encounterIndex = REGION_DATA[Zone.Neutral].encounters.Length - 1;
                 }
                 else
                 {
-                    int index = UnityEngine.Random.Range(0, REGION_DATA[region].encounters.Length);
-                    while (usedIndices.Contains(index))
+                    int index = UnityEngine.Random.Range(0, REGION_DATA[region].Region.encounters.Count);
+                    int sanity = 0;
+                    while (usedIndices.Contains(index) && sanity < 20)
                     {
                         index += 1;
-                        if (index == REGION_DATA[region].encounters.Length)
+                        sanity += 1;
+                        if (index == REGION_DATA[region].Region.encounters.Count)
                             index = 0;
                     }
                     enemyNode.encounterIndex = index;
@@ -445,7 +447,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 // 50% change of terrain
                 if (UnityEngine.Random.value < 0.5f)
-                    enemyNode.battleTerrainIndex = UnityEngine.Random.Range(0, REGION_DATA[region].terrain.Length) + 1;
+                    enemyNode.battleTerrainIndex = UnityEngine.Random.Range(0, REGION_DATA[region].Terrain.Length) + 1;
 
                 rewardNode.upgrade = reward;
                 return true;
@@ -684,11 +686,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             List<HoloMapNode.NodeDataType> rewards = new() {
                 HoloMapNode.NodeDataType.CardChoice,
                 HoloMapNode.NodeDataType.AddCardAbility,
-                data.defaultReward,
+                data.DefaultReward,
                 HoloMapNode.NodeDataType.AddCardAbility,
-                data.defaultReward
+                data.DefaultReward
             };
-            for (int i = 0; i < data.encounters.Length; i++)
+            for (int i = 0; i < data.Region.encounters.Count; i++)
             {
                 HoloMapNode.NodeDataType? reward = null;
                 if (rewards.Count > 0)
@@ -701,7 +703,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             RegionGeneratorData neutral = REGION_DATA[Zone.Neutral];
-            for (int i = 0; i < neutral.encounters.Length; i++)
+            for (int i = 0; i < neutral.Region.encounters.Count; i++)
             {
                 HoloMapNode.NodeDataType? reward = null;
                 if (rewards.Count > 0)
@@ -1036,7 +1038,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 UnityEngine.Random.InitState(seedForChoice + (colorsWithoutEnemies.Count * 1000));
                 int colorToUse = colorsWithoutEnemies[UnityEngine.Random.Range(0, colorsWithoutEnemies.Count)];
-                HoloMapNode.NodeDataType type = colorsWithoutEnemies.Count <= 2 ? HoloMapNode.NodeDataType.AddCardAbility : REGION_DATA[region].defaultReward;
+                HoloMapNode.NodeDataType type = colorsWithoutEnemies.Count <= 2 ? HoloMapNode.NodeDataType.AddCardAbility : REGION_DATA[region].DefaultReward;
                 if (DiscoverAndCreateEnemyEncounter(bpBlueprint, retval, order, region, type, usedIndices, colorToUse))
                     numberOfEncountersAdded += 1;
                 colorsWithoutEnemies.Remove(colorToUse);
@@ -1045,7 +1047,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             int remainingEncountersToAdd = EventManagement.ENEMIES_TO_UNLOCK_BOSS - numberOfEncountersAdded;
             for (int i = 0; i < remainingEncountersToAdd; i++)
             {
-                if (DiscoverAndCreateEnemyEncounter(bpBlueprint, retval, order, region, REGION_DATA[region].defaultReward, usedIndices))
+                if (DiscoverAndCreateEnemyEncounter(bpBlueprint, retval, order, region, REGION_DATA[region].DefaultReward, usedIndices))
                     numberOfEncountersAdded += 1;
             }
 
@@ -1083,7 +1085,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 retval.GetRandomPointOfInterest().upgrade = HoloMapNode.NodeDataType.CardChoice;
 
             // And now we're just going to add one more regional upgrade
-            retval.GetRandomPointOfInterest().upgrade = REGION_DATA[region].defaultReward;
+            retval.GetRandomPointOfInterest().upgrade = REGION_DATA[region].DefaultReward;
 
             for (int i = 0; i < 3; i++)
                 retval.GetRandomPointOfInterest().upgrade = UnlockAscensionItemNodeData.UnlockItemsAscension;
@@ -1104,7 +1106,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 HoloMapBlueprint tbp2 = retval.GetRandomPointOfInterest();
                 if (tbp2 != null)
-                    tbp2.upgrade = REGION_DATA[cRegion].defaultReward;
+                    tbp2.upgrade = REGION_DATA[cRegion].DefaultReward;
             }
 
             // Add story events data

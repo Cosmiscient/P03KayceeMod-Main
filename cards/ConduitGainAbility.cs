@@ -102,6 +102,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             foreach (CardSlot slot in slots.Where(s => s.Card != null))
             {
+                if (TurnManager.Instance.Opponent.queuedCards.Contains(slot.Card))
+                    continue;
+
                 List<Ability> conduitAbilities = GetConduitAbilitiesForSlot(slot);
                 CardModificationInfo info = GetConduitAbilityMod(slot.Card);
 

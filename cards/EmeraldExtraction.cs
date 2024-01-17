@@ -17,7 +17,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Green Mox Buff";
-            info.rulebookDescription = "When [creature] is played, it gains one health for each Green Mox its owner controls.";
+            info.rulebookDescription = "When [creature] is played, it gains two health for each Green Mox its owner controls.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = true;
@@ -41,7 +41,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (Card.TemporaryMods.Any(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(nameof(EmeraldExtraction))))
                 yield break;
 
-            int healthBuff = BoardManager.Instance.GetSlots(!Card.OpponentCard).Where(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemGreen) || s.Card.HasAbility(Ability.GainGemTriple))).Count();
+            int healthBuff = 2 * BoardManager.Instance.GetSlots(!Card.OpponentCard).Where(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemGreen) || s.Card.HasAbility(Ability.GainGemTriple))).Count();
             CardModificationInfo mod = new(0, healthBuff)
             {
                 singletonId = nameof(EmeraldExtraction)
