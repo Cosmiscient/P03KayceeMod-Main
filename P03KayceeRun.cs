@@ -5,11 +5,9 @@ using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
-using Infiniscryption.P03KayceeRun.Cards.Multiverse;
 using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Quests;
-using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 using UnityEngine.SceneManagement;
@@ -69,13 +67,11 @@ namespace Infiniscryption.P03KayceeRun
             }
 
             CustomCards.RegisterCustomCards(harmony);
-            MultiverseCards.CreateCards();
             StarterDecks.RegisterStarterDecks();
             AscensionChallengeManagement.UpdateP03Challenges();
             BossManagement.RegisterBosses();
             DefaultQuestDefinitions.DefineAllQuests();
             EncounterHelper.BuildEncounters();
-            MultiverseEncounters.CreateMultiverseEncounters();
 
             CustomCards.printAllCards();
 
@@ -99,39 +95,5 @@ namespace Infiniscryption.P03KayceeRun
             AbilityManager.SyncAbilityList();
             EncounterManager.SyncEncounterList();
         }
-
-        // private class DummyPatchTarget
-        // {
-        //     private List<Ability> DummyMethod() => null;
-        // }
-
-        // [HarmonyPatch]
-        // private class DeckEditorCompatPatch
-        // {
-        //     public static MethodBase TargetMethod()
-        //     {
-        //         foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies().Reverse())
-        //         {
-        //             Type testType = assembly.GetType("DeckEditor");
-        //             if (testType != null)
-        //             {
-        //                 MethodInfo meth = AccessTools.FirstMethod(testType, m => m.Name.Contains("GetAllAbilities"));
-        //                 if (meth != null)
-        //                     return meth;
-        //             }
-        //         }
-        //         return typeof(DummyPatchTarget).GetMethod("DummyMethod");
-        //     }
-
-        //     public static bool Prefix(ref List<Ability> __result)
-        //     {
-        //         __result = GuidManager.GetValues<Ability>()
-        //                               .Select(AbilitiesUtil.GetInfo)
-        //                               .Where(ai => ai != null)
-        //                               .Select(ai => ai.ability)
-        //                               .ToList();
-        //         return false;
-        //     }
-        // }
     }
 }

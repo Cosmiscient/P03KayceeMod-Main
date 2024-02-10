@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using DiskCardGame;
 using HarmonyLib;
-using Infiniscryption.P03KayceeRun.Cards.Multiverse;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;

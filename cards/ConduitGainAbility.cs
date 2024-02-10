@@ -123,30 +123,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private static void FixCardsNotOnBoard()
         {
-            if (MultiverseBattleSequencer.Instance == null)
-            {
-                foreach (PlayableCard card in PlayerHand.Instance.CardsInHand)
-                    ClearConduitAbilityMods(card);
+            foreach (PlayableCard card in PlayerHand.Instance.CardsInHand)
+                ClearConduitAbilityMods(card);
 
-                foreach (PlayableCard card in TurnManager.Instance.Opponent.queuedCards)
-                    ClearConduitAbilityMods(card);
-            }
-            else
-            {
-                foreach (var universe in MultiverseBattleSequencer.Instance.MultiverseGames)
-                {
-                    if (universe == null)
-                        continue;
-
-                    if (universe.HandState != null)
-                        foreach (PlayableCard card in universe.HandState)
-                            ClearConduitAbilityMods(card);
-
-                    if (universe.OpponentQueue != null)
-                        foreach (PlayableCard card in universe.OpponentQueue)
-                            ClearConduitAbilityMods(card);
-                }
-            }
+            foreach (PlayableCard card in TurnManager.Instance.Opponent.queuedCards)
+                ClearConduitAbilityMods(card);
         }
 
         private static void ClearAllCards()
@@ -182,22 +163,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
             else
             {
-                if (MultiverseBattleSequencer.Instance == null)
-                {
-                    ResolveForSlots(BoardManager.Instance.opponentSlots);
-                    ResolveForSlots(BoardManager.Instance.playerSlots);
-                }
-                else
-                {
-                    foreach (var universe in MultiverseBattleSequencer.Instance.MultiverseGames)
-                    {
-                        if (universe == null || universe.OpponentSlots == null || universe.PlayerSlots == null)
-                            continue;
-
-                        ResolveForSlots(universe.OpponentSlots);
-                        ResolveForSlots(universe.PlayerSlots);
-                    }
-                }
+                ResolveForSlots(BoardManager.Instance.opponentSlots);
+                ResolveForSlots(BoardManager.Instance.playerSlots);
                 FixCardsNotOnBoard();
             }
         }
