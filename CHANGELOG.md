@@ -1,9 +1,26 @@
+# 4.3.7
+
+- Mr:Clock now has 2 health instead of 3.
+- The Mox Obelisk terrain now has the "Dust Giver" sigil instead of the "Great Mox" sigil.
+- Made a number of difficulty and balance tweaks.
+  - Tweaked the difficulty of the following encounters down: Attack Conduits, Stinky Conduits, Zoo
+  - Tweaked the difficulty of the following encounters up: Obnoxious Conduits, Gem Shielders, 
+  - Final boss: Slightly tuned down the difficulty of the first phase.
+
+# 4.3.6
+
+- Fixed a defect that caused the G0lly bossfight to softlock.
+
+# 4.3.5
+
+- Fixed a defect where selectable cards (i.e., cards in deck review) with custom gun animations caused the game to softlock.
+
 # 4.3.4
 
 - The "Guardians" (Ruby/Sapphire/Emerald Guardian) are now named "Sentinels" (Ruby Sentinel, Sapphire Sentinel, and Emerald Sentinel).
 - Dialogue can now be advanced using the spacebar in addition to clicking with the mouse.
 - The Busted 3D Printer now changes its portrait when the L33pB0t sidedeck challenge is active.
-- Curve Hopper has a custom gun animation.
+- Curve Hopper, Dr. Zambot, Ignitron, and Street Sweeper now have special gun models.
 - Skeletons created by the Skeleclock ability retain their name.
 - G0lly's friend cards now can't have energy costs higher than 6.
 - "Unkillable when Powered" and "Unkillable" now work correctly together.
@@ -11,6 +28,7 @@
 - Fixed a performance issue with the "Conduit Gain Ability" template where opposing cards moving from the queue to the board would cause a framerate drop.
 - Fixed a defect where if you somehow managed to draw a Seed, playing it would softlock the game.
 - Fixed a defect with the Kaycee's Run lifetime stats screen where stats were not properly being displayed.
+- Made a minor visual tweak to the second phase of the final boss fight.
 
 # 4.3.3
 

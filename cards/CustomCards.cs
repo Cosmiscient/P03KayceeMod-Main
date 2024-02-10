@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards.Multiverse;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
@@ -24,6 +25,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public static readonly CardMetaCategory TechRegion = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "TechRegionCards");
         public static readonly CardMetaCategory NatureRegion = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "NatureRegionCards");
         public static readonly CardMetaCategory UndeadRegion = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "UndeadRegionCards");
+
+        public static readonly AbilityMetaCategory MultiverseAbility = GuidManager.GetEnumValue<AbilityMetaCategory>(P03Plugin.PluginGuid, "MultiverseAbility");
 
         public static readonly CardMetaCategory NewBeastTransformers = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "NewBeastTransformers");
 
@@ -96,7 +99,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 cardToModify.temple = CardTemple.Tech;
 
             string compName = cardToModify.name.ToLowerInvariant();
-            if (compName.StartsWith("sentinel") || cardToModify.name == "TechMoxTriple")
+            if (compName.StartsWith("sentinel") || cardToModify.name.Contains("TechMoxTriple"))
             {
                 if (compName.StartsWith("sentinel"))
                 {
@@ -686,7 +689,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.New(P03Plugin.CardPrefx, "MoxObelisk", "Mox Obelisk", 0, 4)
                 .AddAppearances(OnboardDynamicHoloPortrait.ID)
-                .AddAbilities(Ability.GainGemTriple)
+                .AddAbilities(FriendliesMagicDust.AbilityID)
                 .SetCost(energyCost: 3)
                 .AddTraits(Trait.Gem)
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/map/holomapscenery/HoloGemBlue|prefabs/map/holomapscenery/HoloGemGreen|prefabs/map/holomapscenery/HoloGemOrange|prefabs/map/holomapscenery/HoloRock_3")
@@ -955,6 +958,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (info.nameReplacement != null)
             {
                 retval += $"+;{info.nameReplacement}";
+            }
+
+            if (info.negateAbilities != null)
+            {
+                foreach (Ability ab in info.negateAbilities)
+                {
+                    retval += $"+-{ab}";
+                }
             }
 
             return retval;

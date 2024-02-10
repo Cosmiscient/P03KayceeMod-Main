@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
@@ -13,6 +14,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
     {
         public static Ability AbilityID { get; private set; }
         public override Ability Ability => AbilityID;
+
+        public static int NumberOfActiveAbilities = 0;
 
         static SapphirePower()
         {
@@ -35,14 +38,45 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
+        public override bool RespondsToOtherCardAssignedToSlot(PlayableCard otherCard) => true;
+
+        public override bool RespondsToResolveOnBoard() => true;
+
+        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
+
+        public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
+        {
+            UpdateCount();
+            yield break;
+        }
+
+        public override IEnumerator OnResolveOnBoard()
+        {
+            UpdateCount();
+            yield break;
+        }
+
+        public override IEnumerator OnOtherCardAssignedToSlot(PlayableCard otherCard)
+        {
+            UpdateCount();
+            yield break;
+        }
+
+        private void UpdateCount()
+        {
+            List<CardSlot> slots = BoardManager.Instance.GetSlots(!Card.OpponentCard);
+            NumberOfActiveAbilities = slots.Where(s => s.Card != null && !s.Card.Dead && s.Card.HasAbility(AbilityID)).Count();
+        }
+
+        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.SetupPhase))]
+        [HarmonyPrefix]
+        private static void ResetCount() => NumberOfActiveAbilities = 0;
+
         [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.EnergyCost), MethodType.Getter)]
         [HarmonyPostfix]
         private static void AdjustCostForSapphirePower(PlayableCard __instance, ref int __result)
         {
-            List<CardSlot> slots = BoardManager.Instance.GetSlots(!__instance.OpponentCard);
-            __result -= slots.Where(s => s.Card != null && s.Card.HasAbility(AbilityID)).Count();
-            if (__result < 0)
-                __result = 0;
+            __result -= NumberOfActiveAbilities;
         }
     }
 }

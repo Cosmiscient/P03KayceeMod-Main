@@ -5,9 +5,11 @@ using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03KayceeRun.Cards.Multiverse;
 using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Quests;
+using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 using UnityEngine.SceneManagement;
@@ -67,11 +69,13 @@ namespace Infiniscryption.P03KayceeRun
             }
 
             CustomCards.RegisterCustomCards(harmony);
+            MultiverseCards.CreateCards();
             StarterDecks.RegisterStarterDecks();
             AscensionChallengeManagement.UpdateP03Challenges();
             BossManagement.RegisterBosses();
             DefaultQuestDefinitions.DefineAllQuests();
             EncounterHelper.BuildEncounters();
+            MultiverseEncounters.CreateMultiverseEncounters();
 
             CustomCards.printAllCards();
 

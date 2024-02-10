@@ -142,7 +142,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 public bool PlayerUpkeep { get; set; }
                 public int QueuedTurnNumber { get; set; }
 
-                public bool ReadyForStrike(bool playerUpkeep) => PlayerUpkeep == playerUpkeep && QueuedTurnNumber < TurnManager.Instance.TurnNumber;
+                public bool ReadyForStrike(bool playerUpkeep) => PlayerUpkeep == playerUpkeep && QueuedTurnNumber < TurnManager.Instance.TurnNumber && BoardManager.Instance.AllSlotsCopy.Contains(Slot);
 
             }
 

@@ -27,6 +27,15 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         private readonly List<string> PhaseTwoWeirdCards = new() { "MantisGod", "Moose", "Grizzly", "FrankNStein", "Amalgam", "Adder", "JuniorSage", "PracticeMage", "Revenant", "Bonehound", "RubyGolem" };
 
         private CardInfo PhaseTwoBlocker;
+        private CardInfo PhaseTwoTree
+        {
+            get
+            {
+                CardInfo info = CardLoader.GetCardByName("PracticeMage");
+                info.mods.Add(new(Ability.Reach));
+                return info;
+            }
+        }
 
         private static readonly CardSlot CardSlotPrefab = ResourceBank.Get<CardSlot>("Prefabs/Cards/CardSlot_Part3");
 
@@ -122,7 +131,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             }
 
             if (NumLives == 3)
-                return BountyHunterGenerator.GenerateCardInfo(BountyHunterGenerator.GenerateMod(turn, (5 * turn) + 6));
+                return BountyHunterGenerator.GenerateCardInfo(BountyHunterGenerator.GenerateMod(turn, (4 * turn) + 6));
 
             if (NumLives == 2)
             {
@@ -297,7 +306,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 {
                     if (slot.Card == null && slot.opposingSlot.Card != null)
                     {
-                        yield return BoardManager.Instance.CreateCardInSlot(CardLoader.GetCardByName("DeadTree"), slot);
+                        yield return BoardManager.Instance.CreateCardInSlot(PhaseTwoTree, slot);
                         yield return new WaitForSeconds(0.45f);
                     }
                 }
@@ -583,7 +592,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             }
         }
 
-        private static readonly int[] MODDERS_PART_1 = new int[] { 0, 1, 1, 1, 1, 1, 0, 2, 1, 0, 2 };
+        private static readonly int[] MODDERS_PART_1 = new int[] { 0, 1, 0, 1, 1, 1, 0, 2, 1, 0, 2 };
 
         private static readonly int[] MODDERS_PART_2 = new int[] { 2, 1, 2, 0, 1, 2, 0, 1, 2, 1 };
 

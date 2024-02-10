@@ -2,9 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Card;
+using Pixelplacement;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -58,6 +62,74 @@ namespace Infiniscryption.P03KayceeRun.Cards
                             {
                                 abilityIconInteractable.SetColor(inConduitCircuit ? info.colorOverride : color);
                             }
+                            if (info.metaCategories.Contains(CustomCards.MultiverseAbility))
+                            {
+                                abilityIconInteractable.SetColor(Color.black);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(CardAbilityIcons), nameof(CardAbilityIcons.UpdateAbilityIcons))]
+        [HarmonyPostfix]
+        private static void RainbowMultiverse(CardAbilityIcons __instance, PlayableCard playableCard)
+        {
+            if (MultiverseBattleSequencer.Instance != null && playableCard != null)
+            {
+                List<GameObject> defaultIconGroups = __instance.defaultIconGroups;
+                foreach (GameObject group in defaultIconGroups)
+                {
+                    if (group.activeSelf && group.transform.parent.gameObject.name.Contains("Invisible"))
+                    {
+                        //P03Plugin.Log.LogInfo($"Updating ability icon colors for group {group}");
+                        foreach (AbilityIconInteractable abilityIconInteractable in group.GetComponentsInChildren<AbilityIconInteractable>())
+                        {
+                            // Create the dummy
+                            // Look for a duplicate icon
+                            string duplicateName = abilityIconInteractable.transform.parent.gameObject.name + "_" + abilityIconInteractable.gameObject.name + "_rainbow";
+                            Transform existing = abilityIconInteractable.transform.Find(duplicateName);
+                            P03Plugin.Log.LogInfo($"Is there already a rainbow? {existing}");
+                            Renderer rend = null;
+                            if (existing.SafeIsUnityNull())
+                            {
+                                P03Plugin.Log.LogInfo($"Creating rainbow");
+                                GameObject duplicate = GameObject.Instantiate(abilityIconInteractable.gameObject, abilityIconInteractable.transform);
+                                duplicate.name = duplicateName;
+                                duplicate.transform.localPosition = new Vector3(0f, 0f, 0.0925f);
+                                duplicate.transform.localScale = Vector3.one;
+                                duplicate.SetActive(true);
+
+                                AbilityIconInteractable dummyIcon = duplicate.GetComponent<AbilityIconInteractable>();
+                                GameObject.DestroyImmediate(dummyIcon);
+
+                                foreach (var collider in duplicate.GetComponents<Collider>())
+                                    GameObject.DestroyImmediate(collider);
+                                rend = duplicate.GetComponent<Renderer>();
+                                rend.material.shader = Shader.Find("Standard");
+                                rend.material.EnableKeyword("_EMISSION");
+                                //dummyIcon.AssignAbility(abilityIconInteractable.Ability, playableCard.Info, playableCard);
+                            }
+                            else
+                            {
+                                rend = existing.gameObject.GetComponent<Renderer>();
+                            }
+                            AbilityInfo info = AbilitiesUtil.GetInfo(abilityIconInteractable.Ability);
+                            P03Plugin.Log.LogInfo($"Icon {abilityIconInteractable.gameObject.name} {info.rulebookName} is multiverse? {info.metaCategories.Contains(CustomCards.MultiverseAbility)}");
+                            if (info.metaCategories.Contains(CustomCards.MultiverseAbility) && !abilityIconInteractable.gameObject.name.Contains("rainbow"))
+                            {
+                                var texture = abilityIconInteractable.LoadIcon(null, info, playableCard.OpponentCard);
+                                rend.material.mainTexture = texture;
+                                rend.enabled = true;
+                                rend.gameObject.SetActive(true);
+                                Tween.Value(0f, 1f, (float v) => rend.material.SetColor("_EmissionColor", RareDiscCardAppearance.RGB_GRADIENT.Evaluate(v)), 3.5f, 0f, loop: Tween.LoopType.Loop);
+                            }
+                            else
+                            {
+                                rend.enabled = false;
+                                rend.gameObject.SetActive(false);
+                            }
                         }
                     }
                 }
@@ -75,6 +147,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     if (group.activeSelf)
                     {
+                        //P03Plugin.Log.LogInfo($"Updating ability icon colors for group {group}");
                         foreach (AbilityIconInteractable abilityIconInteractable in group.GetComponentsInChildren<AbilityIconInteractable>())
                         {
                             AbilityInfo info = AbilitiesUtil.GetInfo(abilityIconInteractable.Ability);

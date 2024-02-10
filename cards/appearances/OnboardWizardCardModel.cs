@@ -72,6 +72,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         wcac.WizardPortrait.gemType = GemType.Orange;
                         wcac.WizardPortrait.enabled = true;
                     }
+                    if (prefab.name.EndsWith("PracticeMage"))
+                        wizard.transform.Find("Anim/archeryTarget").localEulerAngles = new(0f, 0f, 40f);
                     //wizard.SetActive(false);
                 }
             }

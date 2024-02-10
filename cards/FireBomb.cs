@@ -74,11 +74,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             public bool RespondsToSlotModificationChanged(CardSlot slot, SlotModificationManager.ModificationType previous, SlotModificationManager.ModificationType current) => true;
 
-            public override bool RespondsToTurnEnd(bool playerTurnEnd) => true;
+            public override bool RespondsToTurnEnd(bool playerTurnEnd)
+            {
+                return BoardManager.Instance.GetSlots(playerTurnEnd).Any(s => s != null && OnFire.Contains(s.GetSlotModification()));
+            }
 
             public override IEnumerator OnTurnEnd(bool playerTurnEnd)
             {
                 List<CardSlot> slots = BoardManager.Instance.GetSlots(playerTurnEnd);
+                P03Plugin.Log.LogInfo($"About to execute fire update on {slots.Count} slots");
                 foreach (CardSlot slot in slots.Where(s => s != null))
                 {
                     if (OnFire.Contains(slot.GetSlotModification()))

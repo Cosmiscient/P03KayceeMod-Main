@@ -329,7 +329,10 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 2
             natureZoo.turns.AddTurn(
-                Enemy("P03KCM_CXformerOpossum", replacement: "CXformerAdder", difficulty: 2),
+                Enemy("P03KCM_CXformerOpossum", replacement: "CXformerAdder", difficulty: 2)
+            );
+
+            natureZoo.turns.AddTurn(
                 Enemy(null, replacement: "P03KCM_CXformerMole", difficulty: 1)
             );
 
@@ -338,6 +341,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 Enemy("P03KCM_CXformerAlpha", overclock: 5),
                 Enemy("P03KCM_CXformerRabbit", replacement: "P03KCM_CXformerOpossum", difficulty: 3)
             );
+
 
             // TURN 4
             natureZoo.turns.AddTurn(
@@ -353,7 +357,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 6
             natureZoo.turns.AddTurn(
-                Enemy(null, replacement: "P03KCM_CXformerAlpha", difficulty: 1),
+                Enemy(null, replacement: "P03KCM_CXformerAlpha", difficulty: 4),
                 Enemy(null, replacement: "P03KCM_CXformerMantis", difficulty: 3)
             );
 
@@ -1336,7 +1340,8 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 5
             techObnoxiousConduits.turns.AddTurn(
-                Enemy("P03KCMXP2_UrchinCell", replacement: "P03KCMXP2_LockjawCell", difficulty: 5)
+                Enemy("P03KCMXP2_UrchinCell", replacement: "P03KCMXP2_LockjawCell", difficulty: 5),
+                Enemy("CellTri")
             );
 
             // TURN 6
@@ -1379,11 +1384,11 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 Enemy("ConduitTower", replacement: "AttackConduit", difficulty: 6),
             });
             techAttackConduits.AddEnemyTerrainQueue(new() {
-                Enemy(null, replacement: "AttackConduit", difficulty: 1),
+                Enemy(null, replacement: "AttackConduit", difficulty: 3),
                 null,
                 null,
                 null,
-                Enemy(null, replacement: "ConduitTower", difficulty: 1),
+                Enemy(null, replacement: "ConduitTower", difficulty: 3),
             });
 
             // TURN 1
@@ -1393,20 +1398,19 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 2
             techAttackConduits.turns.AddTurn(
-                Enemy("LeapBot", replacement: "CellGift", difficulty: 2)
+                Enemy(null, replacement: "LeapBot", difficulty: 2)
             );
 
             // TURN 3
             techAttackConduits.turns.AddTurn(
-                Enemy("Insectodrone", replacement: "Shieldbot", difficulty: 4),
+                Enemy("Automaton", replacement: "Insectodrone", difficulty: 4),
                 Enemy(null, replacement: "Shieldbot", difficulty: 6)
             );
 
             // TURN 4
             techAttackConduits.turns.AddTurn(
                 Enemy("LeapBot", replacement: "CellBuff", difficulty: 4),
-                Enemy("Automaton"),
-                Enemy(null, replacement: "P03KCMXP1_EmeraldTitan", difficulty: 5)
+                Enemy("Automaton", replacement: "P03KCMXP1_EmeraldTitan", difficulty: 5)
             );
 
             // TURN 5
@@ -1667,13 +1671,12 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 1
             techStinkyConduits.turns.AddTurn(
-                Enemy("Insectodrone")
+                Enemy("Automaton")
             );
 
             // TURN 2
             techStinkyConduits.turns.AddTurn(
-                Enemy("MineCart", overclock: 3),
-                Enemy("CellGift", replacement: "CellTri", difficulty: 5)
+                Enemy("MineCart", overclock: 3)
             );
 
             // TURN 3
@@ -2201,15 +2204,15 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 1
             wizardShieldGems.turns.AddTurn(
-                Enemy("EmptyVessel_BlueGem", overclock: 5),
-                Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 3)
+                Enemy("EmptyVessel_OrangeGem", overclock: 5),
+                Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 3)
             );
 
             // TURN 2
             wizardShieldGems.turns.AddTurn(
-                Enemy("EmptyVessel_BlueGem", replacement: "SentinelGreen", difficulty: 3),
+                Enemy("EmptyVessel_GreenGem", replacement: "SentinelGreen", difficulty: 3),
                 Enemy("Bombbot", replacement: "GemShielder", difficulty: 3, overclock: 4),
-                Enemy(null, replacement: "EmptyVessel_BlueGem", difficulty: 2, overclock: 3)
+                Enemy(null, replacement: "EmptyVessel_OrangeGem", difficulty: 2, overclock: 3)
             );
 
             // TURN 3
@@ -2217,7 +2220,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 Enemy("GemShielder", overclock: 2),
                 Enemy(null, replacement: "GemShielder", difficulty: 3, overclock: 4),
                 Enemy(null, replacement: "TechMoxTriple", difficulty: 5),
-                Enemy(null, replacement: "SentinelGreen", difficulty: 3)
+                Enemy("SentinelGreen", overclock: 3)
             );
 
             // TURN 4
@@ -2229,7 +2232,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 5
             wizardShieldGems.turns.AddTurn(
-                Enemy("EmptyVessel_BlueGem", replacement: "Bombbot", difficulty: 2),
+                Enemy("EmptyVessel_OrangeGem", replacement: "Bombbot", difficulty: 2),
                 Enemy(null, replacement: "GemShielder", difficulty: 3, overclock: 6)
             );
 

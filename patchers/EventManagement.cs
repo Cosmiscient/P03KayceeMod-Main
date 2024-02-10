@@ -172,7 +172,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             StoryEvent.LukeVOPart1Vision,
             StoryEvent.LukeVOPart2Bonelord,
             StoryEvent.LukeVOPart2Grimora,
-            StoryEvent.LukeVOPart3CloseWin
+            StoryEvent.LukeVOPart3CloseWin,
+            StoryEvent.BasicTutorialCompleted,
+            StoryEvent.TutorialRunCompleted,
+            StoryEvent.SacrificedStoatInTutorial,
+            StoryEvent.StoatIntroduction,
+            StoryEvent.BonesTutorialCompleted,
+            StoryEvent.TutorialRun2Completed
         };
 
         private static readonly Dictionary<HoloMapNode.NodeDataType, float> CostAdjustments = new()

@@ -113,6 +113,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 3)
                 .SetNeutralP03Card()
                 .AddMetaCategories(CardMetaCategory.Part3Random)
+                .SetWeaponMesh(
+                    "p03kcm/prefabs/flamethrower",
+                    localPosition: new Vector3(0f, 0f, 0f),
+                    localRotation: new Vector3(0f, 90f, 0f),
+                    localScale: new Vector3(0.75f, 0.75f, 0.75f)
+                )
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_ignitron.png", typeof(ExpansionPackCards_2).Assembly))
                 .AddAbilities(FireBomb.AbilityID);
 
@@ -152,6 +158,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_streetcleaner.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 6)
                 .SetNeutralP03Card()
+                .SetWeaponMesh(
+                    "p03kcm/prefabs/flamethrower",
+                    localPosition: new Vector3(0f, 0f, 0f),
+                    localRotation: new Vector3(0f, 90f, 0f),
+                    localScale: new Vector3(0.75f, 0.75f, 0.75f)
+                )
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_street_sweeper.png", typeof(ExpansionPackCards_2).Assembly))
                 .AddAbilities(FireBomb.AbilityID, Ability.Strafe);
 
@@ -341,6 +353,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .SetRare()
+                .SetWeaponMesh(
+                    "p03kcm/prefabs/syringe_gun_low",
+                    localPosition: new Vector3(0f, -.3f, 0f),
+                    localRotation: new Vector3(0f, 270f, 45f),
+                    localScale: new Vector3(0.04f, 0.03f, 0.03f)
+                )
                 .AddAbilities(DrawUpgrade.AbilityID);
 
             // Trash Compactor

@@ -129,7 +129,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ReRenderCard();
         }
 
-        private static readonly Gradient RGB_GRADIENT = new Gradient()
+        internal static readonly Gradient RGB_GRADIENT = new Gradient()
         {
             colorKeys = new GradientColorKey[] {
                 new GradientColorKey(new (1f, 0f, 0f), 0f),

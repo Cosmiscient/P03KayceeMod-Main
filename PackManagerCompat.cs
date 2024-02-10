@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Logging;
 using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.PackManagement;
 using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
@@ -73,6 +74,7 @@ namespace Infiniscryption.PackManagerP03Plugin
 
             // Protect the NewBeastTransformer metacategory
             PackManager.AddProtectedMetacategory(GuidManager.GetEnumValue<CardMetaCategory>(P03PluginGuid, "NewBeastTransformers"));
+            PackManager.AddProtectedMetacategory(CustomCards.MultiverseAbility);
 
             // Expansion pack
             PackInfo expPack1 = PackManager.GetPackInfo("P03KCMXP1");

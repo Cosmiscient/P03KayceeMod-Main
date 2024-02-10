@@ -6,6 +6,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using InscryptionAPI.Card;
+using InscryptionAPI.Encounters;
 using InscryptionAPI.Regions;
 using UnityEngine;
 
@@ -583,10 +584,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         }
 
         [HarmonyPatch(typeof(FriendCardCreator), nameof(FriendCardCreator.FriendToCard))]
-        [HarmonyPrefix]
+        [HarmonyPostfix]
         private static void MaxEnergyCostOfSix(CardInfo __result)
         {
-            __result.Mods.ForEach(m => m.energyCostAdjustment = Mathf.Min(m.energyCostAdjustment, 6));
+            if (__result != null && __result.Mods != null)
+                foreach (var mod in __result.Mods.Where(m => m != null))
+                    mod.energyCostAdjustment = Mathf.Min(mod.energyCostAdjustment, 6);
         }
 
         [HarmonyPatch(typeof(TextDisplayer), nameof(TextDisplayer.ManagedUpdate))]
@@ -595,6 +598,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (InputButtons.GetButtonUp(Button.EndTurn))
                 __instance.continuePressed = true;
+        }
+
+        [HarmonyPatch(typeof(Opponent), nameof(Opponent.LoadBlueprint))]
+        [HarmonyPostfix]
+        private static void OpponentLoadBlueprint(string blueprintId, ref EncounterBlueprintData __result)
+        {
+            __result ??= EncounterManager.AllEncountersCopy.FirstOrDefault(e => e.name.Equals(blueprintId, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }

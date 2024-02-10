@@ -314,7 +314,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             frankenBeast.metaCategories = new();
 
             // Clock man
-            CardManager.New(EXP_1_PREFIX, "Clockbot", "Mr:Clock", 0, 3)
+            CardManager.New(EXP_1_PREFIX, "Clockbot", "Mr:Clock", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)

@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 2280041490
+CRC: 2161727484
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 71932a4a11cec58f0c85cde773e696e8
+    Hash: 5a7da4d765a6a3271fb193d6e61a4a3c
   TypeTreeHash:
     serializedVersion: 2
     Hash: 10caaafd0ad3fcdc9870467d863128a4
@@ -62,7 +62,9 @@ Assets:
 - Assets/Prefabs/mantrap.prefab
 - Assets/Effects/Fire_Material.mat
 - Assets/Prefabs/Launcher.prefab
+- Assets/Models/flamethrower.fbx
 - Assets/Shaders/ProjectStickerShader.shader
+- Assets/Effects/cardslot_teleport.prefab
 - Assets/Textures/UFO_Middle.mat
 - Assets/Prefabs/rocket-bomb.prefab
 - Assets/Textures/PolaroidMaterial.mat
@@ -70,6 +72,7 @@ Assets:
 - Assets/Effects/Fire_Particles.png
 - Assets/Effects/Fire_Parent.prefab
 - Assets/Textures/UFO_Base.mat
+- Assets/Models/syringe_gun_low.fbx
 - Assets/Effects/UFO_Particles.png
 - Assets/Prefabs/Unlit-Bomb.prefab
 - Assets/Prefabs/Missile.prefab

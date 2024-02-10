@@ -356,6 +356,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             P03MultiverseOpponent = OpponentManager.Add(P03Plugin.PluginGuid, "P03MultiverseBoss", string.Empty, typeof(MultiverseBossOpponent))
                 .SetNewSequencer(P03Plugin.PluginGuid, "MultiverseBattleSequencer", typeof(MultiverseBattleSequencer))
                 .Id;
+
+            if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("multiverse"))
+                P03FinalBossOpponent = P03MultiverseOpponent;
         }
     }
 }
