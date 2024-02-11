@@ -84,9 +84,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static void AdjustSPBasedOnUselessMods(CardInfo info, ref int __result)
         {
-            List<CardModificationInfo> uselessMods = info.Mods.Where(m => m.ModIsUseless()).ToList();
-            int uselessCount = uselessMods.Count();
-            __result -= uselessCount;
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
+            // New formula.
+            // 1 base. +1 per ability. +1 for having been gemified by the player. Just simplify this shit.
+            // It's simpler to process and fix by a lot
+            if (info.name.Equals(ExpansionPackCards_2.RINGWORM_CARD))
+            {
+                __result = 6;
+            }
+            else
+            {
+                __result = 1 + info.Abilities.Count + (info.Gemified && !CardLoader.GetCardByName(info.name).Gemified ? 1 : 0);
+            }
         }
 
 

@@ -142,6 +142,24 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        [HarmonyPatch(typeof(CardInfoGenerator), nameof(CardInfoGenerator.CreateRandomizedAbilitiesStatsMod))]
+        [HarmonyPostfix]
+        private static void ReduceAttackPowerForDoubleStrike(ref CardModificationInfo __result)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
+            if (__result.abilities.Contains(Ability.DoubleStrike) || __result.abilities.Contains(Ability.SplitStrike))
+            {
+                __result.attackAdjustment = Mathf.Max(1, Mathf.FloorToInt(__result.attackAdjustment * 0.66f));
+            }
+
+            if (__result.abilities.Contains(Ability.TriStrike))
+            {
+                __result.attackAdjustment = Mathf.Max(1, Mathf.FloorToInt(__result.attackAdjustment * 0.4f));
+            }
+        }
+
         [HarmonyPatch(typeof(BountyHunter), nameof(BountyHunter.IntroductionSequence))]
         [HarmonyPrefix]
         private static void ResetBountyHunterTurns()

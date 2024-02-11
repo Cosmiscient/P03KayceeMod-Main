@@ -1,17 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Helpers;
+using InscryptionAPI.Card;
 using InscryptionAPI.Dialogue;
+using Sirenix.Serialization.Utilities;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
     [HarmonyPatch]
     public static class DialogueManagement
     {
+        internal static List<string> AllStringsToTranslate = new();
+        internal static bool TrackForTranslation = false;
+
+
         private static Emotion FaceEmotion(this P03AnimationController.Face face)
         {
             return face == P03AnimationController.Face.Angry
@@ -90,6 +97,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 speaker = DialogueEvent.Speaker.P03MycologistMain;
 
             bool leshy = speaker is DialogueEvent.Speaker.Leshy or DialogueEvent.Speaker.Goo or DialogueEvent.Speaker.Grimora or DialogueEvent.Speaker.Magnificus;
+
+            // Track for translation
+            AllStringsToTranslate.AddRange(lines);
 
             if (string.IsNullOrEmpty(id))
                 return;
@@ -255,5 +265,55 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPatch(typeof(TextDisplayer), nameof(TextDisplayer.ShowUntilInput))]
         [HarmonyPrefix]
         private static void Profanity2(ref string message) => Profanity(ref message);
+
+        [HarmonyPatch(typeof(CardManager), nameof(CardManager.New))]
+        [HarmonyPrefix]
+        private static void TrackCardNames(string displayName)
+        {
+            if (TrackForTranslation)
+                AllStringsToTranslate.Add(displayName);
+        }
+
+        [HarmonyPatch(typeof(AbilityManager), nameof(AbilityManager.Add))]
+        [HarmonyPrefix]
+        private static void TrackAbilityNames(AbilityInfo info)
+        {
+            if (TrackForTranslation)
+            {
+                AllStringsToTranslate.Add(info.rulebookName);
+                AllStringsToTranslate.Add(info.rulebookDescription);
+            }
+        }
+
+        internal static void ResolveCurrentTranslation()
+        {
+            // Load existing dialogue
+            string basePath = Path.GetDirectoryName(P03Plugin.Instance.Info.Location);
+            string filePath = Path.Combine(basePath, "P03Translations.gttsv");
+            Dictionary<string, List<string>> existingData = new();
+            if (File.Exists(filePath))
+            {
+                string fileContents = File.ReadAllText(filePath);
+                List<List<string>> contents = new(fileContents.Split('\n').Select(line => line.Split('\t').ToList()));
+                foreach (var lineContents in contents)
+                    existingData[lineContents[0]] = lineContents;
+            }
+
+            // Merge with all tracked dialogue
+            List<List<string>> newData = new();
+            newData.Add(new() { "Original", "English", "German", "Japanese", "Korean", "French", "Italian", "Spanish", "BrazilianPortuguese", "Turkish", "Russian", "ChineseSimplified", "ChineseTraditional" });
+            foreach (string line in AllStringsToTranslate.Distinct())
+            {
+                if (existingData.ContainsKey(line))
+                    newData.Add(existingData[line]);
+                else
+                    newData.Add(new() { line, null, null, null, null, null, null, null, null, null, null, null, null });
+            }
+
+            // Create output
+            string fileOutput = string.Join("\n", newData.Select(l => string.Join("\t", l)));
+            string outFilePath = Path.Combine(basePath, "P03Translated_Unfinished.gttsv");
+            File.WriteAllText(outFilePath, fileOutput);
+        }
     }
 }

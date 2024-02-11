@@ -893,6 +893,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return info;
         }
 
+        public static int NumberOfTimesUpgraded(this CardInfo info)
+        {
+            CardInfo baseInfo = CardLoader.GetCardByName(info.name);
+            int numberOfBaseInfoMods = baseInfo.Mods.Where(ModIsUseless).Count();
+            int numberOfCurrentMods = info.Mods.Where(ModIsUseless).Count();
+            return Mathf.Max(0, numberOfCurrentMods - numberOfBaseInfoMods);
+        }
+
         public static CardInfo RemoveAbility(this CardInfo info, Ability ability)
         {
             (info.mods ??= new()).Add(new() { negateAbilities = new() { ability } });

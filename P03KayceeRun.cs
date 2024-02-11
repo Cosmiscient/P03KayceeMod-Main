@@ -50,6 +50,8 @@ namespace Infiniscryption.P03KayceeRun
             Harmony harmony = new(PluginGuid);
             harmony.PatchAll();
 
+            DialogueManagement.TrackForTranslation = true;
+
             // Call dialogue sequence
             DialogueManagement.AddSequenceDialogue();
 
@@ -72,6 +74,8 @@ namespace Infiniscryption.P03KayceeRun
             BossManagement.RegisterBosses();
             DefaultQuestDefinitions.DefineAllQuests();
             EncounterHelper.BuildEncounters();
+            DialogueManagement.TrackForTranslation = false;
+            DialogueManagement.ResolveCurrentTranslation();
 
             CustomCards.printAllCards();
 

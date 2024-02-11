@@ -1,11 +1,12 @@
 # 4.3.7
 
+- The formula for how much SP the Build-A-Bot machine gives you for your card has been modified to be more consistent across all types of cards. 
+- Fixed a defect in the formula that determines how many Robobucks are in each pickup on the map. This should slightly increase the amount of money the player receives.
+- Bounty Hunters and Friend Cards with Bifurcated Strike now have an additional attack reduction. Surprisingly, the base game did not have a check for this already. This will mostly affect very high bounty levels.
 - Mr:Clock now has 2 health instead of 3.
 - The Mox Obelisk terrain now has the "Dust Giver" sigil instead of the "Great Mox" sigil.
-- Made a number of difficulty and balance tweaks.
-  - Tweaked the difficulty of the following encounters down: Attack Conduits, Stinky Conduits, Zoo
-  - Tweaked the difficulty of the following encounters up: Obnoxious Conduits, Gem Shielders, 
-  - Final boss: Slightly tuned down the difficulty of the first phase.
+- The following encounters are moderately easier: Attack Conduits, Stinky Conduits, Zoo, Final Boss Phase One
+- The following encounters are moderately harder: Obnoxious Conduits, Gem Shielders, Conveyor Latchers, Sentry Wall, Emerald Squids
 
 # 4.3.6
 

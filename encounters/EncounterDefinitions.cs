@@ -725,7 +725,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             neutralSentryWall.turns.AddTurn(
                 Enemy(null, replacement: "RoboSkeleton", difficulty: 2),
                 Enemy(null, replacement: "RoboSkeleton", difficulty: 5),
-                Enemy("SentryBot", replacement: "Shutterbug", difficulty: 5)
+                Enemy("SentryBot", overclock: 1, overclockAbility: Ability.GuardDog)
             );
 
             // TURN 5
@@ -1649,7 +1649,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
 
             // Encounter: Tech_StinkyConduits
-            EncounterBlueprintData techStinkyConduits = EncounterManager.New("P03KCM1_Tech_StinkyConduits", addToPool: true);
+            EncounterBlueprintData techStinkyConduits = EncounterManager.New("P03KCMXP1_Tech_StinkyConduits", addToPool: true);
             techStinkyConduits.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Tech);
             techStinkyConduits.turns = new();
             techStinkyConduits.AddTerrainRepeatRule(DefaultConduitRepeatBehavior);
@@ -2029,7 +2029,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             // TURN 1
             undeadStrafeLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_ConveyorLatcher", overclock: 2),
-                Enemy(null, "SentryBot", difficulty: 2, overclock: 5, overclockAbility: Ability.Sharp)
+                Enemy("SentryBot", overclock: 5, overclockAbility: Ability.Sharp)
             );
 
             // TURN 2
@@ -2043,21 +2043,20 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             undeadStrafeLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_ConveyorLatcher"),
                 Enemy("MineCart", replacement: "P03KCMXP1_RoboAngel", difficulty: 6),
-                Enemy(null, "SentryBot", difficulty: 2, overclock: 5, overclockAbility: Ability.Sharp)
+                Enemy("SentryBot", overclock: 5, overclockAbility: Ability.Sharp)
             );
 
             // TURN 4
             undeadStrafeLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_ConveyorLatcher", overclock: 6),
-                Enemy("MineCart"),
-                Enemy(null, replacement: "MineCart", difficulty: 2),
-                Enemy(null, replacement: "LatcherBrittle", difficulty: 4)
+                Enemy("MineCart", replacement: "LatcherBrittle", difficulty: 3)
             );
 
             // TURN 5
             undeadStrafeLatchers.turns.AddTurn(
                 Enemy("P03KCMXP1_ConveyorLatcher"),
                 Enemy("MineCart"),
+                Enemy("SentryBot", overclock: 5, overclockAbility: Ability.Sharp),
                 Enemy(null, replacement: "P03KCMXP1_ConveyorLatcher", difficulty: 1)
             );
 
@@ -2294,12 +2293,12 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 4
             wizardGuardians.turns.AddTurn(
-                Enemy(null, replacement: "P03KCMXP2_EmeraldSquid", difficulty: 1, overclock: 3, overclockAbility: Ability.GainGemGreen)
+                Enemy("P03KCMXP2_EmeraldSquid", overclock: 3, overclockAbility: Ability.GainGemGreen)
             );
 
             // TURN 5
             wizardGuardians.turns.AddTurn(
-                Enemy(null, replacement: "P03KCMXP2_EmeraldGuardian", difficulty: 2, overclock: 5),
+                Enemy("EmptyVessel_GreenGem", replacement: "P03KCMXP2_EmeraldGuardian", difficulty: 2, overclock: 5),
                 Enemy(null, replacement: "P03KCMXP2_RubyGuardian", difficulty: 3, overclock: 5)
             );
 
