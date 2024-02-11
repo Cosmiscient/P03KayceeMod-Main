@@ -25,7 +25,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public const string NUMBER_OF_MISSILES = "NumberOfMissiles";
         private int _numberOfShotsFired = 0;
-        private int MissileCount => Card.Info.GetExtendedPropertyAsInt(NUMBER_OF_MISSILES).GetValueOrDefault(1);
+        private int MissileCount
+        {
+            get
+            {
+                try
+                {
+                    return Card.Info.GetExtendedPropertyAsInt(NUMBER_OF_MISSILES).GetValueOrDefault(1);
+                }
+                catch
+                {
+                    return 1;
+                }
+            }
+        }
         private int ShotsRemaining => MissileCount - _numberOfShotsFired;
 
         private static readonly List<Texture2D> MissileIcons = new()
@@ -41,7 +54,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Launch Missile";
             info.rulebookDescription = "Skip your attack this turn to launch a missile that lands on the next turn, splashing damage to adjacent spaces. Use carefully - ammo is limited.";
             info.canStack = false;
-            info.powerLevel = 2;
+            info.powerLevel = 3;
             info.activated = true;
             info.opponentUsable = true;
             info.passive = false;
@@ -62,7 +75,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (ability.ability != AbilityID)
                 return true;
 
-            int? numberOfMissiles = info.GetExtendedPropertyAsInt(NUMBER_OF_MISSILES);
+            int? numberOfMissiles = null;
+
+            // This breaks in half during build-a-bot
+            try
+            {
+                numberOfMissiles = info.GetExtendedPropertyAsInt(NUMBER_OF_MISSILES);
+            }
+            catch { }
+
             if (!numberOfMissiles.HasValue)
             {
                 __result = MissileIcons[0];
@@ -121,7 +142,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 public bool PlayerUpkeep { get; set; }
                 public int QueuedTurnNumber { get; set; }
 
-                public bool ReadyForStrike(bool playerUpkeep) => PlayerUpkeep == playerUpkeep && QueuedTurnNumber < TurnManager.Instance.TurnNumber;
+                public bool ReadyForStrike(bool playerUpkeep) => PlayerUpkeep == playerUpkeep && QueuedTurnNumber < TurnManager.Instance.TurnNumber && BoardManager.Instance.AllSlotsCopy.Contains(Slot);
 
             }
 
@@ -195,6 +216,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     {
                         yield return TurnManager.Instance.CombatPhaseManager.PreOverkillDamage(queuedCard);
                         yield return queuedCard.TakeDamage(damage, attacker);
+                        if (queuedCard != null && !queuedCard.Dead)
+                        {
+                            if (queuedCard.HasAbility(Ability.SwapStats))
+                            {
+                                SwapStats component = queuedCard.GetComponent<SwapStats>();
+                                if (component != null)
+                                    yield return component.OnTakeDamage(queuedCard);
+                            }
+                        }
                         yield return TurnManager.Instance.CombatPhaseManager.PostOverkillDamage(queuedCard);
                     }
                 }
@@ -257,6 +287,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         {
                             yield return GlobalTriggerHandler.Instance.TriggerCardsOnBoard(Trigger.CardGettingAttacked, false, slot.Card);
                             yield return slot.Card.TakeDamage(atkDefn.AttackValue, atkDefn.Attacker);
+                            if (slot.Card != null && !slot.Card.Dead)
+                            {
+                                if (slot.Card.HasAbility(Ability.SwapStats))
+                                {
+                                    SwapStats component = slot.Card.GetComponent<SwapStats>();
+                                    if (component != null)
+                                        yield return component.OnTakeDamage(slot.Card);
+                                }
+                            }
                         }
 
                         if (atkDefn.Attacker != null)
@@ -321,7 +360,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             Tween.LocalPosition(missile.transform, Vector3.up * flyDuration, .4f, 0f, completeCallback: () => Destroy(missile));
             AudioController.Instance.PlaySound3D("missile_launch", MixerGroup.TableObjectsSFX, source.position);
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.5f);
 
             MissileStrikeManager.Instance.QueueMissileStrike(attacker, amount, target);
             yield break;
@@ -424,7 +463,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 Card.RenderInfo.OverrideAbilityIcon(AbilityID, MissileIcons[ShotsRemaining - 1]);
                 Card.RenderCard();
             }
-            yield break;
+            yield return new WaitForSeconds(0.5f);
         }
 
         public override bool RespondsToUpkeep(bool playerUpkeep) => Card.OpponentCard != playerUpkeep;
@@ -435,7 +474,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield break;
         }
 
-        public bool RespondsToBellRung(bool playerCombatPhase) => Card.OpponentCard && !playerCombatPhase;
+        public bool RespondsToBellRung(bool playerCombatPhase) => Card.OpponentCard && !playerCombatPhase && ShotsRemaining > 0;
 
         public IEnumerator OnBellRung(bool playerCombatPhase)
         {

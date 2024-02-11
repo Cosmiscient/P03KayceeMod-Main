@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
-using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using Pixelplacement;
@@ -21,7 +20,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Hopper";
             info.rulebookDescription = "At the end of each turn, [creature] moves to an empty space of its owner's choosing.";
             info.canStack = false;
-            info.powerLevel = 2;
+            info.powerLevel = 3;
             info.opponentUsable = false;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };

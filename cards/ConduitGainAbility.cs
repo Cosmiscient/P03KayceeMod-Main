@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Sequences;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -102,6 +103,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             foreach (CardSlot slot in slots.Where(s => s.Card != null))
             {
+                if (TurnManager.Instance.Opponent.queuedCards.Contains(slot.Card))
+                    continue;
+
                 List<Ability> conduitAbilities = GetConduitAbilitiesForSlot(slot);
                 CardModificationInfo info = GetConduitAbilityMod(slot.Card);
 
@@ -120,14 +124,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static void FixCardsNotOnBoard()
         {
             foreach (PlayableCard card in PlayerHand.Instance.CardsInHand)
-            {
                 ClearConduitAbilityMods(card);
-            }
 
             foreach (PlayableCard card in TurnManager.Instance.Opponent.queuedCards)
-            {
                 ClearConduitAbilityMods(card);
-            }
         }
 
         private static void ClearAllCards()
@@ -172,5 +172,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
         [HarmonyPostfix]
         private static void CleanupActiveAbilities() => ActiveAbilities.Clear();
+
+        [HarmonyPatch(typeof(PhotographerSnapshotManager), nameof(PhotographerSnapshotManager.ApplySlotState))]
+        [HarmonyPostfix]
+        private static IEnumerator ResetAferPhotog(IEnumerator sequence)
+        {
+            yield return sequence;
+
+            ActiveAbilities = BoardManager.Instance.AllSlotsCopy.Where(s => s.Card != null).SelectMany(s => s.Card.GetComponents<ConduitGainAbility>()).ToList();
+            yield break;
+        }
     }
 }

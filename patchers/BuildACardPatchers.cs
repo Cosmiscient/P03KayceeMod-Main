@@ -57,7 +57,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         __result.Add(ab);
                 }
 
-                __result = __result.Distinct().Randomize().Take(8).ToList();
+                int randomSeed = P03AscensionSaveData.RandomSeed + 25;
+                __result = __result.Distinct().OrderBy(a => SeededRandom.Value(randomSeed++) * 1000).Take(8).ToList();
             }
         }
 
@@ -65,14 +66,40 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static bool OnAddPressedFix(ref AbilityScreenButton __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
             if (__instance.Ability == Ability.None)
             {
                 __instance.SetIconShown(true);
+                if (__instance.abilityChoices == null || __instance.abilityChoices.Count < 8)
+                    __instance.abilityChoices = BuildACardInfo.GetValidAbilities();
                 __instance.Ability = __instance.abilityChoices[0];
             }
             __instance.OnLeftOrRightPressed(false);
             return false;
         }
+
+        [HarmonyPatch(typeof(RecycleCardSequencer), nameof(RecycleCardSequencer.GetCardStatPointsValue))]
+        [HarmonyPostfix]
+        private static void AdjustSPBasedOnUselessMods(CardInfo info, ref int __result)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
+            // New formula.
+            // 1 base. +1 per ability. +1 for having been gemified by the player. Just simplify this shit.
+            // It's simpler to process and fix by a lot
+            if (info.name.Equals(ExpansionPackCards_2.RINGWORM_CARD))
+            {
+                __result = 6;
+            }
+            else
+            {
+                __result = 1 + info.Abilities.Count + (info.Gemified && !CardLoader.GetCardByName(info.name).Gemified ? 1 : 0);
+            }
+        }
+
 
         public class BuildACardNameInputHandler : KeyboardInputHandler
         {

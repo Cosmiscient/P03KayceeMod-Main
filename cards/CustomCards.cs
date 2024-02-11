@@ -2,9 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
+using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.Spells.Sigils;
 using InscryptionAPI.Card;
@@ -22,6 +24,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public static readonly CardMetaCategory TechRegion = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "TechRegionCards");
         public static readonly CardMetaCategory NatureRegion = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "NatureRegionCards");
         public static readonly CardMetaCategory UndeadRegion = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "UndeadRegionCards");
+
+        public static readonly AbilityMetaCategory MultiverseAbility = GuidManager.GetEnumValue<AbilityMetaCategory>(P03Plugin.PluginGuid, "MultiverseAbility");
 
         public static readonly CardMetaCategory NewBeastTransformers = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "NewBeastTransformers");
 
@@ -47,6 +51,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string PROGRAMMER = "P03KCM_PROGRAMMER";
         public const string ARTIST = "P03KCM_ARTIST";
         public const string FIREWALL = "P03KCM_FIREWALL";
+        public const string FIREWALL_SMALL = "P03KCM_FIREWALL_0";
+        public const string FIREWALL_MEDIUM = "P03KCM_FIREWALL_1";
+        public const string FIREWALL_LARGE = "P03KCM_FIREWALL_2";
         public const string FIREWALL_NORMAL = "P03KCM_FIREWALL_BATTLE";
         public const string BRAIN = "P03KCM_BOUNTYBRAIN";
         public const string BOUNTY_HUNTER_SPAWNER = "P03KCM_BOUNTY_SPAWNER";
@@ -69,13 +76,29 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private static readonly List<CardMetaCategory> GBC_RARE_PLAYABLES = new() { CardMetaCategory.GBCPack, CardMetaCategory.GBCPlayable, CardMetaCategory.Rare, CardMetaCategory.ChoiceNode };
 
+        private static Texture2D LEEPBOT_ALT_TEXTURE = TextureHelper.GetImageAsTexture("portrait_leepbot_printer.png", typeof(CustomCards).Assembly);
+
+        private static readonly Dictionary<string, Texture2D> TEXTURE_CACHE = new();
+        private static Texture2D GetTexture(string filename, Assembly dummyAssembly = null)
+        {
+            if (TEXTURE_CACHE.ContainsKey(filename))
+                return TEXTURE_CACHE[filename];
+
+            TEXTURE_CACHE[filename] = TextureHelper.GetImageAsTexture(filename, dummyAssembly ?? typeof(CustomCards).Assembly);
+            return TEXTURE_CACHE[filename];
+        }
+
         private static void ModifyCardForAscension(CardInfo cardToModify)
         {
             // This used to be a patch on CardLoader.Clone; I'm no longer doing it that way
             // But rather than completely rewrite it, I'm just converting the old patch method to
             // run inside the CardManager event. Less can go wrong that way
+
+            if (cardToModify.holoPortraitPrefab != null)
+                cardToModify.temple = CardTemple.Tech;
+
             string compName = cardToModify.name.ToLowerInvariant();
-            if (compName.StartsWith("sentinel") || cardToModify.name == "TechMoxTriple")
+            if (compName.StartsWith("sentinel") || cardToModify.name.Contains("TechMoxTriple"))
             {
                 if (compName.StartsWith("sentinel"))
                 {
@@ -296,9 +319,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         [HarmonyPatch(typeof(Ouroboros), nameof(Ouroboros.OnDie))]
         [HarmonyPostfix]
-        private static IEnumerator OnlyIfDiedInCombat(IEnumerator sequence, PlayableCard killer)
+        private static IEnumerator OnlyIfDiedInCombat(IEnumerator sequence, Ouroboros __instance, PlayableCard killer)
         {
-            if (P03AscensionSaveData.IsP03Run && killer == null)
+            if (P03AscensionSaveData.IsP03Run && __instance.PlayableCard.Slot == ItemSlotPatches.LastSlotHammered)
             {
                 yield return EventManagement.SayDialogueOnce("P03HammerOrb", EventManagement.SAW_NEW_ORB);
                 SaveManager.SaveFile.OuroborosDeaths = SaveManager.SaveFile.OuroborosDeaths - 1;
@@ -324,18 +347,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             if (!string.IsNullOrEmpty(textureKey))
             {
-                card.SetPortrait(TextureHelper.GetImageAsTexture($"{textureKey}.png", typeof(CustomCards).Assembly));
+                card.SetPortrait(GetTexture($"{textureKey}.png"));
             }
 
             if (!string.IsNullOrEmpty(colorPortraitKey))
             {
-                card.SetAltPortrait(TextureHelper.GetImageAsTexture($"{colorPortraitKey}.png", typeof(CustomCards).Assembly));
+                card.SetAltPortrait(GetTexture($"{colorPortraitKey}.png", typeof(CustomCards).Assembly));
                 card.AddAppearances(HighResAlternatePortrait.ID);
             }
 
             if (!string.IsNullOrEmpty(pixelTextureKey))
             {
-                card.SetPixelPortrait(TextureHelper.GetImageAsTexture($"{pixelTextureKey}.png", typeof(CustomCards).Assembly));
+                card.SetPixelPortrait(GetTexture($"{pixelTextureKey}.png", typeof(CustomCards).Assembly));
             }
 
             if (!string.IsNullOrEmpty(regionCode))
@@ -346,7 +369,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             if (!string.IsNullOrEmpty(decalTextureKey))
             {
-                card.decals = new() { TextureHelper.GetImageAsTexture($"{decalTextureKey}.png", typeof(CustomCards).Assembly) };
+                card.decals = new() { GetTexture($"{decalTextureKey}.png", typeof(CustomCards).Assembly) };
             }
 
             if (isPackCard)
@@ -358,7 +381,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         internal static void RegisterCustomCards(Harmony harmony)
         {
             AbilityManager.BaseGameAbilities.AbilityByID(Ability.Transformer).Info.SetPixelAbilityIcon(
-                TextureHelper.GetImageAsTexture("pixelability_transform.png", typeof(CustomCards).Assembly)
+                GetTexture("pixelability_transform.png", typeof(CustomCards).Assembly)
             );
 
             // This creates all the sprites behind the scenes so we're ready to go
@@ -383,28 +406,37 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     cards.CardByName("TechMoxTriple").AddMetaCategories(WizardRegion);
                     cards.CardByName("EnergyRoller").AddMetaCategories(CardMetaCategory.Rare);
                     cards.CardByName("Librarian").AddAppearances(LibrarianSizeTitle.ID);
+                    cards.CardByName("AboveCurve").SetWeaponMesh(
+                        "p03kcm/prefabs/FingerGun",
+                        localPosition: new Vector3(0f, -0.66f, 0f),
+                        localRotation: new Vector3(0f, 180f, 0f),
+                        localScale: new Vector3(0.002f, 0.005f, 0.002f)
+                    );
                     cards.CardByName("TechMoxTriple").AddDecal(
                         DUMMY_DECAL,
                         DUMMY_DECAL_2,
-                        TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_2.png", typeof(CustomCards).Assembly)
+                        GetTexture("portrait_triplemox_color_decal_2.png", typeof(CustomCards).Assembly)
                     );
-                    cards.CardByName("PlasmaGunner").AddAppearances(ForceRevolverAppearance.ID);
+                    cards.CardByName("PlasmaGunner").SetWeaponMesh(DiskCardWeapon.Revolver);
 
                     cards.CardByName("JuniorSage").AddAppearances(OnboardWizardCardModel.ID);
                     cards.CardByName("PracticeMage").AddAppearances(OnboardWizardCardModel.ID);
                     cards.CardByName("RubyGolem").AddAppearances(OnboardWizardCardModel.ID);
                     cards.CardByName("MoxRuby").AddAppearances(OnboardWizardCardModel.ID);
-                }
 
-                foreach (CardInfo ci in cards.Where(ci => ci.temple == CardTemple.Tech))
-                {
-                    if (ci.metaCategories.Contains(CardMetaCategory.Rare))
-                        ci.AddAppearances(RareDiscCardAppearance.ID);
+                    if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.LEEPBOT_SIDEDECK))
+                        cards.CardByName("BustedPrinter").SetPortrait(LEEPBOT_ALT_TEXTURE);
 
-                    for (int i = 0; i < ci.abilities.Count; i++)
+                    foreach (CardInfo ci in cards.Where(ci => ci.temple == CardTemple.Tech))
                     {
-                        if (ci.abilities[i] == Ability.SteelTrap)
-                            ci.abilities[i] = BetterSteelTrap.AbilityID;
+                        if (ci.metaCategories.Contains(CardMetaCategory.Rare))
+                            ci.AddAppearances(RareDiscCardAppearance.ID);
+
+                        for (int i = 0; i < ci.abilities.Count; i++)
+                        {
+                            if (ci.abilities[i] == Ability.SteelTrap)
+                                ci.abilities[i] = BetterSteelTrap.AbilityID;
+                        }
                     }
                 }
 
@@ -425,12 +457,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             // Triple Gunner
             CardInfo qgun = CardManager.New(P03Plugin.CardPrefx, "QuadGunner", "Mega Gunner", 2, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_quad_gunner.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPortrait(GetTexture("portrait_quad_gunner.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 6)
                 .AddAbilities(Ability.TriStrike, Ability.DoubleStrike);
 
             CardInfo tgun = CardManager.New(P03Plugin.CardPrefx, "TripleGunner", "Triple Gunner", 2, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_triple_gunner.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPortrait(GetTexture("portrait_triple_gunner.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 6)
                 .AddAbilities(Ability.TriStrike)
                 .SetEvolve(qgun, 1);
@@ -440,7 +472,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Hurt Heal Conduit
 
             CardInfo hhc = CardManager.New(P03Plugin.CardPrefx, "HurtHealConduit", "Hurt-n-Heal Conduit", 0, 4)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_conduitattackhealer.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPortrait(GetTexture("portrait_conduitattackhealer.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 5)
                 .AddAbilities(Ability.ConduitBuffAttack, Ability.ConduitHeal);
 
@@ -449,25 +481,25 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             // 50er
             CardInfo minecartrad = CardManager.New(P03Plugin.CardPrefx, "MineCart_Overdrive", "50er", 1, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_50er.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetPortrait(GetTexture("portrait_50er.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .AddAbilities(Ability.Strafe, Ability.Strafe);
 
             CardManager.BaseGameCards.First(c => c.name == "MineCart").SetEvolve(minecartrad, 1);
 
             CardManager.New(P03Plugin.CardPrefx, DRAFT_TOKEN, "Basic Token", 0, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_drafttoken.png", typeof(CustomCards).Assembly))
-                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixel_drafttoken.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_drafttoken.png", typeof(CustomCards).Assembly))
+                .SetPixelPortrait(GetTexture("pixel_drafttoken.png", typeof(CustomCards).Assembly))
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, UNC_TOKEN, "Improved Token", 0, 2)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_drafttoken_plus.png", typeof(CustomCards).Assembly))
-                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixel_drafttoken_plus.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_drafttoken_plus.png", typeof(CustomCards).Assembly))
+                .SetPixelPortrait(GetTexture("pixel_drafttoken_plus.png", typeof(CustomCards).Assembly))
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, RARE_DRAFT_TOKEN, "Rare Token", 0, 3)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_drafttoken_plusplus.png", typeof(CustomCards).Assembly))
-                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixel_drafttoken.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_drafttoken_plusplus.png", typeof(CustomCards).Assembly))
+                .SetPixelPortrait(GetTexture("pixel_drafttoken.png", typeof(CustomCards).Assembly))
                 .AddAppearances(RareDiscCardAppearance.ID)
                 .temple = CardTemple.Tech;
 
@@ -489,93 +521,117 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.New(P03Plugin.CardPrefx, OLD_DATA, "UNSAFE.DAT", 0, 1)
                 .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_captivefile"))
-                .AddAbilities(LoseOnDeath.AbilityID)
+                .AddAbilities(LoseOnDeath.AbilityID, Ability.MadeOfStone)
                 .AddTraits(QuestCard)
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, CODE_BLOCK, "Code Snippet", 1, 2)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_code.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_code.png", typeof(CustomCards).Assembly))
                 .AddTraits(Programmer.CodeTrait)
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, CODE_BUG, "Bug", 2, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_bug.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_bug.png", typeof(CustomCards).Assembly))
                 .AddTraits(Programmer.CodeTrait)
                 .AddAbilities(Ability.Brittle)
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, VIRUS_SCANNER, "Virus Scanner", 1, 7)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_virusscanner.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_virusscanner.png", typeof(CustomCards).Assembly))
                 .AddAbilities(Ability.Deathtouch, Ability.StrafeSwap)
                 .AddDecal(
                     DUMMY_DECAL,
                     DUMMY_DECAL_2,
-                    TextureHelper.GetImageAsTexture("portrait_virusscanner_decal.png", typeof(CustomCards).Assembly)
+                    GetTexture("portrait_virusscanner_decal.png", typeof(CustomCards).Assembly)
                 )
                 .temple = CardTemple.Tech;
 
             CardInfo ch2 = CardManager.New(P03Plugin.CardPrefx, "AboveCurve2", "Curve Hopper Hopper", 3, 4)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_abovecurve_2.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_abovecurve_2.png", typeof(CustomCards).Assembly))
                 .AddAppearances(RareDiscCardAppearance.ID);
             ch2.temple = CardTemple.Tech;
             CardManager.BaseGameCards.CardByName("AboveCurve").SetEvolve(ch2, 1);
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL, "Turbo Vessel", 0, 2)
-                    .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
+                    .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.ConduitNull)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_BLUEGEM, "Turbo Vessel", 0, 2)
-                    .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
+                    .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemBlue)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_REDGEM, "Turbo Vessel", 0, 2)
-                    .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
+                    .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemOrange)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_GREENGEM, "Turbo Vessel", 0, 2)
-                    .SetPortrait(TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
+                    .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemGreen)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_LEAPBOT, "Turbo L33pb0t", 0, 2)
-                    .SetPortrait(TextureHelper.GetImageAsTexture("portrait_TurboL33pBot.png", typeof(CustomCards).Assembly))
+                    .SetPortrait(GetTexture("portrait_TurboL33pBot.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(Ability.Reach, DoubleSprint.AbilityID)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, FIREWALL, "Firewall", 0, 3)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_firewall.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_firewall.png", typeof(CustomCards).Assembly))
                 .AddAbilities(Ability.PreventAttack)
                 .SetCost(energyCost: 5)
                 .temple = CardTemple.Tech;
 
+            var basicFirewall = CardManager.New(P03Plugin.CardPrefx, FIREWALL_SMALL, "Firewall", 0, 1)
+                .SetPortrait(GetTexture("portrait_mute_firewall.png", typeof(CustomCards).Assembly))
+                .AddAbilities(Ability.Reach, Ability.WhackAMole)
+                .SetCost(energyCost: 1)
+                .SetCardTemple(CardTemple.Tech);
+
+            var mediumFirewall = CardManager.New(P03Plugin.CardPrefx, FIREWALL_MEDIUM, "Replicating Firewall", 0, 3)
+                .SetPortrait(GetTexture("portrait_replicating_firewall.png", typeof(CustomCards).Assembly))
+                .AddAbilities(Ability.Reach, Ability.WhackAMole)
+                .AddSpecialAbilities(ReplicatingFirewallBehavior.AbilityID)
+                .SetIceCube(basicFirewall)
+                .SetExtendedProperty(ReplicatingFirewallBehavior.NUMBER_OF_ADDITIONAL_COPIES, 2)
+                .SetCost(energyCost: 3)
+                .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, FIREWALL_LARGE, "Replicating Firewall", 0, 6)
+                .SetPortrait(GetTexture("portrait_replicating_firewall.png", typeof(CustomCards).Assembly))
+                .AddAbilities(Ability.Reach, Ability.WhackAMole)
+                .AddSpecialAbilities(ReplicatingFirewallBehavior.AbilityID)
+                .SetIceCube(mediumFirewall)
+                .SetCost(energyCost: 6)
+                .SetCardTemple(CardTemple.Tech);
+
             CardManager.New(P03Plugin.CardPrefx, FIREWALL_NORMAL, "Firewall", 0, 3)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_firewall.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_firewall.png", typeof(CustomCards).Assembly))
                 .AddAbilities(Ability.PreventAttack, Ability.StrafeSwap)
                 .SetCost(energyCost: 5)
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, BRAIN, "Hunter Brain", 0, 2)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_bounty_hunter_brain.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_bounty_hunter_brain.png", typeof(CustomCards).Assembly))
                 .AddAppearances(GoldPortrait.ID)
                 .SetCost(energyCost: 2)
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, BOUNTY_HUNTER_SPAWNER, "Activated Hunter", 0, 0)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_bounty_hunter_brain.png", typeof(CustomCards).Assembly))
-                .AddAppearances(ConditionalDynamicPortrait.ID, ForceRevolverAppearance.ID, GoldPortrait.ID)
+                .SetPortrait(GetTexture("portrait_bounty_hunter_brain.png", typeof(CustomCards).Assembly))
+                .AddAppearances(ConditionalDynamicPortrait.ID, GoldPortrait.ID)
+                .SetWeaponMesh(DiskCardWeapon.Revolver)
                 .AddAbilities(RandomBountyHunter.AbilityID)
                 .temple = CardTemple.Tech;
 
@@ -587,41 +643,67 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, "CXformerRiverSnapper", "R!V3R 5N4PP3R", 1, 6)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_riversnapper.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_transformer_riversnapper.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 4)
                 .SetNewBeastTransformer(4, 1);
 
             CardManager.New(P03Plugin.CardPrefx, "CXformerMole", "M013", 0, 4)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_mole.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_transformer_mole.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 4)
                 .AddAbilities(Ability.WhackAMole)
                 .SetNewBeastTransformer(2, 1);
 
             CardManager.New(P03Plugin.CardPrefx, "CXformerRabbit", "R488!7", 0, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_rabbit.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_transformer_rabbit.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 0)
                 .SetNewBeastTransformer(0, -2);
 
             CardManager.New(P03Plugin.CardPrefx, "CXformerMantis", "M4N7!5", 1, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_mantis.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_transformer_mantis.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 3)
                 .AddAbilities(Ability.SplitStrike)
                 .SetNewBeastTransformer(0, 0);
 
             CardManager.New(P03Plugin.CardPrefx, "CXformerAlpha", "41PH4", 1, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_alpha.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_transformer_alpha.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 5)
                 .AddAbilities(Ability.BuffNeighbours)
                 .SetNewBeastTransformer(0, 1);
 
             CardManager.New(P03Plugin.CardPrefx, "CXformerOpossum", "Robopossum", 1, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_opossum.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_transformer_opossum.png", typeof(CustomCards).Assembly))
                 .SetCost(energyCost: 2)
                 .SetNewBeastTransformer(0, -1);
 
+            CardManager.New(P03Plugin.CardPrefx, "Ghoulware", "Ghoulware", 0, 2)
+                .AddAppearances(OnboardDynamicHoloPortrait.ID)
+                .AddAbilities(Ability.Deathtouch, Ability.Sharp)
+                .SetCost(energyCost: 3)
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/map/holomapscenery/HoloZombieArm|prefabs/map/holomapscenery/HoloZombieArm|prefabs/map/holomapscenery/HoloZombieArm")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.ROTATION_KEY, "23,60,60|-15,60,60|0,80,60")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, "1.5,3,2.5|1.5,3,2.5|1.5,3,2.5")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.HIDE_CHILDREN, "HoloDirtPile_2|HoloDirtPile_2|HoloDirtPile_2")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "0,-0.45,0|0.45,-0.45,-.45|-.45,-.45,-.45")
+                .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, "MoxObelisk", "Mox Obelisk", 0, 4)
+                .AddAppearances(OnboardDynamicHoloPortrait.ID)
+                .AddAbilities(FriendliesMagicDust.AbilityID)
+                .SetCost(energyCost: 3)
+                .AddTraits(Trait.Gem)
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/map/holomapscenery/HoloGemBlue|prefabs/map/holomapscenery/HoloGemGreen|prefabs/map/holomapscenery/HoloGemOrange|prefabs/map/holomapscenery/HoloRock_3")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.HIDE_CHILDREN, "Dirt|Dirt|Dirt|nothing")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "-0.2655,-0.0873,0.3273|0.3164,-0.2364,0.3055|0.4109,0.0437,0|0,-.5,0")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.ROTATION_KEY, "0,0,0|0,0,0|0,0,0|-90,0,0")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, "0.4,0.4,0.4|0.8,0.8,0.8|0.5,0.5,0.5|2.5,2.5,1.5")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.SHADER_KEY, "default|default|default|default")
+                .SetCardTemple(CardTemple.Tech);
+            // cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "0,-.39,0");
+            // cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, ".6,.6,.6");
+
             CardInfo cTower = CardManager.New(P03Plugin.CardPrefx, "StarterConduitTower", "Conduit Tower", 0, 2)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_conduit_tower.png", typeof(CustomCards).Assembly))
-                .SetPixelPortrait(TextureHelper.GetImageAsTexture("syntax_conduittower.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_conduit_tower.png", typeof(CustomCards).Assembly))
+                .SetPixelPortrait(GetTexture("syntax_conduittower.png", typeof(CustomCards).Assembly))
                 .AddAppearances(OnboardHoloPortrait.ID)
                 .AddAbilities(Ability.ConduitNull)
                 .SetCost(energyCost: 1);
@@ -634,7 +716,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo radio = CardManager.New(P03Plugin.CardPrefx, RADIO_TOWER, "Radio Tower", 0, 3);
             radio.AddSpecialAbilities(ListenToTheRadio.AbilityID, RerenderOnBoard.AbilityID);
             radio.SetCost(energyCost: 3);
-            radio.SetPortrait(TextureHelper.GetImageAsTexture("portrait_radio.png", typeof(CustomCards).Assembly));
+            radio.SetPortrait(GetTexture("portrait_radio.png", typeof(CustomCards).Assembly));
             radio.AddAppearances(OnboardHoloPortrait.ID);
             radio.AddAppearances(QuestCardAppearance.ID);
             radio.AddTraits(QuestCard);
@@ -649,7 +731,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo powerTower = CardManager.New(P03Plugin.CardPrefx, POWER_TOWER, "Power Sink", 0, 2);
             powerTower.AddSpecialAbilities(RerenderOnBoard.AbilityID, PowerUpTheTower.AbilityID);
             powerTower.SetCost(energyCost: 3);
-            powerTower.SetPortrait(TextureHelper.GetImageAsTexture("portrait_radio.png", typeof(CustomCards).Assembly));
+            powerTower.SetPortrait(GetTexture("portrait_radio.png", typeof(CustomCards).Assembly));
             powerTower.AddAppearances(OnboardDynamicHoloPortrait.ID);
             powerTower.AddAppearances(QuestCardAppearance.ID);
             powerTower.AddTraits(QuestCard);
@@ -672,15 +754,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardInfo goobertCardBase = CardManager.New(P03Plugin.CardPrefx, MYCO_CONSTRUCT_BASE, "Experiment #1", 0, 5);
             goobertCardBase.SetCost(energyCost: 6);
-            goobertCardBase.SetPortrait(TextureHelper.GetImageAsTexture("portrait_goobot.png", typeof(CustomCards).Assembly));
+            goobertCardBase.SetPortrait(GetTexture("portrait_goobot.png", typeof(CustomCards).Assembly));
             goobertCardBase.AddAppearances(GooDiscCardAppearance.ID);
             goobertCardBase.AddSpecialAbilities(GoobertCenterCardBehaviour.AbilityID);
-            goobertCardBase.AddAbilities(TripleCardStrike.AbilityID, PowerDrain.AbilityID);
+            goobertCardBase.AddAbilities(TripleCardStrike.AbilityID);
             goobertCardBase.AddTraits(Unrotateable, Trait.Uncuttable);
             goobertCardBase.temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, SKELETON_LORD, "Skeleton Master", 0, 4)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_skeleton_lord.png", typeof(CustomCards).Assembly))
+                .SetPortrait(GetTexture("portrait_skeleton_lord.png", typeof(CustomCards).Assembly))
                 .AddAbilities(BrittleGainsUndying.AbilityID, DrawBrittle.AbilityID)
                 .SetCost(energyCost: 2)
                 .AddAppearances(RareDiscCardAppearance.ID)
@@ -811,6 +893,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return info;
         }
 
+        public static int NumberOfTimesUpgraded(this CardInfo info)
+        {
+            CardInfo baseInfo = CardLoader.GetCardByName(info.name);
+            int numberOfBaseInfoMods = baseInfo.Mods.Where(ModIsUseless).Count();
+            int numberOfCurrentMods = info.Mods.Where(ModIsUseless).Count();
+            return Mathf.Max(0, numberOfCurrentMods - numberOfBaseInfoMods);
+        }
+
         public static CardInfo RemoveAbility(this CardInfo info, Ability ability)
         {
             (info.mods ??= new()).Add(new() { negateAbilities = new() { ability } });
@@ -843,11 +933,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.SetExtendedProperty("DefaultAbilityColor", "gold");
             info.SetExtendedProperty("PortraitColor", "gold");
             info.SetExtendedProperty("Holofy", true);
+            info.SetCardTemple(CardTemple.Tech);
             info.hideAttackAndHealth = true;
             return info;
         }
 
-        private static string GetModCode(CardModificationInfo info)
+        internal static string GetModCode(CardModificationInfo info)
         {
             string retval = "";
             foreach (Ability ab in info.abilities)
@@ -874,6 +965,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (info.nameReplacement != null)
             {
                 retval += $"+;{info.nameReplacement}";
+            }
+
+            if (info.negateAbilities != null)
+            {
+                foreach (Ability ab in info.negateAbilities)
+                {
+                    retval += $"+-{ab}";
+                }
             }
 
             return retval;
@@ -929,6 +1028,43 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return retval;
         }
 
+        public static bool ModIsUseless(this CardModificationInfo info)
+        {
+            return (info.abilities == null || !info.abilities.Any(a => a != Ability.None))
+            && info.healthAdjustment == 0 && info.attackAdjustment == 0
+            && info.bloodCostAdjustment == 0 && info.energyCostAdjustment == 0 && info.bonesCostAdjustment == 0
+            && (info.addGemCost == null || info.addGemCost.Count <= 0)
+            && !info.nullifyGemsCost
+            && !info.gemify
+            && (info.negateAbilities == null || !info.negateAbilities.Any(a => a != Ability.None))
+            && (info.specialAbilities == null || info.specialAbilities.Count <= 0)
+            && info.statIcon == SpecialStatIcon.None && string.IsNullOrEmpty(info.transformerBeastCardId);
+        }
+
+        public static CardInfo SetWeaponMesh(this CardInfo info, DiskCardWeapon weapon)
+        {
+            info.AddAppearances(DiskWeaponAppearance.ID);
+            info.SetExtendedProperty(DiskWeaponAppearance.WEAPON_KEY, weapon);
+            return info;
+        }
+
+        public static CardInfo SetWeaponMesh(this CardInfo info, string weaponPrefab, Vector3? localPosition = null, Vector3? localRotation = null, Vector3? localScale = null)
+        {
+            info.AddAppearances(DiskWeaponAppearance.ID);
+            info.SetExtendedProperty(DiskWeaponAppearance.WEAPON_KEY, weaponPrefab);
+
+            if (localRotation.HasValue)
+                info.SetExtendedProperty(DiskWeaponAppearance.WEAPON_ROTATION, $"{localRotation.Value.x},{localRotation.Value.y},{localRotation.Value.z}");
+
+            if (localPosition.HasValue)
+                info.SetExtendedProperty(DiskWeaponAppearance.WEAPON_POSITION, $"{localPosition.Value.x},{localPosition.Value.y},{localPosition.Value.z}");
+
+            if (localScale.HasValue)
+                info.SetExtendedProperty(DiskWeaponAppearance.WEAPON_SCALE, $"{localScale.Value.x},{localScale.Value.y},{localScale.Value.z}");
+
+            return info;
+        }
+
         public static string ConvertCardToCompleteCode(CardInfo card) => "@" + card.name + string.Join("", card.Mods.Select(GetModCode));
 
         public static CardInfo ConvertCodeToCard(string code)
@@ -946,20 +1082,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return retval;
         }
 
-        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.EnergyCost), MethodType.Getter)]
-        [HarmonyPostfix]
-        private static void AdjustCostForTempMods(ref PlayableCard __instance, ref int __result)
-        {
-            if (__instance.temporaryMods != null)
-            {
-                foreach (CardModificationInfo tMod in __instance.temporaryMods)
-                {
-                    __result += tMod.energyCostAdjustment;
-                }
-            }
+        // [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.EnergyCost), MethodType.Getter)]
+        // [HarmonyPostfix]
+        // private static void AdjustCostForTempMods(ref PlayableCard __instance, ref int __result)
+        // {
+        //     if (__instance.temporaryMods != null)
+        //     {
+        //         foreach (CardModificationInfo tMod in __instance.temporaryMods)
+        //         {
+        //             __result += tMod.energyCostAdjustment;
+        //         }
+        //     }
 
-            __result = Mathf.Max(0, __result);
-        }
+        //     __result = Mathf.Max(0, __result);
+        // }
 
         public static bool SlotHasTripleCard(this CardSlot slot) => slot.Card != null && slot.Card.Info.SpecialAbilities.Contains(GoobertCenterCardBehaviour.AbilityID);
 

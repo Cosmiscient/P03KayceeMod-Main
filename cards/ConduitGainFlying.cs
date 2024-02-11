@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using DiskCardGame;
 using HarmonyLib;
-using InscryptionAPI;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -22,13 +21,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Airborne Conduit";
             info.rulebookDescription = "Cards within a circuit completed by [creature] have Airborne.";
             info.canStack = false;
-            info.powerLevel = 1;
+            info.powerLevel = 3;
             info.opponentUsable = false;
             info.conduit = true;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
 
-            ConduitGainFlying.AbilityID = AbilityManager.Add(
+            AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
                 info,
                 typeof(ConduitGainFlying),

@@ -19,37 +19,64 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string SCALE_KEY = "HoloPortrait.Transform.LocalScale";
         public const string COLOR = "HoloPortrait.Color";
         public const string SHADER_KEY = "HoloPortrait.ShaderKey";
+        public const string HIDE_CHILDREN = "HoloPortrait.HideChildren";
         public const string IN_HAND = "HoloPortrait.InHand";
 
         private bool portraitSpawned = false;
 
         public static Appearance ID { get; private set; }
 
-        private GameObject GetPrefab()
+        private GameObject GetPrefab(string portraitKey, string prefabKey)
         {
-            string key = Card.Info.GetExtendedProperty(PORTRAIT_KEY);
-            if (string.IsNullOrEmpty(key))
+            if (string.IsNullOrEmpty(portraitKey))
             {
-                key = Card.Info.GetExtendedProperty(PREFAB_KEY);
-
-                if (string.IsNullOrEmpty(key))
+                if (string.IsNullOrEmpty(prefabKey))
                     return null;
 
-                P03Plugin.Log.LogDebug($"Getting prefab for card portrait: {key}");
-                return Resources.Load<GameObject>(key);
+                P03Plugin.Log.LogDebug($"Getting prefab for card portrait: {prefabKey}");
+                return ResourceBank.Get<GameObject>(prefabKey);
             }
 
-            P03Plugin.Log.LogDebug($"Getting game object from holomap for card portrait: {key}");
-            return RunBasedHoloMap.GetGameObject(key);
+            P03Plugin.Log.LogDebug($"Getting game object from holomap for card portrait: {portraitKey}");
+            return RunBasedHoloMap.GetGameObject(portraitKey);
         }
 
-        private Vector3 GetVector3(string key, bool zeroDefault = true)
+        private List<GameObject> GetPrefab()
         {
-            string offset = Card.Info.GetExtendedProperty(key);
+            string allPortraitKey = Card.Info.GetExtendedProperty(PORTRAIT_KEY);
+            string allPrefabKey = Card.Info.GetExtendedProperty(PREFAB_KEY);
+
+            List<string> portraitKeys = String.IsNullOrEmpty(allPortraitKey) ? new() : allPortraitKey.Split('|').ToList();
+            List<string> prefabKeys = String.IsNullOrEmpty(allPrefabKey) ? new() : allPrefabKey.Split('|').ToList();
+
+            int numberOfObjects = Mathf.Max(portraitKeys.Count, prefabKeys.Count);
+
+            List<GameObject> retval = new();
+
+            for (int i = 0; i < numberOfObjects; i++)
+            {
+                string portraitKey = i < portraitKeys.Count ? portraitKeys[i] : string.Empty;
+                string prefabKey = i < prefabKeys.Count ? prefabKeys[i] : string.Empty;
+
+                GameObject child = GetPrefab(portraitKey, prefabKey);
+                retval.Add(child);
+            }
+
+            return retval;
+
+        }
+
+        internal static Vector3 GetVector3(Card card, string key, int index, bool zeroDefault = true)
+        {
+            string offset = card.Info.GetExtendedProperty(key);
             if (string.IsNullOrEmpty(offset))
                 return zeroDefault ? Vector3.zero : Vector3.one;
 
-            string[] offsetSplit = offset.Split(',');
+            string[] allOffsets = offset.Split('|');
+            if (allOffsets.Length <= index)
+                return zeroDefault ? Vector3.zero : Vector3.one;
+
+            string[] offsetSplit = allOffsets[index].Split(',');
             return offsetSplit.Length != 3
                 ? zeroDefault ? Vector3.zero : Vector3.one
                 : new Vector3(float.Parse(offsetSplit[0], CultureInfo.InvariantCulture),
@@ -100,9 +127,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         }
 
-        private void CleanGameObject(GameObject obj)
+        private void CleanGameObject(GameObject obj, int index)
         {
-            string colorKey = Card.Info.GetExtendedProperty(COLOR);
+            string colorKeyAll = Card.Info.GetExtendedProperty(COLOR);
+            string[] colorKeyAllSplit = string.IsNullOrEmpty(colorKeyAll) ? new string[0] : colorKeyAll.Split('|');
+            string colorKey = index < colorKeyAllSplit.Length ? colorKeyAllSplit[index] : null;
             Color color = GameColors.Instance.brightBlue;
             if (!string.IsNullOrEmpty(colorKey))
             {
@@ -111,7 +140,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     color = new Color(float.Parse(colorSplit[0]), float.Parse(colorSplit[1]), float.Parse(colorSplit[2]));
             }
 
-            string shaderKey = Card.Info.GetExtendedProperty(SHADER_KEY);
+            string shaderKeyAll = Card.Info.GetExtendedProperty(SHADER_KEY);
+            string[] shaderKeyAllSplit = string.IsNullOrEmpty(shaderKeyAll) ? new string[0] : shaderKeyAll.Split('|');
+            string shaderKey = index < shaderKeyAllSplit.Length ? shaderKeyAllSplit[index] : null;
             if (string.IsNullOrEmpty(shaderKey))
                 shaderKey = "SFHologram/HologramShader";
 
@@ -123,17 +154,47 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private void SpawnHoloPortrait(DiskCardAnimationController dcac)
         {
-            GameObject prefab = GetPrefab();
+            List<GameObject> prefab = GetPrefab();
 
-            if (prefab == null)
+            if (prefab == null || prefab.Count == 0)
                 return;
 
-            GameObject gameObject = Instantiate(prefab, dcac.holoPortraitParent);
-            CleanGameObject(gameObject);
-            gameObject.transform.localPosition = GetVector3(OFFSET_KEY);
-            gameObject.transform.localEulerAngles = GetVector3(ROTATION_KEY);
-            gameObject.transform.localScale = GetVector3(SCALE_KEY, false);
-            gameObject.SetActive(true);
+            GameObject gameObject = new("DynamicHoloPortraitParent");
+            gameObject.transform.SetParent(dcac.holoPortraitParent);
+            gameObject.transform.localPosition = Vector3.zero;
+            gameObject.transform.localEulerAngles = Vector3.zero;
+            gameObject.transform.localScale = Vector3.one;
+
+            string hideChildrenAll = Card.Info.GetExtendedProperty(HIDE_CHILDREN);
+            List<string> hideChildren = string.IsNullOrEmpty(hideChildrenAll) ? new() : hideChildrenAll.Split('|').ToList();
+            List<List<string>> childrenToHide = hideChildren.Select(s => string.IsNullOrEmpty(s) ? new() : s.Split(',').ToList()).ToList();
+
+            for (int i = 0; i < prefab.Count; i++)
+            {
+                GameObject child = Instantiate(prefab[i], gameObject.transform);
+                CleanGameObject(child, i);
+                child.transform.localPosition = GetVector3(Card, OFFSET_KEY, i);
+                child.transform.localEulerAngles = GetVector3(Card, ROTATION_KEY, i);
+                child.transform.localScale = GetVector3(Card, SCALE_KEY, i, false);
+                child.SetActive(true);
+
+                if (i < childrenToHide.Count)
+                {
+                    List<string> children = childrenToHide[i];
+                    if (children != null)
+                    {
+                        foreach (string childKey in children)
+                        {
+                            if (!string.IsNullOrEmpty(childKey))
+                            {
+                                Transform t = child.transform.Find(childKey);
+                                t?.gameObject.SetActive(false);
+                            }
+                        }
+                    }
+                }
+            }
+
             CustomCoroutine.FlickerSequence(delegate
             {
                 dcac.holoPortraitParent.gameObject.SetActive(true);

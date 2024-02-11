@@ -244,7 +244,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static readonly Dictionary<KeyCode, string> DIRECTIONS = new()
         {
-            { KeyCode.K, "S"}, { KeyCode.I, "N"},{ KeyCode.J, "W"},{ KeyCode.L, "E"}
+            { KeyCode.K, "S"}, { KeyCode.I, "N"},{ KeyCode.J, "W"}, { KeyCode.L, "E"}
         };
 
         [HarmonyPatch(typeof(ViewController), nameof(ViewController.ManagedLateUpdate))]
@@ -275,11 +275,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     if (Input.GetKey(move.Key))
                     {
                         Transform nodeTransform = arrowsParent.Find($"MoveArea_{move.Value}");
-                        if (nodeTransform == null || !nodeTransform.gameObject.activeSelf)
+                        if (move.Value.Equals("W") && nodeTransform == null)
+                            nodeTransform = arrowsParent.Find($"MoveArea_W (NORTH)");
+                        if (nodeTransform == null || (!nodeTransform.gameObject.activeSelf && !Input.GetKey(KeyCode.LeftControl)))
                             return true;
 
                         MoveHoloMapAreaNode node = nodeTransform.GetComponent<MoveHoloMapAreaNode>();
-                        if (node.Secret)
+                        if (node.Secret || !node.Enabled)
                             return true;
 
                         node.CursorSelectEnd();
@@ -292,6 +294,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     List<HoloMapNode> nodes = currentmap.GetComponentsInChildren<HoloMapNode>().Where(hn => hn is not MoveHoloMapAreaNode).ToList();
                     if (nodes.Count == 1)
                     {
+                        if (nodes[0].Secret || !nodes[0].Enabled)
+                            return true;
+
                         nodes[0].CursorSelectEnd();
                         return false;
                     }
@@ -351,6 +356,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             Part3SaveData.Data.checkpointPos = worldPosition;
 
             yield return new WaitForSeconds(1.75f);
+            ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
 
             SaveManager.SaveToFile();
         }

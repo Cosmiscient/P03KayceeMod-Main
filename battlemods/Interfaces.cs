@@ -19,6 +19,13 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         public IEnumerator OnBattleModCleanup();
     }
 
+    public interface IModifyTerrain
+    {
+        public void ModifyPlayerTerrain(CardInfo[] terrain);
+        public void ModifyOpponentTerrain(CardInfo[] terrain);
+        public void ModifyOpponentQueuedTerrain(CardInfo[] terrain);
+    }
+
     public interface IBattleModSimulator
     {
         public bool HasBoardStateAdjustment(BoardState board, bool playerIsAttacker);

@@ -1,17 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Helpers;
+using InscryptionAPI.Card;
 using InscryptionAPI.Dialogue;
+using Sirenix.Serialization.Utilities;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
     [HarmonyPatch]
     public static class DialogueManagement
     {
+        internal static List<string> AllStringsToTranslate = new();
+        internal static bool TrackForTranslation = false;
+
+
         private static Emotion FaceEmotion(this P03AnimationController.Face face)
         {
             return face == P03AnimationController.Face.Angry
@@ -24,7 +31,34 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 ? Emotion.Neutral
                 : face == P03AnimationController.Face.MycologistAngry
                 ? Emotion.Anger
-                : face == P03AnimationController.Face.MycologistLaughing ? Emotion.Laughter : Emotion.Neutral;
+                : face == P03AnimationController.Face.MycologistLaughing
+                ? Emotion.Laughter
+                : face == P03AnimationController.Face.TelegrapherBoss
+                ? Emotion.Curious
+                : face == P03AnimationController.Face.PhotographerBoss
+                ? Emotion.Anger
+                : Emotion.Neutral;
+        }
+
+        private static Emotion ParseEmotion(this string face)
+        {
+            if (face.ToLowerInvariant().Contains("goocurious"))
+                return Emotion.Neutral;
+            if (face.ToLowerInvariant().Contains("goo"))
+                return Emotion.Anger;
+            if (face.ToLowerInvariant().Contains("curious"))
+                return Emotion.Curious;
+            if (face.ToLowerInvariant().Contains("frustrated"))
+                return Emotion.Anger;
+            if (face.ToLowerInvariant().Contains("laughter"))
+                return Emotion.Laughter;
+            if (face.ToLowerInvariant().Contains("grimora"))
+                return Emotion.Neutral;
+            if (face.ToLowerInvariant().Contains("magnificus"))
+                return Emotion.Neutral;
+            if (face.ToLowerInvariant().Contains("leshy"))
+                return Emotion.Neutral;
+            return face.ParseFace().FaceEmotion();
         }
 
         private static P03AnimationController.Face ParseFace(this string face)
@@ -43,6 +77,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             DialogueEvent.Speaker speaker = DialogueEvent.Speaker.P03;
             if (faces.Exists(s => s.ToLowerInvariant().Contains("leshy")))
                 speaker = DialogueEvent.Speaker.Leshy;
+            else if (faces.Exists(s => s.ToLowerInvariant().Contains("grimora")))
+                speaker = DialogueEvent.Speaker.Grimora;
+            else if (faces.Exists(s => s.ToLowerInvariant().Contains("magnificus")))
+                speaker = DialogueEvent.Speaker.Magnificus;
             else if (faces.Exists(s => s.ToLowerInvariant().Contains("telegrapher")))
                 speaker = DialogueEvent.Speaker.P03Telegrapher;
             else if (faces.Exists(s => s.ToLowerInvariant().Contains("archivist")))
@@ -58,9 +96,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             else if (faces.Exists(s => s.ToLowerInvariant().Contains("mycolo")))
                 speaker = DialogueEvent.Speaker.P03MycologistMain;
 
-            bool leshy = speaker is DialogueEvent.Speaker.Leshy or DialogueEvent.Speaker.Goo;
+            bool leshy = speaker is DialogueEvent.Speaker.Leshy or DialogueEvent.Speaker.Goo or DialogueEvent.Speaker.Grimora or DialogueEvent.Speaker.Magnificus;
 
-            Emotion leshyEmotion = faces.Exists(s => s.ToLowerInvariant().Contains("goocurious")) ? Emotion.Curious : Emotion.Neutral;
+            // Track for translation
+            AllStringsToTranslate.AddRange(lines);
 
             if (string.IsNullOrEmpty(id))
                 return;
@@ -95,7 +134,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     specialInstruction = "",
                     p03Face = leshy ? P03AnimationController.Face.NoChange : ParseFace(face),
                     speakerIndex = 1,
-                    emotion = leshy ? leshyEmotion : ParseFace(face).FaceEmotion()
+                    emotion = ParseEmotion(face)
                 })
                 .Zip(dialogueWavies, delegate (DialogueEvent.Line line, string wavy)
                 {
@@ -226,5 +265,55 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPatch(typeof(TextDisplayer), nameof(TextDisplayer.ShowUntilInput))]
         [HarmonyPrefix]
         private static void Profanity2(ref string message) => Profanity(ref message);
+
+        [HarmonyPatch(typeof(CardManager), nameof(CardManager.New))]
+        [HarmonyPrefix]
+        private static void TrackCardNames(string displayName)
+        {
+            if (TrackForTranslation)
+                AllStringsToTranslate.Add(displayName);
+        }
+
+        [HarmonyPatch(typeof(AbilityManager), nameof(AbilityManager.Add))]
+        [HarmonyPrefix]
+        private static void TrackAbilityNames(AbilityInfo info)
+        {
+            if (TrackForTranslation)
+            {
+                AllStringsToTranslate.Add(info.rulebookName);
+                AllStringsToTranslate.Add(info.rulebookDescription);
+            }
+        }
+
+        internal static void ResolveCurrentTranslation()
+        {
+            // Load existing dialogue
+            string basePath = Path.GetDirectoryName(P03Plugin.Instance.Info.Location);
+            string filePath = Path.Combine(basePath, "P03Translations.gttsv");
+            Dictionary<string, List<string>> existingData = new();
+            if (File.Exists(filePath))
+            {
+                string fileContents = File.ReadAllText(filePath);
+                List<List<string>> contents = new(fileContents.Split('\n').Select(line => line.Split('\t').ToList()));
+                foreach (var lineContents in contents)
+                    existingData[lineContents[0]] = lineContents;
+            }
+
+            // Merge with all tracked dialogue
+            List<List<string>> newData = new();
+            newData.Add(new() { "Original", "English", "German", "Japanese", "Korean", "French", "Italian", "Spanish", "BrazilianPortuguese", "Turkish", "Russian", "ChineseSimplified", "ChineseTraditional" });
+            foreach (string line in AllStringsToTranslate.Distinct())
+            {
+                if (existingData.ContainsKey(line))
+                    newData.Add(existingData[line]);
+                else
+                    newData.Add(new() { line, null, null, null, null, null, null, null, null, null, null, null, null });
+            }
+
+            // Create output
+            string fileOutput = string.Join("\n", newData.Select(l => string.Join("\t", l)));
+            string outFilePath = Path.Combine(basePath, "P03Translated_Unfinished.gttsv");
+            File.WriteAllText(outFilePath, fileOutput);
+        }
     }
 }

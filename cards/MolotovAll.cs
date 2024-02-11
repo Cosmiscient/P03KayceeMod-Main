@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
-using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
@@ -38,14 +37,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override IEnumerator OnResolveOnBoard()
         {
             Card.Anim.LightNegationEffect();
-            List<CardSlot> mySlots = BoardManager.Instance.GetSlotsCopy(!Card.OpponentCard);
-            List<CardSlot> otherSlots = BoardManager.Instance.GetSlotsCopy(Card.OpponentCard);
+            List<CardSlot> slots = BoardManager.Instance.GetSlotsCopy(!Card.OpponentCard);
+            slots.AddRange(BoardManager.Instance.GetSlotsCopy(Card.OpponentCard));
 
-            for (int i = 0; i < mySlots.Count; i++)
-            {
-                yield return Molotov.BombCard(mySlots[i], Card, 3, 0.35f);
-                yield return Molotov.BombCard(otherSlots[i], Card, 3, 0.35f);
-            }
+            yield return Molotov.BombCardsAsync(slots, Card, 2, 0.35f);
         }
     }
 }

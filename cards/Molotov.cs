@@ -1,11 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
-using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using Pixelplacement;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -35,8 +35,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        public static IEnumerator BombCard(CardSlot target, PlayableCard attacker, int level = 2, float speed = 0.5f)
+        public static IEnumerator ThrowMolotov(CardSlot target, PlayableCard attacker, float speed = 0.35f, float delay = 0f)
         {
+            if (delay > 0)
+                yield return new WaitForSeconds(delay);
+
             GameObject bomb = Instantiate(AssetBundleManager.Prefabs["Molotov"]);
             OnboardDynamicHoloPortrait.HolofyGameObject(bomb, GameColors.instance.glowRed);
             bomb.transform.position = attacker.transform.position + (Vector3.up * 0.1f);
@@ -49,17 +52,37 @@ namespace Infiniscryption.P03KayceeRun.Cards
             Tween.LocalRotation(bomb.transform, Quaternion.Euler(new(90f, 0f, 0f)), speed, 0f, Tween.EaseLinear, Tween.LoopType.None, null, null, true);
 
             yield return new WaitForSeconds(speed);
+
             AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, target.transform.position, .7f);
+
             target.Card?.Anim.PlayHitAnimation();
 
             // The fireball should play and then delete itself, but we'll destroy it after some time anyway
             GameObject fireball = Instantiate(AssetBundleManager.Prefabs["Fire_Ball"], target.transform);
             CustomCoroutine.WaitThenExecute(3f, delegate ()
             {
-                if (fireball != null)
+                if (!fireball.SafeIsUnityNull())
                     Destroy(fireball);
             });
+        }
 
+        public static IEnumerator BombCardsAsync(List<CardSlot> target, PlayableCard attacker, int level = 2, float speed = 0.35f)
+        {
+            for (int i = 0; i < target.Count; i++)
+                attacker.StartCoroutine(ThrowMolotov(target[i], attacker, speed, 0.05f * (float)i));
+
+            yield return new WaitForSeconds(speed * 2f);
+
+            foreach (CardSlot slot in target)
+                yield return slot.SetSlotModification(FireBomb.GetFireLevel(level, slot, attacker));
+
+            yield return new WaitForSeconds(speed / 2f);
+            yield break;
+        }
+
+        public static IEnumerator BombCard(CardSlot target, PlayableCard attacker, int level = 2, float speed = 0.35f)
+        {
+            yield return ThrowMolotov(target, attacker, speed);
             yield return new WaitForSeconds(speed * 2f);
             yield return target.SetSlotModification(FireBomb.GetFireLevel(level, target, attacker));
             yield return new WaitForSeconds(speed / 2f);

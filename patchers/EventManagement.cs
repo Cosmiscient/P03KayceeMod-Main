@@ -37,6 +37,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly StoryEvent SAW_P03_BOSSPAIDRESPAWN_EXPLAIN = NewStory("SawP03PaidRespawnExplain", save: true);
         public static readonly StoryEvent GOLLY_NFT = NewStory("GollyNFTIntro", save: true);
         public static readonly StoryEvent DEFEATED_P03 = NewStory("DefeatedP03");
+        public static readonly StoryEvent DEFEATED_P03_MULTIVERSE = NewStory("DefeatedP03Multiverse");
         public static readonly StoryEvent ONLY_ONE_BOSS_LIFE = NewStory("P03AscensionOneBossLife", save: true);
         public static readonly StoryEvent OVERCLOCK_CHANGES = NewStory("P03AscensionOverclock", save: true);
         public static readonly StoryEvent TRANSFORMER_CHANGES = NewStory("P03AscensionTransformer", save: true);
@@ -94,6 +95,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 string key = P03AscensionSaveData.RunStateData.GetValue(P03Plugin.PluginGuid, "MycologistTestSubjects");
                 if (!string.IsNullOrEmpty(P03Plugin.Instance.SecretCardComponents) && P03Plugin.Instance.SecretCardComponents.StartsWith("@"))
                     key = P03Plugin.Instance.SecretCardComponents;
+
+                P03Plugin.Log.LogInfo($"MycoTestSubjects are {key}");
 
                 if (string.IsNullOrEmpty(key))
                     return retval;
@@ -169,7 +172,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             StoryEvent.LukeVOPart1Vision,
             StoryEvent.LukeVOPart2Bonelord,
             StoryEvent.LukeVOPart2Grimora,
-            StoryEvent.LukeVOPart3CloseWin
+            StoryEvent.LukeVOPart3CloseWin,
+            StoryEvent.BasicTutorialCompleted,
+            StoryEvent.TutorialRunCompleted,
+            StoryEvent.SacrificedStoatInTutorial,
+            StoryEvent.StoatIntroduction,
+            StoryEvent.BonesTutorialCompleted,
+            StoryEvent.TutorialRun2Completed
         };
 
         private static readonly Dictionary<HoloMapNode.NodeDataType, float> CostAdjustments = new()
@@ -245,10 +254,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             get
             {
                 int minExpectedUpgrades = AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.ExpensivePelts) ? 2 * CompletedZones.Count : 3 * CompletedZones.Count;
-                int actualUpgrades = Part3SaveData.Data.deck.Cards.Select(c => c.mods.Count()).Sum();
+                int actualUpgrades = Part3SaveData.Data.deck.Cards.Select(c => c.NumberOfTimesUpgraded()).Sum();
                 int upgradeDiff = Math.Max(0, minExpectedUpgrades - actualUpgrades - (Part3SaveData.Data.currency / 6));
-                int low = 4 + CompletedZones.Count + (3 * upgradeDiff);
-                int high = 8 + CompletedZones.Count + (3 * upgradeDiff);
+                int low = 5 + CompletedZones.Count + (4 * upgradeDiff);
+                int high = 8 + CompletedZones.Count + (4 * upgradeDiff);
                 return new(low, high);
             }
         }

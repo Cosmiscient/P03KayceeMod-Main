@@ -159,6 +159,10 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 if (EventId == DefaultQuestDefinitions.Prospector.EventId)
                     return Part3SaveData.Data.deck.Cards.Any(c => c.name == CustomCards.BRAIN); // Always generated if you have a bounty hunter brain in your deck
 
+                // If this is completed but there are still rewards to give?
+                if (IsCompleted && HasUngrantedRewards)
+                    return true;
+
                 // Oh duh, this cannot be in a "must be generated" state if it has been completed
                 if (IsCompleted)
                     return false;
@@ -207,6 +211,11 @@ namespace Infiniscryption.P03KayceeRun.Quests
 && currentState.Status is QuestState.QuestStateStatus.Success or QuestState.QuestStateStatus.Failure;
             }
         }
+
+        /// <summary>
+        /// Indicates whether or not the quest has ungranted rewards
+        /// </summary>
+        public bool HasUngrantedRewards => CurrentState.HasUngrantedRewards;
 
         /// <summary>
         /// Forces a quest to run all the way through its states, ending in the given state. Useful for forcing a quest to complete.

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             Ability.Evolve,
             Ability.IceCube,
             Ability.TailOnHit,
-            Ability.PermaDeath
+            Ability.PermaDeath,
+            RandomNegativeAbility.AbilityID
         };
 
         public override Ability Ability => AbilityID;
@@ -45,6 +47,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
 
+        private static string GetSkeleName(string currentName)
+        {
+            if (currentName.ToLowerInvariant().Contains("skel-e"))
+                return "Skel-E-" + currentName.Replace(" ", "-");
+
+            return "Skele " + currentName;
+        }
+
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
             if (Card.HasAbility(Ability.DrawCopy) || Card.HasAbility(Ability.DrawCopyOnDeath))
@@ -59,14 +69,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Create an exeskeleton
             DeckInfo deck = SaveManager.SaveFile.CurrentDeck;
 
-            CardInfo card = deck.Cards.Find((CardInfo x) => x.HasAbility(AbilityID) && x.name == Card.Info.name);
+            CardInfo card = deck.Cards.Find(x => IsTargetCard(x, Card, AbilityID));
 
-            // If there is no card with this name in your deck, it's probably because it's a transformer and it's
-            // currently on its other side
-            if (card == null && Card.HasAbility(Ability.Transformer) && Card.Info.evolveParams != null)
-                card = deck.Cards.Find(x => x.HasAbility(AbilityID) && x.name == Card.Info.evolveParams.evolution.name);
-
-            // If the card is STILL null, then congratulations - you've managed to find some sort of weird edge case.
+            // If the card is null, then congratulations - you've managed to find some sort of weird edge case.
             // We will just let the game play out without erroring
             if (card == null)
                 yield break;
@@ -74,7 +79,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo replacement = CardLoader.GetCardByName("RoboSkeleton");
             CardModificationInfo mod = new()
             {
-                abilities = new(card.Abilities.Where(ab => ab != AbilityID && !NOT_COPYABLE_ABILITIES.Contains(ab)).Take(3))
+                abilities = new(card.Abilities.Where(ab => ab != AbilityID && !NOT_COPYABLE_ABILITIES.Contains(ab)).Take(3)),
+                nameReplacement = GetSkeleName(card.displayedName)
             };
             replacement.mods.Add(mod);
             deck.AddCard(replacement);
@@ -96,12 +102,59 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return true;
         }
 
-        [HarmonyPatch(typeof(PermaDeath), nameof(PermaDeath.OnDie))]
-        [HarmonyPrefix]
-        private static void CheckForAchievement(PermaDeath __instance)
+        private static bool IsTargetCard(CardInfo info, PlayableCard Card, Ability targetAbility)
         {
+            try
+            {
+                if (info.name.Equals(Card.Info.name))
+                {
+                    if (info.HasAbility(targetAbility))
+                        return true;
+
+                    if (info.HasAbility(RandomNegativeAbility.AbilityID) && Card.HasAbility(RandomNegativeAbility.AbilityID))
+                        return true;
+                }
+
+                if (!Card.HasAbility(Ability.Transformer) || Card.Info.evolveParams.evolution == null)
+                    return false;
+
+                if (info.name.Equals(Card.Info.evolveParams.evolution.name))
+                {
+                    if (info.HasAbility(targetAbility))
+                        return true;
+
+                    if (info.HasAbility(RandomNegativeAbility.AbilityID) && Card.Info.evolveParams.evolution.HasAbility(RandomNegativeAbility.AbilityID))
+                        return true;
+                }
+
+                return false;
+            }
+            catch (NullReferenceException)
+            {
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(PermaDeath), nameof(PermaDeath.OnDie))]
+        [HarmonyPostfix]
+        private static IEnumerator MakePermaDeathWorkRight(IEnumerator sequence, PermaDeath __instance)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
             if (__instance.Card.HasTrait(CustomCards.QuestCard))
                 AchievementManager.Unlock(P03AchievementManagement.KILL_QUEST_CARD);
+
+            DeckInfo currentDeck = SaveManager.SaveFile.CurrentDeck;
+            CardInfo card = currentDeck.Cards.Find(x => IsTargetCard(x, __instance.Card, Ability.PermaDeath));
+
+            if (card != null)
+                currentDeck.RemoveCard(card);
+
+            yield break;
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Shield Absorption";
             info.rulebookDescription = "When [creature] is played, all creatures lose their shields. This creature gains 1 attack for each shield lost this way.";
             info.canStack = false;
-            info.powerLevel = 1;
+            info.powerLevel = 2;
             info.opponentUsable = true;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
@@ -40,15 +40,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             int shields = 0;
             foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
             {
-                if (slot.Card != null && slot.Card.HasShield())
+                while (slot.Card != null && slot.Card.HasShield())
                 {
-                    slot.Card.Status.lostShield = true;
-                    slot.Card.Anim.StrongNegationEffect();
-                    if (slot.Card.Info.name == "MudTurtle")
-                    {
-                        slot.Card.SwitchToAlternatePortrait();
-                    }
-                    slot.Card.UpdateFaceUpOnBoardEffects();
+                    yield return slot.Card.TakeDamage(1, null);
                     shields += 1;
                 }
             }

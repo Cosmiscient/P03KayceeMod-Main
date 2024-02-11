@@ -147,6 +147,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             minimap.transform.localPosition = new Vector3(2.5f, 0.5f, -2.25f);
             //minimap.transform.rotation = Quaternion.LookRotation(-Vector3.up);
 
+            var viewController = minimapContainer.AddComponent<MinimapViewLock>();
+            viewController.Child = minimap;
+
             Minimap map = minimap.AddComponent<Minimap>();
             map.xPosition = posX;
             map.yPosition = posY;
@@ -354,9 +357,29 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             public override void OnCursorSelectEnd()
             {
+                if (ViewManager.Instance.CurrentView != View.MapDefault || ViewManager.Instance.Controller.LockState == ViewLockState.Locked)
+                    return;
+
                 P03Plugin.Log.LogDebug($"Moving to {Position.worldId} [{Position.gridX}, {Position.gridY}]");
+                ViewManager.Instance.Controller.LockState = ViewLockState.Locked;
                 HoloMapAreaManager.Instance.StartCoroutine(FastTravelManagement.ReturnToLocation(Position));
             }
+        }
+    }
+
+    public class MinimapViewLock : ManagedBehaviour
+    {
+        public GameObject Child;
+
+        public override void ManagedUpdate()
+        {
+            if (Child == null)
+                return;
+
+            if (Child.activeSelf && ViewManager.Instance.CurrentView != View.MapDefault)
+                Child.SetActive(false);
+            if (!Child.activeSelf && ViewManager.Instance.CurrentView == View.MapDefault)
+                Child.SetActive(true);
         }
     }
 

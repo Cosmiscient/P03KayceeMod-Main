@@ -17,11 +17,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static CardTemple ToTemple(this Zone zone)
         {
-            if (zone == Zone.Magic)
-                return CardTemple.Wizard;
-            if (zone == Zone.Nature)
-                return CardTemple.Nature;
-            return zone == Zone.Undead ? CardTemple.Undead : CardTemple.Tech;
+            return zone == Zone.Magic
+                ? CardTemple.Wizard
+                : zone == Zone.Nature ? CardTemple.Nature : zone == Zone.Undead ? CardTemple.Undead : CardTemple.Tech;
         }
 
         private static IEnumerable<HoloMapBlueprint> AdjacentToQuadrant(this HoloMapBlueprint[,] map, int x, int y)
@@ -260,8 +258,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static void DiscoverAndCreateBridge(HoloMapBlueprint[,] map, List<HoloMapBlueprint> nodes, Zone region)
         {
-            if (region == Zone.Nature)
-                return; // Nature doesn't have bridges
+            if (region is Zone.Nature or Zone.Tech)
+                return; // Nature doesn't have bridges for flavor, tech doesn't have bridges for mechanics
 
             // This is a goofy one. We're looking for a section on the map where the area could be a bridge.
             // If so, roll the dice and make a bridge
@@ -411,16 +409,36 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 if (enemyNode.color == 1)
                 {
-                    enemyNode.encounterIndex = UnityEngine.Random.Range(0, REGION_DATA[Zone.Neutral].encounters.Length);
+                    bool assigned = false;
+                    if (P03Plugin.Instance.DebugCode.Contains("neutralencounter["))
+                    {
+                        int startIndex = P03Plugin.Instance.DebugCode.IndexOf("neutralencounter[");
+                        string encounterDataString = P03Plugin.Instance.DebugCode.Substring(startIndex).Replace("neutralencounter[", "").Split(']')[0];
+                        for (int i = 0; i < REGION_DATA[Zone.Neutral].Region.encounters.Count; i++)
+                        {
+                            if (REGION_DATA[Zone.Neutral].Region.encounters[i].name.Equals(encounterDataString, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                enemyNode.encounterIndex = i;
+                                assigned = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!assigned)
+                    {
+                        enemyNode.encounterIndex = UnityEngine.Random.Range(0, REGION_DATA[Zone.Neutral].Region.encounters.Count);
+                    }
                     //enemyNode.encounterIndex = REGION_DATA[Zone.Neutral].encounters.Length - 1;
                 }
                 else
                 {
-                    int index = UnityEngine.Random.Range(0, REGION_DATA[region].encounters.Length);
-                    while (usedIndices.Contains(index))
+                    int index = UnityEngine.Random.Range(0, REGION_DATA[region].Region.encounters.Count);
+                    int sanity = 0;
+                    while (usedIndices.Contains(index) && sanity < 20)
                     {
                         index += 1;
-                        if (index == REGION_DATA[region].encounters.Length)
+                        sanity += 1;
+                        if (index == REGION_DATA[region].Region.encounters.Count)
                             index = 0;
                     }
                     enemyNode.encounterIndex = index;
@@ -429,7 +447,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 // 50% change of terrain
                 if (UnityEngine.Random.value < 0.5f)
-                    enemyNode.battleTerrainIndex = UnityEngine.Random.Range(0, REGION_DATA[region].terrain.Length) + 1;
+                    enemyNode.battleTerrainIndex = UnityEngine.Random.Range(0, REGION_DATA[region].Terrain.Length) + 1;
 
                 rewardNode.upgrade = reward;
                 return true;
@@ -668,11 +686,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             List<HoloMapNode.NodeDataType> rewards = new() {
                 HoloMapNode.NodeDataType.CardChoice,
                 HoloMapNode.NodeDataType.AddCardAbility,
-                data.defaultReward,
+                data.DefaultReward,
                 HoloMapNode.NodeDataType.AddCardAbility,
-                data.defaultReward
+                data.DefaultReward
             };
-            for (int i = 0; i < data.encounters.Length; i++)
+            for (int i = 0; i < data.Region.encounters.Count; i++)
             {
                 HoloMapNode.NodeDataType? reward = null;
                 if (rewards.Count > 0)
@@ -685,7 +703,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             RegionGeneratorData neutral = REGION_DATA[Zone.Neutral];
-            for (int i = 0; i < neutral.encounters.Length; i++)
+            for (int i = 0; i < neutral.Region.encounters.Count; i++)
             {
                 HoloMapNode.NodeDataType? reward = null;
                 if (rewards.Count > 0)
@@ -881,30 +899,37 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static List<BattleModManager.BattleModDefinition> SelectMods(List<BattleModManager.BattleModDefinition> mods, int difficulty, int randomSeed)
         {
             // For 1 and 2, just pick a single mod
+            if (difficulty == 1 && P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("conveyor"))
+                return mods.Where(d => d.ID == ConveyorBattle.ID).ToList();
+
             if (difficulty <= 2)
                 return mods.Where(d => d.Difficulty == difficulty).OrderBy(d => SeededRandom.Value(randomSeed++)).Take(1).ToList();
 
-            int totalDiffulty = 0;
+            int totalDifficulty = 0;
             List<BattleModManager.BattleModDefinition> retval = new();
-            List<BattleModManager.BattleModDefinition> remaining = new List<BattleModManager.BattleModDefinition>(mods.OrderBy(d => SeededRandom.Value(randomSeed++)));
+            List<BattleModManager.BattleModDefinition> remaining = new(mods.OrderBy(d => SeededRandom.Value(randomSeed++)));
 
             // The first two mods are purely randomly selected
-            while (retval.Count < 2 && totalDiffulty < difficulty)
+            while (retval.Count < 2 && totalDifficulty < difficulty)
             {
-                BattleModManager.BattleModDefinition next = remaining.FirstOrDefault(d => d.Difficulty <= (difficulty - totalDiffulty));
+                BattleModManager.BattleModDefinition next = remaining.FirstOrDefault(d => d.Difficulty <= (difficulty - totalDifficulty));
 
                 if (next == null)
                     break;
 
-                totalDiffulty += next.Difficulty;
+                totalDifficulty += next.Difficulty;
                 retval.Add(next);
                 remaining.Remove(next);
             }
 
+            // At this point, add two more difficulty to the total.
+            // We've added two modifiers already. That's a lot. A third is a LOT
+            totalDifficulty += 2;
+
             // If we still have to make up room, add the last mod that gets us
             // closest to the total we want.
-            if (totalDiffulty < difficulty && remaining.Count > 0)
-                retval.Add(remaining.OrderBy(d => Mathf.Abs(d.Difficulty - (difficulty - totalDiffulty))).First());
+            if (totalDifficulty < difficulty && remaining.Count > 0)
+                retval.Add(remaining.OrderBy(d => Mathf.Abs(d.Difficulty - (difficulty - totalDifficulty))).First());
 
             return retval;
         }
@@ -924,16 +949,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // But starting with difficulty 4, we add another battle.
             // So the table looks like this:
-            // Difficulty 1-3: 1 battle
-            // Difficulty 4: 2 battles
-            // Difficulty 5: 3 battles
-            // Difficulty 6: 4 battles
+            // Difficulty 1-4: 1 battle
+            // Difficulty 5-6: 2 battles
             // Note that EACH of these have the difficulty.
             // So with both difficulty challenges on, in map four ALL FOUR battles
             // have a +6 battle mod on them.
-            if (difficultyKey > 3)
-                numberOfModdedBattles += difficultyKey - 2;
-            numberOfModdedBattles = numberOfModdedBattles > 4 ? 4 : numberOfModdedBattles;
+            if (difficultyKey >= 5)
+                numberOfModdedBattles = 2;
             List<HoloMapBlueprint> targets = rooms.Where(bp => bp.IsBattleRoom && (order > 0 || bp.color != 1)).OrderBy(x => SeededRandom.Value(randomSeed++)).Take(numberOfModdedBattles).ToList();
 
             // And now we move the difficulty key down by 1 if it's above 3
@@ -1016,7 +1038,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 UnityEngine.Random.InitState(seedForChoice + (colorsWithoutEnemies.Count * 1000));
                 int colorToUse = colorsWithoutEnemies[UnityEngine.Random.Range(0, colorsWithoutEnemies.Count)];
-                HoloMapNode.NodeDataType type = colorsWithoutEnemies.Count <= 2 ? HoloMapNode.NodeDataType.AddCardAbility : REGION_DATA[region].defaultReward;
+                HoloMapNode.NodeDataType type = colorsWithoutEnemies.Count <= 2 ? HoloMapNode.NodeDataType.AddCardAbility : REGION_DATA[region].DefaultReward;
                 if (DiscoverAndCreateEnemyEncounter(bpBlueprint, retval, order, region, type, usedIndices, colorToUse))
                     numberOfEncountersAdded += 1;
                 colorsWithoutEnemies.Remove(colorToUse);
@@ -1025,15 +1047,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             int remainingEncountersToAdd = EventManagement.ENEMIES_TO_UNLOCK_BOSS - numberOfEncountersAdded;
             for (int i = 0; i < remainingEncountersToAdd; i++)
             {
-                if (DiscoverAndCreateEnemyEncounter(bpBlueprint, retval, order, region, REGION_DATA[region].defaultReward, usedIndices))
+                if (DiscoverAndCreateEnemyEncounter(bpBlueprint, retval, order, region, REGION_DATA[region].DefaultReward, usedIndices))
                     numberOfEncountersAdded += 1;
             }
 
             P03Plugin.Log.LogInfo($"I have created {numberOfEncountersAdded} enemy encounters");
-
-            BuildBattleModifiers(retval, region, order, seed);
-
-            P03Plugin.Log.LogInfo($"I have set up battle modifiers");
 
             // Add one trade node
             bool traded = DiscoverAndCreateTrade(bpBlueprint, retval);
@@ -1043,6 +1061,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 traded = ForceTrade(bpBlueprint, retval);
                 P03Plugin.Log.LogInfo($"Forcing a trade. Successful? {traded}");
+            }
+
+            if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BATTLE_MODIFIERS))
+            {
+                BuildBattleModifiers(retval, region, order, seed);
+                P03Plugin.Log.LogInfo($"I have set up battle modifiers");
             }
 
             // Add four card choice nodes
@@ -1061,7 +1085,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 retval.GetRandomPointOfInterest().upgrade = HoloMapNode.NodeDataType.CardChoice;
 
             // And now we're just going to add one more regional upgrade
-            retval.GetRandomPointOfInterest().upgrade = REGION_DATA[region].defaultReward;
+            retval.GetRandomPointOfInterest().upgrade = REGION_DATA[region].DefaultReward;
 
             for (int i = 0; i < 3; i++)
                 retval.GetRandomPointOfInterest().upgrade = UnlockAscensionItemNodeData.UnlockItemsAscension;
@@ -1082,7 +1106,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 HoloMapBlueprint tbp2 = retval.GetRandomPointOfInterest();
                 if (tbp2 != null)
-                    tbp2.upgrade = REGION_DATA[cRegion].defaultReward;
+                    tbp2.upgrade = REGION_DATA[cRegion].DefaultReward;
             }
 
             // Add story events data

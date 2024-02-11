@@ -34,6 +34,8 @@ namespace Infiniscryption.P03KayceeRun
 
         internal string DebugCode => Config.Bind("P03KayceeMod", "DebugCode", "nothing", new BepInEx.Configuration.ConfigDescription("A special code to use for debugging purposes only. Don't change this unless your name is DivisionByZorro or he told you how it works.")).Value;
 
+        internal bool SkipCanvasFace => Config.Bind("P03KayceeMod", "SkipCanvasFace", true, new BepInEx.Configuration.ConfigDescription("If True, skips the creation of the face for the Unfinished Boss. You can change this if you really want to change his face.")).Value;
+
         internal string SecretCardComponents => Config.Bind("P03KayceeMod", "SecretCardComponents", "nothing", new BepInEx.Configuration.ConfigDescription("The secret code for the secret card")).Value;
 
         internal bool TurboMode => DebugCode.ToLowerInvariant().Contains("turbomode");
@@ -47,6 +49,8 @@ namespace Infiniscryption.P03KayceeRun
 
             Harmony harmony = new(PluginGuid);
             harmony.PatchAll();
+
+            DialogueManagement.TrackForTranslation = true;
 
             // Call dialogue sequence
             DialogueManagement.AddSequenceDialogue();
@@ -70,6 +74,8 @@ namespace Infiniscryption.P03KayceeRun
             BossManagement.RegisterBosses();
             DefaultQuestDefinitions.DefineAllQuests();
             EncounterHelper.BuildEncounters();
+            DialogueManagement.TrackForTranslation = false;
+            DialogueManagement.ResolveCurrentTranslation();
 
             CustomCards.printAllCards();
 
@@ -93,39 +99,5 @@ namespace Infiniscryption.P03KayceeRun
             AbilityManager.SyncAbilityList();
             EncounterManager.SyncEncounterList();
         }
-
-        // private class DummyPatchTarget
-        // {
-        //     private List<Ability> DummyMethod() => null;
-        // }
-
-        // [HarmonyPatch]
-        // private class DeckEditorCompatPatch
-        // {
-        //     public static MethodBase TargetMethod()
-        //     {
-        //         foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies().Reverse())
-        //         {
-        //             Type testType = assembly.GetType("DeckEditor");
-        //             if (testType != null)
-        //             {
-        //                 MethodInfo meth = AccessTools.FirstMethod(testType, m => m.Name.Contains("GetAllAbilities"));
-        //                 if (meth != null)
-        //                     return meth;
-        //             }
-        //         }
-        //         return typeof(DummyPatchTarget).GetMethod("DummyMethod");
-        //     }
-
-        //     public static bool Prefix(ref List<Ability> __result)
-        //     {
-        //         __result = GuidManager.GetValues<Ability>()
-        //                               .Select(AbilitiesUtil.GetInfo)
-        //                               .Where(ai => ai != null)
-        //                               .Select(ai => ai.ability)
-        //                               .ToList();
-        //         return false;
-        //     }
-        // }
     }
 }

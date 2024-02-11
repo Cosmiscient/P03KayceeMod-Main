@@ -23,7 +23,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private AlarmState GetDefaultState()
         {
             int? defaultState = Card.Info.GetExtendedPropertyAsInt(DEFAULT_STATE_KEY);
-            return defaultState.HasValue && defaultState.Value >= 0 && defaultState.Value <= 3 ? (AlarmState)defaultState.Value : AlarmState.Up;
+            if (defaultState.HasValue && defaultState.Value >= 0 && defaultState.Value <= 3)
+                return (AlarmState)defaultState.Value;
+
+            if (Card.OpponentCard)
+                return AlarmState.Down;
+
+            return AlarmState.Up;
         }
 
         private AlarmState CurrentState = AlarmState.Up;
@@ -33,7 +39,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private static readonly Dictionary<AlarmState, Texture> Textures = new();
 
-        private RotatingAlarm()
+        private void Start()
         {
             CurrentState = Card != null && Card.RenderInfo != null && Card.RenderInfo.overriddenAbilityIcons != null && Card.RenderInfo.overriddenAbilityIcons.ContainsKey(AbilityID)
                 ? Card.RenderInfo.overriddenAbilityIcons[AbilityID].name.Equals(Textures[AlarmState.Up].name)
@@ -46,6 +52,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     ? AlarmState.Right
                     : GetDefaultState()
                 : GetDefaultState();
+
+            Card.RenderInfo.OverrideAbilityIcon(AbilityID, GetTextureForAlarm(CurrentState));
+            Card.RenderCard();
         }
 
         static RotatingAlarm()
@@ -74,20 +83,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
             Textures.Add(AlarmState.Down, TextureHelper.GetImageAsTexture("ability_alarmdown.png", typeof(RotatingAlarm).Assembly));
         }
 
-        public static AlarmState GetNextAbility(AlarmState current)
+        public AlarmState GetNextAbility(AlarmState current)
         {
-            return current == AlarmState.Up
-                ? AlarmState.Right
-                : current == AlarmState.Right ? AlarmState.Down : current == AlarmState.Down ? AlarmState.Left : AlarmState.Up;
+            int cIdx = (int)current + 1;
+            if (cIdx > 3)
+                cIdx = 0;
+            return (AlarmState)cIdx;
         }
 
         public Texture GetTextureForAlarm(AlarmState current)
         {
-            return Card.OpponentCard
-                ? current == AlarmState.Up
-                    ? Textures[AlarmState.Down]
-                    : current == AlarmState.Down ? Textures[AlarmState.Up] : Textures[current]
-                : Textures[current];
+            return Textures[current];
         }
 
         public override bool RespondsToResolveOnBoard() => true;
@@ -103,14 +109,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnUpkeep(bool playerUpkeep)
         {
+            if (Card == null || Card.Dead || Card.RenderInfo == null)
+                yield break;
+
             ViewManager.Instance.SwitchToView(View.Board, false, false);
             yield return new WaitForSeconds(0.25f);
             AudioController.Instance.PlaySound3D("cuckoo_clock_open", MixerGroup.TableObjectsSFX, gameObject.transform.position, 1f, 0f, new AudioParams.Pitch(AudioParams.Pitch.Variation.VerySmall), null, null, null, false);
             yield return new WaitForSeconds(0.1f);
-            CurrentState = GetNextAbility(CurrentState);
-            Card.RenderInfo.OverrideAbilityIcon(AbilityID, GetTextureForAlarm(CurrentState));
-            Card.RenderCard();
-            yield return new WaitForSeconds(0.3f);
+            if (Card != null && !Card.Dead && Card.RenderInfo != null)
+            {
+                CurrentState = GetNextAbility(CurrentState);
+                Card.RenderInfo.OverrideAbilityIcon(AbilityID, GetTextureForAlarm(CurrentState));
+                Card.RenderCard();
+                yield return new WaitForSeconds(0.3f);
+            }
             ViewManager.Instance.SwitchToView(View.Default, false, false);
             yield break;
         }
@@ -119,10 +131,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             if (Card.Slot != null && target.Slot != null)
             {
-                if (CurrentState == AlarmState.Up && target.Slot == Card.Slot.opposingSlot)
-                    return 1;
-                if (CurrentState == AlarmState.Down && target == Card)
-                    return 1;
+                if (CurrentState == AlarmState.Up)
+                {
+                    if (Card.OpponentCard && target == Card)
+                        return 1;
+                    if (!Card.OpponentCard && target.Slot == Card.Slot.opposingSlot)
+                        return 1;
+                }
+                if (CurrentState == AlarmState.Down)
+                {
+                    if (Card.OpponentCard && target.Slot == Card.Slot.opposingSlot)
+                        return 1;
+                    if (!Card.OpponentCard && target == Card)
+                        return 1;
+                }
                 if (CurrentState == AlarmState.Left && target.Slot == BoardManager.Instance.GetAdjacent(Card.Slot, true))
                     return 1;
                 if (CurrentState == AlarmState.Right && target.Slot == BoardManager.Instance.GetAdjacent(Card.Slot, false))

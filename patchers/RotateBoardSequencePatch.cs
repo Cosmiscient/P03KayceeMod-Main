@@ -85,6 +85,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 yield return sequence;
             }
+            BoardManager.Instance.AllSlotsCopy.ForEach(cs => cs.Card?.UpdateFaceUpOnBoardEffects());
             yield break;
         }
     }

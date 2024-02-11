@@ -6,6 +6,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using InscryptionAPI.Card;
+using InscryptionAPI.Encounters;
 using InscryptionAPI.Regions;
 using UnityEngine;
 
@@ -16,34 +17,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     {
         [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.AddTemporaryMod))]
         [HarmonyPrefix]
-        private static bool ProperlyRemoveSingletonTempMods(PlayableCard __instance, CardModificationInfo mod)
+        [HarmonyPriority(Priority.VeryHigh)]
+        private static void ProperlyRemoveSingletonTempMods(PlayableCard __instance, CardModificationInfo mod)
         {
             if (!string.IsNullOrEmpty(mod.singletonId))
             {
                 CardModificationInfo cardModificationInfo = __instance.temporaryMods.Find(x => String.Equals(x.singletonId, mod.singletonId));
                 if (cardModificationInfo != null)
                 {
-                    __instance.RemoveTemporaryMod(mod, true);
-                }
-            }
-            __instance.temporaryMods.Add(mod);
-            using (List<Ability>.Enumerator enumerator = mod.abilities.GetEnumerator())
-            {
-                while (enumerator.MoveNext())
-                {
-                    Ability ability = enumerator.Current;
-                    if (!__instance.temporaryMods.Exists((CardModificationInfo x) => x.negateAbilities.Contains(ability)))
+                    __instance.temporaryMods.Remove(cardModificationInfo);
+                    foreach (Ability ability in cardModificationInfo.abilities)
                     {
-                        __instance.TriggerHandler.AddAbility(ability);
+                        __instance.TriggerHandler.RemoveAbility(ability);
                     }
                 }
             }
-            foreach (Ability ability2 in mod.negateAbilities)
-            {
-                __instance.TriggerHandler.RemoveAbility(ability2);
-            }
-            __instance.OnStatsChanged();
-            return false;
         }
 
         [HarmonyPatch(typeof(Card), nameof(Card.SetInfo))]
@@ -166,6 +154,24 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         info.attackTextColor = GameColors.Instance.gold;
                     if (ResourcesManager.Instance.HasGem(GemType.Green))
                         info.attackTextColor = GameColors.Instance.brightLimeGreen;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(BoardStateEvaluator), nameof(BoardStateEvaluator.EvaluateBoardState))]
+        [HarmonyPostfix]
+        private static void FixCellEvaluation(BoardState state, ref int __result)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
+            foreach (BoardState.SlotState slot in state.opponentSlots)
+            {
+                if (slot.card != null && slot.card.info.HasCellAbility())
+                {
+                    float num4 = (state.opponentSlots.Count - 1) / 2f;
+                    float num5 = Mathf.Abs(num4 - state.opponentSlots.IndexOf(slot));
+                    __result -= 2 * Mathf.RoundToInt(num4 - num5);
                 }
             }
         }
@@ -394,6 +400,211 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return false;
             }
             return true;
+        }
+
+        // [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.Attack), MethodType.Getter)]
+        // [HarmonyPostfix]
+        // [HarmonyPriority(Priority.VeryLow)]
+        // private static void SwapStatsAttackPatch(PlayableCard __instance, ref int __result)
+        // {
+        //     if (!__instance.HasAbility(Ability.SwapStats))
+        //         return;
+
+        //     SwapStats swapper = __instance.GetComponent<SwapStats>();
+        //     if (swapper == null || !swapper.swapped)
+        //         return;
+
+        //     __result = Mathf.Max(0, __instance.MaxHealth - __instance.Status.damageTaken);
+        // }
+
+        // [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.Health), MethodType.Getter)]
+        // [HarmonyPostfix]
+        // [HarmonyPriority(Priority.VeryLow)]
+        // private static void SwapStatsHealthPatch(PlayableCard __instance, ref int __result)
+        // {
+        //     if (!__instance.HasAbility(Ability.SwapStats))
+        //         return;
+
+        //     SwapStats swapper = __instance.GetComponent<SwapStats>();
+        //     if (swapper == null || !swapper.swapped)
+        //         return;
+
+        //     __result = Mathf.Max(0, __instance.Info.Attack + __instance.GetAttackModifications() + __instance.GetPassiveAttackBuffs());
+        // }
+
+        // [HarmonyPatch(typeof(SwapStats), nameof(SwapStats.Start))]
+        // [HarmonyPrefix]
+        // private static bool DontDoThisForP03() => !P03AscensionSaveData.IsP03Run;
+
+        private static bool ShouldCountTempMod(CardModificationInfo mod)
+        {
+            if (string.IsNullOrEmpty(mod.singletonId))
+                return true;
+
+            if (mod.singletonId.Equals("zeroout") || mod.singletonId.Equals("statswap"))
+                return false;
+
+            return true;
+        }
+
+        [HarmonyPatch(typeof(SwapStats), nameof(SwapStats.OnTakeDamage))]
+        [HarmonyPostfix]
+        private static IEnumerator SimpleSwapStatsFixHopefully(IEnumerator sequence, SwapStats __instance)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            P03Plugin.Log.LogInfo("In custom swap stats damage trigger!");
+            yield return new WaitForSeconds(0.5f);
+            if (__instance.Card.Info.name == "SwapBot")
+            {
+                __instance.swapped = !__instance.swapped;
+                if (__instance.swapped)
+                {
+                    __instance.Card.SwitchToAlternatePortrait();
+                }
+                else
+                {
+                    __instance.Card.SwitchToDefaultPortrait();
+                }
+            }
+            int health = __instance.Card.Health - __instance.Card.GetPassiveHealthBuffs();
+            __instance.Card.HealDamage(__instance.Card.Status.damageTaken);
+            int attack = __instance.Card.Attack - __instance.Card.GetPassiveAttackBuffs();
+            __instance.mod.attackAdjustment = health - __instance.Card.TemporaryMods.Where(ShouldCountTempMod).Select(m => m.attackAdjustment).Sum();
+            __instance.mod.healthAdjustment = attack - __instance.Card.TemporaryMods.Where(ShouldCountTempMod).Select(m => m.healthAdjustment).Sum();
+            __instance.Card.OnStatsChanged();
+            __instance.Card.Anim.StrongNegationEffect();
+            yield return new WaitForSeconds(0.25f);
+            yield return __instance.Card.Health <= 0 ? __instance.Card.Die(false, null, true) : (object)__instance.LearnAbility(0.25f);
+            yield break;
+        }
+
+        [HarmonyPatch(typeof(DeckInfo), nameof(DeckInfo.AddCard))]
+        [HarmonyPrefix]
+        private static bool DontRemodCardsThanksToAPICopyingModsOnClone(DeckInfo __instance, CardInfo card, ref CardInfo __result)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
+            CardInfo cardInfo = card.Clone() as CardInfo;
+            __instance.Cards.Add(cardInfo);
+            __instance.cardIds.Add(card.name);
+            __instance.UpdateModDictionary();
+            __result = cardInfo;
+            return false;
+        }
+
+        [HarmonyPatch(typeof(DrawCopy), nameof(DrawCopy.CardToDrawTempMods), MethodType.Getter)]
+        [HarmonyPostfix]
+        private static void EnsureAllFecundityOverrides(ref List<CardModificationInfo> __result)
+        {
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                __result[0].negateAbilities.Add(Ability.DrawCopy);
+            }
+        }
+
+
+        [HarmonyPatch(typeof(ExplodeOnDeath), nameof(ExplodeOnDeath.BombCard))]
+        [HarmonyPostfix]
+        private static IEnumerator PreventErrors(IEnumerator sequence, ExplodeOnDeath __instance, PlayableCard target, PlayableCard attacker)
+        {
+            if (target == null || attacker == null || __instance.bombPrefab == null || target.Anim == null)
+                yield break;
+
+            while (sequence.MoveNext())
+            {
+                if (target == null || attacker == null || __instance.bombPrefab == null || target.Anim == null)
+                    yield break;
+
+                yield return sequence.Current;
+            }
+            yield break;
+        }
+
+        [HarmonyPatch(typeof(PhotographerSnapshotManager), nameof(PhotographerSnapshotManager.ApplySlotState))]
+        [HarmonyPostfix]
+        private static IEnumerator DontLetTempModsGetOverwritten(IEnumerator sequence, BoardState.SlotState slotState, CardSlot slot)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            yield return BoardManager.Instance.CreateCardInSlot(slotState.card.info, slot, 0f, false);
+            PlayableCard card = slot.Card;
+            (card.Anim as DiskCardAnimationController).Expand(true);
+            foreach (var mod in slotState.card.temporaryMods)
+            {
+                if (string.IsNullOrEmpty(mod.singletonId) || !card.TemporaryMods.Any(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(mod.singletonId)))
+                    card.TemporaryMods.Add(mod);
+            }
+            //card.TemporaryMods = new List<CardModificationInfo>(slotState.card.temporaryMods);
+            card.Status = new PlayableCardStatus(slotState.card.status);
+            card.OnStatsChanged();
+            ResourcesManager.Instance.ForceGemsUpdate();
+            foreach (var restorer in card.GetComponents<IRestoreFromSnapshot>())
+                restorer?.RestoreFromSnapshot(slotState.card);
+            yield break;
+        }
+
+        [HarmonyPatch(typeof(CardInfo), nameof(CardInfo.HasTrait))]
+        [HarmonyPostfix]
+        private static void ChangeGemTraitBehavior(CardInfo __instance, Trait trait, ref bool __result)
+        {
+            if (P03AscensionSaveData.IsP03Run && trait == Trait.Gem && !__result)
+            {
+                if (__instance.HasAnyOfAbilities(Ability.GainGemBlue, Ability.GainGemGreen, Ability.GainGemOrange, Ability.GainGemTriple))
+                {
+                    __result = true;
+                    return;
+                }
+
+                if (TurnManager.Instance != null && TurnManager.Instance.opponent != null)
+                {
+                    foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
+                    {
+                        if (slot.Card != null && slot.Card.Info == __instance)
+                        {
+                            if (slot.Card.HasAnyOfAbilities(Ability.GainGemBlue, Ability.GainGemGreen, Ability.GainGemOrange, Ability.GainGemTriple))
+                            {
+                                __result = true;
+                                return;
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(FriendCardCreator), nameof(FriendCardCreator.FriendToCard))]
+        [HarmonyPostfix]
+        private static void MaxEnergyCostOfSix(CardInfo __result)
+        {
+            if (__result != null && __result.Mods != null)
+                foreach (var mod in __result.Mods.Where(m => m != null))
+                    mod.energyCostAdjustment = Mathf.Min(mod.energyCostAdjustment, 6);
+        }
+
+        [HarmonyPatch(typeof(TextDisplayer), nameof(TextDisplayer.ManagedUpdate))]
+        [HarmonyPrefix]
+        private static void AdvanceTextWithSpacebar(TextDisplayer __instance)
+        {
+            if (InputButtons.GetButtonUp(Button.EndTurn))
+                __instance.continuePressed = true;
+        }
+
+        [HarmonyPatch(typeof(Opponent), nameof(Opponent.LoadBlueprint))]
+        [HarmonyPostfix]
+        private static void OpponentLoadBlueprint(string blueprintId, ref EncounterBlueprintData __result)
+        {
+            __result ??= EncounterManager.AllEncountersCopy.FirstOrDefault(e => e.name.Equals(blueprintId, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }

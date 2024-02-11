@@ -83,6 +83,7 @@
     <Exec Command="xcopy /Y $(ProjectDir)\assets\*.wav $(ProjectDir)\package\BepInEx\plugins\Infiniscryption\assets" />
     -->
     <Exec Command="xcopy /Y $(ProjectDir)\README.md $(ProjectDir)\package" />
+    <Exec Command="xcopy /Y $(ProjectDir)\CHANGELOG.md $(ProjectDir)\package" />
     <Exec Command="xcopy /Y $(ProjectDir)\icon.png $(ProjectDir)\package" />
     <Exec Command="xcopy /Y $(ProjectDir)\manifest.json $(ProjectDir)\package" />
   </Target>

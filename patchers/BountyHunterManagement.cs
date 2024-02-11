@@ -27,7 +27,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (P03AscensionSaveData.IsP03Run)
             {
-                if (BoardManager.Instance.AllSlotsCopy.Any(SlotHasBrain))
+                if (BoardManager.Instance.AllSlotsCopy.Any(SlotHasBrain) && !Part3SaveData.Data.deck.Cards.Any(ci => ci.name.Equals(CustomCards.BRAIN)))
                 {
                     yield return TextDisplayer.Instance.PlayDialogueEvent("P03BountyHunterBrain", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                     CardInfo brain = CardLoader.GetCardByName(CustomCards.BRAIN);
@@ -139,6 +139,24 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     tierSix
                 };
                 __instance.bountyTierObjects = newStars.ToArray();
+            }
+        }
+
+        [HarmonyPatch(typeof(CardInfoGenerator), nameof(CardInfoGenerator.CreateRandomizedAbilitiesStatsMod))]
+        [HarmonyPostfix]
+        private static void ReduceAttackPowerForDoubleStrike(ref CardModificationInfo __result)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
+            if (__result.abilities.Contains(Ability.DoubleStrike) || __result.abilities.Contains(Ability.SplitStrike))
+            {
+                __result.attackAdjustment = Mathf.Max(1, Mathf.FloorToInt(__result.attackAdjustment * 0.66f));
+            }
+
+            if (__result.abilities.Contains(Ability.TriStrike))
+            {
+                __result.attackAdjustment = Mathf.Max(1, Mathf.FloorToInt(__result.attackAdjustment * 0.4f));
             }
         }
 

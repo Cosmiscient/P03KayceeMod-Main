@@ -19,7 +19,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Orange Mox Warrior";
             info.rulebookDescription = "When [creature] is played, it attacks all enemy cards opposite Orange Mox providers its owner controls.";
             info.canStack = true;
-            info.powerLevel = 1;
+            info.powerLevel = 2;
             info.opponentUsable = true;
             info.hasColorOverride = true;
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.GainGemOrange).Info.colorOverride;

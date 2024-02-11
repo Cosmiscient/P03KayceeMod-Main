@@ -2,6 +2,7 @@ using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -17,6 +18,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo wolfBeast = CardManager.New(EXP_1_PREFIX, "WolfBeast", "B30WULF", 2, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_wolfbeast.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 6)
+                .SetCardTemple(CardTemple.Tech)
                 .AddAbilities(Ability.Transformer, Ability.DoubleStrike);
 
             // Wolfbot
@@ -33,6 +35,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo viperBeast = CardManager.New(EXP_1_PREFIX, "ViperBeast", "V1P3R", 3, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_viperbeast.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 5)
+                .SetCardTemple(CardTemple.Tech)
                 .AddAbilities(Ability.Transformer);
 
             // Viperbot
@@ -51,6 +54,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo mantisBeast = CardManager.New(EXP_1_PREFIX, "MantisBeast", "Asmanteus", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_mantisbeast.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 4)
+                .SetCardTemple(CardTemple.Tech)
                 .AddAbilities(Ability.Transformer, Ability.TriStrike);
 
             // Mantisbot
@@ -117,12 +121,41 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetNeutralP03Card()
                 .SetStatIcon(BatteryPower.AbilityID);
 
+            CardManager.New(EXP_1_PREFIX, "Salmon_Undead", "Fishbones", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_fishbones.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetEmissivePortrait(TextureHelper.GetImageAsTexture("portrait_fishbones_emission.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetCost(bonesCost: 1)
+                .SetCardTemple(CardTemple.Undead);
+
+            var salmonWizard = CardManager.New(EXP_1_PREFIX, "Salmon_Wizard", "Koi", 0, 1)
+                .AddAppearances(OnboardWizardCardModel.ID)
+                .SetCardTemple(CardTemple.Wizard);
+
+            salmonWizard.portraitTex = Sprite.Create(
+                TextureHelper.GetImageAsTexture("portrait_koifish.png", typeof(ExpansionPackCards_1).Assembly),
+                new Rect(0, 0, 125, 190),
+                new Vector2(0.5f, 0.5f)
+            );
+
+            CardManager.New(EXP_1_PREFIX, "Salmon_Nature", "Salmon", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_salmon_nature.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetEmissivePortrait(TextureHelper.GetImageAsTexture("portrait_salmon_nature_emission.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetCardTemple(CardTemple.Nature);
+
+            CardManager.New(EXP_1_PREFIX, "Salmon_Golly", "Salmon", 0, 1)
+                .SetAltPortrait(TextureHelper.GetImageAsTexture("portrait_golly_salmon.png", typeof(CustomCards).Assembly, FilterMode.Trilinear))
+                .AddAppearances(HighResAlternatePortrait.ID)
+                .SetWeaponMesh(DiskCardWeapon.Fish)
+                .temple = CardTemple.Tech;
+
             // Salmon and beastmaster
             CardManager.New(EXP_1_PREFIX, "Salmon", "S4LM0N", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_salmon.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_salmon.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 1)
                 .AddMetaCategories(CardMetaCategory.Part3Random)
+                .SetCardTemple(CardTemple.Tech)
+                .SetWeaponMesh(DiskCardWeapon.Fish)
                 .SetEvolve("Angler_Fish_More", 1);
 
             CardManager.BaseGameCards.CardByName("Angler_Fish_More").SetEvolve("Angler_Fish_Good", 1);
@@ -130,6 +163,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo bm2 = CardManager.New(EXP_1_PREFIX, "BeastMaster2", "B3A5T GR4ND M4ST3R", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_beastmaster.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
+                .SetCardTemple(CardTemple.Tech)
                 .AddAbilities(SummonFamiliar.AbilityID, Ability.BuffNeighbours);
 
             CardManager.New(EXP_1_PREFIX, "BeastMaster", "B3A5T M4ST3R", 1, 1)
@@ -168,6 +202,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // oil Bot
             CardManager.New(EXP_1_PREFIX, "OilJerry", "Oil Jerry", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_oil_jerry.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_oil_jerry.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 2)
                 .SetNeutralP03Card()
                 .AddAbilities(FullOfOil.AbilityID);
@@ -190,6 +225,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardInfo gravestone = CardManager.New(EXP_1_PREFIX, "ZombieGravestone", "Zombie Process", 0, 2)
                 .AddAppearances(CardAppearanceBehaviour.Appearance.HologramPortrait)
+                .SetCardTemple(CardTemple.Tech)
                 .AddAbilities(Ability.PreventAttack, Ability.Evolve);
 
             zombie.SetIceCube(gravestone);
@@ -269,6 +305,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardInfo frankenBeast = CardManager.New(EXP_1_PREFIX, "FrankenBeast", "FrankenCell", 3, 4)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_frankenbeast.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetCardTemple(CardTemple.Tech)
                 .AddAbilities(CellDeEvolve.AbilityID, Electric.AbilityID);
 
             frankenBot.SetEvolve(frankenBeast, 1);
@@ -277,7 +314,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             frankenBeast.metaCategories = new();
 
             // Clock man
-            CardManager.New(EXP_1_PREFIX, "Clockbot", "Mr:Clock", 0, 3)
+            CardManager.New(EXP_1_PREFIX, "Clockbot", "Mr:Clock", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
@@ -295,7 +332,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
                 .AddAbilities(RotatingAlarm.AbilityID)
-                .SetExtendedProperty(RotatingAlarm.DEFAULT_STATE_KEY, 2);
+                .SetExtendedProperty(RotatingAlarm.DEFAULT_STATE_KEY, 0);
 
             CardManager.New(EXP_1_PREFIX, "Clockbot_Left", "Mr:Clock", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
@@ -346,6 +383,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Seed
             CardManager.New(EXP_1_PREFIX, "SEED", "Seed", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_seed.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetCost(energyCost: 1)
+                .SetCardTemple(CardTemple.Tech)
                 .AddSpecialAbilities(SeedBehaviour.AbilityID);
         }
     }
