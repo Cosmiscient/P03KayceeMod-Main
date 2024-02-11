@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Encounters;
@@ -29,7 +30,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             FormUrlEncodedContent content = new(values);
             client.PostAsync("https://docs.google.com/forms/u/0/d/e/1FAIpQLSdx9dFMpB3gWUEqn9SiSgE3fwncoYdhHV0aHyFVP5YQ65ZfdA/formResponse", content)
-                  .ContinueWith(t => P03Plugin.Log.LogError(t.Exception), System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
+                  .ContinueWith(delegate (Task<HttpResponseMessage> t)
+                  {
+                      P03Plugin.Log.LogError("Failed to send analytics:");
+                      P03Plugin.Log.LogError(t.Exception);
+                  }, System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
         }
     }
 }

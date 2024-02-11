@@ -36,5 +36,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
         }
 
         public override int EnergyCost => 3;
+
+        public override bool RespondsToUpkeep(bool playerUpkeep) => !playerUpkeep && Card.OpponentCard;
+
+        public override IEnumerator OnUpkeep(bool playerUpkeep)
+        {
+            if (!playerUpkeep && Card.OpponentCard)
+            {
+                yield return Activate();
+            }
+        }
     }
 }

@@ -131,5 +131,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
             }
         }
+
+        [HarmonyPatch(typeof(AscensionStatsData), nameof(AscensionStatsData.GetStatValue))]
+        [HarmonyPostfix]
+        private static void IncludeP03Stats(AscensionStat.Type type, bool allTime, ref int __result)
+        {
+            AscensionStat ascensionStat = (allTime ? P03AscensionSaveData.P03Data.stats.allTimeStats : P03AscensionSaveData.P03Data.stats.currentRunStats).Find((AscensionStat x) => x.type == type);
+            if (ascensionStat != null)
+            {
+                __result += ascensionStat.value;
+            }
+        }
     }
 }

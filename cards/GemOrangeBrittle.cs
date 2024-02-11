@@ -17,7 +17,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Brittle Without Orange";
             info.rulebookDescription = "After attacking, [creature] will perish if its owner does not control an Orange Mox";
             info.canStack = true;
-            info.powerLevel = 1;
+            info.powerLevel = -1;
             info.opponentUsable = true;
             info.SetExtendedProperty(AbilityIconBehaviours.ORANGE_CELL_INVERSE, true);
             info.passive = false;

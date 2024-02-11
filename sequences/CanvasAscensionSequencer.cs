@@ -16,10 +16,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     {
         private static readonly int[] INDICES = new int[] { 1, 2, 3 };
 
+        private bool made1stRule = false;
+
         public override IEnumerator PreHandDraw()
         {
             P03Plugin.Log.LogInfo($"Ascension Canvas Sequencer - is Ascension {SaveFile.IsAscension}");
-            if (SaveFile.IsAscension)
+            if (SaveFile.IsAscension && P03Plugin.Instance.SkipCanvasFace)
             {
                 // This skips the part of the battle where you pick the boss face.
                 if (!Part3SaveData.Data.ValidCanvasBossFace)
@@ -134,7 +136,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield break;
             }
 
-            if (TurnManager.Instance.TurnNumber > 0 && TurnManager.Instance.Opponent.NumLives == 2 && rulesHandler.NumRules == 0)
+            if (TurnManager.Instance.TurnNumber > 0 && TurnManager.Instance.Opponent.NumLives == 2 && !made1stRule)
             {
                 if (chooseFirstRule)
                 {
@@ -147,6 +149,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     yield return TextDisplayer.Instance.PlayDialogueEvent("P03RandomCanvas", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                     yield return RandomRuleSequence();
                 }
+                made1stRule = true;
             }
             if (TurnManager.Instance.Opponent.NumLives == 1 && !made3rdRule)
             {

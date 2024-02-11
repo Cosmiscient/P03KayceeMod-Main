@@ -43,6 +43,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             // Go ahead and get a reference to the quest
             QuestDefinition quest = QuestManager.Get(eventId);
 
+            // This happens when you're coming back for a reward that you
+            // couldn't get before. We track this here so we don't accidentally
+            // increments stats too much (i.e., "complete" an "already completed"
+            // quest)
+            bool hasCompletedAlready = quest.IsCompleted;
+
             MapNodeManager.Instance.SetAllNodesInteractable(false);
             (GameFlowManager.Instance as Part3GameFlowManager).DisableTransitionToFirstPerson = true;
             ViewManager.Instance.Controller.LockState = ViewLockState.Locked;
@@ -69,7 +75,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.SwitchToView(View.Default);
             yield return quest.GrantAllUngrantedRewards();
 
-            if (quest.IsCompleted && quest.CurrentState.Status == QuestState.QuestStateStatus.Success)
+            if (!hasCompletedAlready && quest.IsCompleted && quest.CurrentState.Status == QuestState.QuestStateStatus.Success)
                 AscensionStatsData.TryIncrementStat(StatManagement.QUESTS_COMPLETED);
 
             // Reset back to normal game state
@@ -84,8 +90,15 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             if (quest.IsCompleted)
             {
-                SetCompleted();
-                this.npc?.SetActive(false);
+                if (!quest.HasUngrantedRewards)
+                {
+                    SetCompleted();
+                    this.npc?.SetActive(false);
+                }
+                else
+                {
+                    SetHidden(false, false);
+                }
 
                 // Check to see if we should unlock the "every quest" achievement
                 // This happens if you've completed four full quests and you're in the final zone

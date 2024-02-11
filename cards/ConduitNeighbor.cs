@@ -33,41 +33,45 @@ namespace Infiniscryption.P03KayceeRun.Cards
         }
 
         //This code makes sure that sigils that only activate within conduits work properly
-        [HarmonyPatch(typeof(ConduitCircuitManager))]
-        [HarmonyPatch(nameof(ConduitCircuitManager.SlotIsWithinCircuit))]
-        [HarmonyPrefix]
-        private static bool SatisfyConduitSigils(ConduitCircuitManager __instance, ref bool __result, CardSlot slot)
-        {
-            __result = __instance.GetConduitsForSlot(slot).Count > 0;
+        // [HarmonyPatch(typeof(ConduitCircuitManager))]
+        // [HarmonyPatch(nameof(ConduitCircuitManager.SlotIsWithinCircuit))]
+        // [HarmonyPrefix]
+        // private static bool SatisfyConduitSigils(ConduitCircuitManager __instance, ref bool __result, CardSlot slot)
+        // {
+        //     __result = __instance.GetConduitsForSlot(slot).Count > 0;
 
-            CardSlot toLeft = BoardManager.Instance.GetAdjacent(slot, adjacentOnLeft: true);
-            CardSlot toRight = BoardManager.Instance.GetAdjacent(slot, adjacentOnLeft: false);
+        //     if (__result) // No need to continue
+        //         return false;
 
-            //If adjacent to conduit neighbor, slot is within circuit
-            if (toLeft != null)
-            {
-                if (toLeft.Card != null)
-                {
-                    if (toLeft.Card.HasAbility(AbilityID))
-                    {
-                        __result = true;
-                    }
-                }
-            }
+        //     CardSlot toLeft = BoardManager.Instance.GetAdjacent(slot, adjacentOnLeft: true);
+        //     CardSlot toRight = BoardManager.Instance.GetAdjacent(slot, adjacentOnLeft: false);
 
-            if (toRight != null)
-            {
-                if (toRight.Card != null)
-                {
-                    if (toRight.Card.HasAbility(AbilityID))
-                    {
-                        __result = true;
-                    }
-                }
-            }
+        //     //If adjacent to conduit neighbor, slot is within circuit
+        //     if (toLeft != null)
+        //     {
+        //         if (toLeft.Card != null)
+        //         {
+        //             if (toLeft.Card.HasAbility(AbilityID))
+        //             {
+        //                 __result = true;
+        //                 return false;
+        //             }
+        //         }
+        //     }
 
-            return false; // Skip the original method
-        }
+        //     if (toRight != null)
+        //     {
+        //         if (toRight.Card != null)
+        //         {
+        //             if (toRight.Card.HasAbility(AbilityID))
+        //             {
+        //                 __result = true;
+        //             }
+        //         }
+        //     }
+
+        //     return false; // Skip the original method
+        // }
 
         //This code shows the circuit effect visually
         [HarmonyPatch(typeof(ConduitCircuitManager))]
@@ -77,7 +81,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             foreach (CardSlot slot in slots)
             {
-                if ((__instance.GetConduitsForSlot(slot).Count > 1) || __instance.SlotIsWithinCircuit(slot))
+                if (__instance.SlotIsWithinCircuit(slot))
                 {
                     if (slot.Card != null && !slot.WithinConduitCircuit)
                     {

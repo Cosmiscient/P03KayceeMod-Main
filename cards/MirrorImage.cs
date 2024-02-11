@@ -61,18 +61,22 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return new WaitForSeconds(0.2f);
 
             yield return PreSuccessfulTriggerSequence();
-            yield return Card.TransformIntoCard(CloneForRubberstamp(possibles[0].Card.Info));
+            yield return Card.TransformIntoCard(CloneForRubberstamp(possibles[0].Card));
+            foreach (var mod in possibles[0].Card.TemporaryMods)
+            {
+                Card.AddTemporaryMod((CardModificationInfo)mod.Clone());
+            }
             yield return new WaitForSeconds(0.8f);
 
             ViewManager.Instance.SwitchToView(currentview, false, false);
         }
 
-        private CardInfo CloneForRubberstamp(CardInfo target)
+        private CardInfo CloneForRubberstamp(PlayableCard target)
         {
-            CardInfo clone = CardLoader.Clone(target);
+            CardInfo clone = CardLoader.Clone(target.Info);
             if (clone.mods.Count == 0)
             {
-                foreach (CardModificationInfo mod in target.mods)
+                foreach (CardModificationInfo mod in target.Info.mods)
                     clone.mods.Add(mod.Clone() as CardModificationInfo);
             }
 
@@ -111,9 +115,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 CursorType.Target
             );
 
-            CardInfo clone = CloneForRubberstamp(target.Card.Info);
+            CardInfo clone = CloneForRubberstamp(target.Card);
 
             Card.SetInfo(clone);
+            foreach (var mod in target.Card.TemporaryMods)
+            {
+                Card.AddTemporaryMod((CardModificationInfo)mod.Clone());
+            }
             yield return new WaitForSeconds(0.2f);
         }
     }

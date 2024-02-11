@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using DiskCardGame;
 using HarmonyLib;
@@ -86,6 +87,18 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // We do nothing in phase two; the sequencer handles that
             yield break;
+        }
+
+        [HarmonyPatch(typeof(NetworkManager), nameof(NetworkManager.Login))]
+        [HarmonyPrefix]
+        private static bool FakeLoginForAscension(Action SuccessCallback)
+        {
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                SuccessCallback();
+                return false;
+            }
+            return true;
         }
 
         [HarmonyPatch(typeof(FriendCardCreator), nameof(FriendCardCreator.FriendToCard))]

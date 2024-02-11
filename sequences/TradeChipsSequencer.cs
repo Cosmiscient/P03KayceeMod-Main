@@ -7,6 +7,7 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Pixelplacement;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
@@ -19,6 +20,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public static TradeChipsSequencer Instance { get; private set; }
 
         private static bool activating = false;
+
+        [HarmonyPatch(typeof(MenuController), nameof(MenuController.TransitionToAscensionMenu))]
+        [HarmonyPrefix]
+        private static void EnsureActivatingResets() => activating = false;
 
         private int currentChipPrice = 0;
 
@@ -37,7 +42,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         {
             if (nodeData is TradeChipsNodeData)
             {
-                if (Instance == null)
+                if (Instance.SafeIsUnityNull())
                 {
                     Instance = __instance.gameObject.AddComponent<TradeChipsSequencer>();
                 }
@@ -160,7 +165,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     MixerGroup.TableObjectsSFX,
                     P03AnimationController.Instance.HeadParent.position,
                     1f, 0f,
-                    new AudioParams.Pitch(1f + (float)(amount - i) * -0.01f)
+                    new AudioParams.Pitch(1f + ((amount - i) * -0.01f))
                 );
             }
         }
@@ -414,16 +419,16 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             if (CoinPurchaser != null)
                 return;
 
-            CoinPurchaser = GameObject.Instantiate(RunBasedHoloMap.SpecialNodePrefabs[HoloMapNode.NodeDataType.GainCurrency], transform);
+            CoinPurchaser = Instantiate(RunBasedHoloMap.SpecialNodePrefabs[HoloMapNode.NodeDataType.GainCurrency], transform);
             CoinPurchaser.transform.Find("RendererParent").localEulerAngles = new(60f, 180f, 180f);
             CoinPurchaser.transform.localPosition = new(-2.5f, 4.6f, -4.15f);
             CoinPurchaser.transform.localScale = new(2f, 2f, 2f);
-            GameObject.Destroy(CoinPurchaser.GetComponentInChildren<SineWaveMovement>());
-            GameObject.Destroy(CoinPurchaser.GetComponentInChildren<HoloMapGainCurrencyNode>());
+            Destroy(CoinPurchaser.GetComponentInChildren<SineWaveMovement>());
+            Destroy(CoinPurchaser.GetComponentInChildren<HoloMapGainCurrencyNode>());
 
             // Label
             GameObject sampleObject = RunBasedHoloMap.SpecialNodePrefabs[HoloMapNode.NodeDataType.BuildACard].transform.Find("HoloFloatingLabel").gameObject;
-            GameObject labelObject = UnityEngine.Object.Instantiate(sampleObject, transform);
+            GameObject labelObject = Instantiate(sampleObject, transform);
             labelObject.transform.localPosition = new(-2.3f, 5.34f, -4.45f);
             labelObject.transform.localEulerAngles = new(90f, 0f, 0f);
             HoloFloatingLabel label = labelObject.GetComponent<HoloFloatingLabel>();

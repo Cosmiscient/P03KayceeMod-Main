@@ -16,7 +16,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Big Strike";
-            info.rulebookDescription = "[creature] attacks all cards in all lanes opposing it, or attacks just the center opposing lane if there are no cards opposite it.";
+            info.rulebookDescription = "[creature] attacks all cards in all lanes opposing it, or attacks just the center opposing lane if there are no cards it can attack.";
             info.canStack = false;
             info.powerLevel = 3;
             info.opponentUsable = false;
@@ -32,32 +32,37 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
+        private bool CanAttackSlot(CardSlot slot)
+        {
+            if (slot.Card == null)
+                return false;
+
+            if (slot.Card.FaceDown)
+                return false;
+
+            if (Card.HasAbility(Ability.Flying) && !slot.Card.HasAbility(Ability.Reach))
+                return false;
+
+            return true;
+        }
+
         public List<CardSlot> GetOpposingSlots(List<CardSlot> originalSlots, List<CardSlot> otherAddedSlots)
         {
             List<CardSlot> retval = new();
 
             int slot = Card.Slot.Index;
             List<CardSlot> opposingSlots = BoardManager.Instance.GetSlots(Card.OpponentCard);
-            if (slot > 0 && opposingSlots[slot - 1].Card != null)
+            if (slot > 0 && CanAttackSlot(opposingSlots[slot - 1]))
                 retval.Add(opposingSlots[slot - 1]);
-            if (opposingSlots[slot].Card != null)
+            if (CanAttackSlot(opposingSlots[slot]))
                 retval.Add(opposingSlots[slot]);
-            if (slot + 1 < opposingSlots.Count && opposingSlots[slot + 1].Card != null)
+            if (slot + 1 < opposingSlots.Count && CanAttackSlot(opposingSlots[slot + 1]))
                 retval.Add(opposingSlots[slot + 1]);
 
             return retval;
         }
 
-        public bool RemoveDefaultAttackSlot()
-        {
-            int slot = Card.Slot.Index;
-            List<CardSlot> opposingSlots = BoardManager.Instance.GetSlots(Card.OpponentCard);
-            if (slot > 0 && opposingSlots[slot - 1].Card != null)
-                return true;
-            if (slot + 1 < opposingSlots.Count && opposingSlots[slot + 1].Card != null)
-                return true;
-            return opposingSlots[slot].Card != null;
-        }
+        public bool RemoveDefaultAttackSlot() => GetOpposingSlots(null, null).Count > 0;
 
         public bool RespondsToGetOpposingSlots() => true;
     }

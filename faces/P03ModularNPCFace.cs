@@ -12,6 +12,29 @@ namespace Infiniscryption.P03KayceeRun.Faces
     [HarmonyPatch]
     public class P03ModularNPCFace : ManagedBehaviour
     {
+        public enum FaceSet : int
+        {
+            Cyclops = 1,
+            Rags = 2,
+            Creepface = 3,
+            BuildABot = 4,
+            Wirehead = 5,
+            Pipehead = 6,
+            Fishhead = 7,
+            Faceless = 8,
+            Goggles = 9,
+            Leapbot = 10,
+            MrsBomb = 11,
+            Quill = 12,
+            Jimmy = 13,
+            Steambot = 14,
+            Pyromaniac = 15,
+            BountyHunter = 16,
+            Prospector = 17,
+            PikeMageSolo = 18,
+            InspectorSolo = 19
+        }
+
         public static GameObject NPCFaceObject { get; private set; }
 
         public static P03ModularNPCFace Instance { get; private set; }
@@ -20,7 +43,7 @@ namespace Infiniscryption.P03KayceeRun.Faces
 
         private static readonly Sprite[,] NPC_SPRITES;
 
-        private const int NUMBER_OF_CHOICES = 9;
+        private static readonly int NUMBER_OF_CHOICES = (int)System.Enum.GetValues(typeof(FaceSet)).Cast<FaceSet>().Max();
 
         private static readonly string[] LAYER_NAMES = new string[] { "bottom", "top", "face" };
 
@@ -44,7 +67,7 @@ namespace Infiniscryption.P03KayceeRun.Faces
         public void RenderNPCFace()
         {
             for (int i = 0; i < indices.Count; i++)
-                renderers[i].sprite = NPC_SPRITES[i, indices[i]];
+                renderers[i].sprite = NPC_SPRITES[i, indices[i] - 1];
         }
 
         public static string GeneratedNPCFaceCode(int randomSeed = -1)
@@ -54,7 +77,13 @@ namespace Infiniscryption.P03KayceeRun.Faces
 
             List<int> indices = new();
             for (int i = 0; i < LAYER_NAMES.Length; i++)
-                indices.Add(SeededRandom.Range(0, NUMBER_OF_CHOICES, randomSeed++));
+            {
+                // This is a dumb hack but it'll work okay
+                int n = SeededRandom.Range(1, NUMBER_OF_CHOICES + 1, randomSeed++);
+                while (((FaceSet)n).ToString().EndsWith("Solo"))
+                    n = SeededRandom.Range(1, NUMBER_OF_CHOICES + 1, randomSeed++);
+                indices.Add(n);
+            }
 
             return string.Join("-", indices);
         }

@@ -61,8 +61,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static CardInfo GenerateMycoCard(int randomSeed)
         {
             List<CardInfo> allCards = ScriptableObjectLoader<CardInfo>.AllData.FindAll(x => TradeChipsSequencer.IsValidDraftCard(x) && !x.metaCategories.Contains(CardMetaCategory.Rare)).ToList();
+            // Remove any cards that do nothing
+            allCards.RemoveAll(ci => ci.Attack == 1 && ci.Health == 1 && ci.Abilities.Count == 0);
+
             CardInfo left = allCards[SeededRandom.Range(0, allCards.Count, randomSeed++)];
             allCards.Remove(left);
+
+            // Make them a little more interesting at this point
+            // Remove all cards from the other side of the pool that have an ability in common
+            // Reduce the number of duds
+            allCards.RemoveAll(ci => ci.Abilities.Any(a => left.Abilities.Contains(a)));
+
             CardInfo right = allCards[SeededRandom.Range(0, allCards.Count, randomSeed++)];
 
             string name = GetNameContribution(left) + "-" + GetNameContribution(right);
@@ -72,7 +81,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             List<Ability> abilities = new();
             abilities.AddRange(left.Abilities);
             abilities.AddRange(right.Abilities);
-            int energyCost = Math.Max(left.energyCost, right.energyCost);
+            int energyCost = Mathf.FloorToInt((left.energyCost + right.energyCost) / 2f);
 
             CardModificationInfo mod = new()
             {
@@ -109,9 +118,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 if (region == RunBasedHoloMap.Zone.Mycologist)
                 {
-                    int newRandomSeed = P03AscensionSaveData.RandomSeed;
+                    //int newRandomSeed = P03AscensionSaveData.RandomSeed;
                     for (int i = 0; i < 3; i++)
-                        __result.Add(new() { CardInfo = GenerateMycoCard(newRandomSeed + (100 * i)) });
+                        __result.Add(new() { CardInfo = GenerateMycoCard(randomSeed + (100 * i)) });
 
                     return false;
                 }
@@ -237,6 +246,22 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             __instance.GetComponentInChildren<HoloFloatingLabel>()?.gameObject.SetActive(false);
 
             yield break;
+        }
+
+        [HarmonyPatch(typeof(TradeCardsSequencer), nameof(TradeCardsSequencer.AddCardToDeckAndCleanUp))]
+        [HarmonyPostfix]
+        private static IEnumerator RemoveCloverDuringTrade(IEnumerator sequence, TradeCardsSequencer __instance)
+        {
+            if (__instance.rerollInteractable == null || !P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            __instance.rerollInteractable?.gameObject?.SetActive(false);
+            __instance.GetComponentInChildren<HoloFloatingLabel>()?.gameObject.SetActive(false);
+
+            yield return sequence;
         }
 
         [HarmonyPatch(typeof(CardSingleChoicesSequencer), nameof(CardSingleChoicesSequencer.OnCursorEnterRerollInteractable))]

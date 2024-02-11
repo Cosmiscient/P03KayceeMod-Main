@@ -13,7 +13,7 @@ using UnityEngine;
 namespace Infiniscryption.P03KayceeRun.BattleMods
 {
     [HarmonyPatch]
-    public class ConveyorBattle : NonCardTriggerReceiver, IBattleModSetup, IBattleModCleanup, IBattleModSimulator
+    public class ConveyorBattle : NonCardTriggerReceiver, IBattleModSetup, IBattleModCleanup, IBattleModSimulator, IModifyTerrain
     {
         public static BattleModManager.ID ID { get; private set; }
 
@@ -25,7 +25,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 new List<string>() { "It appears someone activated the [c:bR]conveyor belt[c:]", "Cards will rotate clockwise every turn" },
                 typeof(ConveyorBattle),
                 difficulty: 1,
-                new() { CardTemple.Tech },
+                new() { CardTemple.Nature, CardTemple.Undead, CardTemple.Wizard },
                 iconPath: "p03kcm/prefabs/arrow-repeat"
             );
             BattleModManager.SetGlobalActivationRule(ID,
@@ -68,7 +68,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         public IEnumerator OnBattleModSetup()
         {
-            SlotModificationManager.OverrideDefaultSlotTexture(CardTemple.Tech, PLAYER_CONVEYOR_SLOTS, OPPONENT_CONVEYOR_SLOTS);
+            SlotModificationManager.Instance.OverrideDefaultSlotTexture(CardTemple.Tech, PLAYER_CONVEYOR_SLOTS, OPPONENT_CONVEYOR_SLOTS);
             foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
             {
                 slot.ResetSlotTexture();
@@ -80,7 +80,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         public IEnumerator OnBattleModCleanup()
         {
-            SlotModificationManager.ResetDefaultSlotTexture(CardTemple.Tech);
+            SlotModificationManager.Instance.ResetDefaultSlotTexture(CardTemple.Tech);
             foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
             {
                 slot.ResetSlotTexture();
@@ -92,16 +92,19 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         public void DoBoardStateAdjustment(BoardState board, bool playerIsAttacker)
         {
             // We need to rotate the board
-            BoardState.CardState anchorCard = board.playerSlots[0].card;
-            for (int i = 1; i < board.playerSlots.Count; i++)
-                board.playerSlots[i - 1].card = board.playerSlots[i].card;
-            board.playerSlots[board.playerSlots.Count - 1].card = board.opponentSlots[board.opponentSlots.Count - 1].card;
-            for (int i = board.opponentSlots.Count - 1; i > 0; i--)
-                board.opponentSlots[i].card = board.opponentSlots[i - 1].card;
-            board.opponentSlots[0].card = anchorCard;
+            if (playerIsAttacker)
+            {
+                BoardState.CardState anchorCard = board.playerSlots[0].card;
+                for (int i = 1; i < board.playerSlots.Count; i++)
+                    board.playerSlots[i - 1].card = board.playerSlots[i].card;
+                board.playerSlots[board.playerSlots.Count - 1].card = board.opponentSlots[board.opponentSlots.Count - 1].card;
+                for (int i = board.opponentSlots.Count - 1; i > 0; i--)
+                    board.opponentSlots[i].card = board.opponentSlots[i - 1].card;
+                board.opponentSlots[0].card = anchorCard;
+            }
         }
 
-        public bool HasBoardStateAdjustment(BoardState board, bool playerIsAttacker) => true;
+        public bool HasBoardStateAdjustment(BoardState board, bool playerIsAttacker) => playerIsAttacker;
         public bool HasCardEvaluationAdjustment(BoardState.CardState card, BoardState board) => true;
         public int DoCardEvaluationAdjustment(BoardState.CardState card, BoardState board)
         {
@@ -115,5 +118,35 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             }
             return 0;
         }
+
+        private static void Shift(CardInfo[] terrain, bool left = true)
+        {
+            if (left)
+            {
+                for (int i = 1; i < terrain.Length; i++)
+                {
+                    if (terrain[i - 1] == null)
+                    {
+                        terrain[i - 1] = terrain[i];
+                        terrain[i] = null;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = terrain.Length - 2; i >= 0; i--)
+                {
+                    if (terrain[i + 1] == null)
+                    {
+                        terrain[i + 1] = terrain[i];
+                        terrain[i] = null;
+                    }
+                }
+            }
+        }
+
+        public void ModifyPlayerTerrain(CardInfo[] terrain) => Shift(terrain, left: false);
+        public void ModifyOpponentTerrain(CardInfo[] terrain) => Shift(terrain, left: true);
+        public void ModifyOpponentQueuedTerrain(CardInfo[] terrain) => Shift(terrain, left: true);
     }
 }

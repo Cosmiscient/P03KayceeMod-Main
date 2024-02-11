@@ -5,6 +5,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Items;
+using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Patchers;
 
 namespace Infiniscryption.P03KayceeRun.Quests
@@ -79,22 +80,25 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
             // Tipped Scales
             TippedScales = QuestManager.Add(P03Plugin.PluginGuid, "Tipped Scales")
+                                .OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Rags, CompositeFigurine.FigurineType.SettlerMan))
                                 .SetGenerateCondition(() => EventManagement.CompletedZones.Count <= 2);
             TippedScales.AddDialogueState("TOO EASY...", "P03TooEasyQuest")
                         .AddDialogueState("TOO EASY...", "P03TooEasyAccepted")
-                        .AddDefaultActiveState("KEEP GOING...", "P03TooEasyInProgress", threshold: 5)
+                        .AddDefaultActiveState("KEEP GOING...", "P03TooEasyInProgress", threshold: 3)
                         .AddDialogueState("IMPRESSIVE...", "P03TooEasyComplete")
                         .AddGainAbilitiesReward(1, Ability.DrawCopyOnDeath);
 
             // White Flag
-            WhiteFlag = QuestManager.Add(P03Plugin.PluginGuid, "White Flag");
+            WhiteFlag = QuestManager.Add(P03Plugin.PluginGuid, "White Flag")
+                                    .OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Cyclops, CompositeFigurine.FigurineType.SettlerMan));
             WhiteFlag.AddDialogueState("DO THEY GIVE UP?", "P03WhiteFlagSetup")
                      .AddDefaultActiveState("DO THEY GIVE UP?", "P03WhiteFlagSetup", threshold: 1)
                      .AddDialogueState("THEY DO GIVE UP", "P03WhiteFlagReward")
                      .AddGainCardReward(CustomCards.UNC_TOKEN);
 
             // Deck Size
-            DeckSize = QuestManager.Add(P03Plugin.PluginGuid, "Deck Size");
+            DeckSize = QuestManager.Add(P03Plugin.PluginGuid, "Deck Size")
+                                   .OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Goggles, CompositeFigurine.FigurineType.Robot));
             DeckSize.AddDialogueState("ITS TOO SMALL", "P03DeckSizeSetup")
                     .AddSuccessAction(() => { int dummy = DeckSizeTarget; }) // this sets the initial decksize target
                     .AddNamedState("waiting", "ITS TOO SMALL", "P03DeckSizeSetup")
@@ -108,12 +112,13 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     .AddDynamicMonetaryReward();
 
             // Smuggler
-            Smuggler = QuestManager.Add(P03Plugin.PluginGuid, "Smuggler");
+            Smuggler = QuestManager.Add(P03Plugin.PluginGuid, "Smuggler")
+                                   .OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Wirehead, CompositeFigurine.FigurineType.Gravedigger));
             Smuggler.AddDialogueState("SSH - COME OVER HERE", "P03SmugglerSetup")
                     .AddDialogueState("LETS DO THIS", "P03SmugglerAccepted")
                     .AddGainCardReward(CustomCards.CONTRABAND);
 
-            SmugglerPartTwo = QuestManager.Add(P03Plugin.PluginGuid, "SmugglerPartTwo").SetPriorQuest(Smuggler);
+            SmugglerPartTwo = QuestManager.Add(P03Plugin.PluginGuid, "SmugglerPartTwo").SetPriorQuest(Smuggler).OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Wirehead, CompositeFigurine.FigurineType.Gravedigger));
             QuestState smugglerDummyState = SmugglerPartTwo.AddDummyStartingState(() => Part3SaveData.Data.deck.Cards.Any(c => c.name.Equals(CustomCards.CONTRABAND)));
             smugglerDummyState.SetNextState(QuestState.QuestStateStatus.Success, "SSH - BRING IT HERE", "P03SmugglerComplete", autoComplete: true)
                               .AddLoseCardReward(CustomCards.CONTRABAND)
@@ -121,21 +126,23 @@ namespace Infiniscryption.P03KayceeRun.Quests
             smugglerDummyState.SetNextState(QuestState.QuestStateStatus.Failure, "WHERE DID IT GO?", "P03SmugglerFailed", autoComplete: true);
 
             // Donation
-            Donation = QuestManager.Add(P03Plugin.PluginGuid, "Donation");
+            Donation = QuestManager.Add(P03Plugin.PluginGuid, "Donation")
+                                   .OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Fishhead, CompositeFigurine.FigurineType.SettlerWoman));
             Donation.AddDialogueState("SPARE SOME CASH?", "P03DonationIntro")
                     .AddNamedState("CheckingForAvailableCash", "SPARE SOME CASH?", "P03DonationNotEnough")
                     .SetDynamicStatus(() =>
                     {
-                        return Part3SaveData.Data.currency > 10 ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Active;
+                        return Part3SaveData.Data.currency >= 10 ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Active;
                     })
                     .AddDialogueState("SPARE SOME CASH?", "P03DonationComplete")
                     .AddMonetaryReward(-10);
 
-            DonationPartTwo = QuestManager.Add(P03Plugin.PluginGuid, "DonationPartTwo").SetPriorQuest(Donation);
+            DonationPartTwo = QuestManager.Add(P03Plugin.PluginGuid, "DonationPartTwo").SetPriorQuest(Donation).OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Fishhead, CompositeFigurine.FigurineType.SettlerMan) { faceCode = "2-12-7" });
             DonationPartTwo.AddDialogueState("THANK YOU!", "P03DonationReward").AddGemifyCardsReward(2);
 
             // Fully Upgraded
             FullyUpgraded = QuestManager.Add(P03Plugin.PluginGuid, "Fully Upgraded")
+                .OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.BuildABot, CompositeFigurine.FigurineType.Robot))
                 .SetGenerateCondition(() => EventManagement.CompletedZones.Count >= 3); // Can only happen if you've finished 3 maps
 
             FullyUpgraded.AddDialogueState("SHOW ME POWER", "P03FullyUpgradedFail")
@@ -153,7 +160,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
                          .AddDynamicMonetaryReward();
 
             // I Love Bones
-            ILoveBones = QuestManager.Add(P03Plugin.PluginGuid, "I Love Bones");
+            ILoveBones = QuestManager.Add(P03Plugin.PluginGuid, "I Love Bones")
+                                     .OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Faceless, CompositeFigurine.FigurineType.Gravedigger));
             ILoveBones.SetRegionCondition(RunBasedHoloMap.Zone.Undead)
                       .AddDialogueState("I LOVE BONES!!", "P03ILoveBones")
                       .SetDynamicStatus(() =>
@@ -168,7 +176,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
                       .AddGainCardReward(CustomCards.SKELETON_LORD);
 
             // Radio Tower
-            ListenToTheRadio = QuestManager.Add(P03Plugin.PluginGuid, "Listen To The Radio");
+            ListenToTheRadio = QuestManager.Add(P03Plugin.PluginGuid, "Listen To The Radio")
+                                           .OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Creepface, CompositeFigurine.FigurineType.SettlerMan));
 
             QuestState radioActiveState = ListenToTheRadio.AddDialogueState("LETS DO SCIENCE", "P03RadioQuestStart")
                             .AddDialogueState("LETS DO SCIENCE", "P03RadioQuestAccepted")
@@ -189,7 +198,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
                             .AddGainCardReward(CustomCards.UNC_TOKEN);
 
             // Power Up The Tower
-            PowerUpTheTower = QuestManager.Add(P03Plugin.PluginGuid, "Power Up The Tower");
+            PowerUpTheTower = QuestManager.Add(P03Plugin.PluginGuid, "Power Up The Tower")
+                                          .OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Pipehead, CompositeFigurine.FigurineType.Robot));
 
             QuestState towerActiveState = PowerUpTheTower.AddDialogueState("LOOKING FOR A JOB?", "P03PowerQuestStart")
                             .AddDialogueState("LOOKING FOR A JOB?", "P03PowerQuestAccepted")
@@ -207,10 +217,11 @@ namespace Infiniscryption.P03KayceeRun.Quests
             towerActiveState.AddDialogueState("YOU BROKE IT?!", "P03PowerQuestFailed", QuestState.QuestStateStatus.Failure);
             towerActiveState.AddDialogueState("HERE'S YOUR PAYMENT", "P03PowerQuestSucceeded")
                             .AddLoseCardReward(CustomCards.POWER_TOWER)
-                            .AddDynamicMonetaryReward();
+                            .AddDynamicMonetaryReward(low: true)
+                            .AddGainItemReward(ShockerItem.ItemData.name);
 
             // Goobert Quests
-            FindGoobert = QuestManager.Add(P03Plugin.PluginGuid, "FindGoobert");
+            FindGoobert = QuestManager.Add(P03Plugin.PluginGuid, "FindGoobert").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.PikeMageSolo, CompositeFigurine.FigurineType.Enchantress));
             QuestState waitingState = FindGoobert.AddDialogueState("MY FRIEND IS LOST", "P03WhereIsGoobert")
                             .AddNamedState("GoobertAvailable", "MY FRIEND IS LOST", "P03WhereIsGoobert");
 
@@ -234,7 +245,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     .AddMonetaryReward(13);
 
             // Prospector Quest
-            Prospector = QuestManager.Add(P03Plugin.PluginGuid, "The Prospector");
+            Prospector = QuestManager.Add(P03Plugin.PluginGuid, "The Prospector").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Prospector, CompositeFigurine.FigurineType.Prospector));
             QuestState prepareState = Prospector.AddState("GOLD!", "P03ProspectorWantGold")
                       .SetDynamicStatus(() =>
                       {
@@ -257,13 +268,13 @@ namespace Infiniscryption.P03KayceeRun.Quests
                         .AddGainCardReward(CustomCards.BOUNTY_HUNTER_SPAWNER);
 
             // Generator Quest
-            BrokenGenerator = QuestManager.Add(P03Plugin.PluginGuid, "Broken Generator");
+            BrokenGenerator = QuestManager.Add(P03Plugin.PluginGuid, "Broken Generator").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.InspectorSolo, CompositeFigurine.FigurineType.Wildling));
             QuestState defaultState = BrokenGenerator.AddState("HELP!", "P03DamageRaceIntro");
             defaultState.AddDialogueState("OH NO...", "P03DamageRaceFailed", QuestState.QuestStateStatus.Failure);
-            defaultState.AddDialogueState("PHEW!", "P03DamageRaceSuccess").AddDynamicMonetaryReward(); ;
+            defaultState.AddDialogueState("PHEW!", "P03DamageRaceSuccess").AddDynamicMonetaryReward();
 
             // Pyromania
-            Pyromania = QuestManager.Add(P03Plugin.PluginGuid, "Pyromania");
+            Pyromania = QuestManager.Add(P03Plugin.PluginGuid, "Pyromania").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Pyromaniac, CompositeFigurine.FigurineType.Enchantress));
             Pyromania.SetGenerateCondition(() => Part3SaveData.Data.deck.Cards.Where(c => c.Abilities.Any(a => AbilitiesUtil.GetInfo(a).metaCategories.Contains(FireBomb.FlamingAbility))).Count() >= 2)
                      .AddDialogueState("BURN BABY BURN", "P03PyroQuestStart")
                      .AddDefaultActiveState("BURN BABY BURN", "P03PyroQuestInProgress")
@@ -272,38 +283,39 @@ namespace Infiniscryption.P03KayceeRun.Quests
                      .AddGainCardReward(ExpansionPackCards_2.FLAME_CHARMER_CARD);
 
             // Conveyors
-            Conveyors = QuestManager.Add(P03Plugin.PluginGuid, "Conveyors");
+            Conveyors = QuestManager.Add(P03Plugin.PluginGuid, "Conveyors").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Steambot, CompositeFigurine.FigurineType.Robot));
             Conveyors.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.ALL_CONVEYOR.challengeType))
                      .AddDialogueState("CONVEYOR FIELD TRIALS", "P03ConveyorQuestStart")
                      .AddDialogueState("START FIELD TRIALS?", "P03ConveyorQuestStarting")
                      .AddDefaultActiveState("FIELD TRIALS IN PROGRESS", "P03ConveyorQuestActive")
-                     .WaitForQuestCounter(5)
+                     .WaitForQuestCounter(3)
                      .AddDialogueState("FIELD TRIALS COMPLETE", "P03ConveyorQuestComplete")
                      .AddDynamicMonetaryReward()
                      .AddGainItemReward("PocketWatch");
 
             // Bombs
-            BombBattles = QuestManager.Add(P03Plugin.PluginGuid, "BombBattles");
+            BombBattles = QuestManager.Add(P03Plugin.PluginGuid, "BombBattles").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.MrsBomb, CompositeFigurine.FigurineType.Robot));
             BombBattles.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOMB_CHALLENGE.challengeType))
                      .AddDialogueState("BOOM BOOM BOOM", "P03BombQuestStart")
                      .AddDialogueState("LET'S BLOW IT UP", "P03BombQuestStarting")
                      .AddDefaultActiveState("KEEP UP THE BOOM", "P03BombQuestActive")
-                     .WaitForQuestCounter(5)
+                     .WaitForQuestCounter(3)
                      .AddDialogueState("TRULY EXPLOSIVE", "P03BombQuestComplete")
                      .AddDynamicMonetaryReward()
                      .AddGainItemReward("BombRemote");
 
             // Bounty
-            BountyTarget = QuestManager.Add(P03Plugin.PluginGuid, "BountyTarget");
+            BountyTarget = QuestManager.Add(P03Plugin.PluginGuid, "BountyTarget").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.BountyHunter, CompositeFigurine.FigurineType.SettlerMan));
             BountyTarget.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3)
                         .AddDialogueState("CATCH A FUGITIVE?", "P03BountyQuestIntro")
                         .AddDialogueState("LET'S CATCH A FUGITIVE?!", "P03BountyQuestStarted")
                         .AddDefaultActiveState("LET'S GET HIM!", "P03BountyQuestInProgress")
                         .AddDialogueState("YOU GOT HIM!", "P03BountyQuestComplete")
-                        .AddDynamicMonetaryReward();
+                        .AddDynamicMonetaryReward(low: true)
+                        .AddGainCardReward(CustomCards.DRAFT_TOKEN + "+Sniper");
 
             // LeapBot Neo
-            LeapBotNeo = QuestManager.Add(P03Plugin.PluginGuid, "LeapBotNeo");
+            LeapBotNeo = QuestManager.Add(P03Plugin.PluginGuid, "LeapBotNeo").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Leapbot, CompositeFigurine.FigurineType.Robot));
             static bool generateLBNQuest()
             {
                 return LeapBotNeo.GetQuestCounter() > 7 && Part3SaveData.Data.deck.Cards.Any(c => c.name == "LeapBot");

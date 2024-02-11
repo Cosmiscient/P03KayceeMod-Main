@@ -41,6 +41,8 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         internal static readonly List<BattleModDefinition> AllBattleMods = new();
         private static readonly Dictionary<string, List<ID>> AssignedBattleMods = new();
+        private static readonly Dictionary<ID, NonCardTriggerReceiver> ActiveReceivers = new();
+        private static bool CanShowActivation = false;
 
         static BattleModManager()
         {
@@ -51,6 +53,26 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             hazard.SetActive(false);
             UnityEngine.Object.DontDestroyOnLoad(hazard);
             ResourceBankManager.Add(P03Plugin.PluginGuid, DEFAULT_ICON_PATH, hazard, true);
+        }
+
+        public static bool RuleIsActive(ID ruleId)
+        {
+            var modInfo = AllBattleMods.First(bmd => bmd.ID == ruleId);
+            if (!BoardManager.Instance.SafeIsUnityNull())
+            {
+                var component = BoardManager.Instance.gameObject.GetComponent(modInfo.Behavior);
+                if (component != null)
+                    return true;
+            }
+            return false;
+        }
+
+        public static NonCardTriggerReceiver GetActiveReceiver(ID id)
+        {
+            if (ActiveReceivers.ContainsKey(id))
+                return ActiveReceivers[id];
+
+            return null;
         }
 
         public static ID New(string modGuid, string title, List<string> introDialogue, Type behaviour, int difficulty = 1, List<CardTemple> regions = null, bool bossValid = false, string iconPath = DEFAULT_ICON_PATH)
@@ -112,6 +134,12 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         public static IEnumerator GiveOneTimeIntroduction(ID id, View targetView = View.P03Face)
         {
+            if (CanShowActivation)
+            {
+                if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BATTLE_MODIFIERS))
+                    ChallengeActivationUI.TryShowActivation(AscensionChallengeManagement.BATTLE_MODIFIERS);
+                CanShowActivation = false;
+            }
             string hasSeenIntroId = $"HasSeenBattleModIntro_{id}";
             if (ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, hasSeenIntroId))
                 yield break;
@@ -146,6 +174,20 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 yield break;
             }
 
+            CanShowActivation = true;
+
+            // Guarantee we can't accidentally carry over a battlemod from a previous run
+            foreach (BattleModDefinition defn in AllBattleMods)
+            {
+                Component triggerComponent = BoardManager.Instance.gameObject.GetComponent(defn.Behavior);
+                if (!triggerComponent.SafeIsUnityNull())
+                {
+                    UnityEngine.Object.Destroy(triggerComponent);
+                }
+            }
+
+            yield return new WaitForEndOfFrame();
+
             List<Component> allMods = new();
             foreach (ID id in GetBlueprintMods(TurnManager.Instance.BattleNodeData))
             {
@@ -153,8 +195,11 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 if (defn == null)
                     continue;
 
-                allMods.Add(BoardManager.Instance.gameObject.GetComponent(defn.Behavior)
-                            ?? BoardManager.Instance.gameObject.AddComponent(defn.Behavior));
+                var component = BoardManager.Instance.gameObject.GetComponent(defn.Behavior)
+                            ?? BoardManager.Instance.gameObject.AddComponent(defn.Behavior);
+                ActiveReceivers[id] = component as NonCardTriggerReceiver;
+
+                allMods.Add(component);
             }
 
             yield return sequence;
@@ -166,9 +211,42 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             }
         }
 
-        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.CleanUp))]
+        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.PlacePreSetCards))]
         [HarmonyPostfix]
-        private static IEnumerator DeleteBattleModReceivers(IEnumerator sequence)
+        private static IEnumerator ModifyTerrainByBattleMods(IEnumerator sequence, EncounterData encounterData)
+        {
+            foreach (EncounterData.StartCondition condition in encounterData.startConditions)
+            {
+                if (condition.cardsInPlayerSlots != null)
+                    CustomTriggerFinder.CallAll<IModifyTerrain>(false, t => true, t => t.ModifyPlayerTerrain(condition.cardsInPlayerSlots));
+                if (condition.cardsInOpponentSlots != null)
+                    CustomTriggerFinder.CallAll<IModifyTerrain>(false, t => true, t => t.ModifyOpponentTerrain(condition.cardsInOpponentSlots));
+                if (condition.cardsInOpponentQueue != null)
+                    CustomTriggerFinder.CallAll<IModifyTerrain>(false, t => true, t => t.ModifyOpponentQueuedTerrain(condition.cardsInOpponentQueue));
+            }
+            // List<NonCardTriggerReceiver> receivers = new(GlobalTriggerHandler.Instance.nonCardReceivers);
+            // foreach (NonCardTriggerReceiver trigger in receivers)
+            // {
+            //     if (!trigger.SafeIsUnityNull() && trigger is IModifyTerrain imt)
+            //     {
+            //         foreach (EncounterData.StartCondition condition in encounterData.startConditions)
+            //         {
+            //             if (condition.cardsInPlayerSlots != null)
+            //                 imt.ModifyPlayerTerrain(condition.cardsInPlayerSlots);
+            //             if (condition.cardsInOpponentSlots != null)
+            //                 imt.ModifyOpponentTerrain(condition.cardsInOpponentSlots);
+            //             if (condition.cardsInOpponentQueue != null)
+            //                 imt.ModifyOpponentQueuedTerrain(condition.cardsInOpponentQueue);
+            //         }
+            //     }
+            // }
+
+            yield return sequence;
+        }
+
+        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
+        [HarmonyPostfix]
+        private static IEnumerator CleanupBattleModReceivers(IEnumerator sequence)
         {
             if (!P03AscensionSaveData.IsP03Run)
             {
@@ -176,6 +254,16 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 yield break;
             }
 
+            CanShowActivation = false;
+
+            // List<NonCardTriggerReceiver> receivers = new(GlobalTriggerHandler.Instance.nonCardReceivers);
+            // foreach (NonCardTriggerReceiver trigger in receivers)
+            // {
+            //     if (!trigger.SafeIsUnityNull() && trigger is IBattleModCleanup ibmc)
+            //         yield return ibmc.OnBattleModCleanup();
+            // }
+
+            // TODO: Go back to the custom trigger finder when it gets fixed
             yield return CustomTriggerFinder.TriggerAll(
                 false,
                 delegate (IBattleModCleanup t)
@@ -186,14 +274,32 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 t => t.OnBattleModCleanup()
             );
 
+            yield return new WaitForEndOfFrame();
+
+            foreach (BattleModDefinition defn in AllBattleMods)
+            {
+                Component triggerComponent = BoardManager.Instance.gameObject.GetComponent(defn.Behavior);
+                if (!triggerComponent.SafeIsUnityNull())
+                {
+                    UnityEngine.Object.Destroy(triggerComponent);
+                    yield return new WaitForEndOfFrame();
+                }
+            }
+
+            yield return sequence;
+        }
+
+        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
+        [HarmonyPostfix]
+        [HarmonyPriority(Priority.VeryLow)]
+        private static void DeleteBattleModReceivers()
+        {
             foreach (BattleModDefinition defn in AllBattleMods)
             {
                 Component triggerComponent = BoardManager.Instance.gameObject.GetComponent(defn.Behavior);
                 if (!triggerComponent.SafeIsUnityNull())
                     UnityEngine.Object.Destroy(triggerComponent);
             }
-
-            yield return sequence;
         }
 
         [HarmonyPatch(typeof(BoardStateSimulator), nameof(BoardStateSimulator.SimulateCombatPhase))]
@@ -202,6 +308,14 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         {
             try
             {
+                // List<NonCardTriggerReceiver> receivers = new(GlobalTriggerHandler.Instance.nonCardReceivers);
+                // foreach (NonCardTriggerReceiver trigger in receivers)
+                // {
+                //     if (!trigger.SafeIsUnityNull() && trigger is IBattleModSimulator ibms && ibms.HasBoardStateAdjustment(board, playerIsAttacker))
+                //         ibms.DoBoardStateAdjustment(board, playerIsAttacker);
+                // }
+
+                // TODO: Replace when the custom trigger finder is fixed
                 CustomTriggerFinder.CallAll<IBattleModSimulator>(
                     false,
                     t => t.HasBoardStateAdjustment(board, playerIsAttacker),
@@ -220,12 +334,20 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         {
             try
             {
+                // int sum = 0;
+                // List<NonCardTriggerReceiver> receivers = new(GlobalTriggerHandler.Instance.nonCardReceivers);
+                // foreach (NonCardTriggerReceiver trigger in receivers)
+                // {
+                //     if (!trigger.SafeIsUnityNull() && trigger is IBattleModSimulator ibms && ibms.HasCardEvaluationAdjustment(card, board))
+                //         sum += ibms.DoCardEvaluationAdjustment(card, board);
+                // }
+                // TODO: Replace when trigger finder is fixe
                 List<(TriggerReceiver, int)> result = CustomTriggerFinder.CollectDataAll<IBattleModSimulator, int>(
                     false,
                     t => t.HasCardEvaluationAdjustment(card, board),
                     t => t.DoCardEvaluationAdjustment(card, board)
                 );
-                __result += result.Sum(item => item.Item2);
+                __result += result.Sum(t => t.Item2);
             }
             catch (Exception ex)
             {

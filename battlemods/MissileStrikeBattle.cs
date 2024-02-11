@@ -80,9 +80,9 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
             ViewManager.Instance.SwitchToView(View.Default);
             yield return MissileStrike.LaunchMissile(opponentSlot, parent, 1, null, Vector3.zero, 6.25f);
-            yield return new WaitForSeconds(0.25f);
+            yield return new WaitForSeconds(0.1f);
             yield return MissileStrike.LaunchMissile(playerSlot, parent, 1, null, Vector3.zero, 6.25f);
-            yield return new WaitForSeconds(0.25f);
+            yield return new WaitForSeconds(0.1f);
         }
 
         public IEnumerator OnBattleModSetup()

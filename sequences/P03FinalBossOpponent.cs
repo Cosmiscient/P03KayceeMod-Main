@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +9,10 @@ using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.Spells.Patchers;
+using InscryptionAPI.Card;
 using Pixelplacement;
 using Sirenix.Serialization.Utilities;
+using Sirenix.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
@@ -24,6 +27,15 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         private readonly List<string> PhaseTwoWeirdCards = new() { "MantisGod", "Moose", "Grizzly", "FrankNStein", "Amalgam", "Adder", "JuniorSage", "PracticeMage", "Revenant", "Bonehound", "RubyGolem" };
 
         private CardInfo PhaseTwoBlocker;
+        private CardInfo PhaseTwoTree
+        {
+            get
+            {
+                CardInfo info = CardLoader.GetCardByName("PracticeMage");
+                info.mods.Add(new(Ability.Reach));
+                return info;
+            }
+        }
 
         private static readonly CardSlot CardSlotPrefab = ResourceBank.Get<CardSlot>("Prefabs/Cards/CardSlot_Part3");
 
@@ -111,8 +123,15 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private CardInfo GenerateCard(int turn)
         {
+            if (NextTurnQueueSpecial.Count > 0)
+            {
+                CardInfo next = NextTurnQueueSpecial[0];
+                NextTurnQueueSpecial.Remove(next);
+                return next;
+            }
+
             if (NumLives == 3)
-                return BountyHunterGenerator.GenerateCardInfo(BountyHunterGenerator.GenerateMod(turn, (5 * turn) + 6));
+                return BountyHunterGenerator.GenerateCardInfo(BountyHunterGenerator.GenerateMod(turn, (4 * turn) + 6));
 
             if (NumLives == 2)
             {
@@ -287,7 +306,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 {
                     if (slot.Card == null && slot.opposingSlot.Card != null)
                     {
-                        yield return BoardManager.Instance.CreateCardInSlot(CardLoader.GetCardByName("DeadTree"), slot);
+                        yield return BoardManager.Instance.CreateCardInSlot(PhaseTwoTree, slot);
                         yield return new WaitForSeconds(0.45f);
                     }
                 }
@@ -383,13 +402,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             else
                 slot.SetColors(slotColors[0], slotColors[1], slotColors[2]);
 
-            if (FasterEvents)
-            {
-                slot.OnCursorEnter();
-                yield return new WaitForSeconds(0.05f);
-                slot.OnCursorExit();
-                yield break;
-            }
+            // if (FasterEvents)
+            // {
+            //     slot.OnCursorEnter();
+            //     yield return new WaitForSeconds(0.05f);
+            //     slot.OnCursorExit();
+            //     yield break;
+            // }
 
             GameObject lightning = Instantiate(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"));
             lightning.GetComponent<LightningBoltScript>().EndObject = slot.gameObject;
@@ -409,9 +428,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             CardRenderCamera defaultCam = CardRenderCameras[CardTemple.Tech];
             CardRenderCamera.m_Instance = defaultCam;
             CardRenderCameras.Remove(CardTemple.Tech);
-            CardRenderCameras.ForEach(kvp => kvp.Value.snapshotEmissionRenderTexture.Release());
-            CardRenderCameras.ForEach(kvp => kvp.Value.snapshotRenderTexture.Release());
-            CardRenderCameras.ForEach(kvp => Destroy(kvp.Value));
+            foreach (var cam in CardRenderCameras.Values)
+            {
+                cam.snapshotRenderTexture.Release();
+                cam.snapshotEmissionRenderTexture.Release();
+                Destroy(cam.gameObject);
+            }
             CardRenderCameras = null;
 
             OpponentAnimationController.Instance.ClearLookTarget();
@@ -515,15 +537,15 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             }
             yield return new WaitForSeconds(0.33f);
 
-            CardInfo firewallA = CardLoader.GetCardByName(CustomCards.FIREWALL);
-            firewallA.mods.Add(new(Ability.GuardDog));
-            firewallA.mods.Add(new(Ability.DeathShield));
+            CardInfo firewallA = CardLoader.GetCardByName(CustomCards.FIREWALL_LARGE);
+            // firewallA.mods.Add(new(Ability.GuardDog));
+            // firewallA.mods.Add(new(Ability.DeathShield));
             yield return BoardManager.Instance.CreateCardInSlot(firewallA, BoardManager.Instance.opponentSlots[0]);
             yield return new WaitForSeconds(0.66f);
 
-            CardInfo firewallB = CardLoader.GetCardByName(CustomCards.FIREWALL);
-            firewallB.mods.Add(new(Ability.StrafeSwap));
-            firewallB.mods.Add(new(Ability.DeathShield));
+            CardInfo firewallB = CardLoader.GetCardByName(CustomCards.FIREWALL_LARGE);
+            // firewallB.mods.Add(new(Ability.StrafeSwap));
+            // firewallB.mods.Add(new(Ability.DeathShield));
             yield return BoardManager.Instance.CreateCardInSlot(firewallB, BoardManager.Instance.opponentSlots[6]);
             yield return new WaitForSeconds(1.5f);
 
@@ -570,11 +592,35 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             }
         }
 
-        private static readonly int[] MODDERS_PART_1 = new int[] { 0, 1, 1, 1, 1, 1, 0, 2, 1, 0, 2 };
+        private static readonly int[] MODDERS_PART_1 = new int[] { 0, 1, 0, 1, 1, 1, 0, 2, 1, 0, 2 };
 
         private static readonly int[] MODDERS_PART_2 = new int[] { 2, 1, 2, 0, 1, 2, 0, 1, 2, 1 };
 
         private int[] adjustedPlanP2;
+
+        private static CardTemple GetRendererTemple(CardInfo info)
+        {
+            if (info.HasTrait(Trait.Giant))
+                return info.temple;
+
+            string rendererOverrideTemple = info.GetExtendedProperty("Renderer.OverrideTemple");
+
+            if (!string.IsNullOrEmpty(rendererOverrideTemple))
+            {
+                bool success = Enum.TryParse<CardTemple>(rendererOverrideTemple, out CardTemple rendTemple);
+                if (success)
+                    return rendTemple;
+            }
+
+            string packManagerTemple = info.GetExtendedProperty("PackManager.OriginalTemple");
+            if (!string.IsNullOrEmpty(packManagerTemple))
+            {
+                bool success = Enum.TryParse<CardTemple>(packManagerTemple, out CardTemple packTemple);
+                if (success)
+                    return packTemple;
+            }
+            return info.temple;
+        }
 
         private static CardTemple? SaveFileOverride = null;
 
@@ -626,27 +672,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return true;
         }
 
-        // [HarmonyPatch(typeof(CardRenderCamera), nameof(CardRenderCamera.ValidStatsLayer))]
-        // [HarmonyPrefix]
-        // [HarmonyPriority(Priority.VeryHigh)]
-        // private static bool OnlyTakeAppropriateStatsLayers(CardRenderCamera __instance, RenderStatsLayer layer, ref bool __result)
-        // {
-        //     if (layer == null || layer.PlayableCard == null)
-        //         return true;
-
-        //     if (!__instance.gameObject.name.StartsWith("SpecialRenderCamera"))
-        //         return true;
-
-        //     if (__instance.gameObject.name.Equals("SpecialRenderCameraUndead"))
-        //         __result = layer.PlayableCard.Info.temple == CardTemple.Undead;
-        //     else if (__instance.gameObject.name.Equals("SpecialRenderCameraNature"))
-        //         __result = layer.PlayableCard.Info.temple == CardTemple.Nature;
-        //     else if (__instance.gameObject.name.Equals("SpecialRenderCameraWizard"))
-        //         __result = layer.PlayableCard.Info.temple == CardTemple.Wizard;
-
-        //     return false;
-        // }
-
         [HarmonyPatch(typeof(RenderStatsLayer), nameof(RenderStatsLayer.RenderCard))]
         [HarmonyPrefix]
         [HarmonyPriority(Priority.VeryHigh)]
@@ -660,13 +685,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 if (__instance.Renderer != null)
                 {
-                    SaveFileOverride = info.baseInfo.temple;
+                    SaveFileOverride = GetRendererTemple(info.baseInfo);
                     bool emissionEnabled = CardDisplayer3D.EmissionEnabledForCard(info, __instance.PlayableCard);
                     if (!emissionEnabled)
                         __instance.DisableEmission();
 
-                    P03Plugin.Log.LogInfo($"Rendering {info.baseInfo.name} {info.baseInfo.temple} {CardRenderCameras[info.baseInfo.temple].gameObject.name}");
-                    CardRenderCameras[info.baseInfo.temple].QueueStatsLayerForRender(info, __instance, __instance.PlayableCard, __instance.RenderToMainTexture, emissionEnabled);
+                    P03Plugin.Log.LogInfo($"Rendering {info.baseInfo.name} {GetRendererTemple(info.baseInfo)} {CardRenderCameras[GetRendererTemple(info.baseInfo)].gameObject.name}");
+                    CardRenderCameras[GetRendererTemple(info.baseInfo)].QueueStatsLayerForRender(info, __instance, __instance.PlayableCard, __instance.RenderToMainTexture, emissionEnabled);
                     SaveFileOverride = null;
                     return false;
                 }
@@ -698,18 +723,18 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 && TurnManager.Instance.Opponent != null
                 && TurnManager.Instance.Opponent is P03AscensionOpponent p03
                 && p03.NumLives == 2
-                && info.temple != CardTemple.Tech)
+                && GetRendererTemple(info) != CardTemple.Tech)
             {
                 P03Plugin.Log.LogInfo("In Custom Make Card");
-                SaveFileOverride = info.temple;
-                GameObject card = Instantiate(CardPrefabs[info.temple]);
+                SaveFileOverride = GetRendererTemple(info);
+                GameObject card = Instantiate(CardPrefabs[GetRendererTemple(info)]);
                 PlayableCard playableCard = card.GetComponent<PlayableCard>();
                 playableCard.SetInfo(info);
                 __result = playableCard;
 
                 // Kind of a funny hack...there's got to be a better way to fix this
                 // If I don't do this, the gravestone cards are upside down.
-                if (info.temple == CardTemple.Undead)
+                if (GetRendererTemple(info) == CardTemple.Undead)
                 {
                     GameObject newParent = new("Part3Parent");
                     newParent.transform.SetParent(card.transform);
@@ -726,26 +751,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return true;
         }
 
-        // [HarmonyPatch(typeof(Opponent), nameof(CreateCard))]
-        // [HarmonyPrefix]
-        // [HarmonyPriority(Priority.VeryHigh)]
-        // private static bool MakeCardWithAppropriatePrefab(Opponent __instance, CardInfo cardInfo, ref PlayableCard __result)
-        // {
-        //     P03Plugin.Log.LogInfo($"Creating card for opponent {cardInfo.name} {cardInfo.temple}");
-        //     if (__instance is P03AscensionOpponent p03 && p03.NumLives == 2 && cardInfo.temple != CardTemple.Tech)
-        //     {
-        //         P03Plugin.Log.LogInfo("In Custom Make Card");
-        //         GameObject prefab = cardInfo.temple == CardTemple.Wizard ? MagnificusCardPrefab : (cardInfo.temple == CardTemple.Undead ? GrimoraCardPrefab : LeshyCardPrefab);
-        //         Instantiate(prefab);
-        //         PlayableCard playableCard = prefab.GetComponent<PlayableCard>();
-        //         playableCard.SetInfo(cardInfo);
-        //         playableCard.SetIsOpponentCard(true);
-        //         p03.ModifyQueuedCard(playableCard);
-        //         __result = playableCard;
-        //         return false;
-        //     }
-        //     return true;
-        // }
+        private List<CardInfo> NextTurnQueueSpecial = new();
 
         public override IEnumerator QueueNewCards(bool doTween = true, bool changeView = true)
         {
@@ -761,6 +767,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             int[] plan = (NumLives == 3) ? MODDERS_PART_1 : adjustedPlanP2;
             if (TurnManager.Instance.TurnNumber < plan.Length)
                 numCardsToQueue = plan[TurnManager.Instance.TurnNumber];
+            numCardsToQueue += NextTurnQueueSpecial.Count;
 
             if (NumLives == 2 && !HasDoneFirstWeirdCards)
             {
@@ -778,7 +785,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     if (slotsToQueue.Count > 0)
                     {
                         //int statPoints = Mathf.RoundToInt((float)Mathf.Min(6, TurnManager.Instance.TurnNumber + 1) * 2.5f);
-                        CardSlot slot = slotsToQueue[Random.Range(0, slotsToQueue.Count)];
+                        CardSlot slot = slotsToQueue[UnityEngine.Random.Range(0, slotsToQueue.Count)];
                         CardInfo card = CardLoader.GetCardByName(cardName);
                         if (card != null)
                         {
@@ -796,7 +803,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     if (slotsToQueue.Count > 0)
                     {
                         //int statPoints = Mathf.RoundToInt((float)Mathf.Min(6, TurnManager.Instance.TurnNumber + 1) * 2.5f);
-                        CardSlot slot = slotsToQueue[Random.Range(0, slotsToQueue.Count)];
+                        CardSlot slot = slotsToQueue[UnityEngine.Random.Range(0, slotsToQueue.Count)];
                         CardInfo card = GenerateCard(TurnManager.Instance.TurnNumber);
                         if (card != null)
                         {
@@ -937,7 +944,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             int seed = P03AscensionSaveData.RandomSeed + (10 * TurnManager.Instance.TurnNumber);
 
-            List<CardSlot> possibleSlots = BoardManager.Instance.OpponentSlotsCopy.Where(s => s.Card == null).ToList();
+            List<CardSlot> possibleSlots = BoardManager.Instance.OpponentSlotsCopy.Where(s => !Queue.Exists(p => p.QueuedSlot == s)).ToList();
             CardSlot slot = possibleSlots[SeededRandom.Range(0, possibleSlots.Count, seed++)];
 
             ViewManager.Instance.SwitchToView(View.Hand, false, false);
@@ -967,9 +974,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return PlayerHand.Instance.AddCardToHand(tokenCard, Vector3.zero, 0f);
             yield return new WaitForSeconds(0.6f);
 
-            ViewManager.Instance.SwitchToView(View.BoardCentered, false, false);
-            yield return BoardManager.Instance.CreateCardInSlot(cardToSteal.Info, slot);
-            yield return new WaitForSeconds(0.65f);
+            // ViewManager.Instance.SwitchToView(View.BoardCentered, false, false);
+            // yield return QueueCard(cardToSteal.Info, slot, true, true, true);
+            // //yield return BoardManager.Instance.CreateCardInSlot(cardToSteal.Info, slot);
+            // yield return new WaitForSeconds(0.65f);
+            NextTurnQueueSpecial.Add(cardToSteal.Info);
 
             ViewManager.Instance.SwitchToView(View.Default);
             InteractionCursor.Instance.InteractionDisabled = false;
@@ -1016,11 +1025,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 Transform firstPersonItem = FirstPersonController.Instance.AnimController.SpawnFirstPersonAnimation(hammer.FirstPersonPrefabId, null).transform;
                 firstPersonItem.localPosition = hammer.FirstPersonItemPos + (Vector3.right * 3f) + (Vector3.forward * 1f);
                 firstPersonItem.localEulerAngles = hammer.FirstPersonItemEulers;
-                yield return new WaitForSeconds(0.3f);
+                yield return new WaitForSeconds(0.15f);
                 hammer.MoveItemToPosition(firstPersonItem, slot.transform.position);
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.25f);
                 yield return hammer.OnValidTargetSelected(slot, firstPersonItem.gameObject);
-                yield return new WaitForSeconds(1f);
+                yield return new WaitForSeconds(.5f);
                 Destroy(firstPersonItem.gameObject);
                 yield return new WaitForEndOfFrame();
                 yield return new WaitForEndOfFrame();

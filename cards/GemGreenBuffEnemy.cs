@@ -18,7 +18,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Annoying Without Green";
             info.rulebookDescription = "The creature opposing [creature] gains 1 power unless the owner of [creature] also controls a Green Mox.";
             info.canStack = true;
-            info.powerLevel = 1;
+            info.powerLevel = -1;
             info.opponentUsable = true;
             info.SetExtendedProperty(AbilityIconBehaviours.GREEN_CELL_INVERSE, true);
             info.passive = false;

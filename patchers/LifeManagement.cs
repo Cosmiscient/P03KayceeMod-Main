@@ -37,23 +37,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (SaveFile.IsAscension && AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOUNTY_HUNTER))
             {
                 ChallengeActivationUI.Instance.ShowActivation(AscensionChallengeManagement.BOUNTY_HUNTER);
-                Part3SaveData.Data.bounty = 45 * AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallengeManagement.BOUNTY_HUNTER); // good fucking luck
+                Part3SaveData.Data.bounty = 45 * 2;//AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallengeManagement.BOUNTY_HUNTER); // good fucking luck
             }
         }
 
         //Create our own respawn sequence and go through each potential life system
-
-        //[HarmonyPatch(typeof(Part3GameFlowManager), "PlayerRespawnSequence")]
-        //[HarmonyPostfix]
-        //public static IEnumerator NewRespawnSequence(IEnumerator sequence)
-        //{
-        //    //Run the detract coins function
-        //    DetractCoins(sequence);
-
-        //    //Run the detract lives function
-        //    ShowLivesAtStartOfRespawn(sequence);
-        //    yield break;
-        //}
 
         public static IEnumerator DetractCoins(IEnumerator sequence)
         {
@@ -87,9 +75,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             EventManagement.NumberOfLosses += 1;
 
-            bool diedToBoss = Traverse.Create(Part3GameFlowManager.Instance).Field("diedToBoss").GetValue<bool>();
-
             //If you lost to a boss, move out of the boss room before losing coins
+            bool diedToBoss = (Part3GameFlowManager.Instance as Part3GameFlowManager).diedToBoss;
             if (diedToBoss)
             {
                 ViewManager.Instance.SwitchToView(View.MapDefault, false, false);
@@ -190,7 +177,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             Part3SaveData.Data.playerLives = 1;
 
             //Reset Bounty score
-            Part3SaveData.Data.bounty = 45 * AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallengeManagement.BOUNTY_HUNTER);
+            Part3SaveData.Data.bounty = 45 * 2 * AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallengeManagement.BOUNTY_HUNTER);
 
             HoloMapAreaManager.Instance.CurrentArea.OnAreaActive();
             HoloMapAreaManager.Instance.CurrentArea.OnAreaEnabled();
@@ -223,6 +210,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 yield break;
             }
 
+            SaveManager.savingDisabled = true;
+
             Debug.Log("Challenge Active? : " + AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.TRADITIONAL_LIVES));
 
             //If the lives challenge isn't activated, do the detract coins sequence instead
@@ -233,6 +222,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 Debug.Log("DetractCoins is about to trigger");
 
                 yield return DetractCoins(sequence);
+
+                yield return new WaitForEndOfFrame();
+                SaveManager.savingDisabled = false;
+                SaveManager.SaveToFile(true);
                 yield break;
             }
 
@@ -276,6 +269,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
                 yield return sequence.Current;
             }
+
+            yield return new WaitForEndOfFrame();
+            SaveManager.savingDisabled = false;
+            SaveManager.SaveToFile(true);
             yield break;
         }
 
@@ -303,7 +300,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 dialogueOptions.Add("Part3AscensionDeathPay3");
             }
 
-            string finalDialogue = dialogueOptions[UnityEngine.Random.Range(0, dialogueOptions.Count)];
+            string finalDialogue = dialogueOptions[Random.Range(0, dialogueOptions.Count)];
 
             yield return TextDisplayer.Instance.PlayDialogueEvent(finalDialogue, TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
             yield return new WaitForSeconds(0.1f);

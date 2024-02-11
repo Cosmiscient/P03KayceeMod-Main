@@ -18,7 +18,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.rulebookName = "Zip of Death";
             info.rulebookDescription = "Take 2 damage.";
             info.canStack = false;
-            info.powerLevel = 1;
+            info.powerLevel = 0;
             info.opponentUsable = false;
             info.activated = true;
             info.passive = false;

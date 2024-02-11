@@ -14,6 +14,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
+        public override int Priority => -100;
 
         static VesselHeart()
         {

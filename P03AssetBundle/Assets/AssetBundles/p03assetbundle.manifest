@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 3240280232
+CRC: 2161727484
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: eb39f7ad1f8f4ae17cc5023b6aae3bd9
+    Hash: 5a7da4d765a6a3271fb193d6e61a4a3c
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 8c5b7327d4a845eb9a034ee9c89524e4
+    Hash: 10caaafd0ad3fcdc9870467d863128a4
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -25,9 +25,15 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 48
   Script: {instanceID: 0}
+- Class: 74
+  Script: {instanceID: 0}
+- Class: 91
+  Script: {instanceID: 0}
 - Class: 95
   Script: {instanceID: 0}
 - Class: 136
+  Script: {instanceID: 0}
+- Class: 137
   Script: {instanceID: 0}
 - Class: 198
   Script: {instanceID: 0}
@@ -36,14 +42,17 @@ ClassTypes:
 SerializeReferenceClassIdentifiers: []
 Assets:
 - Assets/Shaders/ProjectedUnstenciledSticker.shader
+- Assets/Prefabs/Question.prefab
 - Assets/Textures/Tractorbeam.mat
 - Assets/Prefabs/Molotov.prefab
 - Assets/Prefabs/UFO.prefab
 - Assets/Textures/UFO_Black_Down.mat
 - Assets/Prefabs/arrow-repeat.prefab
 - Assets/Shaders/StandardWithStencil.shader
+- Assets/Prefabs/koi.prefab
 - Assets/Shaders/LightProjectorShader.shader
 - Assets/Prefabs/latcher-claw.prefab
+- Assets/Models/FingerGun.obj
 - Assets/Effects/Fire_Flamethrower.prefab
 - Assets/Effects/Fire_Ball.prefab
 - Assets/Effects/Fire_Glow.mat
@@ -53,7 +62,9 @@ Assets:
 - Assets/Prefabs/mantrap.prefab
 - Assets/Effects/Fire_Material.mat
 - Assets/Prefabs/Launcher.prefab
+- Assets/Models/flamethrower.fbx
 - Assets/Shaders/ProjectStickerShader.shader
+- Assets/Effects/cardslot_teleport.prefab
 - Assets/Textures/UFO_Middle.mat
 - Assets/Prefabs/rocket-bomb.prefab
 - Assets/Textures/PolaroidMaterial.mat
@@ -61,6 +72,7 @@ Assets:
 - Assets/Effects/Fire_Particles.png
 - Assets/Effects/Fire_Parent.prefab
 - Assets/Textures/UFO_Base.mat
+- Assets/Models/syringe_gun_low.fbx
 - Assets/Effects/UFO_Particles.png
 - Assets/Prefabs/Unlit-Bomb.prefab
 - Assets/Prefabs/Missile.prefab

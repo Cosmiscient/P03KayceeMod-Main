@@ -2,9 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Card;
+using Pixelplacement;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -58,6 +62,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                             {
                                 abilityIconInteractable.SetColor(inConduitCircuit ? info.colorOverride : color);
                             }
+                            if (info.metaCategories.Contains(CustomCards.MultiverseAbility))
+                            {
+                                abilityIconInteractable.SetColor(Color.black);
+                            }
                         }
                     }
                 }
@@ -75,6 +83,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     if (group.activeSelf)
                     {
+                        //P03Plugin.Log.LogInfo($"Updating ability icon colors for group {group}");
                         foreach (AbilityIconInteractable abilityIconInteractable in group.GetComponentsInChildren<AbilityIconInteractable>())
                         {
                             AbilityInfo info = AbilitiesUtil.GetInfo(abilityIconInteractable.Ability);

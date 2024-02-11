@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
@@ -31,6 +32,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         }
 
         private bool? _holofy = null;
+        private bool? _emissiveBorderTex = null;
 
         public virtual Color? BorderColor { get => GetColor("BorderColor"); set => _setColors["BorderColor"] = value; }
         public virtual Color? PortraitColor { get => GetColor("PortraitColor"); set => _setColors["PortraitColor"] = value; }
@@ -41,10 +43,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public virtual Color? HealthColor { get => GetColor("HealthColor"); set => _setColors["HealthColor"] = value; }
         public virtual Color? DefaultAbilityColor { get => GetColor("DefaultAbilityColor"); set => _setColors["DefaultAbilityColor"] = value; }
         public virtual bool HolofyBorder { get => _holofy.GetValueOrDefault(Card.Info.GetExtendedPropertyAsBool("Holofy").GetValueOrDefault(false)); set => _holofy = value; }
+        public virtual bool EmissiveBorderTexture { get => _emissiveBorderTex.GetValueOrDefault(Card.Info.GetExtendedPropertyAsBool("EmissiveBorderTexture").GetValueOrDefault(false)); set => _emissiveBorderTex = value; }
 
-        internal static Texture2D RedTexture { get; set; }
-        internal static Texture2D GoldTexture { get; set; }
-        internal static Texture2D BlueTexture { get; set; }
+        internal static readonly Dictionary<Color, Texture2D> DiskTextures = new();
+
         internal static Texture2D WhiteTextTexture { get; set; }
         internal Texture2D CurrentTexture { get; set; }
 
@@ -57,23 +59,29 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ID = CardAppearanceBehaviourManager.Add(P03Plugin.PluginGuid, "ColoredDiscAppearance", typeof(DiscCardColorAppearance)).Id;
 
             // I'm going to manually load this texture; it seems to have some issues
-            GoldTexture = new Texture2D(2, 2, TextureFormat.DXT1, false);
+            DiskTextures[GameColors.Instance.darkGold] = new Texture2D(2, 2, TextureFormat.DXT1, false);
             byte[] imgBytes = TextureHelper.GetResourceBytes("FloppyDisc_AlbedoTransparency_Gold_2048.png", typeof(DiscCardColorAppearance).Assembly);
-            bool isLoaded = GoldTexture.LoadImage(imgBytes);
-            GoldTexture.filterMode = FilterMode.Point;
-            GoldTexture.name = "GoldDiskTexture";
+            bool isLoaded = DiskTextures[GameColors.Instance.darkGold].LoadImage(imgBytes);
+            DiskTextures[GameColors.Instance.darkGold].filterMode = FilterMode.Point;
+            DiskTextures[GameColors.Instance.darkGold].name = "GoldDiskTexture";
 
-            RedTexture = new Texture2D(2, 2, TextureFormat.DXT1, false);
+            DiskTextures[GameColors.Instance.darkRed] = new Texture2D(2, 2, TextureFormat.DXT1, false);
             imgBytes = TextureHelper.GetResourceBytes("FloppyDisc_AlbedoTransparency_Red_2048.png", typeof(DiscCardColorAppearance).Assembly);
-            isLoaded = RedTexture.LoadImage(imgBytes);
-            RedTexture.filterMode = FilterMode.Point;
-            RedTexture.name = "RedDiskTexture";
+            isLoaded = DiskTextures[GameColors.Instance.darkRed].LoadImage(imgBytes);
+            DiskTextures[GameColors.Instance.darkRed].filterMode = FilterMode.Point;
+            DiskTextures[GameColors.Instance.darkRed].name = "RedDiskTexture";
 
-            BlueTexture = new Texture2D(2, 2, TextureFormat.DXT1, false);
+            DiskTextures[GameColors.Instance.blue] = new Texture2D(2, 2, TextureFormat.DXT1, false);
             imgBytes = TextureHelper.GetResourceBytes("FloppyDisc_AlbedoTransparency_2048.png", typeof(DiscCardColorAppearance).Assembly);
-            isLoaded = BlueTexture.LoadImage(imgBytes);
-            BlueTexture.filterMode = FilterMode.Point;
-            BlueTexture.name = "BlueDiskTexture";
+            isLoaded = DiskTextures[GameColors.Instance.blue].LoadImage(imgBytes);
+            DiskTextures[GameColors.Instance.blue].filterMode = FilterMode.Point;
+            DiskTextures[GameColors.Instance.blue].name = "BlueDiskTexture";
+
+            DiskTextures[Color.black] = new Texture2D(2, 2, TextureFormat.DXT1, false);
+            imgBytes = TextureHelper.GetResourceBytes("FloppyDisc_AlbedoTransparency_Black_2048.png", typeof(DiscCardColorAppearance).Assembly);
+            isLoaded = DiskTextures[Color.black].LoadImage(imgBytes);
+            DiskTextures[Color.black].filterMode = FilterMode.Point;
+            DiskTextures[Color.black].name = "BlackDiskTexture";
 
             WhiteTextTexture = new Texture2D(2, 2, TextureFormat.DXT1, false);
             imgBytes = TextureHelper.GetResourceBytes("heavyweight-white.png", typeof(DiscCardColorAppearance).Assembly);
@@ -120,15 +128,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             if (!BorderColor.HasValue)
             {
-                CurrentTexture = BlueTexture;
+                CurrentTexture = DiskTextures[GameColors.Instance.blue];
                 return;
             }
 
-            float red = ColorDistance(GameColors.Instance.darkRed, BorderColor.Value);
-            float gold = ColorDistance(GameColors.Instance.darkGold, BorderColor.Value);
-            float blue = ColorDistance(GameColors.Instance.blue, BorderColor.Value);
-
-            CurrentTexture = red < gold && red < blue ? RedTexture : gold < red && gold < blue ? GoldTexture : BlueTexture;
+            var key = DiskTextures.Keys.OrderBy(k => ColorDistance(k, BorderColor.Value)).First();
+            CurrentTexture = DiskTextures[key];
         }
 
         internal static Color? GetColorFromString(string colorKey)
@@ -186,7 +191,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             "_DetailAlbedoMap",
         };
 
-        private void ApplyColorSafe(string path, Color color, bool emission, bool holofy = false, Texture retexture = null)
+        private void ApplyColorSafe(string path, Color color, bool emission, bool holofy = false, Texture retexture = null, bool emissiveTexture = false)
         {
             try
             {
@@ -211,7 +216,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     if (emission)
                     {
                         material.EnableKeyword("_EMISSION");
-                        material.SetColor("_EmissionColor", color);
+
+                        if (emissiveTexture)
+                        {
+                            if (retexture == null)
+                                material.SetTexture("_EmissionMap", material.GetTexture("_MainTex"));
+                            else
+                                material.SetTexture("_EmissionMap", retexture);
+                        }
+                        else
+                        {
+                            material.SetColor("_EmissionColor", color);
+                        }
 
                         if (retexture != null)
                             material.SetColor("_Color", Color.black);
@@ -240,14 +256,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (BorderColor.HasValue)
             {
                 foreach (string key in BorderObjectPaths)
-                    ApplyColorSafe(key, BorderColor.Value, true, HolofyBorder);
+                    ApplyColorSafe(key, BorderColor.Value, true, HolofyBorder, emissiveTexture: EmissiveBorderTexture);
             }
 
             // Apply the color to the name background
             if (NameBannerColor.HasValue)
             {
                 foreach (string key in StickerObjectPaths)
-                    ApplyColorSafe(key, NameBannerColor.Value, true, retexture: BlueTexture);
+                    ApplyColorSafe(key, NameBannerColor.Value, true, retexture: DiskTextures[GameColors.Instance.blue]);
             }
 
             if (NameTextColor.HasValue && Card.StatsLayer is DiskRenderStatsLayer drsl)
@@ -280,13 +296,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static IEnumerator FixMiddleColor(IEnumerator sequence, CardRenderCamera __instance, RenderStatsLayer layer, CardRenderInfo info, PlayableCard playableCard, bool updateMain, bool updateEmission)
         {
-            if (!P03AscensionSaveData.IsP03Run || layer is not DiskRenderStatsLayer drsl)
+            if (!P03AscensionSaveData.IsP03Run || layer == null || layer is not DiskRenderStatsLayer drsl)
             {
                 yield return sequence;
                 yield break;
             }
 
-            DiscCardColorAppearance appearance = drsl.gameObject.transform.parent.parent.gameObject.GetComponent<DiscCardColorAppearance>();
+            DiscCardColorAppearance appearance = drsl.GetComponentInParent<DiscCardColorAppearance>();
 
             Color myBarColor = drsl.defaultLightColor;
             if (appearance != null && appearance.BorderColor.HasValue)
@@ -309,9 +325,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 __instance.cardDisplayer.DisplayInfo(info, playableCard);
 
                 // Also change the bar color here.
-                GameObject delimiter = __instance.transform.Find("CardsPlane/Base/Delimiter").gameObject;
-                SpriteRenderer renderer = delimiter.GetComponent<SpriteRenderer>();
-                renderer.color = myBarColor;
+                Transform delimiter = __instance.transform.Find("CardsPlane/Base/Delimiter");
+                if (delimiter != null)
+                {
+                    SpriteRenderer renderer = delimiter.GetComponent<SpriteRenderer>();
+                    renderer.color = myBarColor;
+                }
                 yield return new WaitForEndOfFrame();
             }
 

@@ -46,13 +46,22 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         private float currentUpdateTime = 0f;
         private readonly float clipLoudness = 0f;
 
-        private static readonly Texture RotatedGear = TextureHelper.GetImageAsTexture("card_slot_rotated_normal.png", typeof(P03FinalBossScreenArray).Assembly);
-        private static readonly Texture NormalGear = ResourceBank.Get<Texture>("Art/Cards/card_slot_tech");
-        private bool LastNormal = false;
+        private static readonly List<Texture> Gears = new() {
+            TextureHelper.GetImageAsTexture("card_slot_spin1.png", typeof(P03FinalBossScreenArray).Assembly),
+            TextureHelper.GetImageAsTexture("card_slot_spin2.png", typeof(P03FinalBossScreenArray).Assembly),
+            TextureHelper.GetImageAsTexture("card_slot_spin3.png", typeof(P03FinalBossScreenArray).Assembly),
+            TextureHelper.GetImageAsTexture("card_slot_spin4.png", typeof(P03FinalBossScreenArray).Assembly),
+            TextureHelper.GetImageAsTexture("card_slot_spin5.png", typeof(P03FinalBossScreenArray).Assembly),
+            TextureHelper.GetImageAsTexture("card_slot_spin6.png", typeof(P03FinalBossScreenArray).Assembly),
+            TextureHelper.GetImageAsTexture("card_slot_spin7.png", typeof(P03FinalBossScreenArray).Assembly),
+            TextureHelper.GetImageAsTexture("card_slot_spin8.png", typeof(P03FinalBossScreenArray).Assembly),
+        };
+
+        private static int GearIndex = 0;
 
         // Stuff for face management
         private bool showingLoadingFaces = false;
-        private bool showingMoonFace = false;
+        private readonly bool showingMoonFace = false;
 
         private void Update()
         {
@@ -67,15 +76,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     {
                         // Rotation of gears
                         int beatCount = Mathf.RoundToInt((loop.time - (SECONDS_PER_BEAT / 2f)) / SECONDS_PER_BEAT);
-                        bool gearTarget = beatCount % 2 == 0;
-                        Texture target = gearTarget ? NormalGear : RotatedGear;
-                        if (LastNormal != gearTarget)
+                        int gearTarget = beatCount % Gears.Count;
+                        if (GearIndex != gearTarget)
                         {
-                            LastNormal = gearTarget;
+                            GearIndex = gearTarget;
                             foreach (CardSlot slot in BoardManager.Instance.AllSlots)
                             {
                                 if (slot.GetSlotModification() == SlotModificationManager.ModificationType.NoModification)
-                                    slot.SetTexture(target);
+                                    slot.SetTexture(Gears[GearIndex]);
                             }
 
                             foreach (P03FinalBossExtraScreen screen in AllScreens.Where(s => s.PulsesWithMusic))
