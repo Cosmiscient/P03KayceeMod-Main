@@ -16,6 +16,21 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     [HarmonyPatch]
     public class MultiverseGameState
     {
+        public enum Phase
+        {
+            Any = -1,
+            GameIsOver = 0,
+            PlayerUpkeepAndMain = 1,
+            PlayerCombat = 3,
+            PlayerEnd = 4,
+            AfterPlayer = 5,
+            OpponentUpkeep = 6,
+            OpponentMain = 7,
+            OpponentCombat = 8,
+            OpponentEnd = 9,
+            AfterOpponent = 10
+        }
+
         private static GameObject _offboardHandParent;
         private static GameObject OffboardHandParent
         {
@@ -79,12 +94,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public bool IsPlayerTurn { get; private set; }
         public bool IsPlayerUpkeep { get; private set; }
         public bool IsSetupPhase { get; private set; }
+        public Phase CurrentPhase { get; private set; }
 
         public int DamageDealtThisPhase { get; private set; }
 
         public LightColorState ColorState { get; private set; }
 
-        private Dictionary<Trigger, List<IMultiverseDelayedCoroutine>> Callbacks { get; set; }
+        private Dictionary<Phase, List<IMultiverseDelayedCoroutine>> Callbacks { get; set; }
 
         public Texture2D Screenshot { get; private set; }
 
@@ -168,6 +184,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             state.PlayerTurnPhase = TurnManager.Instance.PlayerPhase;
             state.IsPlayerTurn = TurnManager.Instance.IsPlayerTurn;
             state.IsSetupPhase = TurnManager.Instance.IsSetupPhase;
+            state.CurrentPhase = MultiverseBattleSequencer.Instance.CurrentPhase;
             state.DamageDealtThisPhase = TurnManager.Instance.CombatPhaseManager.DamageDealtThisPhase;
 
             P03Plugin.Log.LogInfo($"Saving Cards In Main Deck: " + string.Join(", ", CardDrawPiles3D.Instance.Deck.cards.Select(c => c.name)));
@@ -203,22 +220,44 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             state.SetScreenshot(MultiverseBattleSequencer.Instance?.ActiveMultiverse?.Screenshot);
 
+            state.Callbacks = MultiverseBattleSequencer.Instance?.ActiveMultiverse?.Callbacks;
+
             return state;
         }
 
-        public void RegisterCallback(Trigger trigger, IMultiverseDelayedCoroutine callback)
+        public void RegisterCallback(IMultiverseDelayedCoroutine callback)
         {
-            this.Callbacks ??= new();
-            this.Callbacks[trigger] ??= new();
-            this.Callbacks[trigger].Add(callback);
+            RegisterCallback(Phase.Any, callback);
         }
 
-        public IEnumerator DoCallbacks(Trigger trigger)
+        public void RegisterCallback(Phase phase, IMultiverseDelayedCoroutine callback)
         {
-            if (Callbacks != null && Callbacks.ContainsKey(trigger) && Callbacks[trigger] != null)
+            this.Callbacks ??= new();
+
+            if (!this.Callbacks.ContainsKey(phase))
+                this.Callbacks.Add(phase, new());
+            this.Callbacks[phase].Add(callback);
+        }
+
+        public IEnumerator DoCallbacks(Phase phase)
+        {
+            if (Callbacks != null)
             {
-                foreach (var co in Callbacks[trigger])
-                    yield return co.DoCallback();
+                if (Callbacks.ContainsKey(Phase.Any) && Callbacks[Phase.Any] != null)
+                {
+                    foreach (var co in Callbacks[Phase.Any])
+                        yield return co.DoCallback();
+
+                    Callbacks[Phase.Any].Clear();
+                }
+
+                if (Callbacks.ContainsKey(phase) && Callbacks[phase] != null)
+                {
+                    foreach (var co in Callbacks[phase])
+                        yield return co.DoCallback();
+
+                    Callbacks[phase].Clear();
+                }
             }
             yield break;
         }
@@ -342,11 +381,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             // Restore face
             P03AnimationController.Instance.FaceRenderer.DisplayFace(this.P03Face);
 
+            // States
+            yield return MultiverseBattleSequencer.Instance.SetPhase(this.CurrentPhase, suppressCallbacks: true);
+
             // Wait for everything to calm down
             yield return new WaitForSeconds(0.4f);
 
             // Do all the coroutine callbacks
-            yield return DoCallbacks(Trigger.None);
+            yield return DoCallbacks(this.CurrentPhase);
 
             restoredCallback?.Invoke();
         }
@@ -437,9 +479,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public bool RespondsToTrigger(Trigger trigger, params object[] args)
         {
-            if (Callbacks != null && Callbacks.ContainsKey(trigger) && Callbacks[trigger] != null && Callbacks[trigger].Count > 0)
-                return true;
-
             // Temporarily assign the slots back and then check noncardtriggerreceivers
             List<CardSlot> playerSlots = new(BoardManager.Instance.playerSlots);
             List<CardSlot> opponentSlots = new(BoardManager.Instance.opponentSlots);

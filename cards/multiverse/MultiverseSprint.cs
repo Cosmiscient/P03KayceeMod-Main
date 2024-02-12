@@ -93,7 +93,9 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
                 yield return new WaitForSeconds(0.4f);
                 Card.UnassignFromSlot();
                 int targetUniverse = MultiverseBattleSequencer.Instance.GetUniverseId(strafeToSlot);
-                MultiverseBattleSequencer.Instance.MultiverseGames[targetUniverse].RegisterCallback(Trigger.TurnEnd, this);
+
+                var phase = Card.OpponentCard ? MultiverseGameState.Phase.OpponentEnd : MultiverseGameState.Phase.PlayerEnd;
+                MultiverseBattleSequencer.Instance.MultiverseGames[targetUniverse].RegisterCallback(phase, this);
             }
             else
             {

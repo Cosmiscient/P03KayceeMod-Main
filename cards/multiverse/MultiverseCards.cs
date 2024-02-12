@@ -1,3 +1,4 @@
+using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -23,7 +24,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             CardManager.New(P03Plugin.CardPrefx, "MultiverseMineCart", "49er", 1, 1)
                 .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_minecart"))
                 .SetCost(energyCost: 2)
-                .AddAbilities(MultiverseStrafe.AbilityID)
+                .AddAbilities(Ability.Strafe, MultiverseStrafe.AbilityID)
                 .SetCardTemple(CardTemple.Tech);
 
             CardManager.New(P03Plugin.CardPrefx, "MultiverseSentry", "Sentry Drone", 0, 1)

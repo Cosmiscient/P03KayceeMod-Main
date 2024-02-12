@@ -98,7 +98,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
                     var universe = MultiverseBattleSequencer.Instance.MultiverseGames[i];
                     CardSlot newSlot = Card.OpponentCard ? universe.OpponentSlots[slotIdx] : universe.PlayerSlots[slotIdx];
 
-                    universe.RegisterCallback(Trigger.None, new OtherUniverseExplode(newSlot, bombPrefab));
+                    universe.RegisterCallback(new OtherUniverseExplode(newSlot, bombPrefab));
                 }
             }
             yield break;
@@ -117,6 +117,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
 
             public IEnumerator DoCallback()
             {
+                MultiverseBattleSequencer.Instance.TeleportationEffects(targetSlot);
                 yield return ExplodeFromSlot(targetSlot, bombPrefab);
             }
         }

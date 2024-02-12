@@ -32,17 +32,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public override void ManagedUpdate()
         {
-            this.SetEnabled(TurnManager.Instance.IsPlayerMainPhase && !(MultiverseBattleSequencer.Instance?.MultiverseTravelLocked).GetValueOrDefault(true));
+            this.SetEnabled((MultiverseBattleSequencer.Instance?.PlayerCanTravelMultiverse).GetValueOrDefault(false));
         }
 
         public override void OnCursorSelectStart()
         {
-            if (TurnManager.Instance.IsPlayerMainPhase)
+            if ((MultiverseBattleSequencer.Instance?.PlayerCanTravelMultiverse).GetValueOrDefault(false))
             {
-                if (!(MultiverseBattleSequencer.Instance?.MultiverseTravelLocked).GetValueOrDefault(true))
-                {
-                    MultiverseBattleSequencer.Instance?.StartCoroutine(MultiverseBattleSequencer.Instance.TraverseMultiverse(MoveForward));
-                }
+                MultiverseBattleSequencer.Instance?.StartCoroutine(MultiverseBattleSequencer.Instance.TraverseMultiverse(MoveForward));
             }
         }
 

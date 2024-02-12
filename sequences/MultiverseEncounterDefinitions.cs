@@ -39,103 +39,104 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         internal static void CreateMultiverseEncounters()
         {
-            MultiverseBossPhaseOne = new() { null, null, null, null, null, null, null, null };
-            // Encounter: Multiverse 1-1
-            MultiverseBossPhaseOne[0] = EncounterManager.New("P03KCM_Multiverse_1_Firewall", addToPool: false);
+            MultiverseBossPhaseOne = new();
+
+            // Encounter: Multiverse 1
+            MultiverseBossPhaseOne.Add(EncounterManager.New("P03KCM_Multiverse_1_Sentries", addToPool: false));
             MultiverseBossPhaseOne[0].SetDifficulty(0, 10);
             MultiverseBossPhaseOne[0].turns = new();
 
-            // TURN 1
             MultiverseBossPhaseOne[0].turns.AddTurn(
-                Enemy("P03KCM_MultiverseFirewall")
-            );
-
-            // TURN 2
-            MultiverseBossPhaseOne[0].turns.AddTurn(
-                Enemy("Automaton"),
-                Enemy("LeapBot")
-            );
-
-            // TURN 3
-            MultiverseBossPhaseOne[0].turns.AddTurn(
-                Enemy("Insectodrone")
-            );
-
-            // TURN 4
-            MultiverseBossPhaseOne[0].turns.AddTurn(
-                Enemy("P03KCM_MultiverseFirewall")
-            );
-
-            // TURN 5
-            MultiverseBossPhaseOne[0].turns.AddTurn(
-                Enemy("P03KCMXP1_Spyplane")
-            );
-
-            // TURN 6
-            MultiverseBossPhaseOne[0].turns.AddTurn(
-                Enemy("LeapBot"),
-                Enemy("Automaton")
-            );
-
-            // TURN 7
-            MultiverseBossPhaseOne[0].turns.AddTurn(
-                Enemy("Automaton")
-            );
-
-            MultiverseBossPhaseOne[0].ContinueOn("P03KCM_MultiverseFirewall", "Automaton", null, "P03KCMXP1_Spyplane");
-
-            // Encounter: Multiverse 2
-            MultiverseBossPhaseOne[1] = EncounterManager.New("P03KCM_Multiverse_2_Sentries", addToPool: false);
-            MultiverseBossPhaseOne[1].SetDifficulty(0, 10);
-            MultiverseBossPhaseOne[1].turns = new();
-
-            MultiverseBossPhaseOne[1].turns.AddTurn(
                 Enemy("P03KCM_MultiverseSentry"),
                 Enemy("P03KCM_MultiverseSentry")
             );
 
             // TURN 2
-            MultiverseBossPhaseOne[1].turns.AddTurn(
+            MultiverseBossPhaseOne[0].turns.AddTurn(
                 Enemy("RoboSkeleton")
             );
 
             // TURN 3
-            MultiverseBossPhaseOne[1].turns.AddTurn(
+            MultiverseBossPhaseOne[0].turns.AddTurn(
                 Enemy("RoboSkeleton"),
                 Enemy("RoboSkeleton")
             );
 
             // TURN 4
-            MultiverseBossPhaseOne[1].turns.AddTurn(
+            MultiverseBossPhaseOne[0].turns.AddTurn(
                 Enemy("P03KCM_MultiverseSentry")
             );
 
             // TURN 5
-            MultiverseBossPhaseOne[1].turns.AddTurn(
+            MultiverseBossPhaseOne[0].turns.AddTurn(
                 Enemy("P03KCM_MultiverseSentry"),
                 Enemy("RoboSkeleton")
             );
 
             // TURN 6
-            MultiverseBossPhaseOne[1].turns.AddTurn(
+            MultiverseBossPhaseOne[0].turns.AddTurn(
                 Enemy("Insectodrone"),
                 Enemy("RoboSkeleton")
             );
 
             // TURN 7
-            MultiverseBossPhaseOne[1].turns.AddTurn(
+            MultiverseBossPhaseOne[0].turns.AddTurn(
                 Enemy("RoboSkeleton")
             );
 
             // TURN 8
-            MultiverseBossPhaseOne[1].turns.AddTurn(
+            MultiverseBossPhaseOne[0].turns.AddTurn(
                 Enemy("P03KCM_MultiverseGunner")
             );
 
-            MultiverseBossPhaseOne[1].ContinueOn("P03KCM_MultiverseSentry", "RoboSkeleton", "RoboSkeleton");
+            MultiverseBossPhaseOne[0].ContinueOn("P03KCM_MultiverseSentry", "RoboSkeleton", "RoboSkeleton");
+
+            // Encounter: Multiverse 1-1
+            MultiverseBossPhaseOne.Add(EncounterManager.New("P03KCM_Multiverse_2_Firewall", addToPool: false));
+            MultiverseBossPhaseOne[1].SetDifficulty(0, 10);
+            MultiverseBossPhaseOne[1].turns = new();
+
+            // TURN 1
+            MultiverseBossPhaseOne[1].turns.AddTurn(
+                Enemy("P03KCM_MultiverseFirewall")
+            );
+
+            // TURN 2
+            MultiverseBossPhaseOne[1].turns.AddTurn(
+                Enemy("Automaton"),
+                Enemy("LeapBot")
+            );
+
+            // TURN 3
+            MultiverseBossPhaseOne[1].turns.AddTurn(
+                Enemy("Insectodrone")
+            );
+
+            // TURN 4
+            MultiverseBossPhaseOne[1].turns.AddTurn(
+                Enemy("P03KCM_MultiverseFirewall")
+            );
+
+            // TURN 5
+            MultiverseBossPhaseOne[1].turns.AddTurn(
+                Enemy("P03KCMXP1_Spyplane")
+            );
+
+            // TURN 6
+            MultiverseBossPhaseOne[1].turns.AddTurn(
+                Enemy("LeapBot"),
+                Enemy("Automaton")
+            );
+
+            // TURN 7
+            MultiverseBossPhaseOne[1].turns.AddTurn(
+                Enemy("Automaton")
+            );
+
+            MultiverseBossPhaseOne[1].ContinueOn("P03KCM_MultiverseFirewall", "Automaton", null, "P03KCMXP1_Spyplane");
 
             // Encounter: Multiverse 3
-            MultiverseBossPhaseOne[2] = EncounterManager.New("P03KCM_Multiverse_3_MineCarts", addToPool: false);
+            MultiverseBossPhaseOne.Add(EncounterManager.New("P03KCM_Multiverse_3_MineCarts", addToPool: false));
             MultiverseBossPhaseOne[2].SetDifficulty(0, 10);
             MultiverseBossPhaseOne[2].turns = new();
 
@@ -198,7 +199,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             MultiverseBossPhaseOne[2].ContinueOn(null, "LeapBot", "P03KCM_MultiverseGunner");
 
             // Encounter: Multiverse 3
-            MultiverseBossPhaseOne[3] = EncounterManager.New("P03KCM_Multiverse_4_Hounds", addToPool: false);
+            MultiverseBossPhaseOne.Add(EncounterManager.New("P03KCM_Multiverse_4_Hounds", addToPool: false));
             MultiverseBossPhaseOne[3].SetDifficulty(0, 10);
             MultiverseBossPhaseOne[3].turns = new();
 
@@ -246,7 +247,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             MultiverseBossPhaseOne[3].ContinueOn("P03KCM_MultiverseBolthound", "P03KCM_CXformerAlpha", "P03KCMXP1_ViperBot");
 
             // Encounter: Multiverse 3
-            MultiverseBossPhaseOne[4] = EncounterManager.New("P03KCM_Multiverse_5_Conduits", addToPool: false);
+            MultiverseBossPhaseOne.Add(EncounterManager.New("P03KCM_Multiverse_5_Conduits", addToPool: false));
             MultiverseBossPhaseOne[4].SetDifficulty(0, 10);
             MultiverseBossPhaseOne[4].turns = new();
             MultiverseBossPhaseOne[4].AddTerrainRepeatRule(5);
@@ -288,7 +289,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             MultiverseBossPhaseOne[4].ContinueOn("LeapBot", "LeapBot", "Automaton", "Insectodrone", "LeapBot");
 
             // Encounter: Multiverse 3
-            MultiverseBossPhaseOne[5] = EncounterManager.New("P03KCM_Multiverse_6_Latchers", addToPool: false);
+            MultiverseBossPhaseOne.Add(EncounterManager.New("P03KCM_Multiverse_6_Latchers", addToPool: false));
             MultiverseBossPhaseOne[5].SetDifficulty(0, 10);
             MultiverseBossPhaseOne[5].turns = new();
 
@@ -333,7 +334,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             MultiverseBossPhaseOne[5].ContinueOn("Shieldbot", "P03KCM_MultiverseBolthound", "P03KCM_MultiverseBombLatcher", "P03KCM_MultiverseBrittleLatcher");
 
-            MultiverseBossPhaseOne[6] = EncounterManager.New("P03KCM_Multiverse_6_Chaos_1", addToPool: false);
+            MultiverseBossPhaseOne.Add(EncounterManager.New("P03KCM_Multiverse_6_Chaos_1", addToPool: false));
             MultiverseBossPhaseOne[6].SetDifficulty(0, 10);
             MultiverseBossPhaseOne[6].turns = new();
 
@@ -362,7 +363,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             MultiverseBossPhaseOne[6].ContinueOn("P03KCM_MultiverseMineCart", "P03KCM_MultiverseGunner", "P03KCM_MultiverseFirewall", "P03KCM_MultiverseMineCart");
 
-            MultiverseBossPhaseOne[7] = EncounterManager.New("P03KCM_Multiverse_6_Chaos_2", addToPool: false);
+            MultiverseBossPhaseOne.Add(EncounterManager.New("P03KCM_Multiverse_6_Chaos_2", addToPool: false));
             MultiverseBossPhaseOne[7].SetDifficulty(0, 10);
             MultiverseBossPhaseOne[7].AddRandomReplacementCards(
                 "P03KCM_MultiverseMole",

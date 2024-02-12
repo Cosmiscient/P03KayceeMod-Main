@@ -22,12 +22,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     {
         internal static MultiverseBattleSequencer Instance { get; private set; }
 
-
         public override Opponent.Type BossType => BossManagement.P03MultiverseOpponent;
         public override StoryEvent DefeatedStoryEvent => EventManagement.DEFEATED_P03_MULTIVERSE;
 
         public bool ScalesTippedToOpponent { get; private set; } = false;
         public bool GameIsOver { get; private set; } = false;
+
+        public MultiverseGameState.Phase CurrentPhase { get; private set; } = MultiverseGameState.Phase.GameIsOver;
 
         private MultiverseTelevisionScreen LeftScreen;
         private MultiverseTelevisionScreen RightScreen;
@@ -55,8 +56,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         internal readonly MultiverseGameState[] MultiverseGames = new MultiverseGameState[NUMBER_OF_MULTIVERSES] { null, null, null };
 
         public bool MultiverseTravelLocked { get; private set; }
-
-        public bool PlayerCanTravelMultiverse => (BoardManager.Instance as BoardManager3D).Bell.PressingAllowed() && !MultiverseTravelLocked;
+        private bool MultiverseTravelExplicitlyAllowed = false;
+        public bool PlayerCanTravelMultiverse => !MultiverseTravelLocked && (MultiverseTravelExplicitlyAllowed || (CurrentPhase == MultiverseGameState.Phase.PlayerUpkeepAndMain && GlobalTriggerHandler.Instance.StackSize == 0));
 
         public void TestTeleportationEffects()
         {
@@ -120,8 +121,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return new WaitForEndOfFrame();
             MultiverseGames[CurrentMultiverseId] = MultiverseGameState.GenerateFromCurrentState();
             MultiverseGames[CurrentMultiverseId].SetScreenshot(MultiverseTelevisionScreen.LastCapturedScreenshot);
-            yield return MultiverseGames[universeId].RestoreState();
+
             CurrentMultiverseId = universeId;
+            yield return MultiverseGames[universeId].RestoreState();
 
             int prev = CurrentMultiverseId - 1;
             if (prev < 0)
@@ -245,7 +247,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private static Vector3 BehindScreenPosition = new(0f, 0f, 1.5f);
         private static Vector3 InFrontScreenPosition = new(0f, 0f, -1.5f);
-        private static Vector3 ScreenAttackRotation = new(45f, 0f, 180f);
+        private static Vector3 OpponentScreenAttackRotation = new(45f, 0f, 180f);
+        private static Vector3 PlayerScreenAttackRotation = new(45f, 0f, 0f);
 
         public class OriginalTransformState
         {
@@ -307,7 +310,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // Put the card behind the tv
             card.transform.SetParent(screen.transform, true);
-            card.transform.localEulerAngles = ScreenAttackRotation;
+            card.transform.localEulerAngles = card.OpponentCard ? OpponentScreenAttackRotation : PlayerScreenAttackRotation;
 
             if (duration > 0f)
             {
@@ -348,23 +351,31 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ParentCardToTvScreen(card, .2f, forceRestore: true);
         }
 
+        public IEnumerator SetPhase(MultiverseGameState.Phase phase, bool suppressCallbacks = false)
+        {
+            CurrentPhase = phase;
+
+            if (!suppressCallbacks && ActiveMultiverse != null)
+                yield return ActiveMultiverse.DoCallbacks(phase);
+        }
+
         public IEnumerator ChooseSlotFromMultiverse(Predicate<CardSlot> filter, Action onMultiverseSwitch, Action<CardSlot> onHighlight, Action<CardSlot> onSelection)
         {
+            P03Plugin.Log.LogInfo("Preparing to choose multiverse slot");
             BoardManager.Instance.ChoosingSlot = true;
+            bool interactionDisabled = InteractionCursor.Instance.InteractionDisabled;
+            InteractionCursor.Instance.InteractionDisabled = false;
             InteractionCursor.Instance.ForceCursorType(CursorType.Place);
 
-            ViewManager.Instance.Controller.SwitchToControlMode(ViewController.ControlMode.CardGameChoosingSlot, false);
+            ViewLockState currentLockState = ViewManager.Instance.Controller.LockState;
+            ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
+            ViewManager.Instance.Controller.SwitchToControlMode(ViewController.ControlMode.CardGameChoosingSlot, true);
 
-            ViewManager.Instance.SwitchToView(BoardManager.Instance.boardView, false, false);
-            BoardManager.Instance.cancelledPlacementWithInput = false;
-
-            BoardManager.Instance.LastSelectedSlot = null;
-            foreach (CardSlot cardSlot in BoardManager.Instance.OpponentSlotsCopy)
-            {
-                cardSlot.SetEnabled(false);
-                cardSlot.ShowState(HighlightedInteractable.State.NonInteractable, false, 0.15f);
-            }
             BoardManager.Instance.SetQueueSlotsEnabled(false);
+
+            Action<CardSlot> selectionAction = (slot) => BoardManager.Instance.LastSelectedSlot = slot;
+            if (onSelection != null)
+                selectionAction += onSelection;
 
             foreach (var cardSlot in BoardManager.Instance.AllSlotsCopy)
             {
@@ -374,21 +385,26 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     if (onHighlight != null)
                         cardSlot.CursorEntered += (mii) => onHighlight(mii as CardSlot);
 
-                    if (onSelection != null)
-                        cardSlot.CursorSelectStarted += (mii) => onSelection(mii as CardSlot);
+                    cardSlot.CursorSelectStarted += (mii) => selectionAction(mii as CardSlot);
                 }
             }
 
-            while (BoardManager.Instance.LastSelectedSlot != null)
+            P03Plugin.Log.LogInfo("Starting selection loop");
+            BoardManager.Instance.LastSelectedSlot = null;
+
+            MultiverseTravelExplicitlyAllowed = true;
+            while (BoardManager.Instance.LastSelectedSlot == null)
             {
                 if (Instance.MultiverseTravelLocked)
                 {
+                    P03Plugin.Log.LogInfo("Multiverse travel is happening. Waiting...");
                     foreach (var cardSlot in BoardManager.Instance.AllSlotsCopy)
                     {
                         cardSlot.Chooseable = false;
                         cardSlot.ClearDelegates();
                     }
                     yield return new WaitUntil(() => !Instance.MultiverseTravelLocked);
+                    P03Plugin.Log.LogInfo("Multiverse travel complete");
                     onMultiverseSwitch?.Invoke();
                     foreach (var cardSlot in BoardManager.Instance.AllSlotsCopy)
                     {
@@ -398,19 +414,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                             if (onHighlight != null)
                                 cardSlot.CursorEntered += (mii) => onHighlight(mii as CardSlot);
 
-                            if (onSelection != null)
-                                cardSlot.CursorSelectStarted += (mii) => onSelection(mii as CardSlot);
+                            cardSlot.CursorSelectStarted += (mii) => selectionAction(mii as CardSlot);
                         }
                     }
                 }
                 yield return new WaitForEndOfFrame();
             }
+            MultiverseTravelExplicitlyAllowed = false;
 
-            foreach (CardSlot cardSlot in BoardManager.Instance.OpponentSlotsCopy)
-            {
-                cardSlot.SetEnabled(true);
-                cardSlot.ShowState(HighlightedInteractable.State.Interactable, false, 0.15f);
-            }
             BoardManager.Instance.SetQueueSlotsEnabled(true);
 
             foreach (var cardSlot in BoardManager.Instance.AllSlotsCopy)
@@ -422,6 +433,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.Controller.SwitchToControlMode(BoardManager.Instance.defaultViewMode, false);
             BoardManager.Instance.ChoosingSlot = false;
             InteractionCursor.Instance.ClearForcedCursorType();
+            InteractionCursor.Instance.InteractionDisabled = interactionDisabled;
+            ViewManager.Instance.Controller.LockState = currentLockState;
             yield break;
         }
 
@@ -473,7 +486,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             for (int i = 0; i < MultiverseGames.Length; i++)
             {
                 var universe = MultiverseGames[i];
-                if ((universe.OpponentDamage - universe.PlayerDamage) > 5)
+                if ((universe.OpponentDamage - universe.PlayerDamage) >= 5)
                 {
                     if (NumberOfPlayerWins < 4)
                     {
@@ -493,7 +506,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             for (int i = 0; i < MultiverseGames.Length; i++)
             {
                 var universe = MultiverseGames[i];
-                if ((universe.PlayerDamage - universe.OpponentDamage) > 5)
+                if ((universe.PlayerDamage - universe.OpponentDamage) >= 5)
                 {
                     if (NumberOfPlayerLosses == 0)
                     {
@@ -506,6 +519,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     }
                 }
             }
+        }
+
+        private IEnumerator CheckForGameLosses()
+        {
+            yield return CheckForOpponentLoss();
+            yield return CheckForPlayerLoss();
         }
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.IsPlayerMainPhase), MethodType.Getter)]
@@ -532,6 +551,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield break;
             }
 
+            yield return mbs.SetPhase(MultiverseGameState.Phase.GameIsOver);
             __instance.ResetGameVars();
             yield return new WaitForEndOfFrame();
             yield return __instance.SetupPhase(encounterData);
@@ -541,15 +561,15 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 {
                     __instance.TurnNumber += 1;
                     yield return __instance.PlayerTurn();
-
-                    yield return mbs.CheckForPlayerLoss();
+                    yield return mbs.SetPhase(MultiverseGameState.Phase.AfterPlayer);
+                    yield return mbs.CheckForGameLosses();
 
                     if (mbs.GameIsOver)
                         break;
 
                     yield return __instance.OpponentTurn();
-
-                    yield return mbs.CheckForOpponentLoss();
+                    yield return mbs.SetPhase(MultiverseGameState.Phase.AfterOpponent);
+                    yield return mbs.CheckForGameLosses();
                 }
                 // if (__instance.ScalesTippedToOpponent())
                 // {
@@ -604,10 +624,16 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 TurnManager.Instance.Opponent.SkipNextTurn = false;
                 yield break;
             }
+
+            yield return Instance.SetPhase(MultiverseGameState.Phase.OpponentUpkeep);
             yield return OpponentUpkeepSteps();
+
+            yield return Instance.SetPhase(MultiverseGameState.Phase.OpponentCombat);
             yield return DoCombatPhase(false);
             if (Math.Abs(LifeManager.Instance.Balance) >= 5)
                 yield break;
+
+            yield return Instance.SetPhase(MultiverseGameState.Phase.OpponentEnd);
             yield return OpponentEndSteps();
         }
 
@@ -735,6 +761,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 PlayerHand.Instance.PlayingLocked = true;
             }
+
+            yield return Instance.SetPhase(MultiverseGameState.Phase.PlayerUpkeepAndMain);
             __instance.IsPlayerTurn = true;
             __instance.PlayerPhase = TurnManager.PlayerTurnPhase.Draw;
             ViewManager.Instance.Controller.LockState = ViewLockState.Locked;
@@ -770,8 +798,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 while (!__instance.playerInitiatedCombat)
                 {
-                    if (!mbs.PlayerCanTravelMultiverse)
-                        yield return new WaitUntil(() => mbs.PlayerCanTravelMultiverse);
+                    if (mbs.MultiverseTravelLocked)
+                        yield return new WaitUntil(() => !mbs.MultiverseTravelLocked);
 
                     if (__instance.LifeLossConditionsMet() && GlobalTriggerHandler.Instance.StackSize == 0)
                     {
@@ -779,10 +807,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     }
                     if (mbs.ActiveMultiverse.PlayerNeedsUpkeepStep)
                     {
+                        mbs.MultiverseTravelLocked = true;
+                        yield return Instance.SetPhase(MultiverseGameState.Phase.PlayerUpkeepAndMain);
                         yield return __instance.DoUpkeepPhase(true);
                         __instance.PlayerPhase = TurnManager.PlayerTurnPhase.Main;
                         yield return new WaitForSeconds(0.25f);
                         yield return mbs.PlayerPostDraw();
+                        mbs.MultiverseTravelLocked = false;
                     }
                     yield return new WaitForEndOfFrame();
                 }
@@ -798,6 +829,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     __instance.playerInitiatedCombat = false;
                 }
             }
+
+            yield return Instance.SetPhase(MultiverseGameState.Phase.PlayerCombat);
             __instance.playerInitiatedCombat = false;
             __instance.PlayerPhase = TurnManager.PlayerTurnPhase.Combat;
 
@@ -808,6 +841,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield break;
             }
 
+            yield return Instance.SetPhase(MultiverseGameState.Phase.PlayerEnd);
             yield return mbs.IterateForAllMultiverses(
                 state => state.RespondsToTrigger(Trigger.TurnEnd, true),
                 PlayerEndStep
@@ -819,9 +853,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         [HarmonyPostfix]
         private static IEnumerator MultiverseTriggerHandler(IEnumerator sequence, Trigger trigger, bool triggerFacedown, object[] otherArgs)
         {
-            if (MultiverseBattleSequencer.Instance != null && MultiverseBattleSequencer.Instance.ActiveMultiverse != null)
-                yield return MultiverseBattleSequencer.Instance.ActiveMultiverse.DoCallbacks(trigger);
-
             yield return sequence;
 
             if (MultiverseBattleSequencer.Instance == null)

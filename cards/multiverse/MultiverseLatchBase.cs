@@ -70,6 +70,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
                 }
                 else
                 {
+                    P03Plugin.Log.LogInfo("Choosing multiverse slot");
                     yield return MultiverseBattleSequencer.Instance.ChooseSlotFromMultiverse(
                         (slot) => slot.Card != null && slot.Card != this.Card && !CardHasLatchMod(slot.Card),
                         delegate ()
@@ -83,7 +84,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
                                 cardAnim.AimWeaponAnim(slot.transform.position);
                             }
                         },
-                        null
+                        (slot) => selectedSlot = slot
                     );
                 }
                 CustomCoroutine.FlickerSequence(delegate
