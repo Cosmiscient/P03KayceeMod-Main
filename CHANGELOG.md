@@ -1,3 +1,7 @@
+# 4.3.8
+
+- Fixed a defect where the Recycler was giving out the incorrect token type.
+
 # 4.3.7
 
 - The formula for how much SP the Build-A-Bot machine gives you for your card has been modified to be more consistent across all types of cards. 
