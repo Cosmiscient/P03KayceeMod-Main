@@ -322,19 +322,19 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetNeutralP03Card()
                 .AddAbilities(RotatingAlarm.AbilityID);
 
-            CardManager.New(EXP_1_PREFIX, "Clockbot_Right", "Mr:Clock", 0, 3)
+            CardManager.New(EXP_1_PREFIX, "Clockbot_Right", "Mr:Clock", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
                 .AddAbilities(RotatingAlarm.AbilityID)
                 .SetExtendedProperty(RotatingAlarm.DEFAULT_STATE_KEY, 1);
 
-            CardManager.New(EXP_1_PREFIX, "Clockbot_Down", "Mr:Clock", 0, 3)
+            CardManager.New(EXP_1_PREFIX, "Clockbot_Down", "Mr:Clock", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
                 .AddAbilities(RotatingAlarm.AbilityID)
                 .SetExtendedProperty(RotatingAlarm.DEFAULT_STATE_KEY, 0);
 
-            CardManager.New(EXP_1_PREFIX, "Clockbot_Left", "Mr:Clock", 0, 3)
+            CardManager.New(EXP_1_PREFIX, "Clockbot_Left", "Mr:Clock", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
                 .AddAbilities(RotatingAlarm.AbilityID)

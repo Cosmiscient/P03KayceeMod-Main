@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+using InscryptionAPI.Card;
 using Pixelplacement;
 using UnityEngine;
 
@@ -93,7 +94,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private CardInfo GetCardInfo()
         {
-            if (selectedCardValue >= 3)
+            if (selectedCardInfo.HasCardMetaCategory(CardMetaCategory.Rare))
             {
                 CardInfo rareCard = CardLoader.GetCardByName(CustomCards.RARE_DRAFT_TOKEN);
                 if (selectedCardInfo.ModAbilities.Count > 0)

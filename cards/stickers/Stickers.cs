@@ -673,30 +673,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 yield break;
             }
 
-            if (__instance.gameObject.GetComponent<StickerInterfaceManager>() == null)
-            {
-                __instance.gameObject.AddComponent<StickerInterfaceManager>();
-            }
-
-            GameObject stickerButton = UnityEngine.Object.Instantiate(ResourceBank.Get<GameObject>("prefabs/rulebook/TableTablet"), __instance.transform);
-            UnityEngine.Object.Destroy(stickerButton.GetComponentInChildren<TableRuleBook>());
-
-            stickerButton.transform.localScale = new(0.5f, 0.5f, 0.5f);
-            stickerButton.transform.localEulerAngles = new(0f, 90f, 0f);
-
-            OpenRulebookInteractable previousInteractable = stickerButton.GetComponentInChildren<OpenRulebookInteractable>();
-            OpenStickerInteractable osi = previousInteractable.gameObject.AddComponent<OpenStickerInteractable>();
-            UnityEngine.Object.Destroy(previousInteractable);
-            osi.SetEnabled(true);
-
-            stickerButton.name = "StickerBook";
-
-            Vector3 targetPosition = new(0f, 0.1f, -1.75f);
-            stickerButton.transform.localPosition = targetPosition + new Vector3(0f, 0f, -2f);
-
-            stickerButton.SetActive(true);
-
-            Tween.LocalPosition(stickerButton.transform, targetPosition, 0.2f, 0f);
+            StickerInterfaceManager stickerInterface = __instance.gameObject.GetComponent<StickerInterfaceManager>() ?? __instance.gameObject.AddComponent<StickerInterfaceManager>();
+            stickerInterface.TweenInStickerTablet();
 
             yield return EventManagement.SayDialogueOnce("P03StickerBook", EventManagement.SAW_STICKER_BOOK);
 

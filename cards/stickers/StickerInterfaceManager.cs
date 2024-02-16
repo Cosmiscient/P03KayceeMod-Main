@@ -3,6 +3,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.Achievements;
 using Pixelplacement;
+using Pixelplacement.TweenSystem;
 using TMPro;
 using UnityEngine;
 
@@ -22,6 +23,9 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         private int DisplayedStickerIndex { get; set; }
         private int DisplayedCardIndex { get; set; }
+
+        private GameObject StickerTablet { get; set; }
+        private TweenBase LastTabletTween { get; set; }
 
         internal GameObject LastPrintedSticker { get; set; }
         internal SelectableCard LastDisplayedCard { get; set; }
@@ -329,6 +333,39 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
             yield return new WaitForEndOfFrame();
             yield break;
+        }
+
+        internal void TweenOutStickerTablet()
+        {
+            LastTabletTween?.Stop();
+            LastTabletTween = Tween.Position(this.StickerTablet.transform, new Vector3(0f, 0.1f, -3.75f), 0.2f, 0f, completeCallback: () => this.StickerTablet.gameObject.SetActive(false));
+        }
+
+        internal void TweenInStickerTablet()
+        {
+            Vector3 targetPosition = new(0f, 0.1f, -1.75f);
+
+            if (this.StickerTablet == null)
+            {
+                this.StickerTablet = UnityEngine.Object.Instantiate(ResourceBank.Get<GameObject>("prefabs/rulebook/TableTablet"), this.transform);
+                UnityEngine.Object.Destroy(this.StickerTablet.GetComponentInChildren<TableRuleBook>());
+
+                this.StickerTablet.transform.localScale = new(0.5f, 0.5f, 0.5f);
+                this.StickerTablet.transform.localEulerAngles = new(0f, 90f, 0f);
+
+                OpenRulebookInteractable previousInteractable = this.StickerTablet.GetComponentInChildren<OpenRulebookInteractable>();
+                OpenStickerInteractable osi = previousInteractable.gameObject.AddComponent<OpenStickerInteractable>();
+                UnityEngine.Object.Destroy(previousInteractable);
+                osi.SetEnabled(true);
+
+                this.StickerTablet.name = "StickerBook";
+            }
+
+            LastTabletTween?.Stop();
+            this.StickerTablet.transform.localPosition = targetPosition + new Vector3(0f, 0f, -2f);
+            this.StickerTablet.SetActive(true);
+
+            LastTabletTween = Tween.LocalPosition(this.StickerTablet.transform, targetPosition, 0.2f, 0f);
         }
 
         protected void OnEnable() => Instance = this;
