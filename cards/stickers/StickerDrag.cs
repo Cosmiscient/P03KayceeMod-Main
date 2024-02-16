@@ -13,7 +13,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         private readonly List<Bounds> CardBounds = new();
         private readonly List<SelectableCard> Cards = new();
-        public SelectableCard LastHoverCard { get; private set; }
+        private SelectableCard LastHoverCard { get; set; }
 
         [SerializeField]
         public float yOffset = 0f;
@@ -70,7 +70,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             isDragging = true;
         }
 
-        private bool IsOverCardBounds(Bounds b, Vector3 p) => p.x >= b.min.x && p.x <= b.max.x && p.z >= b.min.z && p.z <= b.max.z;
+        internal static bool IsOverCardBounds(Bounds b, Vector3 p) => p.x >= b.min.x && p.x <= b.max.x && p.z >= b.min.z && p.z <= b.max.z;
 
         // public override void OnCursorDrag()
         // {

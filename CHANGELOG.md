@@ -1,3 +1,14 @@
+# 4.3.10
+
+- All Mr:Clocks now have 2 health as previously advertised.
+
+# 4.3.9
+
+- Potentially fixed a couple of long-reported and difficult to reproduce bugs that I had not previously been able to resolve.
+  - In some strange cases, an extra money drop would appear on the Central Botopia map. I was finally able to come up with a way to consistently make this happen, and then fixed it. Hopefully this will no longer happen.
+  - If a sticker was already on a card, and you then opened the sticker interface and rotated that sticker without also moving that sticker, the position of the sticker would be lost. This has now been resolved.
+  - The sticker tablet should no longer get stuck on the table if you rapidly open and close the deck review screen.
+
 # 4.3.8
 
 - Fixed a defect where the Recycler was giving out the incorrect token type.

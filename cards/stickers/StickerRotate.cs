@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DiskCardGame;
 using UnityEngine;
 
@@ -7,6 +8,10 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
     [RequireComponent(typeof(Renderer))]
     public class StickerRotate : AlternateInputInteractable
     {
+        private readonly List<Bounds> CardBounds = new();
+        private readonly List<SelectableCard> Cards = new();
+        public SelectableCard LastHoverCard { get; private set; }
+
         public override CursorType CursorType => CursorType.Rotate;
 
         private static Vector3 ROTATION_AXIS = Vector3.up;
@@ -61,6 +66,16 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             if (!StartingDirectionalVector.HasValue)
                 return;
 
+            LastHoverCard = null;
+            for (int i = 0; i < Cards.Count; i++)
+            {
+                if (StickerDrag.IsOverCardBounds(CardBounds[i], CursorWorldPoint))
+                {
+                    LastHoverCard = Cards[i];
+                    continue;
+                }
+            }
+
             if (!InputButtons.GetButton(Button.AltSelect))
             {
                 P03Plugin.Log.LogInfo("Ending because alt select is not down");
@@ -79,6 +94,17 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             StartingDirectionalVector = CurrentDirectionalVector;
             StartingEulerAngles = transform.eulerAngles;
             P03Plugin.Log.LogInfo($"Starting direction: {StartingDirectionalVector}, Angles {StartingEulerAngles}");
+
+            if (DeckReviewSequencer.Instance != null
+                && DeckReviewSequencer.Instance is Part3DeckReviewSequencer
+                && StickerInterfaceManager.Instance.LastDisplayedCard != null)
+            {
+                CardBounds.Clear();
+                Cards.Clear();
+
+                CardBounds.Add(CardExporter.GetMaxBounds(StickerInterfaceManager.Instance.LastDisplayedCard.gameObject));
+                Cards.Add(StickerInterfaceManager.Instance.LastDisplayedCard);
+            }
         }
 
         public override void OnAlternateSelectEnded()
@@ -86,7 +112,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             StartingDirectionalVector = null;
             StartingEulerAngles = null;
 
-            SelectableCard attachedCard = Dragger.LastHoverCard;
+            SelectableCard attachedCard = LastHoverCard;
             if (attachedCard == null)
             {
                 Stickers.ClearStickerAppearance(StickerName);
