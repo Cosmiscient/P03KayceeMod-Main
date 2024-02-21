@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Cards;
 using UnityEngine;
@@ -165,6 +166,58 @@ namespace Infiniscryption.P03KayceeRun.Helpers
             RenderTexture.ReleaseTemporary(tmp);
 
             return myTexture2D;
+        }
+
+        private static void AlignReferenceObjects(Transform newObject, Vector3 newParentScale, Transform referenceObject, Vector3 refParentScale)
+        {
+            newObject.eulerAngles = referenceObject.eulerAngles;
+            newObject.position = referenceObject.position;
+
+            Vector3 refActualScale = Vector3.Scale(referenceObject.localScale, refParentScale);
+            newObject.localScale = new Vector3(
+                refActualScale.x / newParentScale.x,
+                refActualScale.y / newParentScale.y,
+                refActualScale.z / newParentScale.z
+            );
+
+            newObject.gameObject.SetActive(referenceObject.gameObject.activeSelf);
+
+            var renderer = newObject.gameObject.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                P03Plugin.Log.LogDebug($"Setting renderer enabled for {newObject.gameObject.name} to {referenceObject.gameObject.activeSelf}");
+                renderer.enabled = referenceObject.gameObject.activeSelf;
+            }
+
+            for (int i = 0; i < newObject.childCount; i++)
+                AlignReferenceObjects(newObject.GetChild(i), refActualScale, referenceObject.GetChild(i), refActualScale);
+        }
+
+        internal static void AlignReferenceObjects(Transform newObject, Transform referenceObject)
+        {
+            AlignReferenceObjects(newObject, AggregateScale(newObject.parent), referenceObject, AggregateScale(referenceObject.parent));
+        }
+
+        private static Vector3 AggregateScale(Transform t)
+        {
+            Vector3 retval = t.localScale;
+            if (t.parent != null)
+                retval = Vector3.Scale(retval, AggregateScale(t.parent));
+            return retval;
+        }
+
+        public static GameObject CreateMatchingAnimatedObject(GameObject refObj, Transform newParent)
+        {
+            GameObject newObj = GameObject.Instantiate(refObj, refObj.transform.parent);
+
+            foreach (var t in new List<Type>() { typeof(Animator), typeof(TableAnimationKeyframeEvents), typeof(OpponentArmController) })
+                foreach (var anim in newObj.GetComponentsInChildren(t).ToList())
+                    GameObject.Destroy(anim);
+
+            newObj.transform.SetParent(newParent, true);
+            AlignReferenceObjects(newObj.transform, refObj.transform);
+
+            return newObj;
         }
     }
 }

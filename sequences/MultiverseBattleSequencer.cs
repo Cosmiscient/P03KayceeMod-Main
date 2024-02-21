@@ -35,6 +35,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private bool HasExplainedOpponentMultiverseLifeSharing = false;
         private bool HasExplainedPlayerMultiverseLifeSharing = false;
+        internal readonly List<string> ItemStartingState = new();
 
         public const int NUMBER_OF_MULTIVERSES = 3;
 
@@ -43,6 +44,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public int NumberOfPlayerWins { get; private set; } = 0;
         public int NumberOfPlayerLosses { get; private set; } = 0;
+
+        private GameObject CyberspaceParticles => TurnManager.Instance.transform.Find("Cyberspace_Particles")?.gameObject;
 
         private int NextUniverseUp => MultiverseGames.Length - 1 + NumberOfPlayerLosses + NumberOfPlayerWins;
 
@@ -113,14 +116,21 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return -1;
         }
 
-        public IEnumerator TravelToUniverse(int universeId)
+        public IEnumerator TravelToUniverse(int universeId, bool force = false)
         {
+            if (universeId == CurrentMultiverseId && !force)
+                yield break;
+
             MultiverseTravelLocked = true;
             MultiverseTelevisionScreen.CaptureScreenshotNextFrame = true;
             yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();
-            MultiverseGames[CurrentMultiverseId] = MultiverseGameState.GenerateFromCurrentState();
-            MultiverseGames[CurrentMultiverseId].SetScreenshot(MultiverseTelevisionScreen.LastCapturedScreenshot);
+
+            if (universeId != CurrentMultiverseId)
+            {
+                MultiverseGames[CurrentMultiverseId] = MultiverseGameState.GenerateFromCurrentState();
+                MultiverseGames[CurrentMultiverseId].SetScreenshot(MultiverseTelevisionScreen.LastCapturedScreenshot);
+            }
 
             CurrentMultiverseId = universeId;
             yield return MultiverseGames[universeId].RestoreState();
@@ -447,7 +457,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return new WaitForSeconds(0.4f);
 
             string dialogue = opponentLost ? LoseDialogues[NumberOfPlayerWins] : "P03WinUniverse";
-            TextDisplayer.Instance.PlayDialogueEvent(dialogue, TextDisplayer.MessageAdvanceMode.Input);
+            yield return TextDisplayer.Instance.PlayDialogueEvent(dialogue, TextDisplayer.MessageAdvanceMode.Input);
 
             if (opponentLost)
                 NumberOfPlayerWins += 1;
@@ -456,10 +466,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // Dolly zoom in
             Camera camera = ViewManager.Instance.CameraParent.gameObject.GetComponentInChildren<Camera>();
+            Transform cameraParent = camera.transform.parent;
+            float x = cameraParent.localEulerAngles.x;
             float fov = camera.fieldOfView;
             float z = camera.transform.position.z - P03AnimationController.Instance.transform.position.z;
             float width = z * 2f * Mathf.Tan(0.5f * fov * Mathf.Deg2Rad);
-            float zTarget = 0.33f * z;
+            float zTarget = 0.2f * z;
 
             Tween.Value(z, zTarget, delegate (float newZ)
             {
@@ -469,13 +481,33 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     camera.transform.position.y,
                     P03AnimationController.Instance.transform.position.z + newZ
                 );
-            }, 1.5f, 0f);
 
-            MultiverseGames[universeId] = MultiverseGameState.GenerateAlternateStartingState(P03AscensionSaveData.RandomSeed + NextUniverseUp * 10, NextUniverseUp);
-            yield return TravelToUniverse(universeId);
+                cameraParent.localEulerAngles = new(x * (newZ - zTarget) / (z - zTarget), 0f, 0f);
+            }, 1.0f, 0f);
 
-            ViewManager.Instance.SwitchToView(View.Default);
-            yield return new WaitForSeconds(0.33f);
+            yield return new WaitForSeconds(1.0f);
+
+            // Need to remove everything from the hand and board
+            var newUniverse = MultiverseGameState.GenerateAlternateStartingState(P03AscensionSaveData.RandomSeed + NextUniverseUp * 10, NextUniverseUp);
+            var oldUniverse = ActiveMultiverse;
+            P03Plugin.Log.LogInfo("Created new universe; waiting a frame to debug");
+            yield return new WaitForEndOfFrame();
+            yield return oldUniverse.CleanUp();
+            MultiverseGames[universeId] = newUniverse;
+            yield return TravelToUniverse(universeId, force: true);
+            yield return oldUniverse.CleanUp();
+
+            Tween.Value(zTarget, z, delegate (float newZ)
+            {
+                camera.fieldOfView = Mathf.Rad2Deg * Mathf.Atan(width / (2f * newZ)) * 2f;
+                camera.transform.position = new(
+                    camera.transform.position.x,
+                    camera.transform.position.y,
+                    P03AnimationController.Instance.transform.position.z + newZ
+                );
+
+                cameraParent.localEulerAngles = new(x * (newZ - zTarget) / (z - zTarget), 0f, 0f);
+            }, 0.33f, 0f);
 
             yield return SetupMultiverseOpponent(TurnManager.Instance, null, NextUniverseUp);
             yield return new WaitForSeconds(0.33f);
@@ -486,10 +518,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             for (int i = 0; i < MultiverseGames.Length; i++)
             {
                 var universe = MultiverseGames[i];
+                P03Plugin.Log.LogInfo($"Universe {i}: scales tipped {universe.OpponentDamage - universe.PlayerDamage} towards opponent");
                 if ((universe.OpponentDamage - universe.PlayerDamage) >= 5)
                 {
                     if (NumberOfPlayerWins < 4)
                     {
+                        P03Plugin.Log.LogInfo("Opponent lost a universe");
                         yield return VisualizeLosingUniverse(i, opponentLost: true);
                     }
                     else
@@ -523,7 +557,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         private IEnumerator CheckForGameLosses()
         {
+            P03Plugin.Log.LogInfo("Checking to see if opponent has lost in any universe");
             yield return CheckForOpponentLoss();
+            P03Plugin.Log.LogInfo("Checking to see if player has lost in any universe");
             yield return CheckForPlayerLoss();
         }
 
@@ -553,6 +589,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             yield return mbs.SetPhase(MultiverseGameState.Phase.GameIsOver);
             __instance.ResetGameVars();
+            mbs.ItemStartingState.AddRange(ItemsManager.Instance.SaveDataItemsList);
             yield return new WaitForEndOfFrame();
             yield return __instance.SetupPhase(encounterData);
             while (!__instance.GameIsOver())

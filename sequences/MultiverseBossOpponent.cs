@@ -9,6 +9,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public override string PreIntroDialogueId => "P03RoyalBossInto";
         public override string PostDefeatedDialogueId => "P03RoyalBossOuttro";
 
+        public static bool IsActiveForRun => P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("multiverse") || AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.FinalBoss);
+
         public override bool GiveCurrencyOnDefeat => false;
 
         public override IEnumerator StartBattleSequence()

@@ -81,7 +81,7 @@ namespace Infiniscryption.P03KayceeRun.Helpers
             if (loop == null && loopName.StartsWith("P03"))
             {
                 // Please dont' break anything...
-                foreach (string clipName in new string[] { "P03_Phase1", "P03_Phase2", "P03_Phase3" })
+                foreach (string clipName in new string[] { "P03_Phase1", "P03_Phase2", "P03_Phase3", "spooky_background" })
                 {
                     if (!__instance.Loops.Any(ac => ac.name.Equals(clipName, StringComparison.InvariantCultureIgnoreCase)))
                     {

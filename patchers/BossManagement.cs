@@ -357,11 +357,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 .SetNewSequencer(P03Plugin.PluginGuid, "MultiverseBattleSequencer", typeof(MultiverseBattleSequencer))
                 .Id;
 
-            if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("multiverse"))
-            {
-                P03Plugin.Log.LogInfo("Forcing multiverse opponent for testing");
-                P03FinalBossOpponent = P03MultiverseOpponent;
-            }
+            // if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("multiverse"))
+            // {
+            //     P03Plugin.Log.LogInfo("Forcing multiverse opponent for testing");
+            //     P03FinalBossOpponent = P03MultiverseOpponent;
+            // }
         }
     }
 }

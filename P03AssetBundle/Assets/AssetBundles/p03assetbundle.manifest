@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 2161727484
+CRC: 1404414004
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 5a7da4d765a6a3271fb193d6e61a4a3c
+    Hash: 19c82632297aac4f7ac664a468745450
   TypeTreeHash:
     serializedVersion: 2
     Hash: 10caaafd0ad3fcdc9870467d863128a4
@@ -45,6 +45,7 @@ Assets:
 - Assets/Prefabs/Question.prefab
 - Assets/Textures/Tractorbeam.mat
 - Assets/Prefabs/Molotov.prefab
+- Assets/Effects/Cyberspace_Particles.prefab
 - Assets/Prefabs/UFO.prefab
 - Assets/Textures/UFO_Black_Down.mat
 - Assets/Prefabs/arrow-repeat.prefab

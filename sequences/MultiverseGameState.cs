@@ -124,10 +124,23 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return retval;
         }
 
+        private static void DestroyChildCard(CardSlot slot)
+        {
+            for (int i = 0; i < slot.transform.childCount; i++)
+            {
+                Transform c = slot.transform.GetChild(i);
+                if (c.gameObject.name.ToLowerInvariant().StartsWith("card"))
+                {
+                    GameObject.Destroy(c.gameObject);
+                    return;
+                }
+            }
+        }
+
         public static MultiverseGameState GenerateAlternateStartingState(int randomSeed, int colorIndex)
         {
             // This should be done at the start of the game
-            var state = GenerateFromCurrentState();
+            MultiverseGameState state = new();
 
             // The starting draw has already happened. We need to put the player's hand back in the deck
             state.SideDeckState = Part3CardDrawPiles.CreateVesselDeck();
@@ -141,6 +154,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             // Change the color
             state.ColorState = LightColorState.GetPreset(colorIndex);
 
+            // Items
+            state.ItemState = new(MultiverseBattleSequencer.Instance.ItemStartingState);
+
             // Reset some basic stuff
             state.MaxEnergyState = 0;
             state.EnergyState = 0;
@@ -150,15 +166,25 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             state.OpponentNumTurnsTaken = 0;
             state.DamageDealtThisPhase = 0;
             state.HasEverHadUpkeepStep = false;
+            state.P03Face = P03AnimationController.Face.Default;
+            state.CurrentPhase = (MultiverseBattleSequencer.Instance?.ActiveMultiverse?.CurrentPhase).GetValueOrDefault(Phase.OpponentUpkeep);
 
             // Clone the cardslots
             state.PlayerSlots = BoardManager.Instance.playerSlots.Select(cs => GameObject.Instantiate(cs.gameObject, cs.transform.parent).GetComponent<CardSlot>()).ToList();
             state.OpponentSlots = BoardManager.Instance.opponentSlots.Select(cs => GameObject.Instantiate(cs.gameObject, cs.transform.parent).GetComponent<CardSlot>()).ToList();
+            state.OpponentQueue = new();
+            state.OpponentTurnPlan = new();
 
             for (int i = 0; i < state.PlayerSlots.Count; i++)
             {
                 state.PlayerSlots[i].opposingSlot = state.OpponentSlots[i];
                 state.OpponentSlots[i].opposingSlot = state.PlayerSlots[i];
+
+                state.PlayerSlots[i].Card = null;
+                state.OpponentSlots[i].Card = null;
+
+                DestroyChildCard(state.PlayerSlots[i]);
+                DestroyChildCard(state.OpponentSlots[i]);
             }
 
             return state;
@@ -260,6 +286,90 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 }
             }
             yield break;
+        }
+
+        private IEnumerator CleanUpAsCurrent()
+        {
+            foreach (var slot in BoardManager.Instance.AllSlotsCopy)
+            {
+                if (slot.Card != null)
+                {
+                    foreach (var behavior in slot.Card.GetComponents<SpecialCardBehaviour>())
+                        behavior.OnCleanUp();
+                    GameObject.Destroy(slot.Card.gameObject);
+                }
+            }
+
+            OpponentSlots.Clear();
+            PlayerSlots.Clear();
+
+            List<PlayableCard> queueCards = new(TurnManager.Instance.opponent.queuedCards);
+            TurnManager.Instance.opponent.queuedCards.Clear();
+
+            foreach (var card in queueCards)
+            {
+                if (card != null)
+                {
+                    foreach (var behavior in card.GetComponents<SpecialCardBehaviour>())
+                        behavior.OnCleanUp();
+                    GameObject.Destroy(card.gameObject);
+                }
+            }
+
+            OpponentQueue.Clear();
+
+            yield return new WaitForEndOfFrame();
+            List<PlayableCard> cardsInHand = new(PlayerHand.Instance.cardsInHand);
+            PlayerHand.Instance.cardsInHand.Clear();
+
+            foreach (var card in cardsInHand)
+                if (card != null)
+                    GameObject.Destroy(card.gameObject);
+
+            HandState.Clear();
+
+            yield return new WaitForEndOfFrame();
+
+            yield break;
+        }
+
+        internal IEnumerator CleanUp()
+        {
+
+            if (this == MultiverseBattleSequencer.Instance.ActiveMultiverse)
+            {
+                P03Plugin.Log.LogInfo("Cleaning up current universe");
+                yield return CleanUpAsCurrent();
+                yield break;
+            }
+
+            P03Plugin.Log.LogInfo("Cleaning up universe");
+
+            // Deletes everything in this game state
+            foreach (var card in OpponentQueue)
+                GameObject.Destroy(card.gameObject);
+
+            OpponentQueue.Clear();
+
+            foreach (var slot in PlayerSlots.Concat(OpponentSlots))
+            {
+                if (slot.Card != null)
+                {
+                    foreach (var behavior in slot.Card.GetComponents<SpecialCardBehaviour>())
+                        behavior.OnCleanUp();
+                    GameObject.Destroy(slot.Card.gameObject);
+                }
+            }
+
+            foreach (var card in HandState)
+                GameObject.Destroy(card.gameObject);
+
+            yield return new WaitForEndOfFrame();
+
+            foreach (var slot in PlayerSlots.Concat(OpponentSlots))
+                GameObject.Destroy(slot.gameObject);
+
+            P03Plugin.Log.LogInfo("Universe cleanup complete");
         }
 
         public IEnumerator RestoreState(Action restoredCallback = null)

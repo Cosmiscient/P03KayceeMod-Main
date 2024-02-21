@@ -186,8 +186,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 P03FinalBossExtraScreen screen = AllScreens[i];
                 Tween.LocalPosition(screen.transform, screen.transform.localPosition + (Vector3.down * 5f), 0.4f, 0.02f * i, completeCallback: () => Destroy(screen.gameObject));
             }
-            Tween.LocalPosition(BigMoonScreen.transform, BigMoonScreen.transform.localPosition + (Vector3.down * 7f), 0.35f, 0f);
-            CustomCoroutine.WaitThenExecute(0.2f, () => AudioController.Instance.PlaySound2D("big_tv_break", MixerGroup.TableObjectsSFX, 1f));
+
+            if (BigMoonScreen != null)
+                Tween.LocalPosition(BigMoonScreen.transform, BigMoonScreen.transform.localPosition + (Vector3.down * 7f), 0.35f, 0f);
+
+            CustomCoroutine.WaitThenExecute(0.5f, () => AudioController.Instance.PlaySound2D("big_tv_break", MixerGroup.TableObjectsSFX, 1f));
             AllScreens.Clear();
             enabled = false;
         }
