@@ -640,25 +640,25 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 1
             neutralMinecarts.turns.AddTurn(
-                Enemy("MineCart"),
+                Enemy("MineCart", replacement: $"{P03Plugin.CardPrefx}_MineCart_Overdrive", difficulty: 1),
                 Enemy(null, replacement: "MineCart", difficulty: 2)
             );
 
             // TURN 2
             neutralMinecarts.turns.AddTurn(
-                Enemy("LeapBot", replacement: "MineCart", difficulty: 3),
-                Enemy("Bombbot", replacement: "MineCart", difficulty: 2, overclock: 4)
+                Enemy("LeapBot", replacement: CustomCards.TURBO_LEAPBOT, difficulty: 3),
+                Enemy("Bombbot", replacement: "MineCart", difficulty: 5, overclock: 4)
             );
 
             // TURN 3
             neutralMinecarts.turns.AddTurn(
-                Enemy("Insectodrone", replacement: "CloserBot", difficulty: 4),
-                Enemy(null, replacement: "MineCart", difficulty: 3)
+                Enemy("Insectodrone", overclock: 4, overclockAbility: Ability.Strafe),
+                Enemy(null, replacement: $"{P03Plugin.CardPrefx}_MineCart_Overdrive", difficulty: 3)
             );
 
             // TURN 4
             neutralMinecarts.turns.AddTurn(
-                Enemy("LeapBot", replacement: "MineCart", difficulty: 2, overclock: 5),
+                Enemy("LeapBot", replacement: CustomCards.TURBO_LEAPBOT, difficulty: 3),
                 Enemy(null, replacement: "P03KCMXP1_CopyPasta", difficulty: 5)
             );
 
@@ -670,7 +670,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 6
             neutralMinecarts.turns.AddTurn(
-                Enemy(null, replacement: "MineCart", difficulty: 1, overclock: 2),
+                Enemy(null, replacement: $"{P03Plugin.CardPrefx}_MineCart_Overdrive", difficulty: 1, overclock: 2),
                 Enemy(null, replacement: "MineCart", difficulty: 3, overclock: 4),
                 Enemy(null, replacement: "Insectodrone", difficulty: 6)
             );

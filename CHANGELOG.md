@@ -1,3 +1,8 @@
+# 4.3.11
+
+- Made a slight change to the global difficulty curve. Regardless of the number of difficulty challenges active, Map 2 will now be slightly easier.
+- Fixed an error in the Minecarts encounter where turn 3 spawned a Double Gunner on difficulty 4+. Made a couple of fun tweaks to the encounter while I was in there.
+
 # 4.3.10
 
 - All Mr:Clocks now have 2 health as previously advertised.
