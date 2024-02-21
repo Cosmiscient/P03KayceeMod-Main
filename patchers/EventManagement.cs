@@ -197,7 +197,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 int tier = CompletedZones.Count;
                 int modifier = AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.BaseDifficulty);
-                return tier + modifier + (tier == 0 ? 0 : 1);
+                return tier + modifier + (tier <= 1 ? 0 : 1);
             }
         }
 

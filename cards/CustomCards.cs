@@ -483,7 +483,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardInfo minecartrad = CardManager.New(P03Plugin.CardPrefx, "MineCart_Overdrive", "50er", 1, 1)
                 .SetPortrait(GetTexture("portrait_50er.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
-                .AddAbilities(Ability.Strafe, Ability.Strafe);
+                .AddAbilities(DoubleSprint.AbilityID);
 
             CardManager.BaseGameCards.First(c => c.name == "MineCart").SetEvolve(minecartrad, 1);
 
