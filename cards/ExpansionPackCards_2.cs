@@ -75,6 +75,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_billdozer.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetNeutralP03Card()
+                .SetStrafeFlipsPortrait(true)
                 .AddMetaCategories(CardMetaCategory.Part3Random)
                 .AddAbilities(Shove.AbilityID);
 

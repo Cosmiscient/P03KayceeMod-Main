@@ -37,7 +37,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 foreach (SelectableItemSlot slot in this.slots)
                 {
                     if (slot.gameObject.GetComponent<AlternateInputInteractable>() == null)
-                        slot.gameObject.AddComponent<AlternateInputInteractable>();
+                    {
+                        var aii = slot.gameObject.AddComponent<GenericAltInputInteractable>();
+                        aii.cursorType = CursorType.Pickup;
+                    }
                 }
 
                 slotsGamepadControl = slots.GetComponentInChildren<GamepadGridControl>();

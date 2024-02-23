@@ -18,7 +18,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static readonly Dictionary<string, Color?> configColors = new();
         private static readonly Dictionary<string, Color> defaultColors = new()
         {
-            {"BorderColor", GameColors.Instance.darkRed },
+            {"BorderColor", new(1f, 0f, 0f) },
             {"PortraitColor", new(1f, 0.33984375f, 0.19921875f) },
             {"AttackColor", new(1f, 0.33984375f, 0.19921875f) },
             {"HealthColor", new(1f, 0.33984375f, 0.19921875f) },

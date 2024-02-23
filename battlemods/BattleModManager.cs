@@ -103,6 +103,11 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         public static void SetGlobalActivationRule(ID id, Func<bool> rule) => AllBattleMods.First(b => b.ID == id).SpecialRule = rule;
 
+        internal static void ResetAllBlueprintRules()
+        {
+            AssignedBattleMods.Clear();
+        }
+
         internal static void SetBlueprintRule(string blueprintId, ID battleModId)
         {
             if (!AssignedBattleMods.ContainsKey(blueprintId))

@@ -41,9 +41,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator Activate()
         {
-            CardSlot toLeft = Singleton<BoardManager>.Instance.GetAdjacent(Card.Slot, adjacentOnLeft: true);
-            CardSlot toRight = Singleton<BoardManager>.Instance.GetAdjacent(Card.Slot, adjacentOnLeft: false);
-            Singleton<ViewManager>.Instance.SwitchToView(View.Board);
+            CardSlot toLeft = BoardManager.Instance.GetAdjacent(Card.Slot, adjacentOnLeft: true);
+            CardSlot toRight = BoardManager.Instance.GetAdjacent(Card.Slot, adjacentOnLeft: false);
+            ViewManager.Instance.SwitchToView(View.Board);
             yield return new WaitForSeconds(0.25f);
             yield return DoStrafe(toLeft, toRight);
         }
@@ -82,7 +82,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (destination != null && destinationValid)
             {
                 CardSlot oldSlot = Card.Slot;
-                yield return Singleton<BoardManager>.Instance.AssignCardToSlot(Card, destination);
+                yield return BoardManager.Instance.AssignCardToSlot(Card, destination);
                 yield return PostSuccessfulMoveSequence(oldSlot);
                 yield return new WaitForSeconds(0.25f);
             }
@@ -100,7 +100,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private IEnumerator RecursivePush(CardSlot slot, bool toLeft, Action<bool> canMoveResult)
         {
-            CardSlot adjacent = Singleton<BoardManager>.Instance.GetAdjacent(slot, toLeft);
+            CardSlot adjacent = BoardManager.Instance.GetAdjacent(slot, toLeft);
             if (adjacent == null)
             {
                 canMoveResult?.Invoke(obj: false);
@@ -108,7 +108,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
             if (adjacent.Card == null)
             {
-                yield return Singleton<BoardManager>.Instance.AssignCardToSlot(slot.Card, adjacent);
+                yield return BoardManager.Instance.AssignCardToSlot(slot.Card, adjacent);
                 didPush = true;
                 canMoveResult?.Invoke(obj: true);
                 yield break;
@@ -120,7 +120,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             });
             if (canMove)
             {
-                yield return Singleton<BoardManager>.Instance.AssignCardToSlot(slot.Card, adjacent);
+                yield return BoardManager.Instance.AssignCardToSlot(slot.Card, adjacent);
                 didPush = true;
             }
             canMoveResult?.Invoke(canMove);
@@ -128,7 +128,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private bool SlotHasSpace(CardSlot slot, bool toLeft)
         {
-            CardSlot adjacent = Singleton<BoardManager>.Instance.GetAdjacent(slot, toLeft);
+            CardSlot adjacent = BoardManager.Instance.GetAdjacent(slot, toLeft);
             if (adjacent == null)
             {
                 return false;

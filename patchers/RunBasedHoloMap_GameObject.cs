@@ -1060,6 +1060,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             HoloMapWorldData data = ScriptableObject.CreateInstance<HoloMapWorldData>();
             data.name = id;
 
+            BattleModManager.ResetAllBlueprintRules();
+
             string[] idSplit = id.Split('_');
             int regionCount = int.Parse(idSplit[1]);
             Zone regionCode = (Zone)Enum.Parse(typeof(Zone), idSplit[2]);
@@ -1135,6 +1137,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             worldDataCache.Clear();
+            BattleModManager.ResetAllBlueprintRules();
 
             foreach (KeyValuePair<HoloMapNode.NodeDataType, GameObject> entry in SpecialNodePrefabs)
             {

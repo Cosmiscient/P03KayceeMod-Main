@@ -49,8 +49,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
             foreach (PlayableCard card in cardsToAssign)
             {
                 CardSlot newTarget = card.Slot;
-                while (newTarget == card.Slot)
+                int sanityCheck = 0;
+                while (newTarget == card.Slot && sanityCheck < 10)
+                {
+                    sanityCheck += 1;
                     newTarget = slotsToShuffle[SeededRandom.Range(0, slotsToShuffle.Count, randomSeed++)];
+                }
 
                 assignments[card] = newTarget;
                 slotsToShuffle.Remove(newTarget);
@@ -58,7 +62,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return new WaitForSeconds(0.05f);
             foreach (KeyValuePair<PlayableCard, CardSlot> kvp in assignments)
             {
-                yield return BoardManager.Instance.AssignCardToSlot(kvp.Key, kvp.Value);
+                if (kvp.Key.slot != kvp.Value)
+                    yield return BoardManager.Instance.AssignCardToSlot(kvp.Key, kvp.Value);
             }
         }
     }

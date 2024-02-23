@@ -1,3 +1,11 @@
+# 4.3.12
+
+- Billdozer and 50er are now appropriately tagged to flip their portrait horizontally when the card moves left.
+- Updated the border color of rare cards.
+- Fixed a defect where items in the item shop showed two mouse cursors when hovering over them.
+- Fixed a defect where the effects of the Strange Encounters challenge could bleed over into a subsequent run.
+- Fixed a defect where sometimes the Overwhelming Entrance sigil would freeze the game indefinitely. 
+
 # 4.3.11
 
 - Made a slight change to the global difficulty curve. Regardless of the number of difficulty challenges active, Map 2 will now be slightly easier.
