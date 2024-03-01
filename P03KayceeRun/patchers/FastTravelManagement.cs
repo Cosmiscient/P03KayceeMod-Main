@@ -210,8 +210,35 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
-        [HarmonyPatch(typeof(HoloMapWaypointNode), nameof(HoloMapWaypointNode.OnCursorSelectEnd))]
-        [HarmonyPrefix]
+        [HarmonyPatch(typeof(HoloGameMap), nameof(HoloGameMap.OnViewChanged))]
+        [HarmonyPostfix]
+        private static void CheckFastTravelNodesAfterMapView(View newView, View oldView)
+        {
+            // This makes sure that the broken bridges challenge still works after
+            // switching to/from map view
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                if (oldView == View.MapDeckReview && newView == View.MapDefault && MapNodeManager.Instance != null && MapNodeManager.Instance.nodes != null)
+                {
+                    List<FastTravelNode> nodes = MapNodeManager.Instance.nodes
+                                                                        .Select(n => n as FastTravelNode)
+                                                                        .Where(n => n != null)
+                                                                        .ToList();
+
+                    if (nodes.Count > 0)
+                    {
+                        SetFastTravelNodesVisible();
+                        foreach (var n in nodes)
+                            n.OnFastTravelActive();
+                    }
+                }
+            }
+        }
+
+        //[HarmonyPatch(typeof(HoloMapWaypointNode), nameof(HoloMapWaypointNode.OnCursorSelectEnd))]
+        [HarmonyPatch(typeof(HoloGameMap), nameof(HoloGameMap.ToggleFastTravelActive))]
+        //[HarmonyPrefix]
+        [HarmonyPostfix]
         private static void SetFastTravelNodesVisible()
         {
             if (SaveFile.IsAscension)

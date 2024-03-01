@@ -32,12 +32,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-        private static List<CardSlot> GetCopyableSlots()
+        private List<CardSlot> GetCopyableSlots()
         {
             List<CardSlot> possibles = new();
             foreach (CardSlot slot in BoardManager.Instance.playerSlots.Concat(BoardManager.Instance.opponentSlots))
             {
-                if (slot.Card != null)
+                if (slot.Card != null && slot.Card != this.Card && !slot.Card.HasAbility(AbilityID))
                     possibles.Add(slot);
             }
 

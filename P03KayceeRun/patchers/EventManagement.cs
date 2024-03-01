@@ -253,11 +253,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             get
             {
-                int minExpectedUpgrades = AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.ExpensivePelts) ? 2 * CompletedZones.Count : 3 * CompletedZones.Count;
-                int actualUpgrades = Part3SaveData.Data.deck.Cards.Select(c => c.NumberOfTimesUpgraded()).Sum();
-                int upgradeDiff = Math.Max(0, minExpectedUpgrades - actualUpgrades - (Part3SaveData.Data.currency / 6));
-                int low = 5 + CompletedZones.Count + (4 * upgradeDiff);
-                int high = 8 + CompletedZones.Count + (4 * upgradeDiff);
+                // int minExpectedUpgrades = AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.ExpensivePelts) ? 2 * CompletedZones.Count : 3 * CompletedZones.Count;
+                // int actualUpgrades = Part3SaveData.Data.deck.Cards.Select(c => c.NumberOfTimesUpgraded()).Sum();
+                // int upgradeDiff = Math.Max(0, minExpectedUpgrades - actualUpgrades - (Part3SaveData.Data.currency / 6));
+                int low = 5 + CompletedZones.Count;// + (4 * upgradeDiff);
+                int high = 8 + CompletedZones.Count;// + (4 * upgradeDiff);
                 return new(low, high);
             }
         }

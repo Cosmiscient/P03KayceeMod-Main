@@ -395,8 +395,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetRare()
                 .AddAbilities(MolotovAll.AbilityID);
 
-            CardManager.New(EXP_2_PREFIX, "RoboRingworm", "R1ngw0rm", 0, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_roboringworm.png", typeof(ExpansionPackCards_2).Assembly))
+            CardManager.New(EXP_2_PREFIX, "RoboRingworm", "Tapeworm", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_tapeworm.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_ringworm.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetTraits(CustomCards.UpgradeVirus)

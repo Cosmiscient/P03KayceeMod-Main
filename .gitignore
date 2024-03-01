@@ -11,8 +11,13 @@
 
 */compiled/
 
+P03PyWiki/cardexports/
+
+*.local.json
+
 *.dll
 *.pdb
+.env
 
 deploy.ps1
 

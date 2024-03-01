@@ -33,6 +33,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
         private Part3DeckReviewSequencer sequencer;
         private GameObject interfaceContainer;
         private TextMeshPro buttonText;
+        private GenericMainInputInteractable printButtonInteractable;
         private GameObject computerScreen;
 
         private void FlyOutLastDisplayedCard()
@@ -187,15 +188,18 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             {
                 buttonText.transform.parent.gameObject.SetActive(true);
                 buttonText.SetText(Localization.Translate("RECALL"));
+                printButtonInteractable.SetEnabled(true);
             }
             else if (!Stickers.DebugStickers && !stickerAchievemnent.IsUnlocked)
             {
                 buttonText.transform.parent.gameObject.SetActive(false);
+                printButtonInteractable.SetEnabled(false);
             }
             else
             {
                 buttonText.transform.parent.gameObject.SetActive(true);
                 buttonText.SetText(Localization.Translate("PRINT"));
+                printButtonInteractable.SetEnabled(true);
             }
         }
 
@@ -253,9 +257,6 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             GameObject printInteractable = clickablesContainer.transform.Find("Confirm").gameObject;
             printInteractable.transform.localPosition = printButton.transform.localPosition;
 
-            DisplayedStickerIndex = 0;
-            ShowStickerAtIndex();
-
             // Sort out the behavior of the left and right buttons
             clickablesContainer.gameObject.SetActive(true);
             GameObject leftButton = screenInteractables.transform.Find("ArrowButton_Left").gameObject;
@@ -267,11 +268,14 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             leftInt.CursorSelectEnded = (mii) => LeftButtonClicked();
             rightInt.CursorSelectEnded = (mii) => RightButtonClicked();
 
-            GenericMainInputInteractable printButtonInteractable = clickablesContainer.GetComponentInChildren<GenericMainInputInteractable>();
+            printButtonInteractable = clickablesContainer.GetComponentInChildren<GenericMainInputInteractable>();
             printButtonInteractable.SetCursorType(CursorType.Pickup);
             printButtonInteractable.transform.localPosition = new(0f, -0.935f, 0.0028f);
             printButtonInteractable.transform.localScale = new(1.2f, .4f, .15f);
             printButtonInteractable.CursorSelectEnded = (mii) => PrintOrRecallSticker();
+
+            DisplayedStickerIndex = 0;
+            ShowStickerAtIndex();
 
             // Make sure only the right stuff is visible
             foreach (Transform interfaceSibling in interfaceContainer.transform.parent)

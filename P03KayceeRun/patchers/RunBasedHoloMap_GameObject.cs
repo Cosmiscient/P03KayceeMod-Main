@@ -1096,10 +1096,23 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(HoloMapArea), "OnAreaActive")]
         [HarmonyPrefix]
-        public static void ActivateObject(ref HoloMapArea __instance)
+        public static void ActivateObject(HoloMapArea __instance)
         {
             if (SaveFile.IsAscension && !__instance.gameObject.activeSelf)
                 __instance.gameObject.SetActive(true);
+
+            // This is a bizarre hack to try to get rid of that stupid floating currency node
+            // There should never be a currency node in this zone
+            if (RunBasedHoloMap.GetRegionCodeFromWorldID(HoloMapAreaManager.Instance.CurrentWorld.name) == Zone.Neutral)
+            {
+                List<MapNode> nodes = new List<MapNode>(__instance.GetComponentsInChildren<HoloMapGainCurrencyNode>());
+
+                foreach (var n in nodes)
+                {
+                    MapNodeManager.Instance.nodes.Remove(n);
+                    GameObject.Destroy(n.gameObject);
+                }
+            }
         }
 
         private static bool ValidateWorldData(HoloMapWorldData data)

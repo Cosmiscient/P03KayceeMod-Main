@@ -676,6 +676,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 2)
                 .SetNewBeastTransformer(0, -1);
 
+            CardManager.New(P03Plugin.CardPrefx, "GrandfatherClock", "Grandpa:Clock", 0, 6)
+                .AddAppearances(OnboardDynamicHoloPortrait.ID)
+                .AddAbilities(RotatingAlarm.AbilityID)
+                .SetCost(energyCost: 4)
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "p03kcm/prefabs/Clock3")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, ".25,.2,.3")
+                .SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "-1.25,-0.45,0.1")
+                .SetCardTemple(CardTemple.Tech)
+                .AddTraits(Trait.Terrain);
+
             CardManager.New(P03Plugin.CardPrefx, "Ghoulware", "Ghoulware", 0, 2)
                 .AddAppearances(OnboardDynamicHoloPortrait.ID)
                 .AddAbilities(Ability.Deathtouch, Ability.Sharp)
@@ -685,7 +695,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, "1.5,3,2.5|1.5,3,2.5|1.5,3,2.5")
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.HIDE_CHILDREN, "HoloDirtPile_2|HoloDirtPile_2|HoloDirtPile_2")
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "0,-0.45,0|0.45,-0.45,-.45|-.45,-.45,-.45")
-                .SetCardTemple(CardTemple.Tech);
+                .SetCardTemple(CardTemple.Tech)
+                .AddTraits(Trait.Terrain);
 
             CardManager.New(P03Plugin.CardPrefx, "MoxObelisk", "Mox Obelisk", 0, 4)
                 .AddAppearances(OnboardDynamicHoloPortrait.ID)
@@ -698,7 +709,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.ROTATION_KEY, "0,0,0|0,0,0|0,0,0|-90,0,0")
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, "0.4,0.4,0.4|0.8,0.8,0.8|0.5,0.5,0.5|2.5,2.5,1.5")
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.SHADER_KEY, "default|default|default|default")
-                .SetCardTemple(CardTemple.Tech);
+                .SetCardTemple(CardTemple.Tech)
+                .AddTraits(Trait.Terrain);
             // cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "0,-.39,0");
             // cTower.SetExtendedProperty(OnboardDynamicHoloPortrait.SCALE_KEY, ".6,.6,.6");
 

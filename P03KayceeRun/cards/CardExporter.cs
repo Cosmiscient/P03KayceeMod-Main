@@ -5,11 +5,15 @@ using System.IO;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03KayceeRun.Quests;
+using InscryptionAPI;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Saves;
 using Pixelplacement;
 using UnityEngine;
 
@@ -81,7 +85,158 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     ExportAllSigils();
                 }
+                else if (Input.GetKey(KeyCode.F))
+                {
+                    SetupForFaceCamera(true);
+                    StartScreenshotAllFaces();
+                }
+                else if (Input.GetKey(KeyCode.G))
+                {
+                    SetupForFaceCamera(false);
+                    StartScreenshotAllFaces();
+                }
             }
+        }
+
+        private static void SetupForFaceCamera(bool makeWhite)
+        {
+            // The camera's depth setting should make it to where we don't have to turn off a bunch
+            // of game objects. We mostly just need to set the color, position, and intensity of lights
+            // and the position/far clip plane of the camera
+
+            Transform cameraParent = ViewManager.Instance.cameraParent;
+            cameraParent.localPosition = new(0f, 8.25f, 0.54f); // 0 8.25 0.54
+            cameraParent.localEulerAngles = Vector3.zero;
+
+            Camera camera = ViewManager.Instance.pixelCamera;
+            camera.farClipPlane = 7;
+
+            if (makeWhite)
+                ExplorableAreaManager.Instance.SetHangingLightColors(Color.white, Color.white);
+
+            var hangingLight = ExplorableAreaManager.Instance.hangingLight;
+            hangingLight.intensity = 1;
+            hangingLight.type = LightType.Spot;
+            hangingLight.spotAngle = 100;
+            hangingLight.innerSpotAngle = 100;
+            hangingLight.transform.localPosition = new(0.1f, 6.6f, -1.09f); // 0.1 6.6 -1.09
+            hangingLight.transform.localEulerAngles = Vector3.zero;
+
+            P03AnimationController.Instance.transform.Find("Body/Chest").gameObject.SetActive(false);
+            P03AnimationController.Instance.transform.Find("Body/RotatingHead/Head/HeadAnim/Head-Cable-Left").gameObject.SetActive(false);
+            P03AnimationController.Instance.transform.Find("Body/RotatingHead/Head/HeadAnim/Head-Cable-Right").gameObject.SetActive(false);
+        }
+
+        public static void CaptureTransparentScreenshot(Camera cam, int width, int height, string screengrabfile_path)
+        {
+            // https://discussions.unity.com/t/capture-rendered-scene-to-png-with-background-transparent/1705/6
+            // This is slower, but seems more reliable.
+            var bak_cam_targetTexture = cam.targetTexture;
+            var bak_cam_clearFlags = cam.clearFlags;
+            var bak_RenderTexture_active = RenderTexture.active;
+
+            var tex_white = new Texture2D(width, height, TextureFormat.ARGB32, false);
+            var tex_black = new Texture2D(width, height, TextureFormat.ARGB32, false);
+            var tex_transparent = new Texture2D(width, height, TextureFormat.ARGB32, false);
+            // Must use 24-bit depth buffer to be able to fill background.
+            var render_texture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32);
+            var grab_area = new Rect(0, 0, width, height);
+
+            RenderTexture.active = render_texture;
+            cam.targetTexture = render_texture;
+            cam.clearFlags = CameraClearFlags.SolidColor;
+
+            cam.backgroundColor = Color.black;
+            cam.Render();
+            tex_black.ReadPixels(grab_area, 0, 0);
+            tex_black.Apply();
+
+            cam.backgroundColor = Color.white;
+            cam.Render();
+            tex_white.ReadPixels(grab_area, 0, 0);
+            tex_white.Apply();
+
+            // Create Alpha from the difference between black and white camera renders
+            for (int y = 0; y < tex_transparent.height; ++y)
+            {
+                for (int x = 0; x < tex_transparent.width; ++x)
+                {
+                    float alpha = tex_white.GetPixel(x, y).r - tex_black.GetPixel(x, y).r;
+                    alpha = 1.0f - alpha;
+                    Color color;
+                    if (alpha == 0)
+                    {
+                        color = Color.clear;
+                    }
+                    else
+                    {
+                        color = tex_black.GetPixel(x, y) / alpha;
+                    }
+                    color.a = alpha;
+                    tex_transparent.SetPixel(x, y, color);
+                }
+            }
+
+            // Encode the resulting output texture to a byte array then write to the file
+            byte[] pngShot = ImageConversion.EncodeToPNG(tex_transparent);
+            File.WriteAllBytes(screengrabfile_path, pngShot);
+
+            cam.clearFlags = bak_cam_clearFlags;
+            cam.targetTexture = bak_cam_targetTexture;
+            RenderTexture.active = bak_RenderTexture_active;
+            RenderTexture.ReleaseTemporary(render_texture);
+
+            Texture2D.Destroy(tex_black);
+            Texture2D.Destroy(tex_white);
+            Texture2D.Destroy(tex_transparent);
+        }
+
+        private void StartScreenshotAllFaces()
+        {
+            inRender = true;
+            StartCoroutine(ScreenshotAllFaces());
+        }
+
+        private IEnumerator ScreenshotAllFaces()
+        {
+            yield return new WaitForSeconds(0.3f);
+
+            foreach (P03AnimationController.Face face in Enum.GetValues(typeof(P03AnimationController.Face)))
+            {
+                if (face == P03AnimationController.Face.NUM_FACES)
+                    continue;
+
+                string facecode = face.ToString().ToLowerInvariant();
+                P03AnimationController.Instance.headAnim.Rebind();
+                yield return new WaitForSeconds(0.1f);
+                P03AnimationController.Instance.transform.Find("Body/RotatingHead/Head/HeadAnim/Head-Cable-Left").gameObject.SetActive(false);
+                P03AnimationController.Instance.transform.Find("Body/RotatingHead/Head/HeadAnim/Head-Cable-Right").gameObject.SetActive(false);
+                P03AnimationController.Instance.SetAntennaShown(face == P03AnimationController.Face.TelegrapherBossOnline);
+                P03AnimationController.Instance.ShowInfected(facecode.Contains("myco"));
+                P03AnimationController.Instance.SwitchToFace(face, false, false);
+                yield return new WaitForSeconds(facecode.Contains("myco") ? 1.0f : 0.1f);
+
+                string outfile = $"cardexports/p03face_{facecode}.png";
+                CaptureTransparentScreenshot(ViewManager.Instance.pixelCamera, Screen.width, Screen.height, outfile);
+            }
+
+            // And now we need to iterate through all the faces
+            P03AnimationController.Instance.headAnim.Rebind();
+            yield return new WaitForSeconds(1.5f);
+            P03AnimationController.Instance.SwitchToFace(P03ModularNPCFace.ModularNPCFace, false, false);
+            foreach (P03ModularNPCFace.FaceSet faceset in Enum.GetValues(typeof(P03ModularNPCFace.FaceSet)))
+            {
+                string facecode = $"p03face_npc_{faceset}";
+                NPCDescriptor npc = new(faceset, CompositeFigurine.FigurineType.SettlerMan);
+                P03ModularNPCFace.Instance.SetNPCFace(npc.faceCode);
+                yield return new WaitForSeconds(0.1f);
+
+                string outfile = $"cardexports/{facecode}.png";
+                CaptureTransparentScreenshot(ViewManager.Instance.pixelCamera, Screen.width, Screen.height, outfile);
+                yield return new WaitForSeconds(0.2f);
+            }
+
+            inRender = false;
         }
 
         internal static Bounds GetMaxBounds(GameObject g)
@@ -133,6 +288,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static readonly HashSet<string> GeneratedThisRun = new();
         private static bool Generated(CardInfo info)
         {
+            if (File.Exists($"cardexports/{GetRepr(info)}.png"))
+                return true;
+
             if (info.mods == null || info.mods.Count == 0)
             {
                 return File.Exists($"cardexports/{GetRepr(info)}.png");
@@ -204,6 +362,151 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
 
             yield return new WaitForEndOfFrame();
+        }
+
+        private static List<KeyValuePair<string, string>> GetEnumValues(Type type)
+        {
+            List<KeyValuePair<string, string>> itemList = new();
+            foreach (var item in Enum.GetValues(type))
+                itemList.Add(new(((int)item).ToString(), item.ToString()));
+
+            string startKey = type.Name + "_";
+            var saveData = Traverse.Create(ModdedSaveManager.SaveData).Field("SaveData").GetValue<Dictionary<string, Dictionary<string, object>>>();
+            foreach (var item in saveData[InscryptionAPIPlugin.ModGUID])
+            {
+                if (item.Key.StartsWith(startKey))
+                {
+                    itemList.Add(new(item.Value.ToString(), item.Key.Replace(startKey, "")));
+                }
+            }
+
+            return itemList;
+        }
+
+        private void ExportJsons()
+        {
+            foreach (var name in CardManager.AllCardsCopy.Select(ci => ci.name))
+            {
+                var cardInfo = CardLoader.GetCardByName(name);
+                var json = JsonUtility.ToJson(cardInfo);
+                if (cardInfo.evolveParams != null && cardInfo.evolveParams.evolution != null)
+                {
+                    json = json.Substring(0, json.Length - 1);
+                    json += ",\"evolveParams\":{\"evolution\":\"" + cardInfo.evolveParams.evolution.name;
+                    json += "\",\"turns\":" + cardInfo.evolveParams.turnsToEvolve + "}}";
+                }
+                if (cardInfo.iceCubeParams != null && cardInfo.iceCubeParams.creatureWithin != null)
+                {
+                    json = json.Substring(0, json.Length - 1);
+                    json += ",\"iceCubeParams\":{\"creatureWithin\":\"" + cardInfo.iceCubeParams.creatureWithin.name + "\"}}";
+                }
+                File.WriteAllText($"cardexports/card_{cardInfo.name}.json", json);
+
+                // And the card portrait
+                if (cardInfo.portraitTex != null && cardInfo.portraitTex.texture != null)
+                {
+                    try
+                    {
+                        Texture2D abTexture = TextureHelper.DuplicateTexture(cardInfo.portraitTex.texture);
+                        // for (int x = 0; x < abTexture.width; x++)
+                        //     for (int y = 0; y < abTexture.height; y++)
+                        //         if (abTexture.GetPixel(x, y).a > 0.1)
+                        //             abTexture.SetPixel(x, y, new(0f, 0f, 0f, 1f));
+                        //         else
+                        //             abTexture.SetPixel(x, y, new(0f, 0f, 0f, 0f));
+
+                        abTexture.Apply();
+                        File.WriteAllBytes($"cardexports/card_{cardInfo.name}.png", ImageConversion.EncodeToPNG(abTexture));
+                        GameObject.Destroy(abTexture);
+                    }
+                    catch (Exception ex)
+                    {
+                        P03Plugin.Log.LogWarning($"Failed to generate portrait export for {cardInfo.name}");
+                        P03Plugin.Log.LogWarning(ex);
+                    }
+                }
+                else
+                {
+                    P03Plugin.Log.LogInfo($"Skipping portrait export for {cardInfo.name} because it is blank");
+                }
+            }
+            foreach (var ab in AbilityManager.AllAbilities)
+            {
+                var json = JsonUtility.ToJson(ab.Info);
+                var name = ab.Info.rulebookName.Replace(" ", "_");
+                File.WriteAllText($"cardexports/ability_{name}.json", json);
+
+                // And the ability icon
+                Texture2D abTexture = TextureHelper.DuplicateTexture(ab.Texture as Texture2D);
+                for (int x = 0; x < abTexture.width; x++)
+                    for (int y = 0; y < abTexture.height; y++)
+                        if (abTexture.GetPixel(x, y).a > 0.1)
+                            abTexture.SetPixel(x, y, new(0f, .88f, 1f, 1f));
+                        else
+                            abTexture.SetPixel(x, y, new(0f, 0f, 0f, 0f));
+
+                abTexture.Apply();
+                File.WriteAllBytes($"cardexports/ability_{name}.png", ImageConversion.EncodeToPNG(abTexture));
+                GameObject.Destroy(abTexture);
+
+
+            }
+            // Now the special stuff
+            string specialJson = "{\n";
+            foreach (var enumType in new List<Type>() { typeof(CardTemple), typeof(SpecialTriggeredAbility), typeof(CardMetaCategory), typeof(AbilityMetaCategory), typeof(CardAppearanceBehaviour.Appearance) })
+            {
+                specialJson += "\t\"" + enumType.Name + "\": {";
+                foreach (var kvp in GetEnumValues(enumType))
+                    specialJson += "\t\t\"" + kvp.Key + "\": \"" + kvp.Value + "\",\n";
+
+                specialJson = specialJson.Substring(0, specialJson.Length - 2) + "\n";
+
+                specialJson += "\t},\n";
+            }
+            specialJson = specialJson.Substring(0, specialJson.Length - 2) + "\n";
+            specialJson += "}";
+            File.WriteAllText($"cardexports/special_enums.json", specialJson);
+
+            // List<CardInfo> cards = CardManager.AllCardsCopy
+            //                                   .Where(ci => !ci.name.StartsWith("!") &&
+            //                                                ci.temple == CardTemple.Tech)
+            //                                   .ToList();
+
+            // string table = "id,name,artist,expansion,cost,attack,health,sigils,quality,region\n";
+            // foreach (var card in cards)
+            // {
+            //     table += card.name + "," + card.DisplayedNameEnglish + ",,";
+            //     if (card.HasAnyOfCardMetaCategories(CardMetaCategory.Rare, CardMetaCategory.ChoiceNode))
+            //     {
+            //         if (card.name.StartsWith("P03KCMXP2"))
+            //             table += "Expansion Pack 2";
+            //         else if (card.name.StartsWith("P03KCMXP1"))
+            //             table += "Expansion Pack 1";
+            //         else if (card.name.StartsWith("P03KCM"))
+            //             table += "P03 in Kaycee's Mod";
+            //         else if (card.IsBaseGameCard())
+            //             table += "Vanilla";
+            //     }
+            //     table += ",";
+            //     if (card.energyCost > 0)
+            //         table += $"{card.energyCost} energy,";
+            //     table += card.Attack + "," + card.Health + ",";
+            //     table += "\"";
+            //     List<string> abilityLinks = new();
+            //     foreach (var sigil in card.Abilities)
+            //     {
+            //         var ab = AbilitiesUtil.GetInfo(sigil);
+            //         string pageName = ab.rulebookName.Replace(" ", "");
+            //         abilityLinks.Add($"[[{pageName}|{ab.rulebookName}]]");
+            //     }
+            //     table += string.Join(", ", abilityLinks) + "\"";
+            //     if (card.HasCardMetaCategory(CardMetaCategory.Rare))
+            //         table += "Rare,";
+            //     else if (card.HasCardMetaCategory(CardMetaCategory.ChoiceNode))
+            //         table += "Common,";
+            //     else
+            //         table += "Unobtainable,";
+            // }
         }
 
         private void ExportAllSigils()
@@ -548,6 +851,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             Destroy(screenshot);
 
             ExportAllSigils();
+            ExportJsons();
 
             ExplorableAreaManager.Instance.SetHangingLightColors(originalHangingLightColor, originalHangingLightCardColor);
 

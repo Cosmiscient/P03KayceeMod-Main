@@ -733,6 +733,23 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             }
         }
 
+        [HarmonyPatch(typeof(CardAnimationController), nameof(CardAnimationController.SetFaceDown))]
+        [HarmonyPostfix]
+        private static void ManageStickers(CardAnimationController __instance, bool faceDown)
+        {
+            if (__instance is not DiskCardAnimationController dcac)
+                return;
+
+            if (dcac.PlayableCard == null)
+                return;
+
+            CustomCoroutine.WaitThenExecute(0.22f, delegate ()
+            {
+                foreach (var proj in dcac.PlayableCard.GetComponentsInChildren<Projector>())
+                    proj.enabled = !faceDown;
+            });
+        }
+
         private static readonly List<string> STENCIL_PATHS = new() { "ScreenFront", "Rails", "Bottom", "Top", "Top/MetalSlider" };
 
         [HarmonyPatch(typeof(Card), nameof(Card.RenderCard))]

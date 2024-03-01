@@ -1,3 +1,20 @@
+# 4.4
+
+- Balance change: The "Overwhelming Entrance" sigil (3leph4nt's sigil) is now an activated ability that still triggers on entering play. The activation cost is 4 energy. This allows you to retrigger the Elephant's disruptive effect multiple times during battle. Additionally, this effect now shuffles the opponent queue and no longer shuffles terrain.
+- The currency catchup mechanic has been removed. Players will receive less currency in pickup nodes on maps 2, 3, and 4.
+- Fixed a defect where the sticker printer could print stickers that were no unlocked.
+- Added another patch to handle the randomly appearing robobucks node Central Botopia.
+- The Clock battle has been completely reworked.
+- A **significant** update to difficulty: the top half of all battles (according to number of player deaths) have been made less difficult. This was accomplished by entirely eliminating one opponent card somewhere in turns 2-4.
+
+# 4.3.13
+
+- Fixed a bug where the Scarlet Skull achievement would not unlock. If you have been personally affected by this bug on any version less than 4.3.13, feel free to reach out to me on Discord for a retroactive fix.
+- Fixed a bug where switching to and from the deck review with the fast travel map open would allow players to bypass the Broken Bridges challenge.
+- Copypasta can no longer copy itself.
+- Stickers no longer show through cards when facedown. 
+- The enigmatic Tapeworm has replaced the Ringworm.
+
 # 4.3.12
 
 - Billdozer and 50er are now appropriately tagged to flip their portrait horizontally when the card moves left.

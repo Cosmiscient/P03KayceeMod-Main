@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 2161727484
+CRC: 3481215840
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 5a7da4d765a6a3271fb193d6e61a4a3c
+    Hash: b3bdf5fb48b61db33940d0e8101e8108
   TypeTreeHash:
     serializedVersion: 2
     Hash: 10caaafd0ad3fcdc9870467d863128a4
@@ -42,6 +42,7 @@ ClassTypes:
 SerializeReferenceClassIdentifiers: []
 Assets:
 - Assets/Shaders/ProjectedUnstenciledSticker.shader
+- Assets/Prefabs/Clock3.prefab
 - Assets/Prefabs/Question.prefab
 - Assets/Textures/Tractorbeam.mat
 - Assets/Prefabs/Molotov.prefab

@@ -41,8 +41,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 foreach (ChallengeManager.FullChallenge fc in PageOneChallenges)
                 {
+                    if (fc.UnlockLevel > 13)
+                        continue;
                     int count = PageOneChallenges.Count(c => c.Challenge.challengeType == fc.Challenge.challengeType);
-                    if (AscensionSaveData.Data.GetNumChallengesOfTypeActive(fc.Challenge.challengeType) < count)
+                    int active = AscensionSaveData.Data.GetNumChallengesOfTypeActive(fc.Challenge.challengeType);
+                    P03Plugin.Log.LogInfo($"Scarlet Skull Check. Expecting {count} {fc.Challenge.title}, found {active}");
+                    if (active < count)
                         return false;
                 }
                 return true;

@@ -146,11 +146,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 P03Plugin.Log.LogInfo("Maxing out P03 Challenge Level");
                 P03AscensionSaveData.P03Data.challengeLevel = 13;
+                if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("scarletskull"))
+                    AchievementManager.Unlock(P03AchievementManagement.SKULLSTORM);
             }
             if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKey(KeyCode.P) && Input.GetKey(KeyCode.O) && Input.GetKey(KeyCode.E))
             {
                 P03Plugin.Log.LogInfo("Maxing out P03 Challenge Level");
                 P03AscensionSaveData.P03Data.challengeLevel = 13;
+                if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("scarletskull"))
+                    AchievementManager.Unlock(P03AchievementManagement.SKULLSTORM);
             }
             if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKey(KeyCode.P) && Input.GetKey(KeyCode.R) && Input.GetKey(KeyCode.E))
             {
