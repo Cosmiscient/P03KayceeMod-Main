@@ -239,7 +239,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     : QuestState.QuestStateStatus.Active;
             });
             boughtState.AddDialogueState("MY FRIEND IS LOST", "P03LostGoobert", QuestState.QuestStateStatus.Failure);
-            boughtState.AddDefaultActiveState("YOU FOUND HIM!", "P03GoobertHome")
+            boughtState.AddDialogueState("YOU FOUND HIM!", "P03GoobertHome")
                     .AddLoseItemReward(GoobertHuh.ItemData.name)
                     .AddGainItemReward(LifeItem.ItemData.name)
                     .AddMonetaryReward(13);

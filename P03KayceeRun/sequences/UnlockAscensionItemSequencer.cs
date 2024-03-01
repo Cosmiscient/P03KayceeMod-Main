@@ -39,7 +39,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     if (slot.gameObject.GetComponent<AlternateInputInteractable>() == null)
                     {
                         var aii = slot.gameObject.AddComponent<GenericAltInputInteractable>();
-                        aii.cursorType = CursorType.Pickup;
+                        aii.cursorType = CursorType.Inspect;
                     }
                 }
 

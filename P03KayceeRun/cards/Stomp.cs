@@ -122,18 +122,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPriority(HarmonyLib.Priority.VeryHigh)]
         private static IEnumerator OnResolveOnBoardPatch(IEnumerator sequence, ActivatedAbilityBehaviour __instance)
         {
-            P03Plugin.Log.LogInfo("In ActivatedAbilityBehaviour.OnResolveOnBoard");
             if (__instance is not Stomp)
             {
-                P03Plugin.Log.LogInfo("Not Stomp");
                 yield return sequence;
                 yield break;
             }
-            P03Plugin.Log.LogInfo("Is Stomp");
 
             __instance.Card.Anim.StrongNegationEffect();
-            TableVisualEffectsManager.Instance.ThumpTable(2f);
-            yield return new WaitForSeconds(0.15f);
+            TableVisualEffectsManager.Instance.ThumpTable(0.7f);
             List<CardSlot> slotsToShuffle = BoardManager.Instance.GetSlotsCopy(__instance.Card.OpponentCard)
                                                         .Where(SlotCanBeShuffled)
                                                         .ToList();

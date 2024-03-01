@@ -203,7 +203,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             {
                 if (Part3SaveData.Data.items.Contains(ItemName))
                 {
-                    ItemSlot slot = ItemsManager.Instance.Slots.First(s => s.Item != null && s.Item.name.Equals(ItemName));
+                    ItemSlot slot = ItemsManager.Instance.Slots.First(s => s.Item != null && s.Item.Data.name.Equals(ItemName));
 
                     View currentView = ViewManager.Instance.CurrentView;
                     yield return new WaitForEndOfFrame();

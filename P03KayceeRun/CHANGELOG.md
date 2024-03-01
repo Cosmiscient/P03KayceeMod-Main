@@ -1,10 +1,11 @@
 # 4.4
 
 - Balance change: The "Overwhelming Entrance" sigil (3leph4nt's sigil) is now an activated ability that still triggers on entering play. The activation cost is 4 energy. This allows you to retrigger the Elephant's disruptive effect multiple times during battle. Additionally, this effect now shuffles the opponent queue and no longer shuffles terrain.
-- The currency catchup mechanic has been removed. Players will receive less currency in pickup nodes on maps 2, 3, and 4.
+- The currency catchup mechanic was broken and players were receiving way too much extra money. Ultimately we decided to remove it altogether. Players will receive significantly less currency in pickup nodes. We will keep an eye on how this affects gameplay and determine if any additional tweaks to the currency system are necessary.
+- Fixed a defect where a particular NPC's quest would never complete.
 - Fixed a defect where the sticker printer could print stickers that were no unlocked.
-- Added another patch to handle the randomly appearing robobucks node Central Botopia.
-- The Clock battle has been completely reworked.
+- Added another patch to handle the randomly appearing robobucks node in Central Botopia.
+- The Clock battle has been completely reworked and a new terrain card has been added to support the encounter.
 - A **significant** update to difficulty: the top half of all battles (according to number of player deaths) have been made less difficult. This was accomplished by entirely eliminating one opponent card somewhere in turns 2-4.
 
 # 4.3.13
