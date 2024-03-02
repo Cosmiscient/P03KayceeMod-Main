@@ -1,9 +1,5 @@
 ManifestFileVersion: 0
-<<<<<<< HEAD:P03AssetBundle/Assets/AssetBundles/AssetBundles.manifest
-CRC: 882064162
-=======
-CRC: 1973896689
->>>>>>> main:P03KayceeRun/P03AssetBundle/Assets/AssetBundles/AssetBundles.manifest
+CRC: 4273968884
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:

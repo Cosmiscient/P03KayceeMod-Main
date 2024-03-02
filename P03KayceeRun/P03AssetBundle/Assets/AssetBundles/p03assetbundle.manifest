@@ -1,17 +1,9 @@
 ManifestFileVersion: 0
-<<<<<<< HEAD:P03AssetBundle/Assets/AssetBundles/p03assetbundle.manifest
-CRC: 1404414004
+CRC: 2261901517
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 19c82632297aac4f7ac664a468745450
-=======
-CRC: 2329066813
-Hashes:
-  AssetFileHash:
-    serializedVersion: 2
-    Hash: 2d64dddef8e0021c6c9083218d831868
->>>>>>> main:P03KayceeRun/P03AssetBundle/Assets/AssetBundles/p03assetbundle.manifest
+    Hash: a0e84bc5814a892ca07d87554151ae7d
   TypeTreeHash:
     serializedVersion: 2
     Hash: 10caaafd0ad3fcdc9870467d863128a4
