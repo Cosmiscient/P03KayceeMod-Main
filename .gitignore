@@ -1,32 +1,37 @@
-bin/
-obj/
+*/bin/
+*/obj/
 
 # lib is ignored. You have to supply your own game files 
-lib/
+*/lib/
 
 # I'm keeping copies of my save files locally to help with testing
 # Right now I'm not putting them in git
-saves/
-package/
+*/saves/
+*/package/
 
-compiled/
+*/compiled/
+
+P03PyWiki/cardexports/
+
+*.local.json
 
 *.dll
 *.pdb
+.env
 
 deploy.ps1
 
-P03AssetBundle/[Ll]ibrary/
-P03AssetBundle/[Tt]emp/
-P03AssetBundle/[Oo]bj/
-P03AssetBundle/[Bb]uild/
-P03AssetBundle/[Bb]uilds/
-P03AssetBundle/[Ll]ogs/
-P03AssetBundle/[Uu]ser[Ss]ettings/
+*/P03AssetBundle/[Ll]ibrary/
+*/P03AssetBundle/[Tt]emp/
+*/P03AssetBundle/[Oo]bj/
+*/P03AssetBundle/[Bb]uild/
+*/P03AssetBundle/[Bb]uilds/
+*/P03AssetBundle/[Ll]ogs/
+*/P03AssetBundle/[Uu]ser[Ss]ettings/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
-P03AssetBundle/[Mm]emoryCaptures/
+*/P03AssetBundle/[Mm]emoryCaptures/
 
 # Recordings can get excessive in size
-P03AssetBundle/[Rr]ecordings/
+*/P03AssetBundle/[Rr]ecordings/

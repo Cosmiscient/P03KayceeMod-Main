@@ -1,0 +1,209 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Helpers;
+using Infiniscryption.P03KayceeRun.Quests;
+using InscryptionAPI.Card;
+using InscryptionAPI.Guid;
+using InscryptionAPI.Helpers;
+using InscryptionAPI.Helpers.Extensions;
+using InscryptionAPI.Triggers;
+using UnityEngine;
+
+namespace Infiniscryption.P03KayceeRun.Cards
+{
+    public class FireBomb : AbilityBehaviour, IOnPostSingularSlotAttackSlot
+    {
+        public static Ability AbilityID { get; private set; }
+        public override Ability Ability => AbilityID;
+
+        public static Ability FlameStokerID { get; private set; }
+
+        public static readonly AbilityMetaCategory FlamingAbility = GuidManager.GetEnumValue<AbilityMetaCategory>(P03Plugin.PluginGuid, "FlamingAbility");
+
+        private static List<SlotModificationManager.ModificationType> OnFire { get; set; }
+
+        public static bool SlotIsOnFire(CardSlot slot) => OnFire.Contains(slot.GetSlotModification());
+
+        public static SlotModificationManager.ModificationType GetFireLevel(int fireLevel, CardSlot target, PlayableCard source = null)
+        {
+            if (source == null)
+                return OnFire[fireLevel];
+
+            if (target.IsOpponentSlot() != source.IsPlayerCard())
+                return OnFire[fireLevel];
+
+            if (BoardManager.Instance.GetSlotsCopy(source.IsPlayerCard())
+                                     .Any(s => s.Card != null
+                                            && s.Card.HasAbility(FlameStokerID)))
+            {
+
+                if (fireLevel < OnFire.Count - 1)
+                    return OnFire[fireLevel + 1];
+            }
+
+            return OnFire[fireLevel];
+        }
+
+        public class BurningSlot : NonCardTriggerReceiver, ISlotModificationChanged
+        {
+            public static bool CardIsFireproof(PlayableCard card) => card.HasAbility(Ability.MadeOfStone);
+
+            public IEnumerator OnSlotModificationChanged(CardSlot slot, SlotModificationManager.ModificationType previous, SlotModificationManager.ModificationType current)
+            {
+                int fireIdx = OnFire.IndexOf(current);
+
+                Transform flames = slot.transform.Find("Flames");
+                if (flames != null && fireIdx == -1)
+                    CustomCoroutine.WaitOnConditionThenExecute(() => GlobalTriggerHandler.Instance.StackSize == 0, () => Destroy(flames.gameObject));
+
+                if (fireIdx == -1)
+                    yield break;
+
+                GameObject newFlames = flames == null ? Instantiate(AssetBundleManager.Prefabs["Fire_Parent"], slot.transform) : flames.gameObject;
+                newFlames.name = "Flames";
+                newFlames.transform.localPosition = new(0f, 0f, -0.95f);
+
+                // This bit sets the number that shows through the flames
+                for (int i = 1; i <= 4; i++)
+                    newFlames.transform.Find($"Fire_System_{i}").gameObject.SetActive(i == fireIdx + 1);
+
+                yield return new WaitForEndOfFrame();
+            }
+
+            public bool RespondsToSlotModificationChanged(CardSlot slot, SlotModificationManager.ModificationType previous, SlotModificationManager.ModificationType current) => true;
+
+            public override bool RespondsToTurnEnd(bool playerTurnEnd)
+            {
+                return BoardManager.Instance.GetSlots(playerTurnEnd).Any(s => s != null && OnFire.Contains(s.GetSlotModification()));
+            }
+
+            public override IEnumerator OnTurnEnd(bool playerTurnEnd)
+            {
+                List<CardSlot> slots = BoardManager.Instance.GetSlots(playerTurnEnd);
+                P03Plugin.Log.LogInfo($"About to execute fire update on {slots.Count} slots");
+                foreach (CardSlot slot in slots.Where(s => s != null))
+                {
+                    if (OnFire.Contains(slot.GetSlotModification()))
+                    {
+                        if (slot.Card != null && slot.Card.Info != null)
+                        {
+                            if (!CardIsFireproof(slot.Card))
+                            {
+                                if (slot.Card.Info.name.Equals("Tree_Hologram") || slot.Card.Info.name.Equals("Tree_Hologram_SnowCovered"))
+                                {
+                                    slot.Card.SetInfo(CardLoader.GetCardByName("DeadTree"));
+                                    yield return new WaitForSeconds(0.25f);
+                                    if (slot.Card.Health <= 0)
+                                    {
+                                        yield return slot.Card.Die(false);
+                                        yield return new WaitForSeconds(0.15f);
+                                    }
+                                }
+                                else
+                                {
+                                    if (slot.Card.Health == 1)
+                                        DefaultQuestDefinitions.Pyromania.IncrementQuestCounter(onlyIfActive: true);
+
+                                    yield return slot.Card.TakeDamage(1, null);
+
+                                    if (slot.Card != null && !slot.Card.Dead)
+                                    {
+                                        if (slot.Card.HasAbility(Ability.SwapStats))
+                                        {
+                                            SwapStats component = slot.Card.GetComponent<SwapStats>();
+                                            if (component != null)
+                                                yield return component.OnTakeDamage(slot.Card);
+                                        }
+                                    }
+                                    yield return new WaitForSeconds(0.15f);
+                                }
+                            }
+                        }
+
+                        int idx = OnFire.IndexOf(slot.GetSlotModification());
+                        yield return idx <= 0
+                            ? slot.SetSlotModification(SlotModificationManager.ModificationType.NoModification)
+                            : (object)slot.SetSlotModification(OnFire[idx - 1]);
+
+                        yield return new WaitForSeconds(0.15f);
+                    }
+                }
+            }
+        }
+
+        static FireBomb()
+        {
+            AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
+            info.rulebookName = "Fire Strike";
+            info.rulebookDescription = "When [creature] attacks, it sets the target space on fire for three turns.";
+            info.canStack = false;
+            info.powerLevel = 3;
+            info.opponentUsable = true;
+            info.passive = false;
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular, FlamingAbility };
+            info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_fire_bomb.png", typeof(FireBomb).Assembly));
+
+            AbilityID = AbilityManager.Add(
+                P03Plugin.PluginGuid,
+                info,
+                typeof(FireBomb),
+                TextureHelper.GetImageAsTexture("ability_fire_bomb.png", typeof(FireBomb).Assembly)
+            ).Id;
+
+            OnFire = new();
+            for (int i = 1; i <= 4; i++)
+            {
+                OnFire.Add(SlotModificationManager.New(
+                    P03Plugin.PluginGuid,
+                    $"OnFire{i}",
+                    typeof(BurningSlot),
+                    TextureHelper.GetImageAsTexture($"card_slot_fire_{i}.png", typeof(FireBomb).Assembly)
+                ));
+            }
+
+            AbilityInfo fsInfo = ScriptableObject.CreateInstance<AbilityInfo>();
+            fsInfo.rulebookName = "Flame Stoker";
+            fsInfo.rulebookDescription = "While [creature] is on board, all fires you start will be stronger, causing them to last one turn longer.";
+            fsInfo.canStack = false;
+            fsInfo.powerLevel = 1;
+            fsInfo.opponentUsable = true;
+            fsInfo.passive = true;
+            fsInfo.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, FlamingAbility };
+
+            FlameStokerID = AbilityManager.Add(
+                P03Plugin.PluginGuid,
+                fsInfo,
+                typeof(FireBomb),
+                TextureHelper.GetImageAsTexture("ability_flame_stoker.png", typeof(FireBomb).Assembly)
+            ).Id;
+        }
+
+        public bool RespondsToPostSingularSlotAttackSlot(CardSlot attackingSlot, CardSlot targetSlot) => attackingSlot == Card.Slot;
+
+        public static IEnumerator SetSlotOnFireBasic(int fireLevel, CardSlot targetSlot, CardSlot attackingSlot)
+        {
+            GameObject fireball = Instantiate(AssetBundleManager.Prefabs["Fire_Ball"], targetSlot.transform);
+            AudioController.Instance.PlaySound3D("fireball", MixerGroup.TableObjectsSFX, fireball.transform.position, 0.5f);
+            CustomCoroutine.WaitThenExecute(3f, delegate ()
+            {
+                if (fireball != null)
+                {
+                    Destroy(fireball);
+                }
+            });
+            yield return new WaitForSeconds(0.3f);
+            yield return targetSlot.SetSlotModification(GetFireLevel(fireLevel, targetSlot, attackingSlot?.Card));
+            yield return new WaitForSeconds(0.05f);
+        }
+
+        public IEnumerator OnPostSingularSlotAttackSlot(CardSlot attackingSlot, CardSlot targetSlot)
+        {
+            //AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, targetSlot.transform.position, .7f);
+            // The fireball should play and then delete itself, but we'll destroy it after some time anyway
+            yield return SetSlotOnFireBasic(2, targetSlot, attackingSlot);
+            yield break;
+        }
+    }
+}

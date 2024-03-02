@@ -1,0 +1,5 @@
+mwclient
+notebook
+python-dotenv
+pillow
+numpy
