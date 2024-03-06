@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards.Multiverse;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
@@ -67,6 +68,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string MYCO_CONSTRUCT_BASE = "P03KCM_MYCO_CONSTRUCT_BASE";
 
         public const string TURBO_MINECART = "P03KCM_TURBO_MINECART";
+
+        public const string MAG_BRUSH = "P03KCM_MAG_BRUSH";
 
         public const string TURBO_VESSEL = "P03KCM_TURBO_VESSEL";
         public const string TURBO_VESSEL_BLUEGEM = "P03KCM_TURBO_VESSEL_BLUEGEM";
@@ -587,6 +590,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     .AddAbilities(Ability.Reach, DoubleSprint.AbilityID)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, MAG_BRUSH, "MAGBRUSH.EXE", 0, 0)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_brush.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 2)
+                .SetTargetedSpell()
+                .SetSpellAppearanceP03()
+                .AddSpecialAbilities(MultiverseRandomSigilBehaviour.AbilityID)
+                .AddAbilities(GuidManager.GetEnumValue<Ability>("zorro.infiniscryption.sigils", "Give Sigils"));
 
             CardManager.New(P03Plugin.CardPrefx, FIREWALL, "Firewall", 0, 3)
                 .SetPortrait(GetTexture("portrait_firewall.png", typeof(CustomCards).Assembly))

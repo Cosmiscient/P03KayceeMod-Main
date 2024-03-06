@@ -514,7 +514,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             //newSequencer.enabled = true;
 
             HoloMapArea area = retval.GetComponent<HoloMapArea>();
-            area.firstEnterDialogueId = "P03AscensionPreIntro";
+            area.firstEnterDialogueId = P03AscensionSaveData.LeshyIsDead ? "P03AscensionMultiverseReturn" : "P03AscensionPreIntro";
 
             P03Plugin.Log.LogInfo("Building boss node");
             HoloMapBossNode bossNode = BuildSpecialNode(HoloMapNode.NodeDataType.BossBattle, HoloMapBlueprint.NO_SPECIAL, Zone.Neutral, retval.transform.Find("Nodes"), null, 0f, 0f) as HoloMapBossNode;
@@ -522,20 +522,35 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             foreach (Renderer rend in bossNode.gameObject.GetComponentsInChildren<Renderer>())
                 rend.enabled = false; // Hide the boss node visually - I don't want to see it
 
+            var boss = P03AscensionSaveData.LeshyIsDead ? BossManagement.P03MultiverseOpponent : BossManagement.P03FinalBossOpponent;
+
             bossNode.lootNodes = new();
             bossNode.bossAnim = null;
-            bossNode.specialEncounterId = BossBattleSequencer.GetSequencerIdForBoss(BossManagement.P03FinalBossOpponent);
+            bossNode.specialEncounterId = BossBattleSequencer.GetSequencerIdForBoss(boss);
 
             P03Plugin.Log.LogInfo($"Setting boss type. Boss node data is {bossNode.Data}");
             P03Plugin.Log.LogInfo($"Type of data is {bossNode.Data.GetType()}");
             CardBattleNodeData data = bossNode.Data as CardBattleNodeData;
-            data.specialBattleId = BossBattleSequencer.GetSequencerIdForBoss(BossManagement.P03FinalBossOpponent);
+            data.specialBattleId = BossBattleSequencer.GetSequencerIdForBoss(boss);
 
             area.bossNode = bossNode;
             area.activateBossOnEnter = true;
 
             retval.SetActive(false);
             return retval;
+        }
+
+        [HarmonyPatch(typeof(HoloMapAreaManager), nameof(HoloMapAreaManager.MoveToAreaDirectly))]
+        [HarmonyPostfix]
+        private static void WeirdBossSavingBehavior(HoloMapAreaManager __instance)
+        {
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                if (__instance.CurrentArea.activateBossOnEnter)
+                {
+                    __instance.StartCoroutine(__instance.CurrentArea.ReachBossNodeSequence());
+                }
+            }
         }
 
         private static GameObject BuildFinalShopNode()

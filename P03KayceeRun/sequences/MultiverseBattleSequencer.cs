@@ -25,6 +25,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public override Opponent.Type BossType => BossManagement.P03MultiverseOpponent;
         public override StoryEvent DefeatedStoryEvent => EventManagement.DEFEATED_P03_MULTIVERSE;
 
+        internal bool HasSeenMagnificusBrush { get; set; } = false;
+
         public bool ScalesTippedToOpponent { get; private set; } = false;
         public bool GameIsOver { get; private set; } = false;
 
@@ -33,8 +35,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         private MultiverseTelevisionScreen LeftScreen;
         private MultiverseTelevisionScreen RightScreen;
 
-        private bool HasExplainedOpponentMultiverseLifeSharing = false;
-        private bool HasExplainedPlayerMultiverseLifeSharing = false;
         internal readonly List<string> ItemStartingState = new();
 
         public const int NUMBER_OF_MULTIVERSES = 3;
@@ -45,7 +45,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public int NumberOfPlayerWins { get; private set; } = 0;
         public int NumberOfPlayerLosses { get; private set; } = 0;
 
-        private GameObject CyberspaceParticles => TurnManager.Instance.transform.Find("Cyberspace_Particles")?.gameObject;
+        internal GameObject CyberspaceParticles => TurnManager.Instance.transform.Find("Cyberspace_Particles")?.gameObject;
 
         private int NextUniverseUp => MultiverseGames.Length - 1 + NumberOfPlayerLosses + NumberOfPlayerWins;
 
@@ -219,6 +219,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public override IEnumerator OnUpkeep(bool playerUpkeep)
         {
+            yield return GameEnd(true);
+
             if (playerUpkeep)
             {
                 // if (PlayerHand.Instance != null && TurnManager.Instance.TurnNumber == 1)
@@ -240,6 +242,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
                 if (PlayerHand.Instance != null && TurnManager.Instance.TurnNumber > 1)
                     yield return CardDrawPiles.Instance.DrawPhaseSequence();
+
+                if (PlayerHand.Instance != null && TurnManager.Instance.TurnNumber % 2 == 0)
+                {
+                    if (!PlayerHand.Instance.CardsInHand.Any(c => c.Info.name.Equals(CustomCards.MAG_BRUSH)))
+                    {
+                        yield return CardSpawner.Instance.SpawnCardToHand(CardLoader.GetCardByName(CustomCards.MAG_BRUSH), new List<CardModificationInfo>(), CardDrawPiles.Instance.drawFromPilesSpawnOffset, 0.15f);
+                    }
+                }
             }
 
             ActiveMultiverse.PlayerNeedsUpkeepStep = false;
@@ -467,6 +477,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             // Dolly zoom in
             Camera camera = ViewManager.Instance.CameraParent.gameObject.GetComponentInChildren<Camera>();
             Transform cameraParent = camera.transform.parent;
+            Vector3 originalPosition = camera.transform.position;
             float x = cameraParent.localEulerAngles.x;
             float fov = camera.fieldOfView;
             float z = camera.transform.position.z - P03AnimationController.Instance.transform.position.z;
@@ -487,6 +498,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             yield return new WaitForSeconds(1.0f);
 
+            foreach (CardSlot slot in BoardManager.Instance.AllSlots)
+            {
+                if (slot.GetSlotModification() != SlotModificationManager.ModificationType.NoModification)
+                    yield return slot.SetSlotModification(SlotModificationManager.ModificationType.NoModification);
+            }
+
             // Need to remove everything from the hand and board
             var newUniverse = MultiverseGameState.GenerateAlternateStartingState(P03AscensionSaveData.RandomSeed + NextUniverseUp * 10, NextUniverseUp);
             var oldUniverse = ActiveMultiverse;
@@ -495,6 +512,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return oldUniverse.CleanUp();
             MultiverseGames[universeId] = newUniverse;
             yield return TravelToUniverse(universeId, force: true);
+
+            foreach (CardSlot slot in BoardManager.Instance.AllSlots)
+            {
+                if (slot.GetSlotModification() != SlotModificationManager.ModificationType.NoModification)
+                    yield return slot.SetSlotModification(SlotModificationManager.ModificationType.NoModification);
+            }
+
             yield return oldUniverse.CleanUp();
 
             Tween.Value(zTarget, z, delegate (float newZ)
@@ -509,6 +533,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 cameraParent.localEulerAngles = new(x * (newZ - zTarget) / (z - zTarget), 0f, 0f);
             }, 0.33f, 0f);
 
+            Tween.Position(camera.transform, originalPosition, 1f, 0f);
+
             yield return SetupMultiverseOpponent(TurnManager.Instance, null, NextUniverseUp);
             yield return new WaitForSeconds(0.33f);
         }
@@ -517,11 +543,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         {
             for (int i = 0; i < MultiverseGames.Length; i++)
             {
+                if (GameIsOver)
+                    yield break;
+
                 var universe = MultiverseGames[i];
                 P03Plugin.Log.LogInfo($"Universe {i}: scales tipped {universe.OpponentDamage - universe.PlayerDamage} towards opponent");
                 if ((universe.OpponentDamage - universe.PlayerDamage) >= 5)
                 {
-                    if (NumberOfPlayerWins < 4)
+                    if (NumberOfPlayerWins < 3)
                     {
                         P03Plugin.Log.LogInfo("Opponent lost a universe");
                         yield return VisualizeLosingUniverse(i, opponentLost: true);
@@ -529,6 +558,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     else
                     {
                         ScalesTippedToOpponent = true;
+                        TurnManager.Instance.Opponent.Surrendered = true;
                         GameIsOver = true;
                     }
                 }
@@ -539,6 +569,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         {
             for (int i = 0; i < MultiverseGames.Length; i++)
             {
+                if (GameIsOver)
+                    yield break;
+
                 var universe = MultiverseGames[i];
                 if ((universe.PlayerDamage - universe.OpponentDamage) >= 5)
                 {
@@ -549,6 +582,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     else
                     {
                         ScalesTippedToOpponent = false;
+                        TurnManager.Instance.PlayerSurrendered = true;
                         GameIsOver = true;
                     }
                 }
@@ -880,7 +914,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             yield return Instance.SetPhase(MultiverseGameState.Phase.PlayerEnd);
             yield return mbs.IterateForAllMultiverses(
-                state => state.RespondsToTrigger(Trigger.TurnEnd, true),
+                state => state.RespondsToTrigger(Trigger.TurnEnd, true) || state.HasPhaseCallback(MultiverseGameState.Phase.PlayerEnd),
                 PlayerEndStep
             );
             yield break;
@@ -916,6 +950,189 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     yield return GlobalTriggerHandler.Instance.TriggerSequence(trigger, receiver, otherArgs);
             }
             yield break;
+        }
+
+        private void AnimeFlyAway(Transform transform, Vector3 offset, float duration = 0.3f)
+        {
+            Tween.Position(transform, transform.position + offset, duration, 0f, completeCallback: () => transform.gameObject.SetActive(false));
+        }
+
+
+        public override IEnumerator PreCleanUp()
+        {
+            OpponentAnimationController.Instance.ClearLookTarget();
+            InteractionCursor.Instance.InteractionDisabled = true;
+            ViewManager.Instance.Controller.LockState = ViewLockState.Locked;
+            ViewManager.Instance.SwitchToView(View.DefaultUpwards, false, false);
+
+            UIManager.Instance.Effects.GetEffect<ScreenGlitchEffect>().SetIntensity(1f, .4f);
+            CameraEffects.Instance.Shake(0.1f, .4f);
+            AudioController.Instance.PlaySound2D("cam_switch", MixerGroup.None, .6f, 0f, pitch: new AudioParams.Pitch(AudioParams.Pitch.Variation.Medium));
+            MultiverseGameState.LightColorState.GetPreset(GameColors.Instance.blue).RestoreState();
+
+            yield return new WaitForSeconds(1f);
+
+            if (TurnManager.Instance.PlayerWon)
+            {
+                PauseMenu.pausingDisabled = true;
+                yield return TextDisplayer.Instance.PlayDialogueEvent(LoseDialogues[3], TextDisplayer.MessageAdvanceMode.Input);
+                ViewManager.Instance.SwitchToView(View.P03Face, false, false);
+                yield return new WaitForSeconds(0.25f);
+                yield return TextDisplayer.Instance.PlayDialogueEvent("P03GetsIt", TextDisplayer.MessageAdvanceMode.Input);
+                ViewManager.Instance.SwitchToView(View.DefaultUpwards, false, false);
+                yield return new WaitForSeconds(0.25f);
+                yield return TextDisplayer.Instance.PlayDialogueEvent("P03HuntsForGrimora", TextDisplayer.MessageAdvanceMode.Input);
+                yield return new WaitForSeconds(0.25f);
+                P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Thinking);
+
+
+                // Duplicate the arm
+                P03AscensionSaveData.SetLeshyDead(false, true);
+                GameObject leftArm = P03AnimationController.Instance.transform.Find("Body/RotatingHead/Head/HeadAnim/LeftLeshyArm").gameObject;
+                GameObject newLeftArm = GameObject.Instantiate(leftArm, leftArm.transform.parent);
+                var anim = newLeftArm.GetComponentInChildren<Animator>();
+                if (anim != null)
+                    GameObject.Destroy(anim);
+
+                newLeftArm.transform.SetParent(P03AnimationController.Instance.transform, true);
+
+                Transform elbow = newLeftArm.transform.Find("LeshyNew_Root/LeshyNew_LowerBack/LeshyNew_Chest/LeshyNew_Chest1/LeshyNew_Chest2/LeshyNew_RightCollar/LeshyNew_RightShoulder/LeshyNew_RightElbow");
+                Transform wrist = newLeftArm.transform.Find("LeshyNew_Root/LeshyNew_LowerBack/LeshyNew_Chest/LeshyNew_Chest1/LeshyNew_Chest2/LeshyNew_RightCollar/LeshyNew_RightShoulder/LeshyNew_RightElbow/LeshyNew_RightWrist");
+
+                newLeftArm.SetActive(true);
+                elbow.localPosition = new(3.2957f, 7.5788f, 1.2436f);
+                elbow.localEulerAngles = new(13.182f, 334.1849f, 43.4195f);
+                yield return new WaitForSeconds(0.1f);
+
+                Tween.LocalPosition(elbow, new Vector3(-4.0613f, -3.3674f, 1.3031f), 2f, 0f, Tween.EaseInOut);
+                Tween.LocalPosition(wrist, new Vector3(-5.9689f, -0.0341f, -0.0775f), 2f, 0f, Tween.EaseInOut);
+                Tween.LocalRotation(wrist, new Vector3(65.9436f, 159.2189f, 172.2731f), 2f, 0f, Tween.EaseInOut);
+
+                yield return new WaitForSeconds(3f);
+
+                Tween.LocalPosition(elbow, new Vector3(-3.174f, -1.9196f, -0.8266f), 1f, 0f, Tween.EaseInOut);
+                Tween.LocalRotation(elbow, new Vector3(358.182f, 304.1849f, 43.4195f), 1f, 0f, Tween.EaseInOut);
+
+                yield return new WaitForSeconds(1.5f);
+
+                Tween.LocalRotation(elbow, new Vector3(343.182f, 29.1849f, 53.4195f), 0.15f, 0f, Tween.EaseInOut);
+                yield return new WaitForSeconds(0.09f);
+
+                foreach (var ps in CyberspaceParticles.GetComponentsInChildren<ParticleSystem>())
+                {
+                    // Stop making new particles
+                    ParticleSystem.EmissionModule emission = ps.emission;
+                    emission.rateOverTime = new ParticleSystem.MinMaxCurve(0f);
+
+                    // Update all currently existing particles
+                    ParticleSystem.Particle[] particles = new ParticleSystem.Particle[ps.particleCount];
+                    int num = ps.GetParticles(particles);
+
+                    for (int i = 0; i < num; i++)
+                    {
+                        particles[i].velocity = new Vector3(
+                            UnityEngine.Random.value < 0.5f ? -1f : 1f,
+                            1f - (UnityEngine.Random.value * 2f),
+                            0f
+                        ) * 20f;
+                        particles[i].angularVelocity = 5f;
+                    }
+
+                    ps.SetParticles(particles, num);
+                }
+
+                var shake = Tween.Shake(CameraEffects.Instance.transform, Vector3.zero, new Vector3(0.1f, 0.1f, 0f), 0.05f, 0f, loop: Tween.LoopType.Loop);
+
+                var timedelta = Time.fixedDeltaTime;
+
+                Time.timeScale = 0.06f;
+                Time.fixedDeltaTime = timedelta * 0.06f;
+
+                AudioController.Instance.SetLoopPaused(true);
+                AudioController.Instance.PlaySound2D("anime_sword_hit_2", MixerGroup.TableObjectsSFX, 0.8f);
+
+                Transform head = P03AnimationController.Instance.headAnim.transform.parent;
+                Tween.LocalPosition(head, new Vector3(-15.5001f, 3.9984f, -0.1134f), 0.3f, 0f);
+                Tween.Rotate(head, new Vector3(0f, 0f, 360f), Space.Self, 0.1f, 0f, loop: Tween.LoopType.Loop);
+                P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Disconnected, false, false);
+
+                // And make all the other stuff go away
+                AnimeFlyAway(ResourceDrone.Instance.transform, Vector3.right * 9f);
+                AnimeFlyAway(ItemsManager.Instance.transform, new Vector3(9f, 0f, 0f));
+                GameObject.Destroy((ItemsManager.Instance as Part3ItemsManager).hammerSlot.Consumable.gameObject, 0.1f);
+                AnimeFlyAway((BoardManager.Instance as BoardManager3D).bell.transform, Vector3.left * 9f);
+                AnimeFlyAway(LifeManager.Instance.Scales3D.transform, Vector3.right * -9f);
+                AnimeFlyAway(LeftScreen.transform, Vector3.right * 11f);
+                AnimeFlyAway(RightScreen.transform, Vector3.right * 11f);
+
+                if ((CardDrawPiles.Instance as CardDrawPiles3D).pile != null)
+                    StartCoroutine((CardDrawPiles.Instance as CardDrawPiles3D).pile.DestroyCards(Vector3.right * 9f, 30f, 0.0075f));
+
+                if ((CardDrawPiles.Instance as CardDrawPiles3D).sidePile != null)
+                    StartCoroutine((CardDrawPiles.Instance as CardDrawPiles3D).sidePile.DestroyCards(Vector3.right * 9f, 30f, 0.0075f));
+
+                StartCoroutine(PlayerHand.Instance.CleanUp());
+                foreach (var slot in BoardManager.Instance.AllSlotsCopy)
+                {
+                    slot.Card?.ExitBoard(0.25f, Vector3.right * 9f);
+                    slot.SetShown(false, true);
+                }
+
+                foreach (var slot in BoardManager.Instance.opponentQueueSlots)
+                    slot.SetShown(false, true);
+
+                foreach (var card in TurnManager.Instance.opponent.queuedCards)
+                    card.ExitBoard(0.25f, Vector3.right * 9f);
+
+                yield return new WaitForSeconds(0.3f);
+                Time.timeScale = 1f;
+                Time.fixedDeltaTime = timedelta;
+                shake.Stop();
+
+                Tween.LocalPosition(elbow, new Vector3(4.7227f, 7.0035f, 0.5946f), 2f, 0f, completeCallback: () => GameObject.Destroy(leftArm));
+
+                yield return new WaitForSeconds(5f);
+                FactoryScrybes scrybes = FactoryManager.Instance.Scrybes;
+                scrybes.Show();
+                scrybes.EnterOtherScrybes();
+                yield return new WaitForSeconds(2f);
+
+                scrybes.leshy.gameObject.SetActive(true);
+                scrybes.leshy.transform.localScale = new(0.6f, 0.5f, 0.7f);
+                Tween.LocalPosition(scrybes.leshy.transform, new Vector3(-4.75f, 7.99f, 0f), 1f, 0f);
+
+
+                yield return TextDisplayer.Instance.PlayDialogueEvent("GrimoraMultiverseFinale", TextDisplayer.MessageAdvanceMode.Input);
+                scrybes.magnificus.SetHeadTrigger("point_brush");
+                yield return TextDisplayer.Instance.PlayDialogueEvent("MagnificusMultiverseFinale", TextDisplayer.MessageAdvanceMode.Input);
+                scrybes.leshy.SetEyesAnimated(true);
+                yield return TextDisplayer.Instance.PlayDialogueEvent("LeshyMultiverseFinale", TextDisplayer.MessageAdvanceMode.Input);
+                scrybes.leshy.SetEyesAnimated(false);
+                yield return TextDisplayer.Instance.PlayDialogueEvent("GrimoraMultiverseFinale2", TextDisplayer.MessageAdvanceMode.Input);
+                scrybes.magnificus.SetHeadTrigger("pensive");
+                yield return TextDisplayer.Instance.PlayDialogueEvent("MagnificusMultiverseFinale2", TextDisplayer.MessageAdvanceMode.Input);
+                scrybes.leshy.SetEyesAnimated(true);
+                yield return TextDisplayer.Instance.PlayDialogueEvent("LeshyMultiverseFinale2", TextDisplayer.MessageAdvanceMode.Input);
+                scrybes.leshy.SetEyesAnimated(false);
+
+                yield return new WaitForSeconds(1.5f);
+                PauseMenu.pausingDisabled = false;
+                EventManagement.FinishAscension(true);
+            }
+            else
+            {
+                yield return TextDisplayer.Instance.PlayDialogueEvent("P03MultiverseLost", TextDisplayer.MessageAdvanceMode.Input);
+            }
+        }
+
+        public override IEnumerator GameEnd(bool playerWon)
+        {
+            if (!playerWon)
+            {
+                yield return TextDisplayer.Instance.PlayDialogueEvent("P03MultiverseLost2", TextDisplayer.MessageAdvanceMode.Input);
+                yield return new WaitForSeconds(1.5f);
+                EventManagement.FinishAscension(true);
+            }
         }
 
         protected class RefBoolean

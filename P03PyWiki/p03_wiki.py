@@ -314,3 +314,39 @@ def publish_ability_pages(overwrite_if_exists=False):
         number_of_cards, page_contents = generate_ability_page(aname)
         if page_contents != None and number_of_cards > 0:
             edit_page_contents(client, aname, page_contents, overwrite_if_exists=overwrite_if_exists)
+
+def touch_all_category(category_name: str):
+    client = login()
+    for page in client.categories[category_name]:
+        try:
+            print(f"Touching {page.name}")
+            page.touch()
+        except:
+            print("Taking a break")
+            time.sleep(30)
+            page.touch()
+
+def update_card_categories(category_name: str):
+    """Updates the card category summary for a given category"""
+    client = login()
+
+    if category_name == "Unobtainable Cards":
+        unob_cards = []
+    else:
+        unob_cards = list(p.name for p in client.categories["Unobtainable Cards"])
+
+    outtext = '<gallery mode="nolines">\n'
+    #xp2_cards = list(p for p in site.categories["Base Game Cards"] if p.name not in unob_cards)
+    for p in client.categories[category_name]:
+        if p.name in unob_cards:
+            continue
+        text = p.text()
+        fname = [l.replace('| id = ', '') for l in text.splitlines() if "id = " in l]
+        if len(fname) == 0:
+            continue
+        fname = fname[0]
+        outtext += f'File:{fname}.png|[[{p.name}]]\n'
+    outtext += '</gallery>'
+
+    page = client.pages[f"Category:{category_name}"]
+    page.edit(outtext)

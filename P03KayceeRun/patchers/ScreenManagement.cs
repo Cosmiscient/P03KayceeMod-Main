@@ -163,6 +163,57 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        private static readonly Color KAYCEE_RED_COLOR = new Color(0.6196f, 0.149f, 0.1882f, 1f);
+        private static readonly Color P03_BLUE_COLOR = new Color(0.1098f, 0.8863f, 1f, 1f);
+        private static bool IsColorMatch(Color color_a, Color color_b)
+        {
+            // Target color: 0.6196 0.149 0.1882 1
+            if (Math.Abs(color_a.r - color_b.r) > 0.1)
+                return false;
+            if (Math.Abs(color_a.g - color_b.g) > 0.1)
+                return false;
+            if (Math.Abs(color_a.b - color_b.b) > 0.1)
+                return false;
+            return true;
+        }
+
+        [HarmonyPatch(typeof(AscensionMenuScreens), nameof(AscensionMenuScreens.Start))]
+        [HarmonyPostfix]
+        private static void RecolorForP03OnStart(AscensionMenuScreens __instance)
+        {
+            RecolorForP03(__instance);
+        }
+
+        [HarmonyPatch(typeof(AscensionMenuScreens), nameof(AscensionMenuScreens.SwitchToScreen))]
+        [HarmonyPostfix]
+        private static void RecolorForP03(AscensionMenuScreens __instance)
+        {
+            if (P03AscensionSaveData.LeshyIsDead)
+            {
+                foreach (SpriteRenderer renderer in __instance.GetComponentsInChildren<SpriteRenderer>(true))
+                {
+                    if (IsColorMatch(renderer.color, KAYCEE_RED_COLOR))
+                        renderer.color = P03_BLUE_COLOR;
+                }
+                foreach (AscensionMenuBlinkEffect blinker in __instance.GetComponentsInChildren<AscensionMenuBlinkEffect>(true))
+                {
+                    if (IsColorMatch(blinker.blinkOffColor, KAYCEE_RED_COLOR))
+                        blinker.blinkOffColor = P03_BLUE_COLOR;
+                    if (IsColorMatch(blinker.blinkOnColor, KAYCEE_RED_COLOR))
+                        blinker.blinkOnColor = P03_BLUE_COLOR;
+                }
+                foreach (PixelText text in __instance.GetComponentsInChildren<PixelText>(true))
+                {
+                    if (IsColorMatch(text.defaultColor, KAYCEE_RED_COLOR))
+                        text.defaultColor = P03_BLUE_COLOR;
+                    if (IsColorMatch(text.mainText.color, KAYCEE_RED_COLOR))
+                        text.mainText.color = P03_BLUE_COLOR;
+                    if (text.mainText.text.ToLowerInvariant().Contains("kaycee's mod"))
+                        text.SetText("P03'S MOD");
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(MenuController), nameof(MenuController.LoadGameFromMenu))]
         [HarmonyPrefix]
         private static bool LoadGameFromMenu(bool newGameGBC)
@@ -341,15 +392,24 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (itemsParent == null)
                 return;
 
+            Transform leshyNewTransform = itemsParent.Find("Menu_New");
             Transform leshyContinueTransform = FindLeshyContinueButton(itemsParent);
             Transform p03ContinueTransform = itemsParent.Find("Menu_Continue_P03");
 
             if (leshyContinueTransform == null || p03ContinueTransform == null)
                 return;
 
-            leshyContinueTransform.Find("Menu_Continue").gameObject.SetActive(__instance.RunExists);
-            leshyContinueTransform.Find("Menu_Continue_DISABLED").gameObject.SetActive(!__instance.RunExists);
-            leshyContinueTransform.gameObject.SetActive(__instance.RunExists);
+            if (P03AscensionSaveData.LeshyIsDead)
+            {
+                leshyNewTransform.gameObject.SetActive(false);
+                leshyContinueTransform.gameObject.SetActive(false);
+            }
+            else
+            {
+                leshyContinueTransform.Find("Menu_Continue").gameObject.SetActive(__instance.RunExists);
+                leshyContinueTransform.Find("Menu_Continue_DISABLED").gameObject.SetActive(!__instance.RunExists);
+                leshyContinueTransform.gameObject.SetActive(__instance.RunExists);
+            }
 
             p03ContinueTransform.Find("Menu_Continue").gameObject.SetActive(P03AscensionSaveData.P03RunExists);
             p03ContinueTransform.Find("Menu_Continue_DISABLED").gameObject.SetActive(!P03AscensionSaveData.P03RunExists);
@@ -391,6 +451,18 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             transitionController.onEnableRevealedObjects = transitionController.onEnableRevealedObjects.Distinct().ToList();
 
             transitionController.screenInteractables = transitionController.onEnableRevealedObjects.SelectMany(g => g.GetComponentsInChildren<MainInputInteractable>()).ToList();
+
+            if (P03AscensionSaveData.LeshyIsDead)
+            {
+                transitionController.onEnableRevealedObjects.Remove(leshyContinueTransform.gameObject);
+                transitionController.onEnableRevealedObjects.Remove(leshyNewTransform.gameObject);
+
+                foreach (var mii in leshyContinueTransform.GetComponentsInChildren<MainInputInteractable>())
+                    transitionController.screenInteractables.Remove(mii);
+
+                foreach (var mii in leshyNewTransform.GetComponentsInChildren<MainInputInteractable>())
+                    transitionController.screenInteractables.Remove(mii);
+            }
         }
 
         [HarmonyPatch(typeof(AscensionMenuScreenTransition), nameof(AscensionMenuScreenTransition.SequentiallyRevealContents))]

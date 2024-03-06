@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Quests;
@@ -14,6 +15,47 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     public class UnlockAscensionItemSequencer : SelectItemsSequencer
     {
         public static UnlockAscensionItemSequencer Instance { get; private set; }
+
+        public void StartScreenshotSequence()
+        {
+            StartCoroutine(ItemScreenshotSequence());
+        }
+
+        private static void SetupForItemCamera()
+        {
+            // The camera's depth setting should make it to where we don't have to turn off a bunch
+            // of game objects. We mostly just need to set the color, position, and intensity of lights
+            // and the position/far clip plane of the camera
+
+            Transform cameraParent = ViewManager.Instance.cameraParent;
+            cameraParent.localPosition = new(0, 6.25f, -6.86f); // 0 8.25 0.54
+            cameraParent.localEulerAngles = Vector3.zero;
+
+            TableVisualEffectsManager.Instance.gameObject.SetActive(false);
+
+            Camera camera = ViewManager.Instance.pixelCamera;
+            camera.farClipPlane = 5;
+        }
+
+        private IEnumerator ItemScreenshotSequence()
+        {
+            SetupForItemCamera();
+            List<string> items = new() { "Battery", ShockerItem.ItemData.name, "ShieldGenerator", LifeItem.ItemData.name, "BombRemote", "PocketWatch", UfoItem.ItemData.name, RifleItem.ItemData.name };
+
+            SetSlotCollidersEnabled(false);
+
+            var slot = this.slots[1];
+
+            foreach (var item in items)
+            {
+                slot.CreateItem(ItemsUtil.GetConsumableByName(item));
+                string outfile = $"cardexports/item_{item}.png";
+                yield return new WaitUntil(() => InputButtons.GetButton(Button.EndTurn));
+                CardExporter.CaptureTransparentScreenshot(ViewManager.Instance.pixelCamera, Screen.width, Screen.height, outfile);
+                yield return new WaitForSeconds(0.25f);
+            }
+
+        }
 
         public override void Start()
         {

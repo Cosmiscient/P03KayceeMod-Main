@@ -287,11 +287,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     UnlockLevel = 6
                 },
 
+                // Final Boss
                 new() {
-                    Challenge = ChallengeManager.BaseGameChallenges.First(fc => fc.Challenge.challengeType == AscensionChallenge.FinalBoss),
+                    Challenge = new() {
+                        challengeType = AscensionChallenge.FinalBoss,
+                        title = "The Great Transcendence",
+                        description = "Unlock the secrets of the Great Transcendence",
+                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_multiverse.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_multiverse_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 15
+                    },
                     AppearancesInChallengeScreen = 1,
-                    UnlockLevel = 15
-                }
+                    UnlockLevel = 8,
+                },
             });
 
             // PatchedChallengesReference = new() {

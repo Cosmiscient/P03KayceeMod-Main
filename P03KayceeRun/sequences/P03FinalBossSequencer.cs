@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using DigitalRuby.LightningBolt;
 using DiskCardGame;
+using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
@@ -13,6 +15,7 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
 {
+    [HarmonyPatch]
     public class P03FinalBossSequencer : BossBattleSequencer
     {
         public override Opponent.Type BossType => BossManagement.P03FinalBossOpponent;
@@ -108,6 +111,43 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             antennaLightning.Clear();
         }
 
+        private IEnumerator BlinkInOutInner(GameObject obj)
+        {
+            if (obj.activeSelf)
+            {
+                obj.SetActive(false);
+                float waitTime = 0.125f;
+                for (int i = 0; i < 3; i++)
+                {
+                    yield return new WaitForSeconds(waitTime);
+                    obj.SetActive(true);
+                    yield return new WaitForSeconds(waitTime);
+                    obj.SetActive(false);
+                    waitTime /= 2f;
+                }
+                yield break;
+            }
+            else
+            {
+                obj.SetActive(true);
+                float waitTime = 0.125f;
+                for (int i = 0; i < 3; i++)
+                {
+                    yield return new WaitForSeconds(waitTime);
+                    obj.SetActive(false);
+                    yield return new WaitForSeconds(waitTime);
+                    obj.SetActive(true);
+                    waitTime /= 2f;
+                }
+                yield break;
+            }
+        }
+
+        private void BlinkInOut(GameObject obj)
+        {
+            StartCoroutine(BlinkInOutInner(obj));
+        }
+
         public override IEnumerator GameEnd(bool playerWon)
         {
             OpponentAnimationController.Instance.ClearLookTarget();
@@ -166,6 +206,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
                 P03AnimationController.Instance.headAnim.Rebind();
 
+                PauseMenu.pausingDisabled = true;
                 AudioController.Instance.SetLoopAndPlay($"spooky_background", 0, true, true);
                 AudioController.Instance.SetLoopVolumeImmediate(0.4f, 0);
 
@@ -199,6 +240,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 GlitchOutAssetEffect.GlitchModel(rightArmDuplicate.transform);
 
                 scrybes.leshy.gameObject.SetActive(false);
+                P03AscensionSaveData.SetLeshyDead(true, true);
 
                 yield return new WaitForSeconds(2f);
                 P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Happy);
@@ -207,15 +249,21 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03MultiverseConnect", TextDisplayer.MessageAdvanceMode.Input);
                 P03AnimationController.Instance.SetAntennaShown(true);
-                P03AnimationController.Instance.antenna.transform.Find("WifiParticles").gameObject.SetActive(false);
+                //P03AnimationController.Instance.antenna.transform.Find("WifiParticles").gameObject.SetActive(false);
+                P03AnimationController.Instance.SetWifiColor(GameColors.Instance.blue);
                 yield return new WaitForSeconds(0.25f);
 
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03MultiverseConnectTwo", TextDisplayer.MessageAdvanceMode.Input);
-                AddAntennaLightning(Vector3.up * 4f);
+                //AddAntennaLightning(Vector3.up * 4f);
 
                 P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Thinking);
-                AudioController.Instance.SetLoopAndPlay($"spooky_background", 0, true, true);
+                AudioController.Instance.SetLoopAndPlay($"dark_mist", 0, true, true);
                 AudioController.Instance.SetLoopVolumeImmediate(0.4f, 0);
+
+                GameObject cyberspace = GameObject.Instantiate(AssetBundleManager.Prefabs["Cyberspace_Particles"], TurnManager.Instance.transform);
+                cyberspace.name = "Cyberspace_Particles";
+                cyberspace.transform.localPosition = new(0f, 10f, 16f);
+                cyberspace.transform.localEulerAngles = new(0f, 180f, 0f);
 
                 yield return new WaitForSeconds(1.5f);
                 ViewManager.Instance.SwitchToView(View.HandCuff);
@@ -236,31 +284,59 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Thinking);
                 ViewManager.Instance.SwitchToView(View.DefaultUpwards);
 
-                GameObject obj = GameObject.Instantiate(AssetBundleManager.Prefabs["Cyberspace_Particles"], TurnManager.Instance.transform);
-                obj.name = "Cyberspace_Particles";
-                obj.transform.localPosition = new(0f, 10f, 16f);
-                obj.transform.localEulerAngles = new(0f, 180f, 0f);
+                // yield return new WaitForSeconds(0.2f);
+                // AddAntennaLightning(Vector3.right * 50f);
+                // yield return new WaitForSeconds(0.2f);
+                // AddAntennaLightning(new Vector3(5f, 1f, -2f) * 2f);
+                // yield return new WaitForSeconds(0.2f);
+                // AddAntennaLightning(new Vector3(-5f, 1f, 2f) * 2f);
+                // yield return new WaitForSeconds(0.2f);
+                // AddAntennaLightning(new Vector3(-5f, 1f, -2f) * 2f);
+                // yield return new WaitForSeconds(0.2f);
+                // AddAntennaLightning(new Vector3(5f, 1f, 2f) * 2f);
 
-                yield return new WaitForSeconds(0.2f);
-                AddAntennaLightning(Vector3.right * 50f);
-                yield return new WaitForSeconds(0.2f);
-                AddAntennaLightning(new Vector3(5f, 1f, -2f) * 2f);
-                yield return new WaitForSeconds(0.2f);
-                AddAntennaLightning(new Vector3(-5f, 1f, 2f) * 2f);
-                yield return new WaitForSeconds(0.2f);
-                AddAntennaLightning(new Vector3(-5f, 1f, -2f) * 2f);
-                yield return new WaitForSeconds(0.2f);
-                AddAntennaLightning(new Vector3(5f, 1f, 2f) * 2f);
-                yield return new WaitForSeconds(1.25f);
+                GameObject grimora = GameObject.Instantiate(FactoryManager.Instance.scrybes.grimora.gameObject, FactoryManager.Instance.scrybes.grimora.transform.parent);
+                GameObject magnificus = GameObject.Instantiate(FactoryManager.Instance.scrybes.magnificus.gameObject, FactoryManager.Instance.scrybes.magnificus.transform.parent);
 
+                OnboardDynamicHoloPortrait.HolofyGameObject(grimora, GameColors.Instance.darkLimeGreen);
+                OnboardDynamicHoloPortrait.HolofyGameObject(magnificus, GameColors.Instance.darkRed);
+
+                grimora.SetActive(false);
+                magnificus.SetActive(false);
+
+
+                yield return new WaitForSeconds(1.75f);
+
+                BlinkInOut(grimora);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("GrimorasPlan", TextDisplayer.MessageAdvanceMode.Input);
+                BlinkInOut(magnificus);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("MagnificusResponseToPlan", TextDisplayer.MessageAdvanceMode.Input);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("GrimorasPlanTwo", TextDisplayer.MessageAdvanceMode.Input);
 
-                yield return new WaitUntil(() => InputButtons.GetButton(Button.EndTurn));
+                yield return new WaitForSeconds(0.5f);
+                BlinkInOut(grimora);
+                BlinkInOut(magnificus);
+                yield return new WaitForSeconds(1.0f);
+
+                for (int i = 0; i < cyberspace.transform.childCount; i++)
+                {
+                    if (cyberspace.transform.GetChild(i).gameObject.activeSelf)
+                    {
+                        ParticleSystem particles = cyberspace.transform.GetChild(i).gameObject.GetComponent<ParticleSystem>();
+                        ParticleSystem.EmissionModule emission = particles.emission;
+                        emission.rateOverTime = new ParticleSystem.MinMaxCurve(10f);
+                    }
+                    else
+                    {
+                        cyberspace.transform.GetChild(i).gameObject.SetActive(true);
+                    }
+                }
+
+                yield return TextDisplayer.Instance.PlayDialogueEvent("P03MultiverseFound", TextDisplayer.MessageAdvanceMode.Input);
 
                 InteractionCursor.Instance.InteractionDisabled = false;
                 ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
+                PauseMenu.pausingDisabled = false;
             }
             else
             {
@@ -272,6 +348,24 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield return new WaitForSeconds(1.5f);
                 EventManagement.FinishAscension(false);
             }
+        }
+
+        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.TransitionToNextGameState))]
+        [HarmonyPrefix]
+        [HarmonyPriority(HarmonyLib.Priority.VeryHigh)]
+        private static bool TransitionDirectlyToMultiverseBoss(TurnManager __instance)
+        {
+            if (MultiverseBossOpponent.IsActiveForRun && __instance.SpecialSequencer is P03FinalBossSequencer)
+            {
+                CardBattleNodeData data = new()
+                {
+                    difficulty = AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.BaseDifficulty),
+                    specialBattleId = BossBattleSequencer.GetSequencerIdForBoss(BossManagement.P03MultiverseOpponent)
+                };
+                GameFlowManager.Instance.TransitionToGameState(GameState.CardBattle, data);
+                return false;
+            }
+            return true;
         }
 
         public override IEnumerator DamageAddedToScale(int amount, bool playerIsAttacker)

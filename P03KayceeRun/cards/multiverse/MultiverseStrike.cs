@@ -138,7 +138,9 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             P03Plugin.Log.LogInfo("Attacking card");
             bool impactFrameReached = false;
             bool readyToUnpause = false;
-            yield return MultiverseBattleSequencer.Instance.VisualizeMultiversalAttack(Card, opposingSlot, () => impactFrameReached = true, () => readyToUnpause);
+
+            // The attack visualization happens on its own coroutine
+            StartCoroutine(MultiverseBattleSequencer.Instance.VisualizeMultiversalAttack(Card, opposingSlot, () => impactFrameReached = true, () => readyToUnpause));
             yield return new WaitUntil(() => impactFrameReached);
 
             yield return GlobalTriggerHandler.Instance.TriggerCardsOnBoard(Trigger.CardGettingAttacked, false, opposingSlot.Card);
@@ -151,6 +153,13 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
                 int overkillDamage = Card.Attack - opposingSlot.Card.Health;
                 yield return opposingSlot.Card.TakeDamage(Card.Attack, Card);
                 yield return TurnManager.Instance.CombatPhaseManager.DealOverkillDamage(overkillDamage, Card.slot, opposingSlot);
+            }
+
+            // Just in case!
+            if (!readyToUnpause)
+            {
+                readyToUnpause = true;
+                yield return new WaitForSeconds(0.2f);
             }
         }
     }

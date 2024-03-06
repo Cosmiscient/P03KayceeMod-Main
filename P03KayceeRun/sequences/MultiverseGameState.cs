@@ -45,6 +45,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             }
         }
 
+        public static event Action<MultiverseGameState> StateRestored;
+
         public static float OFFBOARD_SLOT_Y { get; private set; } = -15f;
         public static float ONBOARD_SLOT_Y { get; private set; } = -15f;
 
@@ -376,6 +378,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         {
             ViewManager.Instance.SwitchToView(View.Default);
 
+            UIManager.Instance.Effects.GetEffect<ScreenGlitchEffect>().SetIntensity(1f, .4f);
+            CameraEffects.Instance.Shake(0.1f, .4f);
+            //AudioController.Instance.PlaySound2D("cam_switch", MixerGroup.None, .4f, 0f, pitch: new AudioParams.Pitch(AudioParams.Pitch.Variation.Medium));
+
             // Remove all cards
             // P03Plugin.Log.LogInfo("Restoring multiverse state: Removing cards in slots");
             // foreach (CardSlot cardSlot in BoardManager.Instance.AllSlots)
@@ -494,6 +500,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             // States
             yield return MultiverseBattleSequencer.Instance.SetPhase(this.CurrentPhase, suppressCallbacks: true);
 
+            // Fire event
+            MultiverseGameState.StateRestored?.Invoke(this);
+
             // Wait for everything to calm down
             yield return new WaitForSeconds(0.4f);
 
@@ -585,6 +594,14 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             PlayerHand.Instance.ParentCardToHand(card, CardSpawner.Instance.spawnedPositionOffset);
             PlayerHand.Instance.cardsInHand.Add(card);
             PlayerHand.Instance.SetCardPositions();
+        }
+
+        public bool HasPhaseCallback(MultiverseGameState.Phase phase)
+        {
+            if (!Callbacks.ContainsKey(phase))
+                return false;
+
+            return Callbacks[phase].Count > 0;
         }
 
         public bool RespondsToTrigger(Trigger trigger, params object[] args)
@@ -762,6 +779,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 TableVisualEffectsManager.Instance.ChangeTableColors(
                     MainLightColor, CardLightColor, InteractablesColor, SlotDefaultColor, SlotInteractableColor, SlotHighlightedColor, QueueSlotDefaultColor, QueueSlotInteractableColor, QueueSlotHighlightedColor
                 );
+
+                // Particles
+                P03AnimationController.Instance.SetWifiColor(MainLightColor);
+                // GameObject tunnel = MultiverseBattleSequencer.Instance.CyberspaceParticles;
+                // if (tunnel != null)
+                //     foreach (ParticleSystem particles in tunnel.GetComponentsInChildren<ParticleSystem>())
+                //         particles.UpdateParticleColors(MainLightColor, 0.2f);
 
 
                 foreach (var face in SpriteFaces)

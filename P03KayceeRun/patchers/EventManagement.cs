@@ -48,6 +48,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly StoryEvent GOT_STICKER_INTRODUCTION = NewStory("P03GotStickerIntro", save: true);
         public static readonly StoryEvent P03_SAVE_MARKER = NewStory("P03SaveMarker", save: true);
 
+        internal static readonly StoryEvent LESHY_IS_DEAD = NewStory("P03LeshyIsDead", save: true);
+
         public const string GAME_OVER = "GameOverZone";
 
         internal static readonly StoryEvent SAW_BOUNTY_HUNTER_MEDAL = NewStory("SawBountyHunterMedal", run: true);

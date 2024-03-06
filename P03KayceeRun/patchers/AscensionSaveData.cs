@@ -29,6 +29,23 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         internal static bool P03RunExists => P03Data != null && P03Data.currentRun != null && P03Data.currentRun.playerLives > 0;
 
+        internal static bool LeshyIsDead => (P03Data?.itemUnlockEvents.Contains(EventManagement.LESHY_IS_DEAD)).GetValueOrDefault(false);
+
+        internal static void SetLeshyDead(bool dead, bool immediate)
+        {
+            if (P03Data == null)
+                return;
+
+            if (dead && !P03Data.itemUnlockEvents.Contains(EventManagement.LESHY_IS_DEAD))
+                P03Data.itemUnlockEvents.Add(EventManagement.LESHY_IS_DEAD);
+
+            if (!dead && P03Data.itemUnlockEvents.Contains(EventManagement.LESHY_IS_DEAD))
+                P03Data.itemUnlockEvents.Remove(EventManagement.LESHY_IS_DEAD);
+
+            if (immediate)
+                SaveManager.SaveToFile(false);
+        }
+
         [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.Data), MethodType.Getter)]
         [HarmonyPrefix]
         private static bool GetP03SaveData(ref AscensionSaveData __result)

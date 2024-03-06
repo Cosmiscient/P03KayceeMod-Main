@@ -78,6 +78,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
 
             CardManager.New(P03Plugin.CardPrefx, "MultiverseBrittleLatcher", "Brittle Latcher", 1, 1)
                 .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_brittlelatcher"))
+                .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_brittlelatcher"))
                 .SetCost(energyCost: 3)
                 .AddAbilities(MultiverseBrittleLatch.AbilityID)
                 .SetCardTemple(CardTemple.Tech);

@@ -9,6 +9,7 @@ using Infiniscryption.P03KayceeRun.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Dialogue;
 using Sirenix.Serialization.Utilities;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -42,8 +43,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 : Emotion.Neutral;
         }
 
-        private static Emotion ParseEmotion(this string face)
+        private static Emotion ParseEmotion(this string face, Emotion defaultEmotion = Emotion.Neutral)
         {
+            if (string.IsNullOrEmpty(face))
+                return defaultEmotion; ;
             if (face.ToLowerInvariant().Contains("goocurious"))
                 return Emotion.Neutral;
             if (face.ToLowerInvariant().Contains("goo"))
@@ -57,7 +60,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (face.ToLowerInvariant().Contains("anger"))
                 return Emotion.Anger;
             if (face.ToLowerInvariant().Contains("happy"))
-                return Emotion.Laughter;
+                return Emotion.Neutral;
             if (face.ToLowerInvariant().Contains("laughter"))
                 return Emotion.Laughter;
             if (face.ToLowerInvariant().Contains("grimora"))
@@ -74,7 +77,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             string faceLower = face.ToLowerInvariant();
             foreach (var enumVal in Enum.GetValues(typeof(P03AnimationController.Face)))
             {
-                if (faceLower.Contains(enumVal.ToString()))
+                if (faceLower.Contains(enumVal.ToString().ToLowerInvariant()))
                     return (P03AnimationController.Face)enumVal;
             }
             return P03AnimationController.Face.NoChange;
@@ -91,10 +94,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 : face.ParseEnumFace();
         }
 
-        private static DialogueEvent.Speaker ParseSpeaker(this string face)
+        private static DialogueEvent.Speaker ParseSpeaker(this string face, DialogueEvent.Speaker defaultSpeaker = DialogueEvent.Speaker.P03)
         {
-            DialogueEvent.Speaker speaker = DialogueEvent.Speaker.P03;
-            if (face.ToLowerInvariant().Contains("leshy"))
+            DialogueEvent.Speaker speaker = defaultSpeaker;
+            if (string.IsNullOrEmpty(face))
+                speaker = defaultSpeaker;
+            else if (face.ToLowerInvariant().Contains("leshy"))
                 speaker = DialogueEvent.Speaker.Leshy;
             else if (face.ToLowerInvariant().Contains("grimora"))
                 speaker = DialogueEvent.Speaker.Grimora;
@@ -157,6 +162,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             string dialogueId = string.Empty;
             string lastSeenFaceInstruction = string.Empty;
+            DialogueEvent.Speaker lastSpeaker = DialogueEvent.Speaker.P03;
+            Emotion lastEmotion = Emotion.Neutral;
 
             List<DialogueEvent.Line> currentLines = new();
             List<DialogueEvent.Speaker> currentSpeakers = new() { DialogueEvent.Speaker.Single };
@@ -183,15 +190,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     }
 
                     dialogueId = cols[0];
+                    lastSeenFaceInstruction = string.Empty;
+                    lastSpeaker = DialogueEvent.Speaker.P03;
+                    lastEmotion = Emotion.Neutral;
                 }
 
-                string faceInstruction = lastSeenFaceInstruction;
                 if (!string.IsNullOrEmpty(cols[1]))
-                    faceInstruction = lastSeenFaceInstruction = cols[1];
+                    lastSeenFaceInstruction = cols[1];
+
+                string faceInstruction = lastSeenFaceInstruction;
 
                 P03AnimationController.Face face = faceInstruction.ParseFace();
-                DialogueEvent.Speaker speaker = faceInstruction.ParseSpeaker();
-                Emotion emotion = faceInstruction.ParseEmotion();
+                DialogueEvent.Speaker speaker = faceInstruction.ParseSpeaker(lastSpeaker);
+                lastSpeaker = speaker;
+                Emotion emotion = faceInstruction.ParseEmotion(lastEmotion);
+                lastEmotion = emotion;
                 string dialogue = cols[3];
                 bool wavy = !string.IsNullOrEmpty(cols[2]) && cols[2].ToLowerInvariant().Contains("y");
 
