@@ -48,7 +48,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             CardManager.New(P03Plugin.CardPrefx, "MultiverseConduitNull", "Null Conduit", 0, 2)
                 .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_conduitnull"))
                 .SetCost(energyCost: 2)
-                .AddAbilities(MultiverseExplodeOnDeath.AbilityID)
+                .AddAbilities(MultiverseNullConduit.AbilityID)
                 .SetCardTemple(CardTemple.Tech);
 
             CardManager.New(P03Plugin.CardPrefx, "MultiverseGunner", "Multi Gunner", 2, 1)

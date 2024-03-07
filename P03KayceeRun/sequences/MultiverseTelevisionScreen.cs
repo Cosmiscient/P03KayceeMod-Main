@@ -61,7 +61,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     ViewInfo viewInfo = ViewManager.GetViewInfo(View.BoardCentered);
                     _screenshotCamera.transform.position = new(1.15f, 11.5f, -1.2f);
                     _screenshotCamera.transform.localEulerAngles = viewInfo.camRotation;
-                    newCam.fieldOfView = viewInfo.fov;
+                    newCam.fieldOfView = 63f;
 
                     _screenshotCamera.SetActive(false);
                 }

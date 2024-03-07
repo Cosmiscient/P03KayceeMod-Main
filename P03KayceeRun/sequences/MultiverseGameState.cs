@@ -598,6 +598,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public bool HasPhaseCallback(MultiverseGameState.Phase phase)
         {
+            if (Callbacks == null)
+                return false;
+
             if (!Callbacks.ContainsKey(phase))
                 return false;
 

@@ -1,7 +1,9 @@
 using System.Collections;
+using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Helpers;
+using Pixelplacement;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
@@ -37,8 +39,27 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 MultiverseGameState.LightColorState.GetPreset(GameColors.Instance.blue).RestoreState();
 
+                float durationOfEffect = 0.45f;
+
+                Transform itemTrans = ItemsManager.Instance.gameObject.transform;
+                Vector3 newItemPos = new(6.75f, itemTrans.localPosition.y, itemTrans.localPosition.z);
+                Tween.LocalPosition(itemTrans, newItemPos, durationOfEffect, 0f);
+
+                Transform hammerTrans = ItemsManager.Instance.Slots.FirstOrDefault(s => s.name.ToLowerInvariant().StartsWith("hammer")).gameObject.transform;
+                Vector3 newHammerPos = new(-9.5f, hammerTrans.localPosition.y, hammerTrans.localPosition.z);
+                Tween.LocalPosition(hammerTrans, newHammerPos, durationOfEffect, 0f);
+
+                Transform bellTrans = (BoardManager.Instance as BoardManager3D).bell.gameObject.transform;
+                Vector3 newBellPos = new(-5f, bellTrans.localPosition.y, bellTrans.localPosition.z);
+                Tween.LocalPosition(bellTrans, newBellPos, durationOfEffect, 0f);
+
+                Transform scaleTrans = LifeManager.Instance.Scales3D.gameObject.transform;
+                Vector3 newScalePos = new(-6, scaleTrans.localPosition.y, scaleTrans.localPosition.z);
+                Tween.LocalPosition(scaleTrans, newScalePos, durationOfEffect, 0f);
+
                 if (MultiverseBattleSequencer.Instance.CyberspaceParticles == null)
                 {
+                    // This means we have to do a lot of the setup again 
                     GameObject cyberspace = GameObject.Instantiate(AssetBundleManager.Prefabs["Cyberspace_Particles"], TurnManager.Instance.transform);
                     cyberspace.name = "Cyberspace_Particles";
                     cyberspace.transform.localPosition = new(0f, 10f, 16f);
@@ -57,6 +78,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                             cyberspace.transform.GetChild(i).gameObject.SetActive(true);
                         }
                     }
+
+                    P03AnimationController.Instance.SetAntennaShown(true);
+                    P03AnimationController.Instance.SetWifiColor(GameColors.Instance.blue);
                 }
             }
         }

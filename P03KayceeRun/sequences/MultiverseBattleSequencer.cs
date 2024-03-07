@@ -8,6 +8,7 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Cards.Multiverse;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03KayceeRun.Encounters;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Triggers;
 using Pixelplacement;
@@ -212,6 +213,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             RightScreen.transform.localEulerAngles = new(0f, 20f, 0f);
             RightScreen.transform.localPosition = new(2.2f, 0.9f, 3.7f);
             RightScreen.MoveForward = true;
+
+            if (BoardManager.Instance.PlayerSlotsCopy.Count == 5)
+            {
+                P03AscensionOpponent.CreateAllSlots();
+                // Tween each of the four things that need to move
+            }
+
             yield break;
         }
 
@@ -731,6 +739,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return mbs.IterateForAllMultiverses((mbs) => mbs.HasEverHadUpkeepStep, EntireOpponentTurn);
         }
 
+        public override EncounterData BuildCustomEncounter(CardBattleNodeData nodeData)
+        {
+            EncounterData data = base.BuildCustomEncounter(nodeData);
+            data.aiId = BossManagement.P03FinalBossAI;
+            return data;
+        }
+
         private static IEnumerator SetupMultiverseOpponent(params object[] parameters)
         {
             TurnManager tm = parameters[0] as TurnManager;
@@ -751,6 +766,23 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             int difficulty = AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.BaseDifficulty);
             var turnPlan = EncounterBuilder.BuildOpponentTurnPlan(blueprint, difficulty, false);
             tm.opponent.ReplaceAndAppendTurnPlan(turnPlan);
+
+            // I have to manually handle terrain
+            Tuple<List<CardInfo>, List<CardInfo>, List<CardInfo>> terrain = EncounterExtensions.GetTerrainForBlueprint(blueprint, difficulty);
+            if (terrain != null)
+            {
+
+                EncounterData.StartCondition startCondition = new()
+                {
+                    cardsInPlayerSlots = terrain.Item1.ToArray(),
+                    cardsInOpponentSlots = terrain.Item2.ToArray(),
+                    cardsInOpponentQueue = terrain.Item3.ToArray()
+                };
+
+                data ??= new();
+
+                data.startConditions = new() { startCondition };
+            }
 
             if (data != null)
                 yield return tm.PlacePreSetCards(data);
