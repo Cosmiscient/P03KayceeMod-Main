@@ -6,6 +6,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Encounters;
+using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Quests;
 using InscryptionAPI.Card;
@@ -88,6 +89,12 @@ namespace Infiniscryption.P03KayceeRun
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void FixDeckEditor() => Traverse.Create(Chainloader.PluginInfos["inscryption_deckeditor"].Instance as DeckEditor).Field("save").SetValue(SaveManager.SaveFile);
+
+        private void OnDestroy()
+        {
+            AudioHelper.FlushAudioClipCache();
+            AssetBundleManager.CleanUp();
+        }
 
         public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {

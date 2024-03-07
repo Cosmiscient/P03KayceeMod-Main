@@ -1,3 +1,9 @@
+# 4.4.1
+
+- Fixed a defect where the Data Cube didn't work in generator battles
+- All turbo vessels now are marked to flip their portraits when strafe goes in the opposite direction
+- 
+
 # 4.4
 
 - Balance change: The "Overwhelming Entrance" sigil (3leph4nt's sigil) is now an activated ability that still triggers on entering play. The activation cost is 4 energy. This allows you to retrigger the Elephant's disruptive effect multiple times during battle. Additionally, this effect now shuffles the opponent queue and no longer shuffles terrain.

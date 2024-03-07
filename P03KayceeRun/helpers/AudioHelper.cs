@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Sound;
 using UnityEngine;
 
@@ -10,6 +11,24 @@ namespace Infiniscryption.P03KayceeRun.Helpers
     [HarmonyPatch]
     public static class AudioHelper
     {
+        // I'm keeping all of my audio clips in a dictionary. Here. To try to prevent memory leaks
+        private static Dictionary<string, AudioClip> audioCache = new();
+
+        private static AudioClip GetAudioClip(string clipname)
+        {
+            if (audioCache.ContainsKey(clipname))
+                return audioCache[clipname];
+            audioCache[clipname] = SoundManager.LoadAudioClip(P03Plugin.PluginGuid, clipname);
+            return audioCache[clipname];
+        }
+
+        internal static void FlushAudioClipCache()
+        {
+            foreach (var key in audioCache.Keys)
+                GameObject.Destroy(audioCache[key]);
+            audioCache.Clear();
+        }
+
         public struct AudioState
         {
             public int sourceNum;
@@ -78,14 +97,14 @@ namespace Infiniscryption.P03KayceeRun.Helpers
         internal static void LoadMyLoops(string loopName, AudioController __instance)
         {
             AudioClip loop = __instance.GetLoop(loopName);
-            if (loop == null && loopName.StartsWith("P03"))
+            if (loop == null)
             {
                 // Please dont' break anything...
                 foreach (string clipName in new string[] { "P03_Phase1", "P03_Phase2", "P03_Phase3" })
                 {
                     if (!__instance.Loops.Any(ac => ac.name.Equals(clipName, StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        AudioClip expl = SoundManager.LoadAudioClip(P03Plugin.PluginGuid, $"{clipName}.mp3");
+                        AudioClip expl = GetAudioClip($"{clipName}.mp3");
                         if (expl != null)
                         {
                             expl.name = clipName;
@@ -101,11 +120,11 @@ namespace Infiniscryption.P03KayceeRun.Helpers
         internal static void LoadMyCustomAudio(ref AudioController __instance)
         {
             // Please dont' break anything...
-            foreach (string clipName in new string[] { "multiverse_teleport", "bottle_break", "angel_reveal", "fireball", "molotov", "static", "missile_launch", "missile_explosion", "shred", "ufo", "big_tv_break", "small_tv_break" })
+            foreach (string clipName in new string[] { "bottle_break", "angel_reveal", "fireball", "molotov", "static", "missile_launch", "missile_explosion", "shred", "ufo", "big_tv_break", "small_tv_break" })
             {
                 if (!__instance.SFX.Any(ac => ac.name.Equals(clipName, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    AudioClip expl = SoundManager.LoadAudioClip(P03Plugin.PluginGuid, $"{clipName}.wav");
+                    AudioClip expl = GetAudioClip($"{clipName}.wav");
                     if (expl != null)
                     {
                         expl.name = clipName;

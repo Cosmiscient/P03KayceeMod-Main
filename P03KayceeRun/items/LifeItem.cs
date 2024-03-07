@@ -87,7 +87,7 @@ namespace Infiniscryption.P03KayceeRun.Items
             yield return new WaitForSeconds(0.5f);
             if (TurnManager.Instance.SpecialSequencer is not null and DamageRaceBattleSequencer)
             {
-                TurnManager.Instance.SpecialSequencer.DamageAddedToScale(2, true);
+                yield return TurnManager.Instance.SpecialSequencer.DamageAddedToScale(2, true);
             }
             else
             {
