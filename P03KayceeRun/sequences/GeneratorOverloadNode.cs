@@ -9,8 +9,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     {
         private void SetThingsActive()
         {
-            QuestState genState = DefaultQuestDefinitions.BrokenGenerator.InitialState;
-            bool generatorAlive = genState.Status is QuestState.QuestStateStatus.NotStarted or QuestState.QuestStateStatus.Active;
+            bool questActive = DefaultQuestDefinitions.BrokenGenerator.CurrentState.Status == QuestState.QuestStateStatus.NotStarted || DefaultQuestDefinitions.BrokenGenerator.CurrentState.Status == QuestState.QuestStateStatus.Active;
+            bool generatorAlive = DefaultQuestDefinitions.BrokenGenerator.CurrentState.Status != QuestState.QuestStateStatus.Failure;
+
+            this.SetEnabled(questActive);
 
             foreach (GameObject obj in LivingGeneratorPieces)
                 obj.SetActive(generatorAlive);

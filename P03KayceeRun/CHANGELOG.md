@@ -1,3 +1,15 @@
+# 4.4.1
+
+- Resolved a memory leak with how asset bundles and audio files were being loaded and (not always) unloaded.
+- Improved the performance of rendering RGB cards and made them only render on player cards.
+- Fixed a defect where the Data Cube didn't work in generator battles
+- All turbo vessels now are marked to flip their portraits when strafe goes in the opposite direction
+- Fixed an issue with the rulebook as it related to a special item.
+- Properly marked both sides of Asmanteus as being rare colored.
+- Fixed an issue with how the generator battle resolved.
+- Fixed an issue with how certain 3D cards rendered in the final boss battle.
+- Made the "Burning Adrenaline" secret achievement slightly less difficult to unlock.
+
 # 4.4
 
 - Balance change: The "Overwhelming Entrance" sigil (3leph4nt's sigil) is now an activated ability that still triggers on entering play. The activation cost is 4 energy. This allows you to retrigger the Elephant's disruptive effect multiple times during battle. Additionally, this effect now shuffles the opponent queue and no longer shuffles terrain.

@@ -561,12 +561,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.ConduitNull)
                     .SetFlippedPortrait()
+                    .SetStrafeFlipsPortrait(true)
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_BLUEGEM, "Turbo Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemBlue)
+                    .SetStrafeFlipsPortrait(true)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
@@ -574,6 +576,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemOrange)
+                    .SetStrafeFlipsPortrait(true)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
@@ -582,12 +585,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemGreen)
                     .SetFlippedPortrait()
+                    .SetStrafeFlipsPortrait(true)
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_LEAPBOT, "Turbo L33pb0t", 0, 2)
                     .SetPortrait(GetTexture("portrait_TurboL33pBot.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(Ability.Reach, DoubleSprint.AbilityID)
+                    .SetStrafeFlipsPortrait(true)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
@@ -1105,21 +1110,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
             return retval;
         }
-
-        // [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.EnergyCost), MethodType.Getter)]
-        // [HarmonyPostfix]
-        // private static void AdjustCostForTempMods(ref PlayableCard __instance, ref int __result)
-        // {
-        //     if (__instance.temporaryMods != null)
-        //     {
-        //         foreach (CardModificationInfo tMod in __instance.temporaryMods)
-        //         {
-        //             __result += tMod.energyCostAdjustment;
-        //         }
-        //     }
-
-        //     __result = Mathf.Max(0, __result);
-        // }
 
         public static bool SlotHasTripleCard(this CardSlot slot) => slot.Card != null && slot.Card.Info.SpecialAbilities.Contains(GoobertCenterCardBehaviour.AbilityID);
 

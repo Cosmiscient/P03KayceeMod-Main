@@ -468,7 +468,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (drbs.damageDealt >= DamageRaceBattleSequencer.DAMAGE_TO_SUCCEED)
                 {
                     DefaultQuestDefinitions.BrokenGenerator.InitialState.Status = QuestState.QuestStateStatus.Success;
-                    if (__instance.TurnNumber <= 3)
+                    if (__instance.TurnNumber <= 4)
                         AchievementManager.Unlock(P03AchievementManagement.FAST_GENERATOR);
                 }
                 else

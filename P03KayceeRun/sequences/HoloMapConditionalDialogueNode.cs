@@ -59,7 +59,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return HoloGameMap.Instance.FlickerHoloElements(false, 1);
             ViewManager.Instance.SwitchToView(View.P03Face, false, false);
             yield return new WaitForSeconds(0.1f);
-            P03AnimationController.Instance.SwitchToFace(face, true, true);
+            P03AnimationController.Instance.SwitchToFace(npc.P03Face, true, true);
             yield return new WaitForSeconds(0.1f);
 
             // Need to play the dialogue associated with the current state of the quest

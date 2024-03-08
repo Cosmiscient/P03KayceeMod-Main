@@ -226,7 +226,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             FAST_GENERATOR = ModdedAchievementManager.New(
                 P03Plugin.PluginGuid,
                 "Burning Adrenaline",
-                "Repair the generator in three turns or less",
+                "Repair the generator in four turns or less",
                 true,
                 grp.ID,
                 TextureHelper.GetImageAsTexture("achievement_generator.png", typeof(P03AchievementManagement).Assembly)

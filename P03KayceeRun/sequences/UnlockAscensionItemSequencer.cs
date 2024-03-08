@@ -57,6 +57,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         }
 
+        private bool _sequenceRunning = false;
+        internal bool GoobertIsForSale => _sequenceRunning && slots[2].Item.Data.name.Equals(GoobertHuh.ItemData.name);
+
         public override void Start()
         {
             if (slots == null)
@@ -159,6 +162,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield return new WaitForSeconds(0.1f);
             }
 
+            _sequenceRunning = true;
             SetSlotCollidersEnabled(true);
 
             yield return new WaitUntil(() => selectedSlot != null);
@@ -176,6 +180,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             }
 
             RuleBookController.Instance.SetShown(false);
+            _sequenceRunning = false;
             Part3SaveData.Data.items.Add(selectedSlot.Item.Data.name);
 
             DisableSlotsAndExitItems(selectedSlot);

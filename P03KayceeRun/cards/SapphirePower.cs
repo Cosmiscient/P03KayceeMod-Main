@@ -78,6 +78,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.EnergyCost), MethodType.Getter)]
         [HarmonyPostfix]
+        [HarmonyPriority(HarmonyLib.Priority.VeryLow)]
         private static void AdjustCostForSapphirePower(PlayableCard __instance, ref int __result)
         {
             __result -= NumberOfActiveAbilities;
