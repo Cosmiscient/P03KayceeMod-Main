@@ -1100,21 +1100,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return retval;
         }
 
-        // [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.EnergyCost), MethodType.Getter)]
-        // [HarmonyPostfix]
-        // private static void AdjustCostForTempMods(ref PlayableCard __instance, ref int __result)
-        // {
-        //     if (__instance.temporaryMods != null)
-        //     {
-        //         foreach (CardModificationInfo tMod in __instance.temporaryMods)
-        //         {
-        //             __result += tMod.energyCostAdjustment;
-        //         }
-        //     }
-
-        //     __result = Mathf.Max(0, __result);
-        // }
-
         public static bool SlotHasTripleCard(this CardSlot slot) => slot.Card != null && slot.Card.Info.SpecialAbilities.Contains(GoobertCenterCardBehaviour.AbilityID);
 
         public static bool SlotCoveredByTripleCard(this CardSlot slot)

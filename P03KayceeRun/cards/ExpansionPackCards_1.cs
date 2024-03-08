@@ -55,6 +55,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_mantisbeast.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 4)
                 .SetCardTemple(CardTemple.Tech)
+                .AddAppearances(RareDiscCardAppearance.ID)
                 .AddAbilities(Ability.Transformer, Ability.TriStrike);
 
             // Mantisbot

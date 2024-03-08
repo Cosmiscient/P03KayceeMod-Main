@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Patchers;
@@ -14,6 +15,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
     public class RareDiscCardAppearance : DiscCardColorAppearance
     {
         private static bool RGBIsActive => SaveManager.SaveFile.unlockedAchievements.Contains(P03AchievementManagement.SKULLSTORM) || P03Plugin.Instance.DebugCode.Contains("rgb");
+
+        internal static bool CardIsRGBEligible(Card card) => card is not PlayableCard pcard || !pcard.OpponentCard;
 
         private static readonly Dictionary<string, Color?> configColors = new();
         private static readonly Dictionary<string, Color> defaultColors = new()
@@ -141,6 +144,26 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         };
 
+        private static List<List<Color>> CACHED_GRADIENT = null;
+
+        private static void EstablishGradientCache(int width, int height)
+        {
+            if (CACHED_GRADIENT != null)
+                if (CACHED_GRADIENT.Count < width || CACHED_GRADIENT[0].Count < height)
+                    CACHED_GRADIENT.Clear();
+
+            if (CACHED_GRADIENT == null)
+            {
+                CACHED_GRADIENT = new();
+                for (int i = 0; i < width; i++)
+                {
+                    CACHED_GRADIENT.Add(new());
+                    for (int j = 0; j < height; j++)
+                        CACHED_GRADIENT[i].Add(RGB_GRADIENT.Evaluate(((float)(i + j)) / FULL_SIZE));
+                }
+            }
+        }
+
         private const float FULL_SIZE = 250f + 365f;
 
         private static readonly Texture2D SPECULAR_MAP = TextureHelper.GetImageAsTexture("rare_specular_fractal.png", typeof(RareDiscCardAppearance).Assembly, FilterMode.Trilinear);
@@ -166,8 +189,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (RGBIsActive && emission && __instance is DiskRenderStatsLayer drsl && tex is Texture2D texture)
             {
                 Card card = drsl.gameObject.GetComponentInParent<Card>();
-                if (card != null && card.Info.appearanceBehaviour.Contains(ID))
+                if (card != null && card.Info.appearanceBehaviour.Contains(ID) && CardIsRGBEligible(card))
                 {
+                    EstablishGradientCache(texture.width, texture.height);
                     for (int x = 0; x < tex.width; x++)
                     {
                         for (int y = 0; y < tex.height; y++)
@@ -175,7 +199,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                             Color ex = texture.GetPixel(x, y);
                             if (ex != Color.black)
                             {
-                                Color newColor = RGB_GRADIENT.Evaluate(((float)(x + y)) / FULL_SIZE);
+                                Color newColor = CACHED_GRADIENT[x][y];
                                 newColor *= ex;
                                 newColor.a = ex.a;
                                 texture.SetPixel(x, y, newColor);

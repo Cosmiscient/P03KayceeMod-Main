@@ -4,6 +4,7 @@ using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Quests;
+using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Items;
 using InscryptionAPI.Items.Extensions;
@@ -34,6 +35,11 @@ namespace Infiniscryption.P03KayceeRun.Items
             if (DefaultQuestDefinitions.FindGoobert.CurrentState.StateName.ToLowerInvariant().EndsWith("P03GoobertHome"))
             {
                 return new(GameColors.Instance.brightLimeGreen, "Thank you!");
+            }
+
+            if ((UnlockAscensionItemSequencer.Instance?.GoobertIsForSale).GetValueOrDefault(false))
+            {
+                return new(GameColors.Instance.brightLimeGreen, "Please! You've got to help me get out of here!");
             }
 
             // Okay, you only get to this point if you've bought goobert but don't have him anymore.
