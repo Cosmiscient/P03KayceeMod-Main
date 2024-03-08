@@ -165,7 +165,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             // TURN 2
             MultiverseBossPhaseOne[2].turns.AddTurn(
                 Enemy("LeapBot"),
-                Enemy("LeapBot"),
                 Enemy("P03KCM_MultiverseMineCart")
             );
 
