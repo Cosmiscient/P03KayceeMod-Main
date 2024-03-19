@@ -521,7 +521,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                     if (MaxNumberOfItems >= 1)
                     {
-                        __instance.items.Add(ShockerItem.ItemData.name);
+                        if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("wiseclock"))
+                            __instance.items.Add(WiseclockItem.ItemData.name);
+                        else
+                            __instance.items.Add(ShockerItem.ItemData.name);
                     }
 
                     if (MaxNumberOfItems >= 2 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoHook))

@@ -291,7 +291,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                      .WaitForQuestCounter(3)
                      .AddDialogueState("FIELD TRIALS COMPLETE", "P03ConveyorQuestComplete")
                      .AddDynamicMonetaryReward()
-                     .AddGainItemReward("PocketWatch");
+                     .AddGainItemReward(WiseclockItem.ItemData.name);
 
             // Bombs
             BombBattles = QuestManager.Add(P03Plugin.PluginGuid, "BombBattles").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.MrsBomb, CompositeFigurine.FigurineType.Robot));

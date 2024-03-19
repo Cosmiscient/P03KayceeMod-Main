@@ -622,7 +622,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             List<HoloMapBlueprint> retval = new() {
                 new(seed) { upgrade = HoloMapNode.NodeDataType.FastTravel, x = 0, y = 2, arrowDirections = NORTH },
-                new(seed) { specialTerrain = HoloMapBlueprint.FINAL_SHOP_NODE, x = 0, y = 1, arrowDirections = NORTH | SOUTH },
+                new(seed) { specialTerrain = HoloMapBlueprint.FINAL_SHOP_NODE, x = 0, y = 1, arrowDirections = NORTH | SOUTH | EAST, secretDirection = EAST },
+                new(seed) { specialTerrain = HoloMapBlueprint.TEST_OF_STREGTH, x = 1, y = 1, arrowDirections = WEST, isSecretRoom = true },
                 new(seed) { opponent = Opponent.Type.P03Boss, x = 0, y = 0, arrowDirections = SOUTH }
             };
 

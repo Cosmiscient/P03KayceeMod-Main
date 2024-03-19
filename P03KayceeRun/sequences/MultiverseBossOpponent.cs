@@ -3,6 +3,7 @@ using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Helpers;
+using Infiniscryption.P03KayceeRun.Patchers;
 using Pixelplacement;
 using UnityEngine;
 
@@ -14,7 +15,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public override string PostDefeatedDialogueId => "NO_DIALOGUE";
         public override string BossLoopID => "P03_Phase3";
 
-        public static bool IsActiveForRun => P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("multiverse") || AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.FinalBoss);
+        public static bool IsActiveForRun => AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.FinalBoss) || P03AscensionSaveData.LeshyIsDead;
 
         public override bool GiveCurrencyOnDefeat => false;
 

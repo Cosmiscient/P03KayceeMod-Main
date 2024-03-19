@@ -9,7 +9,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     [HarmonyPatch]
     public class UnlockAscensionItemNodeData : SpecialNodeData
     {
-        public static readonly string[] PART1_ITEMS_TO_PART3 = new string[] { "PocketWatch" };
+        public static readonly string[] PART1_ITEMS_TO_PART3 = new string[] { };
 
         public static readonly HoloMapNode.NodeDataType UnlockItemsAscension = GuidManager.GetEnumValue<HoloMapNode.NodeDataType>(P03Plugin.PluginGuid, "UnlockAscensionItemNodeData");
 

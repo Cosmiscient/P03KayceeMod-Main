@@ -1,5 +1,7 @@
+using System.Linq;
 using DiskCardGame;
 using InscryptionAPI.Card;
+using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
@@ -81,6 +83,26 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
                 .SetCost(energyCost: 3)
                 .AddAbilities(MultiverseBrittleLatch.AbilityID)
                 .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, "MultiverseLeapBot", "L33pBot", 0, 2)
+                .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_leapbot"))
+                .SetCost(energyCost: 1)
+                .AddAbilities(MultiverseReach.AbilityID)
+                .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, "MultiverseOilJerry", "Oil Jerry", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_oil_jerry.png", typeof(MultiverseCards).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_oil_jerry.png", typeof(MultiverseCards).Assembly))
+                .SetCost(energyCost: 2)
+                .SetCardTemple(CardTemple.Tech)
+                .AddAbilities(MultiverseFullOfOil.AbilityID);
+
+            CardManager.New(P03Plugin.CardPrefx, "MultiverseAmmoBot", "AmmoBot", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ammobot.png", typeof(MultiverseCards).Assembly))
+                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_ammobot.png", typeof(MultiverseCards).Assembly))
+                .SetCost(energyCost: 3)
+                .SetCardTemple(CardTemple.Tech)
+                .AddAbilities(MultiverseFullyLoaded.AbilityID);
 
             CardManager.New(P03Plugin.CardPrefx, "MultiverseDummyCard", "DummyCard", 1, 1)
                 .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_brittlelatcher"))

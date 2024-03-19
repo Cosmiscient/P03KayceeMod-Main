@@ -27,6 +27,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public static readonly CardMetaCategory UndeadRegion = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "UndeadRegionCards");
 
         public static readonly AbilityMetaCategory MultiverseAbility = GuidManager.GetEnumValue<AbilityMetaCategory>(P03Plugin.PluginGuid, "MultiverseAbility");
+        public static bool IsMultiverseCard(this CardInfo info) => info.Abilities.Any(ab => AbilitiesUtil.GetInfo(ab).metaCategories.Contains(MultiverseAbility));
+        public static bool IsMultiverseCard(this PlayableCard card) => card.AllAbilities().Any(ab => AbilitiesUtil.GetInfo(ab).metaCategories.Contains(MultiverseAbility));
 
         public static readonly CardMetaCategory NewBeastTransformers = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "NewBeastTransformers");
 
@@ -70,6 +72,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string TURBO_MINECART = "P03KCM_TURBO_MINECART";
 
         public const string MAG_BRUSH = "P03KCM_MAG_BRUSH";
+        public const string GRIM_QUIL = "P03KCM_GRIM_QUIL";
 
         public const string TURBO_VESSEL = "P03KCM_TURBO_VESSEL";
         public const string TURBO_VESSEL_BLUEGEM = "P03KCM_TURBO_VESSEL_BLUEGEM";
@@ -596,13 +599,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
-            CardManager.New(P03Plugin.CardPrefx, MAG_BRUSH, "MAGBRUSH.EXE", 0, 0)
+            CardManager.New(P03Plugin.CardPrefx, CustomCards.MAG_BRUSH, "MAGBRUSH.EXE", 0, 0)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_brush.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetTargetedSpell()
                 .SetSpellAppearanceP03()
                 .AddSpecialAbilities(MultiverseRandomSigilBehaviour.AbilityID)
                 .AddAbilities(GuidManager.GetEnumValue<Ability>("zorro.infiniscryption.sigils", "Give Sigils"));
+
+            CardManager.New(P03Plugin.CardPrefx, CustomCards.GRIM_QUIL, "GRIMQUIL.EXE", 0, 0)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_quill.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 2)
+                .SetInstaGlobalSpell()
+                .SetSpellAppearanceP03()
+                .AddAbilities(MultiverseTutor.AbilityID);
 
             CardManager.New(P03Plugin.CardPrefx, FIREWALL, "Firewall", 0, 3)
                 .SetPortrait(GetTexture("portrait_firewall.png", typeof(CustomCards).Assembly))

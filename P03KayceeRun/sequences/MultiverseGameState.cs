@@ -380,7 +380,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             UIManager.Instance.Effects.GetEffect<ScreenGlitchEffect>().SetIntensity(1f, .4f);
             CameraEffects.Instance.Shake(0.1f, .4f);
-            //AudioController.Instance.PlaySound2D("cam_switch", MixerGroup.None, .4f, 0f, pitch: new AudioParams.Pitch(AudioParams.Pitch.Variation.Medium));
+            AudioController.Instance.PlaySound2D("glitch_error", MixerGroup.None, .5f, 0f, pitch: new AudioParams.Pitch(AudioParams.Pitch.Variation.Medium));
 
             // Remove all cards
             // P03Plugin.Log.LogInfo("Restoring multiverse state: Removing cards in slots");

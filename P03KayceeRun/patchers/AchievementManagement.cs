@@ -31,6 +31,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static Achievement PLASMA_JIMMY_CRAZY { get; private set; }
         public static Achievement FULLY_OVERCLOCKED { get; private set; }
         public static Achievement FAST_GENERATOR { get; private set; }
+        public static Achievement TEST_OF_STRENGTH { get; private set; }
+        public static Achievement MULTIVERSE { get; private set; }
 
         private static int BountyHuntersKilled
         {
@@ -231,6 +233,24 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 grp.ID,
                 TextureHelper.GetImageAsTexture("achievement_generator.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [hermes boots, shoe with wings on it] sticker
+
+            TEST_OF_STRENGTH = ModdedAchievementManager.New(
+                P03Plugin.PluginGuid,
+                "Carnival Clown",
+                "Achieve a high score of 50 or more on the test of strength",
+                true,
+                grp.ID,
+                TextureHelper.GetImageAsTexture("achievement_test_of_strength.png", typeof(P03AchievementManagement).Assembly)
+            ).ID;
+
+            MULTIVERSE = ModdedAchievementManager.New(
+                P03Plugin.PluginGuid,
+                "Verse Riff",
+                "Understand the true meaning of the Great Transcendence",
+                true,
+                grp.ID,
+                TextureHelper.GetImageAsTexture("achievement_multiverse.png", typeof(P03AchievementManagement).Assembly)
+            ).ID;
         }
 
         private class CardBattleAchievementMonitor : Singleton<CardBattleAchievementMonitor>

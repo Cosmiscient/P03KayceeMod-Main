@@ -67,13 +67,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             // TURN 2
             MultiverseBossPhaseOne[0].turns.AddTurn(
                 Enemy("RoboSkeleton"),
-                Enemy("LeapBot")
+                Enemy("P03KCM_MultiverseLeapBot")
             );
 
             // TURN 3
             MultiverseBossPhaseOne[0].turns.AddTurn(
                 Enemy("RoboSkeleton"),
-                Enemy("RoboSkeleton")
+                Enemy("P03KCM_MultiverseOilJerry")
             );
 
             // TURN 4
@@ -119,19 +119,20 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // TURN 2
             MultiverseBossPhaseOne[1].turns.AddTurn(
-                Enemy("Automaton"),
-                Enemy("LeapBot")
+                Enemy("P03KCM_MultiverseAmmoBot"),
+                Enemy("P03KCM_MultiverseLeapBot")
             );
 
             // TURN 3
             MultiverseBossPhaseOne[1].turns.AddTurn(
                 Enemy("Insectodrone"),
-                Enemy("LeapBot")
+                Enemy("P03KCM_MultiverseLeapBot")
             );
 
             // TURN 4
             MultiverseBossPhaseOne[1].turns.AddTurn(
-                Enemy("P03KCM_MultiverseFirewall")
+                Enemy("P03KCM_MultiverseFirewall"),
+                Enemy("P03KCM_MultiverseOilJerry")
             );
 
             // TURN 5
@@ -164,7 +165,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // TURN 2
             MultiverseBossPhaseOne[2].turns.AddTurn(
-                Enemy("LeapBot"),
+                Enemy("P03KCM_MultiverseLeapBot"),
                 Enemy("P03KCM_MultiverseMineCart")
             );
 
@@ -176,7 +177,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // TURN 4
             MultiverseBossPhaseOne[2].turns.AddTurn(
-                Enemy("LeapBot"),
+                Enemy("P03KCM_MultiverseLeapBot"),
                 Enemy("P03KCM_MultiverseMineCart")
             );
 
@@ -189,7 +190,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             MultiverseBossPhaseOne[2].turns.AddTurn(
                 Enemy("P03KCM_MultiverseBombbot"),
                 Enemy("P03KCM_MultiverseMineCart"),
-                Enemy("LeapBot")
+                Enemy("P03KCM_MultiverseLeapBot")
             );
 
             // TURN 6
@@ -201,7 +202,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             // TURN 7
             MultiverseBossPhaseOne[2].turns.AddTurn(
                 Enemy("P03KCM_MultiverseGunner"),
-                Enemy("Bombbot")
+                Enemy("Bombbot"),
+                Enemy("P03KCM_MultiverseOilJerry")
             );
 
             // TURN 8
@@ -216,7 +218,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 Enemy("P03KCM_MultiverseGunner")
             );
 
-            MultiverseBossPhaseOne[2].ContinueOn("P03KCM_MultiverseMineCart", "LeapBot", "P03KCM_MultiverseGunner");
+            MultiverseBossPhaseOne[2].ContinueOn("P03KCM_MultiverseMineCart", "P03KCM_MultiverseLeapBot", "P03KCM_MultiverseGunner");
 
             // Encounter: Multiverse 3
             MultiverseBossPhaseOne.Add(EncounterManager.New("P03KCM_Multiverse_4_Hounds", addToPool: false));
@@ -225,13 +227,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // TURN 1
             MultiverseBossPhaseOne[3].turns.AddTurn(
-                Enemy("LeapBot"),
-                Enemy("LeapBot"),
-                Enemy("LeapBot")
+                Enemy("P03KCM_MultiverseLeapBot"),
+                Enemy("P03KCM_MultiverseLeapBot")
             );
 
             // TURN 2
             MultiverseBossPhaseOne[3].turns.AddTurn(
+                Enemy("P03KCM_MultiverseAmmoBot"),
                 Enemy("P03KCM_MultiverseBolthound")
             );
 
@@ -243,7 +245,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             // TURN 4
             MultiverseBossPhaseOne[3].turns.AddTurn(
                 Enemy("P03KCM_CXformerAlpha"),
-                Enemy("LeapBot")
+                Enemy("P03KCM_MultiverseLeapBot")
             );
 
             // TURN 5
@@ -286,12 +288,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // TURN 1
             MultiverseBossPhaseOne[4].turns.AddTurn(
-                Enemy("LeapBot")
+                Enemy("P03KCM_MultiverseLeapBot")
             );
 
             // TURN 2
             MultiverseBossPhaseOne[4].turns.AddTurn(
-                Enemy("LeapBot")
+                Enemy("P03KCM_MultiverseLeapBot")
             );
 
             // TURN 3
@@ -301,7 +303,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // TURN 4
             MultiverseBossPhaseOne[4].turns.AddTurn(
-                Enemy("LeapBot"),
+                Enemy("P03KCM_MultiverseLeapBot"),
                 Enemy("Automaton")
             );
 
@@ -310,7 +312,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 Enemy("Automaton")
             );
 
-            MultiverseBossPhaseOne[4].ContinueOn("LeapBot", "LeapBot", "Automaton", "Insectodrone", "LeapBot");
+            MultiverseBossPhaseOne[4].ContinueOn("P03KCM_MultiverseLeapBot", "P03KCM_MultiverseLeapBot", "Automaton", "Insectodrone", "P03KCM_MultiverseLeapBot");
 
             // Encounter: Multiverse 3
             MultiverseBossPhaseOne.Add(EncounterManager.New("P03KCM_Multiverse_6_Latchers", addToPool: false));
@@ -321,12 +323,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             MultiverseBossPhaseOne[5].turns.AddTurn(
                 Enemy("P03KCM_MultiverseBombLatcher"),
                 Enemy("P03KCM_MultiverseBombLatcher"),
-                Enemy("LeapBot")
+                Enemy("P03KCM_MultiverseOilJerry")
             );
 
             // TURN 2
             MultiverseBossPhaseOne[5].turns.AddTurn(
                 Enemy("P03KCM_MultiverseBombbot"),
+                Enemy("P03KCM_MultiverseOilJerry"),
                 Enemy("P03KCM_MultiverseBrittleLatcher")
             );
 
@@ -339,6 +342,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // TURN 4
             MultiverseBossPhaseOne[5].turns.AddTurn(
+                Enemy("P03KCM_MultiverseAmmoBot"),
                 Enemy("P03KCM_MultiverseBolthound")
             );
 
@@ -366,7 +370,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             MultiverseBossPhaseOne[6].turns.AddTurn(
                 Enemy("P03KCM_MultiverseFirewall"),
-                Enemy("P03KCM_MultiverseFirewall")
+                Enemy("P03KCM_MultiverseFirewall"),
+                Enemy("P03KCM_MultiverseOilJerry")
             );
 
             MultiverseBossPhaseOne[6].turns.AddTurn(
@@ -375,18 +380,19 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             );
 
             MultiverseBossPhaseOne[6].turns.AddTurn(
-                Enemy("LeapBot"),
+                Enemy("P03KCM_MultiverseLeapBot"),
                 Enemy("P03KCM_MultiverseMineCart")
             );
 
             MultiverseBossPhaseOne[6].turns.AddTurn(
                 Enemy("Automaton"),
-                Enemy("LeapBot"),
+                Enemy("P03KCM_MultiverseLeapBot"),
                 Enemy("P03KCM_MultiverseFirewall")
             );
 
             MultiverseBossPhaseOne[6].turns.AddTurn(
-                Enemy("P03KCM_MultiverseBolthound")
+                Enemy("P03KCM_MultiverseBolthound"),
+                Enemy("P03KCM_MultiverseOilJerry")
             );
 
             MultiverseBossPhaseOne[6].ContinueOn("P03KCM_MultiverseMineCart", "P03KCM_MultiverseGunner", "P03KCM_MultiverseFirewall", "P03KCM_MultiverseMineCart");
@@ -399,7 +405,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 "P03KCM_MultiverseSentry",
                 "P03KCM_MultiverseBombbot",
                 "P03KCM_MultiverseBrittleLatcher",
-                "P03KCM_MultiverseBombLatcher"
+                "P03KCM_MultiverseBombLatcher",
+                "P03KCM_MultiverseOilJerry"
             );
             MultiverseBossPhaseOne[7].turns = new();
 

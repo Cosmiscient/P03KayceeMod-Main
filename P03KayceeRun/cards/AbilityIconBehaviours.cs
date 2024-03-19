@@ -76,7 +76,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void RainbowMultiverse(CardAbilityIcons __instance, PlayableCard playableCard)
         {
-            if (MultiverseBattleSequencer.Instance != null && playableCard != null)
+            if (MultiverseBattleSequencer.Instance != null)
             {
                 List<GameObject> defaultIconGroups = __instance.defaultIconGroups;
                 foreach (GameObject group in defaultIconGroups)
@@ -109,7 +109,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                                 rend = duplicate.GetComponent<Renderer>();
                                 rend.material.shader = Shader.Find("Standard");
                                 rend.material.EnableKeyword("_EMISSION");
-                                //dummyIcon.AssignAbility(abilityIconInteractable.Ability, playableCard.Info, playableCard);
                             }
                             else
                             {
@@ -119,7 +118,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                             P03Plugin.Log.LogInfo($"Icon {abilityIconInteractable.gameObject.name} {info.rulebookName} is multiverse? {info.metaCategories.Contains(CustomCards.MultiverseAbility)}");
                             if (info.metaCategories.Contains(CustomCards.MultiverseAbility) && !abilityIconInteractable.gameObject.name.Contains("rainbow"))
                             {
-                                var texture = abilityIconInteractable.LoadIcon(null, info, playableCard.OpponentCard);
+                                var texture = abilityIconInteractable.LoadIcon(null, info, (playableCard?.OpponentCard).GetValueOrDefault(false));
                                 rend.material.mainTexture = texture;
                                 rend.enabled = true;
                                 rend.gameObject.SetActive(true);

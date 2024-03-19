@@ -89,13 +89,24 @@ namespace Infiniscryption.P03KayceeRun.Helpers
             return _rendererCache[renderer.gameObject.name][textureName];
         }
 
-        public static void RetextureAllRenderers(GameObject gameObject, Texture texture, string originalTextureKey = null)
+        public static void RetextureAllRenderers(GameObject gameObject, Texture texture, string originalTextureKey = null, string textureName = null)
         {
             foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>())
             {
                 try
                 {
-                    foreach (string textureName in TextureNames)
+                    if (String.IsNullOrEmpty(textureName))
+                    {
+                        foreach (string texName in TextureNames)
+                        {
+                            if (String.IsNullOrEmpty(originalTextureKey) || CardComponentHasTargetTexture(renderer, textureName, originalTextureKey.ToLowerInvariant()))
+                            {
+                                foreach (Material material in renderer.materials)
+                                    material.SetTexture(texName, texture);
+                            }
+                        }
+                    }
+                    else
                     {
                         if (String.IsNullOrEmpty(originalTextureKey) || CardComponentHasTargetTexture(renderer, textureName, originalTextureKey.ToLowerInvariant()))
                         {

@@ -100,7 +100,9 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             { "sticker_wizardhat", P03AchievementManagement.PLASMA_JIMMY_CRAZY },
             { "sticker_guillotine", P03AchievementManagement.FULLY_OVERCLOCKED },
             { "sticker_mushroom", P03AchievementManagement.MYCOLOGISTS_COMPLETED },
-            { "sticker_winged_shoes", P03AchievementManagement.FAST_GENERATOR }
+            { "sticker_winged_shoes", P03AchievementManagement.FAST_GENERATOR },
+            { "sticker_teddybear", P03AchievementManagement.TEST_OF_STRENGTH },
+            { "sticker_brain", P03AchievementManagement.MULTIVERSE }
         };
 
         internal static string AddAbilitySticker(AbilityManager.FullAbility ability)

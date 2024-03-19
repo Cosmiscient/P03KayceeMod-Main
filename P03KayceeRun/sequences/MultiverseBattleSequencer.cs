@@ -27,6 +27,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public override StoryEvent DefeatedStoryEvent => EventManagement.DEFEATED_P03_MULTIVERSE;
 
         internal bool HasSeenMagnificusBrush { get; set; } = false;
+        internal bool HasSeenGrimoraQuill { get; set; } = false;
 
         public bool ScalesTippedToOpponent { get; private set; } = false;
         public bool GameIsOver { get; private set; } = false;
@@ -203,6 +204,28 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return new WaitForSeconds(0.4f);
         }
 
+        private List<CardInfo> _deadMultiverseCards = new();
+        public List<CardInfo> DeadMultiverseCards => new(_deadMultiverseCards);
+
+        public void RemoveDeadMultiverseCard(CardInfo card)
+        {
+            if (_deadMultiverseCards.Contains(card))
+                _deadMultiverseCards.Remove(card);
+        }
+
+        public override bool RespondsToOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer) => true;
+        public override IEnumerator OnOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer)
+        {
+            if (card.IsMultiverseCard())
+            {
+                CardInfo newInfo = (CardInfo)card.Info.Clone();
+                foreach (var mod in card.temporaryMods)
+                    newInfo.mods.Add((CardModificationInfo)mod.Clone());
+                _deadMultiverseCards.Add(newInfo);
+            }
+            yield break;
+        }
+
         public override IEnumerator PreBoardSetup()
         {
             LeftScreen = MultiverseTelevisionScreen.Create(BoardManager.Instance.gameObject.transform);
@@ -256,6 +279,15 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     if (!PlayerHand.Instance.CardsInHand.Any(c => c.Info.name.Equals(CustomCards.MAG_BRUSH)))
                     {
                         yield return CardSpawner.Instance.SpawnCardToHand(CardLoader.GetCardByName(CustomCards.MAG_BRUSH), new List<CardModificationInfo>(), CardDrawPiles.Instance.drawFromPilesSpawnOffset, 0.15f);
+                    }
+                }
+
+                if (PlayerHand.Instance != null && TurnManager.Instance.TurnNumber % 2 == 1 && TurnManager.Instance.TurnNumber >= 3)
+                {
+                    if (!PlayerHand.Instance.CardsInHand.Any(c => c.Info.name.Equals(CustomCards.GRIM_QUIL)))
+                    {
+                        if ((_deadMultiverseCards.Count - MultiverseGames.SelectMany(g => g.HandState).Where(c => c.Info.name.Equals(CustomCards.GRIM_QUIL)).Count()) >= 1)
+                            yield return CardSpawner.Instance.SpawnCardToHand(CardLoader.GetCardByName(CustomCards.GRIM_QUIL), new List<CardModificationInfo>(), CardDrawPiles.Instance.drawFromPilesSpawnOffset, 0.15f);
                     }
                 }
             }
@@ -1147,6 +1179,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield return TextDisplayer.Instance.PlayDialogueEvent("LeshyMultiverseFinale2", TextDisplayer.MessageAdvanceMode.Input);
                 scrybes.leshy.SetEyesAnimated(false);
 
+                AchievementManager.Unlock(P03AchievementManagement.MULTIVERSE);
                 yield return new WaitForSeconds(1.5f);
                 PauseMenu.pausingDisabled = false;
                 EventManagement.FinishAscension(true);

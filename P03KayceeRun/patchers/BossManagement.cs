@@ -15,8 +15,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly string P03FinalBossAI = AIManager.Add(P03Plugin.PluginGuid, "P03FinalBossAI", typeof(P03FinalBossOpponentAI)).Id;
         public static Opponent.Type P03FinalBossOpponent { get; private set; }
         public static Opponent.Type P03MultiverseOpponent { get; private set; }
-
-        private const int BOSS_MONEY_REWARD = 5;
+        public static Opponent.Type TestOfStrengthOpponent { get; private set; }
 
         //10 was way too quiet... 0.15?
         public static float bossMusicVolume = 0.15f;
@@ -357,11 +356,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 .SetNewSequencer(P03Plugin.PluginGuid, "MultiverseBattleSequencer", typeof(MultiverseBattleSequencer))
                 .Id;
 
-            // if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("multiverse"))
-            // {
-            //     P03Plugin.Log.LogInfo("Forcing multiverse opponent for testing");
-            //     P03FinalBossOpponent = P03MultiverseOpponent;
-            // }
+            TestOfStrengthOpponent = OpponentManager.Add(P03Plugin.PluginGuid, "TestOfStrengthOpponent", string.Empty, typeof(TestOfStrengthBattleOpponent))
+                .SetNewSequencer(P03Plugin.PluginGuid, "TestOfStrengthSequencer", typeof(TestOfStrengthBattleSequencer))
+                .Id;
         }
     }
 }

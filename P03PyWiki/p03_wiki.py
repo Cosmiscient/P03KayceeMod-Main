@@ -412,12 +412,12 @@ def set_all_category_pages():
         all_cats = touch_all_category("Cards")
 
         for cat in all_cats:
-            if "Card" in cat or "Art by" in cat:
+            if "Card" in cat or "Art" in cat:
                 update_card_categories(cat.replace("Category:", ""), "Art" in cat)
     else:
         client = login()
         for cat in client.categories:
-            if "Card" in cat.name or "Art by" in cat.name:
+            if "Card" in cat.name or "Art" in cat.name:
                 update_card_categories(cat.name.replace("Category:", ""), "Art" in cat.name)
 
 

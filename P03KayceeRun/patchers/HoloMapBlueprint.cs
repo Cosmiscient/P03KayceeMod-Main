@@ -22,6 +22,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public const int MYCOLOGIST_WELL = 1 << 9;
         public const int FAST_TRAVEL_NODE = 1 << 10;
         public const int FINAL_SHOP_NODE = 1 << 11;
+        public const int TEST_OF_STREGTH = 1 << 12;
 
         public const int BATTLE = 0;
         public const int TRADE = 1;

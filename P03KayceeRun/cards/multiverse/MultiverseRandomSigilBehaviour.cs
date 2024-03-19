@@ -38,7 +38,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
         private Ability ChooseAbility()
         {
             List<Ability> learnedAbilities = AbilitiesUtil.GetLearnedAbilities(false, 0, 10, CustomCards.MultiverseAbility);
-            learnedAbilities.RemoveAll((Ability x) => x == Ability.RandomAbility || this.PlayableCard.HasAbility(x));
+            learnedAbilities.RemoveAll((Ability x) => x == Ability.RandomAbility || this.PlayableCard.HasAbility(x) || x == MultiverseTutor.AbilityID);
             if (learnedAbilities.Count > 0)
             {
                 return learnedAbilities[SeededRandom.Range(0, learnedAbilities.Count, P03AscensionSaveData.RandomSeed + NumberOfActivations++)];

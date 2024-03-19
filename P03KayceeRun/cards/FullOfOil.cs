@@ -4,6 +4,7 @@ using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using Pixelplacement;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -36,6 +37,32 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
+        public static IEnumerator ThrowOil(CardSlot fromSlot, CardSlot toSlot, float speed = 0.35f)
+        {
+            if (toSlot.Card == null)
+                yield break;
+
+            fromSlot.Card?.Anim.StrongNegationEffect();
+            GameObject bomb = Instantiate(ResourceBank.Get<GameObject>("prefabs/map/holomapscenery/HoloSlime_Pile_2"));
+            OnboardDynamicHoloPortrait.HolofyGameObject(bomb, GameColors.instance.darkBlue);
+            bomb.transform.position = fromSlot.transform.position + (Vector3.up * 0.1f);
+
+            Vector3 midpoint = Vector3.Lerp(fromSlot.transform.position, toSlot.transform.position, 0.5f) + (Vector3.up * 0.25f);
+
+            Tween.Position(bomb.transform, midpoint, speed / 2f, 0f, Tween.EaseOut, Tween.LoopType.None, null, null, true);
+            Tween.Position(bomb.transform, toSlot.transform.position, speed / 2f, speed / 2f, Tween.EaseIn, Tween.LoopType.None, null, null, true);
+            Tween.Position(bomb.transform, toSlot.transform.position - (Vector3.up * 0.2f), 0.1f, speed, Tween.EaseIn, Tween.LoopType.None, null, () => Destroy(bomb), true);
+
+            yield return new WaitForSeconds(speed);
+
+            AudioController.Instance.PlaySound3D("eyeball_squish", MixerGroup.TableObjectsSFX, toSlot.transform.position, .7f, randomization: new AudioParams.Randomization(), pitch: new AudioParams.Pitch(AudioParams.Pitch.Variation.Medium));
+            toSlot.Card.Anim.StrongNegationEffect();
+
+            yield return new WaitForSeconds(0.1f);
+            toSlot.Card.TemporaryMods.Add(new(0, 3));
+            yield return new WaitForSeconds(0.1f);
+        }
+
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
             List<CardSlot> targets = new();
@@ -52,11 +79,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             foreach (CardSlot slot in targets)
             {
-                Card.Anim.StrongNegationEffect();
-                slot.Card.Anim.StrongNegationEffect();
-                yield return new WaitForSeconds(0.25f);
-                slot.Card.TemporaryMods.Add(new(0, 3));
-                yield return new WaitForSeconds(0.25f);
+                yield return ThrowOil(Card.Slot, slot);
+                // Card.Anim.StrongNegationEffect();
+                // slot.Card.Anim.StrongNegationEffect();
+                // yield return new WaitForSeconds(0.25f);
+                // slot.Card.TemporaryMods.Add(new(0, 3));
+                // yield return new WaitForSeconds(0.25f);
             }
 
             ViewManager.Instance.SwitchToView(originalView, false, false);

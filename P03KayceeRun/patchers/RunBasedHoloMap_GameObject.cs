@@ -6,6 +6,7 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.BattleMods;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Encounters;
+using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Quests;
 using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Encounters;
@@ -553,6 +554,88 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        private static GameObject BuildTestOfStrengthNode()
+        {
+            GameObject shopNodeBase = Resources.Load<GameObject>("prefabs/map/holomapareas/HoloMapArea_StartingIslandWaypoint");
+            GameObject retval = UnityEngine.Object.Instantiate(shopNodeBase);
+
+            UnityEngine.Object.Destroy(retval.transform.Find("Nodes/CurrencyGainNode3D").gameObject);
+            UnityEngine.Object.Destroy(retval.transform.Find("WaypointStation").gameObject);
+
+            Transform nodeParent = retval.transform.Find("Nodes");
+            Transform sceneryParent = retval.transform.Find("Scenery");
+
+            // Destroy all previously existing scenery
+            List<GameObject> objsToDelete = new();
+            for (int i = 0; i < sceneryParent.childCount; i++)
+                objsToDelete.Add(sceneryParent.GetChild(i).gameObject);
+            foreach (var obj in objsToDelete)
+                UnityEngine.Object.Destroy(obj);
+
+            UnityEngine.Object.Destroy(retval.transform.Find("smoke").gameObject);
+
+            // Add a generator
+            var generator = GameObject.Instantiate(ResourceBank.Get<GameObject>("prefabs/environment/DamageRaceGenerator"));
+            generator.transform.SetParent(sceneryParent);
+            generator.GetComponentInChildren<DamageRaceGenerator>().alarmAudioSource.volume = 0;
+            GameObject.Destroy(generator.GetComponentInChildren<Animator>());
+            generator.transform.Find("Anim").gameObject.SetActive(true);
+            MaterialHelper.HolofyAllRenderers(generator.transform.Find("Anim/Main").gameObject, GameColors.Instance.limeGreen);
+            generator.transform.localScale = new(0.4f, 0.4f, 0.4f);
+            generator.transform.localPosition = new(2.6f, 0f, 0f);
+            generator.transform.localEulerAngles = new(0f, 235f, 0f);
+
+            // Add a series of lights 
+            var lightArray = TestOfStrengthLightArray.Create(sceneryParent);
+            lightArray.transform.localPosition = new(0f, 0f, 0f);
+
+            // Add the actual battle
+            GameObject refObject = ArrowPrefabs[WEST | ENEMY];
+            GameObject damageRageIcon = refObject.transform.Find("RendererParent/DamageRaceIcon").gameObject;
+
+            GameObject nodePrefab = GetGameObject("WizardMainPath_3", "Nodes/CardChoiceNode3D");
+            GameObject nodeObj = UnityEngine.Object.Instantiate(nodePrefab);
+            nodeObj.transform.SetParent(nodeParent);
+
+            // Turn this into a trade node
+            HoloMapSpecialNode oldNodeData = nodeObj.GetComponent<HoloMapSpecialNode>();
+            UnityEngine.Object.Destroy(oldNodeData);
+
+            HoloMapNode nodeData = nodeObj.AddComponent<HoloMapNode>();
+            nodeData.nodeType = HoloMapNode.NodeDataType.CardBattle;
+            nodeData.specialEncounterId = BossBattleSequencer.GetSequencerIdForBoss(BossManagement.TestOfStrengthOpponent);
+            nodeData.blueprintData = EncounterHelper.GeneratorDamageRace;
+            nodeData.opponentTerrain = new CardInfo[5];
+            nodeData.playerTerrain = new CardInfo[5];
+
+            UnityEngine.Object.Destroy(nodeObj.transform.Find("RendererParent/Renderer").gameObject);
+            UnityEngine.Object.Destroy(nodeObj.transform.Find("RendererParent/Renderer_2").gameObject);
+
+            Transform iconParent = nodeObj.transform.Find("RendererParent");
+            GameObject instIcon = UnityEngine.Object.Instantiate(damageRageIcon, iconParent);
+            instIcon.transform.localPosition = Vector3.zero;
+            instIcon.SetActive(true);
+
+            nodeData.nodeRenderers = new() {
+                instIcon.GetComponentInChildren<Renderer>()
+            };
+
+            nodeObj.transform.localPosition = new(1.8f, 0f, 0f);
+            nodeObj.transform.localEulerAngles = new(0f, 283f, 0f);
+
+            HoloMapArea area = retval.GetComponent<HoloMapArea>();
+            //area.firstEnterDialogueId = "P03FinalShopNode";
+
+            // Add an arrow to the left
+            Transform leftArrow = nodeParent.Find("MoveArea_W");
+            // MoveHoloMapAreaNode moveRight = leftArrow.gameObject.GetComponentInChildren<MoveHoloMapAreaNode>();
+            // moveRight.secret = true;
+            leftArrow.gameObject.SetActive(true);
+
+            retval.SetActive(false);
+            return retval;
+        }
+
         private static GameObject BuildFinalShopNode()
         {
             GameObject shopNodeBase = Resources.Load<GameObject>("prefabs/map/holomapareas/HoloMapArea_StartingIslandWaypoint");
@@ -563,6 +646,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             Transform nodeParent = retval.transform.Find("Nodes");
             Transform sceneryParent = retval.transform.Find("Scenery");
+
+            // Make a secret node to the right
+            Transform rightArrow = nodeParent.Find("MoveArea_E");
+            MoveHoloMapAreaNode moveRight = rightArrow.gameObject.GetComponentInChildren<MoveHoloMapAreaNode>();
+            moveRight.secret = true;
+            rightArrow.gameObject.SetActive(true);
 
             // Copy/rotate the bridge
             GameObject bridge = UnityEngine.Object.Instantiate(sceneryParent.Find("HoloBridge_Entrance").gameObject, sceneryParent);
@@ -805,6 +894,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (bp.specialTerrain == HoloMapBlueprint.FINAL_SHOP_NODE)
                 return BuildFinalShopNode();
+
+            if (bp.specialTerrain == HoloMapBlueprint.TEST_OF_STREGTH)
+                return BuildTestOfStrengthNode();
 
             P03Plugin.Log.LogInfo($"Instantiating base object {neutralHoloPrefab}");
             GameObject area = UnityEngine.Object.Instantiate(neutralHoloPrefab);
