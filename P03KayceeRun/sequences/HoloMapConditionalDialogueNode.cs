@@ -12,7 +12,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     [HarmonyPatch]
     public class HoloMapConditionalDialogueNode : HoloMapDialogueNode
     {
-
         [HarmonyPatch(typeof(HoloFloatingLabel), nameof(HoloFloatingLabel.ManagedUpdate))]
         [HarmonyPrefix]
         private static bool DontIfLabelIsNull(HoloFloatingLabel __instance) => __instance.line != null;
@@ -48,6 +47,22 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             // increments stats too much (i.e., "complete" an "already completed"
             // quest)
             bool hasCompletedAlready = quest.IsCompleted;
+
+            // Time to figure out if this is a special node. If so, we hand it off
+            // and back out
+            if (!hasCompletedAlready)
+            {
+                if (quest.CurrentState.SpecialNodeData is CardBattleNodeData)
+                {
+                    GameFlowManager.Instance.TransitionToGameState(GameState.CardBattle, quest.CurrentState.SpecialNodeData);
+                    yield break;
+                }
+                if (quest.CurrentState.SpecialNodeData is SpecialNodeData)
+                {
+                    GameFlowManager.Instance.TransitionToGameState(GameState.SpecialCardSequence, quest.CurrentState.SpecialNodeData);
+                    yield break;
+                }
+            }
 
             MapNodeManager.Instance.SetAllNodesInteractable(false);
             (GameFlowManager.Instance as Part3GameFlowManager).DisableTransitionToFirstPerson = true;
@@ -88,6 +103,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             P03Plugin.Log.LogDebug($"After dialogue, the current state of the quest is {quest.CurrentState.StateName} with a status of {quest.CurrentState.Status}. Is the quest completed? {quest.IsCompleted}");
 
+            TryResolveQuest(quest);
+
+            yield break;
+        }
+
+        internal void TryResolveQuest(QuestDefinition quest)
+        {
             if (quest.IsCompleted)
             {
                 if (!quest.HasUngrantedRewards)
@@ -104,8 +126,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 // This happens if you've completed four full quests and you're in the final zone
                 if (EventManagement.CompletedZones.Count == 3)
                 {
-                    if (QuestManager.AllQuestDefinitions
-.Count(q => !q.IsSpecialQuest
+                    if (QuestManager.AllQuestDefinitions.Count(
+                                              q => !q.IsSpecialQuest
                                            && q.IsCompleted
                                            && q.CurrentState.Status == QuestState.QuestStateStatus.Success
                                            && q.IsEndOfQuest) == 4)
@@ -118,8 +140,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 SetHidden(false, false);
             }
-
-            yield break;
         }
 
         [SerializeField]

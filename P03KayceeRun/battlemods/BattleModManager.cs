@@ -486,6 +486,9 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         [HarmonyPostfix]
         private static void UpdateAdditionalSpecialModIcons(MoveHoloMapAreaNode __instance)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             Transform parent = __instance.transform.Find("RendererParent");
             foreach (Transform child in parent)
             {

@@ -48,6 +48,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 adjacentSlots.RemoveAt(0);
             }
             yield return new WaitForSeconds(0.2f);
+            if (baseSlot.Card == null || baseSlot.Card != Card || Card == null || Card.Dead)
+            {
+                yield break;
+            }
             if (adjacentSlots.Count > 0 && adjacentSlots[0].Card != null && !adjacentSlots[0].Card.Dead)
             {
                 yield return ShockCard(adjacentSlots[0].Card, baseSlot.Card, Mathf.CeilToInt(Card.Attack * 0.5f));

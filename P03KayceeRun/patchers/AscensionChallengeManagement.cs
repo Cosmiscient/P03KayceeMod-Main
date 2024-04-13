@@ -577,6 +577,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        private static void EnsureSingletonFinalBoss()
+        {
+            while (P03AscensionSaveData.P03Data.activeChallenges.Where(c => c == AscensionChallenge.FinalBoss).Count() > 1)
+            {
+                P03AscensionSaveData.P03Data.activeChallenges.Remove(AscensionChallenge.FinalBoss);
+                AscensionChallengeScreen.Instance?.challengeLevelText?.UpdateText();
+            }
+        }
+
         [HarmonyPatch(typeof(AscensionIconInteractable), nameof(AscensionIconInteractable.OnCursorSelectStart))]
         [HarmonyPrefix]
         private static bool SpecialFinalBossClick(AscensionIconInteractable __instance)
@@ -589,8 +598,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 && __instance.clickable)
             {
                 __instance.clickable = false;
-                __instance.iconRenderer.enabled = false;
-                __instance.activatedRenderer.enabled = false;
+
+                if (__instance.iconRenderer != null)
+                    __instance.iconRenderer.enabled = false;
+
+                if (__instance.activatedRenderer != null)
+                    __instance.activatedRenderer.enabled = false;
+
                 __instance.gameObject.SetActive(false);
                 P03AscensionSaveData.P03Data.activeChallenges.Add(AscensionChallenge.FinalBoss);
 
@@ -598,6 +612,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 GBC.CameraEffects.Instance.Shake(0.1f, .4f);
                 AudioController.Instance.PlaySound2D("glitch", MixerGroup.VideoCam, 1f);
 
+                EnsureSingletonFinalBoss();
                 return false;
             }
             return true;
@@ -617,27 +632,46 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (P03AscensionSaveData.LeshyIsDead)
                 {
                     __instance.clickable = false;
-                    __instance.iconRenderer.sprite = info.iconSprite;
-                    __instance.activatedRenderer.sprite = info.activatedSprite;
-                    __instance.iconRenderer.enabled = true;
-                    __instance.activatedRenderer.enabled = true;
-                    AscensionChallengeScreen.Instance.SetChallengeActivated(info, true);
+
+                    if (__instance.iconRenderer != null)
+                    {
+                        __instance.iconRenderer.sprite = info.iconSprite;
+                        __instance.iconRenderer.enabled = true;
+                    }
+
+                    if (__instance.activatedRenderer != null)
+                    {
+                        __instance.activatedRenderer.sprite = info.activatedSprite;
+                        __instance.activatedRenderer.enabled = true;
+                    }
+                    AscensionChallengeScreen.Instance?.SetChallengeActivated(info, true);
                 }
                 else if (P03AscensionSaveData.P03Data.activeChallenges.Contains(info.challengeType))
                 {
                     __instance.clickable = false;
                     __instance.gameObject.SetActive(false);
-                    __instance.iconRenderer.enabled = false;
-                    __instance.activatedRenderer.enabled = false;
+
+                    if (__instance.iconRenderer != null)
+                        __instance.iconRenderer.enabled = false;
+
+                    if (__instance.activatedRenderer != null)
+                        __instance.activatedRenderer.enabled = false;
                 }
                 else
                 {
                     __instance.clickable = true;
-                    __instance.iconRenderer.enabled = true;
                     __instance.challengeInfo = FAKE_FINAL_BOSS_INFO;
-                    __instance.iconRenderer.sprite = SKULL_SPRITE;
-                    __instance.activatedRenderer.sprite = SKULL_EYES_SPRITE;
+
+                    if (__instance.iconRenderer != null)
+                    {
+                        __instance.iconRenderer.enabled = true;
+                        __instance.iconRenderer.sprite = SKULL_SPRITE;
+                    }
+
+                    if (__instance.activatedRenderer != null)
+                        __instance.activatedRenderer.sprite = SKULL_EYES_SPRITE;
                 }
+                EnsureSingletonFinalBoss();
                 return false;
             }
             return true;

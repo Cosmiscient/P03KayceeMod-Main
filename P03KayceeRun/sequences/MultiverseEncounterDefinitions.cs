@@ -23,7 +23,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         // P03 1 plays a deck of multiversal gems
         // P03 2 plays a deck of defensive, multiversal conduits
 
-        private static void ContinueOn(this EncounterBlueprintData data, params string[] turns)
+        internal static void ContinueOn(this EncounterBlueprintData data, params string[] turns)
         {
             for (int i = 0; i < 10; i++)
             {
@@ -276,7 +276,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             MultiverseBossPhaseOne[4].turns = new();
             MultiverseBossPhaseOne[4].AddTerrainRepeatRule(5);
 
-            MultiverseBossPhaseOne[4].AddEnemyTerrain(new() {
+            MultiverseBossPhaseOne[4].AddEnemyTerrainQueue(new() {
                 Enemy("AttackConduit"),
                 null,
                 null,

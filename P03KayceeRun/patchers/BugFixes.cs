@@ -606,5 +606,29 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             __result ??= EncounterManager.AllEncountersCopy.FirstOrDefault(e => e.name.Equals(blueprintId, StringComparison.InvariantCultureIgnoreCase));
         }
+
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.ChooseTarget))]
+        [HarmonyPostfix]
+        private static IEnumerator ChoosingTargetLocksUpSlots(IEnumerator sequence, BoardManager __instance)
+        {
+            __instance.ChoosingSlot = true;
+            yield return sequence;
+            __instance.ChoosingSlot = false;
+        }
+
+        [HarmonyPatch(typeof(Card), nameof(Card.SetInfo))]
+        [HarmonyPrefix]
+        private static void ResetHidePortrait(Card __instance)
+        {
+            __instance.renderInfo.hidePortrait = false;
+        }
+
+        [HarmonyPatch(typeof(HoloMapNode), nameof(HoloMapNode.Awake))]
+        [HarmonyPrefix]
+        private static void EnsureNotNullRenderers(HoloMapNode __instance)
+        {
+            __instance.nodeRenderers ??= new();
+        }
+
     }
 }

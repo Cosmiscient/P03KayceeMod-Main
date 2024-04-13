@@ -34,7 +34,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static Achievement TEST_OF_STRENGTH { get; private set; }
         public static Achievement MULTIVERSE { get; private set; }
 
-        private static int BountyHuntersKilled
+        internal static int BountyHuntersKilled
         {
             get => ModdedSaveManager.SaveData.GetValueAsInt(P03Plugin.PluginGuid, "BountyHuntersKilledLifetime");
             set => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "BountyHuntersKilledLifetime", value);
@@ -467,6 +467,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 CardBattleAchievementMonitor.Instance.BountyHunterDied = true;
 
             BountyHuntersKilled++;
+            AscensionStatsData.TryIncrementStat(StatManagement.BOUNTY_HUNTERS_KILLED);
+
             if (BountyHuntersKilled >= 30)
                 AchievementManager.Unlock(KILL_30_BOUNTY_HUNTERS);
         }
@@ -475,7 +477,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static void CheckingForBACAchievement(int baseStatPoints)
         {
-            if (baseStatPoints >= 5 && P03AscensionSaveData.IsP03Run)
+            if (baseStatPoints >= 6 && P03AscensionSaveData.IsP03Run)
                 AchievementManager.Unlock(MAX_SP_CARD);
         }
 

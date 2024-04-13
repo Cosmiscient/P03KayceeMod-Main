@@ -41,19 +41,23 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             //PlayableCard target = this.Card.OpposingCard();
 
-            if (opposingSlot.Card != null && !opposingSlot.Card.Dead)
+            // Just loop this over and over again.
+            // Just in case the card has IceCube or something
+            int sanityCount = 0;
+            while (opposingSlot.Card != null && !opposingSlot.Card.Dead && sanityCount < 10)
             {
                 //target.Die(false, base.Card);
                 //base.Card.Slot.opposingSlot.Card.Die(false, base.Card);
                 Card.Anim.StrongNegationEffect();
                 yield return new WaitForSeconds(0.2f);
                 yield return opposingSlot.Card.Die(false, Card);
+                sanityCount += 1;
                 //Debug.Log("Card found");
             }
 
             // Lots of bad stuff can happen if we're currently dead at this point
             // There's no point in continuing to move if we're just going to die anyway
-            if (Card.Dead || Card.Health < 0)
+            if (Card.Dead || Card.Health < 0 || opposingSlot.Card != null)
                 yield break;
 
             yield return new WaitForSeconds(0.25f);

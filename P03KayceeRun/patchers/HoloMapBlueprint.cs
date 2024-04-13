@@ -23,6 +23,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public const int FAST_TRAVEL_NODE = 1 << 10;
         public const int FINAL_SHOP_NODE = 1 << 11;
         public const int TEST_OF_STREGTH = 1 << 12;
+        public const int MIRROR = 1 << 13;
+        public const int HOLO_PELT_MINIGAME = 1 << 14;
 
         public const int BATTLE = 0;
         public const int TRADE = 1;

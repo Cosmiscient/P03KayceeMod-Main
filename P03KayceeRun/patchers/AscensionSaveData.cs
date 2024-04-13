@@ -129,8 +129,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // || (!SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part1")
             // && AscensionSaveData.Data != null && AscensionSaveData.Data.currentRun != null && AscensionSaveData.Data.currentRun.playerLives > 0
             // && ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "IsP03Run"));
-            get => (SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part3") && SaveFile.IsAscension)
-                || ScreenManagement.ScreenState == CardTemple.Tech;
+            get => SaveFile.IsAscension && (SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part3") || ScreenManagement.ScreenState == CardTemple.Tech);
         }
 
         private static string ToCompressedJSON(object data)
@@ -328,6 +327,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyAfter(new string[] { "cyantist.inscryption.api" })]
         private static void LoadPart3AscensionSaveData()
         {
+            EnsurePart3Saved();
             P03Plugin.Log.LogInfo($"Loading from the save file. Getting Part3 save [{SaveKey}]");
             string part3Data = ModdedSaveManager.SaveData.GetValue(P03Plugin.PluginGuid, SaveKey);
             Part3SaveData data = FromCompressedJSON<Part3SaveData>(part3Data);

@@ -16,6 +16,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static Opponent.Type P03FinalBossOpponent { get; private set; }
         public static Opponent.Type P03MultiverseOpponent { get; private set; }
         public static Opponent.Type TestOfStrengthOpponent { get; private set; }
+        public static Opponent.Type DredgerOpponent { get; private set; }
 
         //10 was way too quiet... 0.15?
         public static float bossMusicVolume = 0.15f;
@@ -358,6 +359,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             TestOfStrengthOpponent = OpponentManager.Add(P03Plugin.PluginGuid, "TestOfStrengthOpponent", string.Empty, typeof(TestOfStrengthBattleOpponent))
                 .SetNewSequencer(P03Plugin.PluginGuid, "TestOfStrengthSequencer", typeof(TestOfStrengthBattleSequencer))
+                .Id;
+
+            DredgerOpponent = OpponentManager.Add(P03Plugin.PluginGuid, "DredgerOpponent", string.Empty, typeof(DredgerBossOpponent))
+                .SetNewSequencer(P03Plugin.PluginGuid, "DredgerP03Sequencer", typeof(Infiniscryption.P03KayceeRun.Sequences.DredgerBattleSequencer))
                 .Id;
         }
     }

@@ -16,6 +16,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         internal static AscensionStat.Type HAMMER_USES = GuidManager.GetEnumValue<AscensionStat.Type>(P03Plugin.PluginGuid, "HammerUses");
         internal static AscensionStat.Type EXPERIMENTS_CREATED = GuidManager.GetEnumValue<AscensionStat.Type>(P03Plugin.PluginGuid, "ExperimentsCreated");
         internal static AscensionStat.Type QUESTS_COMPLETED = GuidManager.GetEnumValue<AscensionStat.Type>(P03Plugin.PluginGuid, "QuestsCompletd");
+        internal static AscensionStat.Type BOUNTY_HUNTERS_KILLED = GuidManager.GetEnumValue<AscensionStat.Type>(P03Plugin.PluginGuid, "BountyHuntersKilled");
 
         private static readonly Sprite WIN_BACKGROUND = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascension_endscreen_victory.png", typeof(StatManagement).Assembly));
         private static readonly Sprite LOSE_BACKGROUND = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascension_endscreen_defeat.png", typeof(StatManagement).Assembly));
@@ -45,6 +46,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (__instance.type == QUESTS_COMPLETED)
                 __result = "Quests Completed";
+
+            if (__instance.type == BOUNTY_HUNTERS_KILLED)
+                __result = "Bounty Hunters Killed";
         }
 
         [HarmonyPatch(typeof(ResourcesManager), nameof(ResourcesManager.SpendEnergy))]
@@ -91,11 +95,26 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static void AddAdditionalStats()
         {
+            // First - we tracked bounty hunters separately for a long time. I need to make sure
+            // that the all-time stat for bounty hunters matches the other thing we're tracking
+            // This is a goofy hack that I hate but it's my fault for not tracking bounty hunters
+            // this way the whole time
+            P03AscensionSaveData.P03Data.stats ??= new();
+            P03AscensionSaveData.P03Data.stats.allTimeStats ??= new();
+            var bhStat = P03AscensionSaveData.P03Data.stats.allTimeStats.FirstOrDefault(s => s.type == BOUNTY_HUNTERS_KILLED);
+            if (bhStat == null)
+                P03AscensionSaveData.P03Data.stats.allTimeStats.Add(new(BOUNTY_HUNTERS_KILLED, P03AchievementManagement.BountyHuntersKilled));
+            else if (bhStat.value < P03AchievementManagement.BountyHuntersKilled)
+                bhStat.value = P03AchievementManagement.BountyHuntersKilled;
+
+            // Add the additional stats
             AscensionStatsScreen statScreen = AscensionMenuScreens.Instance.statsScreen.GetComponentInChildren<AscensionStatsScreen>();
+
+            statScreen.transform.Find("Stats/ScreenAnchor").GetComponent<GBC.AnchorToScreenEdge>().anchorYOffset = -0.2f;
             float yGap = statScreen.statsText[1].gameObject.transform.parent.position.y - statScreen.statsText[0].gameObject.transform.parent.position.y;
 
             GameObject template = statScreen.statsText[0].gameObject.transform.parent.gameObject;
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 5; i++)
             {
                 GameObject newItem = Object.Instantiate(template, template.transform.parent);
                 float newY = statScreen.statsText.Last().gameObject.transform.parent.localPosition.y + yGap;
@@ -115,6 +134,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (!statScreen.displayedStatTypes.Contains(QUESTS_COMPLETED))
                 statScreen.displayedStatTypes.Add(QUESTS_COMPLETED);
 
+            if (!statScreen.displayedStatTypes.Contains(BOUNTY_HUNTERS_KILLED))
+                statScreen.displayedStatTypes.Add(BOUNTY_HUNTERS_KILLED);
         }
 
         [HarmonyPatch(typeof(AscensionStatsScreen), nameof(AscensionStatsScreen.OnEnable))]

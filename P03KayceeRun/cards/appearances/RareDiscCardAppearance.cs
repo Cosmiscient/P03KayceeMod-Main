@@ -16,7 +16,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
     {
         private static bool RGBIsActive => SaveManager.SaveFile.unlockedAchievements.Contains(P03AchievementManagement.SKULLSTORM) || P03Plugin.Instance.DebugCode.Contains("rgb");
 
-        internal static bool CardIsRGBEligible(Card card) => card is not PlayableCard pcard || !pcard.OpponentCard;
+        internal bool IsRGBEligible
+        {
+            get
+            {
+                if (!RGBIsActive)
+                    return false;
+
+                return !IsOpponentAppearance;
+            }
+        }
 
         private static readonly Dictionary<string, Color?> configColors = new();
         private static readonly Dictionary<string, Color> defaultColors = new()
@@ -71,7 +80,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (c.HasValue)
                 return c;
 
-            var lookup = RGBIsActive ? defaultRGBColors : defaultColors;
+            var lookup = IsRGBEligible ? defaultRGBColors : defaultColors;
             return lookup.ContainsKey(key) ? lookup[key] : null;
         }
 
@@ -186,10 +195,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static void RBGifyCard(RenderStatsLayer __instance, Texture tex, bool emission)
         {
-            if (RGBIsActive && emission && __instance is DiskRenderStatsLayer drsl && tex is Texture2D texture)
+            if (emission && __instance is DiskRenderStatsLayer drsl && tex is Texture2D texture && RGBIsActive)
             {
-                Card card = drsl.gameObject.GetComponentInParent<Card>();
-                if (card != null && card.Info.appearanceBehaviour.Contains(ID) && CardIsRGBEligible(card))
+                RareDiscCardAppearance rareApp = drsl.gameObject.transform.parent.parent.gameObject.GetComponent<RareDiscCardAppearance>();
+                if (rareApp != null && rareApp.IsRGBEligible)
                 {
                     EstablishGradientCache(texture.width, texture.height);
                     for (int x = 0; x < tex.width; x++)

@@ -45,6 +45,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string UNC_TOKEN = "P03KCM_Draft_Token_Uncommon";
         public const string RARE_DRAFT_TOKEN = "P03KCM_Draft_Token_Rare";
         public const string GOLLYCOIN = "P03KCM_GollyCoin";
+        public const string GOLLY_TREE = "P03KCM_GollyTree";
+        public const string GOLLY_MOLEMAN = "P03KCM_GollyMoleMan";
         public const string BLOCKCHAIN = "P03KCM_Blockchain";
         public const string NFT = "P03KCM_NFT";
         public const string OLD_DATA = "P03KCM_OLD_DATA";
@@ -68,11 +70,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string FAILED_EXPERIMENT_BASE = "P03KCM_FAILED_EXPERIMENT";
         public const string MYCO_HEALING_CONDUIT = "P03KCM_MYCO_HEALING_CONDUIT";
         public const string MYCO_CONSTRUCT_BASE = "P03KCM_MYCO_CONSTRUCT_BASE";
+        public const string TRAINING_DUMMY = "P03KCM_TRAINING_DUMMY";
 
         public const string TURBO_MINECART = "P03KCM_TURBO_MINECART";
 
         public const string MAG_BRUSH = "P03KCM_MAG_BRUSH";
         public const string GRIM_QUIL = "P03KCM_GRIM_QUIL";
+
+        public const string PILE_OF_SCRAP = "P03KCM_PILE_OF_SCRAP";
+        public const string PAPERWORK_A = "P03KCM_PAPERWORK_A";
+        public const string PAPERWORK_B = "P03KCM_PAPERWORK_B";
+        public const string PAPERWORK_C = "P03KCM_PAPERWORK_C";
+
+        public const string HOLO_PELT = "P03KCM_HOLO_PELT";
+        public const string SINGLE_USE_TRAP = "P03KCM_SINGLE_USE_TRAP";
 
         public const string TURBO_VESSEL = "P03KCM_TURBO_VESSEL";
         public const string TURBO_VESSEL_BLUEGEM = "P03KCM_TURBO_VESSEL_BLUEGEM";
@@ -494,6 +505,33 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.BaseGameCards.First(c => c.name == "MineCart").SetEvolve(minecartrad, 1);
 
+            CardManager.New(P03Plugin.CardPrefx, PILE_OF_SCRAP, "Scrap Pile", 0, 1)
+                .SetPortrait(GetTexture("portrait_scrappile.png", typeof(CustomCards).Assembly))
+                .AddSpecialAbilities(ScrapDropBehaviour.ID)
+                .SetCost(energyCost: 2)
+                .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, PAPERWORK_A, "ALPHA.DOC", 0, 2)
+                .SetPortrait(GetTexture("portrait_paperwork.png", typeof(CustomCards).Assembly))
+                .AddSpecialAbilities(FilePaperworkInOrder.ID)
+                .AddAppearances(PaperworkDecalAppearance.ID)
+                .SetCost(energyCost: 1)
+                .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, PAPERWORK_B, "BETA.DOC", 0, 2)
+                .SetPortrait(GetTexture("portrait_paperwork.png", typeof(CustomCards).Assembly))
+                .AddSpecialAbilities(FilePaperworkInOrder.ID)
+                .AddAppearances(PaperworkDecalAppearance.ID)
+                .SetCost(energyCost: 1)
+                .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, PAPERWORK_C, "GAMMA.DOC", 0, 2)
+                .SetPortrait(GetTexture("portrait_paperwork.png", typeof(CustomCards).Assembly))
+                .AddSpecialAbilities(FilePaperworkInOrder.ID)
+                .AddAppearances(PaperworkDecalAppearance.ID)
+                .SetCost(energyCost: 1)
+                .SetCardTemple(CardTemple.Tech);
+
             CardManager.New(P03Plugin.CardPrefx, DRAFT_TOKEN, "Basic Token", 0, 1)
                 .SetPortrait(GetTexture("portrait_drafttoken.png", typeof(CustomCards).Assembly))
                 .SetPixelPortrait(GetTexture("pixel_drafttoken.png", typeof(CustomCards).Assembly))
@@ -559,6 +597,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ch2.temple = CardTemple.Tech;
             CardManager.BaseGameCards.CardByName("AboveCurve").SetEvolve(ch2, 1);
 
+            CardManager.New(P03Plugin.CardPrefx, TRAINING_DUMMY, "Training Dummy", 0, 7)
+                    .SetPortrait(GetTexture("portrait_dumbot.png", typeof(CustomCards).Assembly))
+                    .SetCost(energyCost: 6)
+                    .SetSpecialAbilities(DummyBreak.ID)
+                    .SetCardTemple(CardTemple.Tech);
+
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL, "Turbo Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
@@ -599,6 +643,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
+            CardManager.New(P03Plugin.CardPrefx, CustomCards.GOLLY_TREE, "Tree", 0, 2)
+                .SetAltPortrait(TextureHelper.GetImageAsTexture("portrait_golly_tree.png", typeof(CustomCards).Assembly, FilterMode.Trilinear))
+                .AddAppearances(HighResAlternatePortrait.ID)
+                .SetCardTemple(CardTemple.Tech)
+                .AddAbilities(Ability.Reach);
+
+            CardManager.New(P03Plugin.CardPrefx, CustomCards.GOLLY_MOLEMAN, "Mole Man", 0, 6)
+                .SetAltPortrait(TextureHelper.GetImageAsTexture("portrait_golly_moleman.png", typeof(CustomCards).Assembly, FilterMode.Trilinear))
+                .AddAppearances(HighResAlternatePortrait.ID)
+                .SetCardTemple(CardTemple.Tech)
+                .AddAbilities(Ability.Reach, Ability.WhackAMole);
+
             CardManager.New(P03Plugin.CardPrefx, CustomCards.MAG_BRUSH, "MAGBRUSH.EXE", 0, 0)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_brush.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
@@ -609,7 +665,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.New(P03Plugin.CardPrefx, CustomCards.GRIM_QUIL, "GRIMQUIL.EXE", 0, 0)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_quill.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 2)
+                .SetCost(energyCost: 3)
                 .SetInstaGlobalSpell()
                 .SetSpellAppearanceP03()
                 .AddAbilities(MultiverseTutor.AbilityID);

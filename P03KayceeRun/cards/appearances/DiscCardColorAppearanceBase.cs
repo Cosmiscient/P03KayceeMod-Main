@@ -16,19 +16,41 @@ namespace Infiniscryption.P03KayceeRun.Cards
     {
         private readonly Dictionary<string, Color?> _setColors = new();
 
+        private readonly Dictionary<bool, Dictionary<string, Color?>> _cachedColors = new() { { true, new() }, { false, new() } };
+
         protected virtual Color? LookupColor(string key) => null;
+
+        private Card _cacheCard = null;
+        private PlayableCard _cachedPlayableCard = null;
+        protected bool IsOpponentAppearance
+        {
+            get
+            {
+                if (_cacheCard == null)
+                {
+                    _cacheCard = this.Card;
+                    _cachedPlayableCard = this.Card as PlayableCard;
+                }
+                return _cachedPlayableCard != null && _cachedPlayableCard.OpponentCard;
+            }
+        }
 
         private Color? GetColor(string key)
         {
             if (_setColors.ContainsKey(key))
                 return _setColors[key];
 
-            _setColors[key] = LookupColor(key);
+            var cache = _cachedColors[IsOpponentAppearance];
 
-            if (!_setColors[key].HasValue)
-                _setColors[key] = GetColorFromString(Card.Info.GetExtendedProperty(key));
+            if (cache.ContainsKey(key))
+                return cache[key];
 
-            return _setColors[key];
+            cache[key] = LookupColor(key);
+
+            if (!cache[key].HasValue)
+                cache[key] = GetColorFromString(Card.Info.GetExtendedProperty(key));
+
+            return cache[key];
         }
 
         private bool? _holofy = null;

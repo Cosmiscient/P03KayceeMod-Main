@@ -4,10 +4,12 @@ using System.IO;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Dialogue;
+using InscryptionAPI.Guid;
 using Sirenix.Serialization.Utilities;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -18,6 +20,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     {
         internal static List<string> AllStringsToTranslate = new();
         internal static bool TrackForTranslation = false;
+        private static readonly Dictionary<string, DialogueEvent.Speaker> cardSpeakers = new();
+
+        internal static DialogueEvent.Speaker NewCardSpeaker(string speaker)
+        {
+            var result = GuidManager.GetEnumValue<DialogueEvent.Speaker>(P03Plugin.PluginGuid, speaker);
+            cardSpeakers.Add(speaker.ToLowerInvariant(), result);
+            return result;
+        }
 
 
         private static Emotion FaceEmotion(this P03AnimationController.Face face)
@@ -88,7 +98,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return String.IsNullOrEmpty(face)
                 ? P03AnimationController.Face.NoChange
                 : face.ToLowerInvariant().StartsWith("npc")
-                ? P03ModularNPCFace.ModularNPCFace
+                ? P03AnimationController.Face.NoChange
                 : face.ToLowerInvariant().Contains("troll")
                 ? P03TrollFace.ID
                 : face.ParseEnumFace();
@@ -96,9 +106,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static DialogueEvent.Speaker ParseSpeaker(this string face, DialogueEvent.Speaker defaultSpeaker = DialogueEvent.Speaker.P03)
         {
-            DialogueEvent.Speaker speaker = defaultSpeaker;
             if (string.IsNullOrEmpty(face))
-                speaker = defaultSpeaker;
+                return defaultSpeaker;
+
+            foreach (var kvp in cardSpeakers)
+                if (face.ToLowerInvariant().Contains(kvp.Key))
+                    return kvp.Value;
+
+            DialogueEvent.Speaker speaker = defaultSpeaker;
+            if (face.ToLowerInvariant().Contains("card"))
+                speaker = DialogueEvent.Speaker.AnglerTalkingCard;
             else if (face.ToLowerInvariant().Contains("leshy"))
                 speaker = DialogueEvent.Speaker.Leshy;
             else if (face.ToLowerInvariant().Contains("grimora"))
@@ -166,6 +183,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             Emotion lastEmotion = Emotion.Neutral;
 
             List<DialogueEvent.Line> currentLines = new();
+            List<List<DialogueEvent.Line>> replacementLines = new();
             List<DialogueEvent.Speaker> currentSpeakers = new() { DialogueEvent.Speaker.Single };
 
             foreach (string line in lines.Skip(1))
@@ -174,25 +192,38 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 if (!string.IsNullOrEmpty(cols[0]))
                 {
-                    if (!string.IsNullOrEmpty(dialogueId))
+                    if (cols[0].StartsWith("|"))
                     {
-                        DialogueEvent newEvent = new()
-                        {
-                            id = dialogueId,
-                            speakers = currentSpeakers,
-                            mainLines = new(currentLines)
-                        };
-
-                        currentLines = new();
-                        currentSpeakers = new() { DialogueEvent.Speaker.Single };
-
-                        DialogueManager.Add(P03Plugin.PluginGuid, newEvent);
+                        replacementLines.Add(new());
                     }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(dialogueId))
+                        {
+                            DialogueEvent newEvent = new()
+                            {
+                                id = dialogueId,
+                                speakers = currentSpeakers,
+                                mainLines = new(currentLines)
+                            };
 
-                    dialogueId = cols[0];
-                    lastSeenFaceInstruction = string.Empty;
-                    lastSpeaker = DialogueEvent.Speaker.P03;
-                    lastEmotion = Emotion.Neutral;
+                            if (replacementLines.Count > 0)
+                                newEvent.repeatLines = replacementLines.Select(
+                                    llines => new DialogueEvent.LineSet(llines)
+                                ).ToList();
+
+                            currentLines = new();
+                            currentSpeakers = new() { DialogueEvent.Speaker.Single };
+                            replacementLines = new();
+
+                            DialogueManager.Add(P03Plugin.PluginGuid, newEvent);
+                        }
+
+                        dialogueId = cols[0];
+                        lastSeenFaceInstruction = string.Empty;
+                        lastSpeaker = DialogueEvent.Speaker.P03;
+                        lastEmotion = Emotion.Neutral;
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(cols[1]))
@@ -208,12 +239,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 string dialogue = cols[3];
                 bool wavy = !string.IsNullOrEmpty(cols[2]) && cols[2].ToLowerInvariant().Contains("y");
 
+                P03Plugin.Log.LogDebug($"{dialogueId} has speaker {speaker}");
+
                 if (!currentSpeakers.Contains(speaker))
                     currentSpeakers.Add(speaker);
 
+                if (cardSpeakers.ContainsValue(speaker))
+                {
+                    currentSpeakers.Remove(DialogueEvent.Speaker.Single);
+                    dialogue += "[w:0.3]";
+                }
+
                 AllStringsToTranslate.Add(dialogue);
 
-                currentLines.Add(new()
+                DialogueEvent.Line newLine = new()
                 {
                     text = dialogue,
                     specialInstruction = "",
@@ -221,7 +260,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     speakerIndex = currentSpeakers.IndexOf(speaker),
                     emotion = emotion,
                     letterAnimation = wavy ? TextDisplayer.LetterAnimation.Jitter : TextDisplayer.LetterAnimation.None
-                });
+                };
+
+                if (replacementLines.Count > 0)
+                    replacementLines.Last().Add(newLine);
+                else
+                    currentLines.Add(newLine);
             }
         }
 

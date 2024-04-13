@@ -495,7 +495,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ResourcesManager.Instance.ForceGemsUpdate();
 
             // Restore face
-            P03AnimationController.Instance.FaceRenderer.DisplayFace(this.P03Face);
+            if (MultiverseBattleSequencer.Instance.CurrentPhase == Phase.PlayerUpkeepAndMain && this.PlayerRungBell)
+                P03AnimationController.Instance.FaceRenderer.DisplayFace(P03BellFace.ID);
+            else if (this.P03Face == P03BellFace.ID)
+                P03AnimationController.Instance.FaceRenderer.DisplayFace(P03AnimationController.Face.Default);
+            else
+                P03AnimationController.Instance.FaceRenderer.DisplayFace(this.P03Face);
 
             // States
             yield return MultiverseBattleSequencer.Instance.SetPhase(this.CurrentPhase, suppressCallbacks: true);

@@ -7,6 +7,9 @@ using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Patchers;
+using InscryptionAPI.Card;
+using InscryptionAPI.Encounters;
+using Infiniscryption.P03KayceeRun.Encounters;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {
@@ -29,6 +32,14 @@ namespace Infiniscryption.P03KayceeRun.Quests
         internal static QuestDefinition BombBattles { get; private set; }
         internal static QuestDefinition BountyTarget { get; private set; }
         internal static QuestDefinition LeapBotNeo { get; private set; }
+        internal static QuestDefinition TrainingDummy { get; private set; }
+        internal static QuestDefinition DredgerBattle { get; private set; }
+        internal static QuestDefinition LibrarianPaperwork { get; private set; }
+        internal static QuestDefinition KayceesFriend { get; private set; }
+        internal static QuestDefinition KayceesFriendPartTwo { get; private set; }
+        internal static QuestDefinition TrapperPelts { get; private set; }
+        internal static QuestDefinition TraderPelts { get; private set; }
+        internal static QuestDefinition Rebecha { get; private set; }
 
         // These are the special story maps
         internal static QuestDefinition FindGoobert { get; private set; }
@@ -38,6 +49,23 @@ namespace Infiniscryption.P03KayceeRun.Quests
         public const int RADIO_TURNS = 5;
         public const int POWER_TURNS = 4;
         public const int BURNED_CARDS = 3;
+
+        internal static bool TalkingCardPriorityCheck
+        {
+            get
+            {
+                if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("talking"))
+                    return true;
+
+                if (EventManagement.CompletedZones.Count == 0)
+                    return SeededRandom.Value(P03AscensionSaveData.RandomSeed) < 0.2f;
+
+                if (Part3SaveData.Data.deck.Cards.Any(ci => ci.appearanceBehaviour.Contains(CardAppearanceBehaviour.Appearance.DynamicPortrait)))
+                    return SeededRandom.Value(P03AscensionSaveData.RandomSeed) < 0.66667f;
+
+                return false;
+            }
+        }
 
         internal static int DeckSizeTarget
         {
@@ -221,7 +249,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                             .AddGainItemReward(ShockerItem.ItemData.name);
 
             // Goobert Quests
-            FindGoobert = QuestManager.Add(P03Plugin.PluginGuid, "FindGoobert").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.PikeMageSolo, CompositeFigurine.FigurineType.Enchantress));
+            FindGoobert = QuestManager.Add(P03Plugin.PluginGuid, "FindGoobert").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.PikeMageSolo, CompositeFigurineManager.PikeMage));
             QuestState waitingState = FindGoobert.AddDialogueState("MY FRIEND IS LOST", "P03WhereIsGoobert")
                             .AddNamedState("GoobertAvailable", "MY FRIEND IS LOST", "P03WhereIsGoobert");
 
@@ -330,6 +358,182 @@ namespace Infiniscryption.P03KayceeRun.Quests
             dummyState.AddDialogueState("ITS GLORIOUS", "P03LeapBotQuest")
                       .AddReward(new QuestRewardTransformCard() { CardName = "LeapBot", TransformIntoCardName = ExpansionPackCards_2.LEAPBOT_NEO });
 
+
+            // Training Dummy
+            TrainingDummy = QuestManager.Add(P03Plugin.PluginGuid, "TrainingDummy").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.DummySolo, CompositeFigurineManager.TrainingDummy));
+            TrainingDummy.SetGenerateCondition(() => EventManagement.CurrentZone == RunBasedHoloMap.Zone.Magic)
+                         .SetPriorityCalculation(() => TalkingCardPriorityCheck ? 10 : 1)
+                         .AddDialogueState("...", "DummyData")
+                         .AddDialogueState("...", "DummyDataTwo")
+                         .AddDialogueState("...", "DummyDataThree")
+                         .AddGainCardReward(CustomCards.TRAINING_DUMMY);
+
+            // Dredger Battle
+            DredgerBattle = QuestManager.Add(P03Plugin.PluginGuid, "DredgerBattle").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.DredgerSolo, CompositeFigurine.FigurineType.Robot));
+
+            var dredgerBattle = new CardBattleNodeData()
+            {
+                specialBattleId = BossBattleSequencer.GetSequencerIdForBoss(BossManagement.DredgerOpponent),
+                difficulty = 0,
+                blueprint = EncounterHelper.DredgerBattle,
+            };
+
+            var battleState = DredgerBattle.SetGenerateCondition(() => EventManagement.CurrentZone == RunBasedHoloMap.Zone.Tech)
+                         .SetPriorityCalculation(() => TalkingCardPriorityCheck ? 10 : 1)
+                         .AddDialogueState("OY MATEY", "DredgerQuestStart")
+                         .AddSpecialNodeState("LET'S FIGHT", dredgerBattle);
+
+            battleState.AddDialogueState("GOOD GAME", "DredgerReward")
+                       .AddGainCardReward(TalkingCardMelter.Name);
+
+            battleState.AddDialogueState("TOO BAD", "DredgerNoReward", QuestState.QuestStateStatus.Failure);
+
+            // Kaycee's Friend and Librarians
+            KayceesFriend = QuestManager.Add(P03Plugin.PluginGuid, "KayceesFriend").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.KayceeSolo, CompositeFigurineManager.Kaycee));
+            LibrarianPaperwork = QuestManager.Add(P03Plugin.PluginGuid, "LibrarianPaperwork").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.LibrariansSolo, CompositeFigurineManager.None));
+            LibrarianPaperwork.SetPartnerQuest(KayceesFriend.EventId)
+                              .SetAllowLandmarks()
+                              .SetValidRoomCondition(bp => (bp.specialTerrain & HoloMapBlueprint.FAST_TRAVEL_NODE) != 0)
+                              .AddPostGenerationAction(go => go.transform.localPosition = new(-0.9469f, 1.1f, 0.6946f));
+            KayceesFriend.SetGenerateCondition(() => EventManagement.CurrentZone == RunBasedHoloMap.Zone.Undead)
+                         .QuestCannotContinueAcrossMap()
+                         .SetPriorityCalculation(() => TalkingCardPriorityCheck ? 10 : 1);
+
+            var kayceeActiveState = KayceesFriend.AddDialogueState("BRRRRR", "KayceeQuestStart")
+                         .AddDefaultActiveState("F-FIND HIM", "KayceeQuestWaiting")
+                         .SetDynamicStatus(() =>
+                         {
+                             if (!LibrarianPaperwork.IsCompleted)
+                                 return QuestState.QuestStateStatus.Active;
+
+                             if (Part3SaveData.Data.deck.CardInfos.Any(ci => ci.name.Equals(TalkingCardSawyer.Name)))
+                                 return QuestState.QuestStateStatus.Success;
+
+                             return QuestState.QuestStateStatus.Failure;
+                         });
+            kayceeActiveState.AddDialogueState("HOORAY!", "KayceeQuestSuccess").SetDynamicStatus(() => QuestState.QuestStateStatus.Active);
+            kayceeActiveState.AddDialogueState("OH NO", "KayceeQuestFailed", QuestState.QuestStateStatus.Failure);
+
+            var librarianActiveState = LibrarianPaperwork.AddState("QUIET", "LibrarianQuestShhh")
+                        .SetDynamicStatus(() => KayceesFriend.InitialState.Status == QuestState.QuestStateStatus.Success ? QuestState.QuestStateStatus.Success : QuestState.QuestStateStatus.Active)
+                        .AddDialogueState("YOU WANT HIM BACK?", "LibrarianQuestStart")
+                        .AddGainCardReward(CustomCards.PAPERWORK_A)
+                        .AddGainCardReward(CustomCards.PAPERWORK_B)
+                        .AddGainCardReward(CustomCards.PAPERWORK_C)
+                        .AddDefaultActiveState("FILE THE PAPERS", "LibrarianQuestWaiting")
+                        .SetDynamicStatus(delegate ()
+                        {
+                            if (Part3SaveData.Data.deck.CardInfos.Where(ci => FilePaperworkInOrder.ALL_PAPERWORK.Contains(ci.name)).Count() < 3)
+                                return QuestState.QuestStateStatus.Failure;
+
+                            if (FilePaperworkStamp.StampedPaperwork.Count >= 3)
+                                return QuestState.QuestStateStatus.Success;
+
+                            return QuestState.QuestStateStatus.Active;
+                        });
+
+            librarianActiveState.AddDialogueState("IT IS COMPLETE", "LibrarianQuestSuccess")
+                        .AddLoseCardReward(CustomCards.PAPERWORK_A)
+                        .AddLoseCardReward(CustomCards.PAPERWORK_B)
+                        .AddLoseCardReward(CustomCards.PAPERWORK_C)
+                        .AddGainCardReward(TalkingCardSawyer.Name);
+
+            librarianActiveState.AddDialogueState("YOU FAILED", "LibrarianQuestFailed", QuestState.QuestStateStatus.Failure);
+
+            KayceesFriendPartTwo = QuestManager.Add(P03Plugin.PluginGuid, "KayceesFriendContinue").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.KayceeSolo, CompositeFigurineManager.Kaycee));
+            KayceesFriendPartTwo.SetGenerateCondition(() => false)
+                                .SetMustBeGeneratedCondition(
+                                    () => LibrarianPaperwork.QuestGenerated && !LibrarianPaperwork.IsCompleted
+                                          && Part3SaveData.Data.deck.CardInfos.Any(ci => FilePaperworkInOrder.ALL_PAPERWORK.Contains(ci.name))
+                                          && EventManagement.CurrentZone != RunBasedHoloMap.Zone.Undead
+                                );
+
+            var kStatePartTwo = KayceesFriendPartTwo.AddState("H-HURRY", "KayceeQuestTwoActive")
+                        .SetDynamicStatus(delegate ()
+                        {
+                            if (Part3SaveData.Data.deck.CardInfos.Where(ci => FilePaperworkInOrder.ALL_PAPERWORK.Contains(ci.name)).Count() < 3)
+                                return QuestState.QuestStateStatus.Failure;
+
+                            if (FilePaperworkStamp.StampedPaperwork.Count >= 3)
+                                return QuestState.QuestStateStatus.Success;
+
+                            return QuestState.QuestStateStatus.Active;
+                        });
+
+            kStatePartTwo.AddDialogueState("HOORAY!", "KayceeQuestTwoSuccess")
+                         .AddLoseCardReward(CustomCards.PAPERWORK_A)
+                         .AddLoseCardReward(CustomCards.PAPERWORK_B)
+                         .AddLoseCardReward(CustomCards.PAPERWORK_C)
+                         .AddDefaultActiveState("BRB", "KayceeQuestTwoWaiting")
+                         .WaitForQuestCounter(1)
+                         .AddDialogueState("I'M BACK!", "KayceeQuestTwoFinal")
+                         .AddGainCardReward(TalkingCardSawyer.Name);
+
+            kStatePartTwo.AddDialogueState("OH NO", "KayceeQuestFailed", QuestState.QuestStateStatus.Failure);
+
+            // Trapper/Trader
+            TrapperPelts = QuestManager.Add(P03Plugin.PluginGuid, "TrapperPelts").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.TrapperSolo, CompositeFigurine.FigurineType.Wildling, CompositeFigurine.FigurineType.Chief, CompositeFigurine.FigurineType.Chief));
+            TrapperPelts.SetGenerateCondition(() => EventManagement.CurrentZone == RunBasedHoloMap.Zone.Nature)
+                        .QuestCannotContinueAcrossMap()
+                        .SetPriorityCalculation(() => TalkingCardPriorityCheck ? 10 : 1)
+                        .AddDialogueState("PELTS PELTS PELTS", "TrapperQuestStart")
+                        .AddDialogueState("PELTS PELTS PELTS", "TrapperQuestContinue")
+                        .AddDefaultActiveState("FIND MY TRAPS", "TrapperQuestActive")
+                        .SetDynamicStatus(delegate ()
+                        {
+                            if (Part3SaveData.Data.pelts < 4)
+                                return QuestState.QuestStateStatus.Active;
+
+                            // Mark the quest as "failed" because I don't want you to get
+                            // two completed quests in one.
+                            return QuestState.QuestStateStatus.Failure;
+                        })
+                        .AddDialogueState("PELTS!", "TrapperQuestComplete", QuestState.QuestStateStatus.Failure);
+
+            TraderPelts = QuestManager.Add(P03Plugin.PluginGuid, "TraderPelts").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.TraderSolo, CompositeFigurine.FigurineType.Wildling, CompositeFigurine.FigurineType.Chief, CompositeFigurine.FigurineType.Chief));
+            TraderPelts.SetPartnerQuest(TrapperPelts.EventId)
+                       .QuestCannotContinueAcrossMap()
+                       .SetValidRoomCondition(bp => bp.color == 3)
+                       .AddState("PELTS?", "TraderNoPelts")
+                       .SetDynamicStatus(() => Part3SaveData.Data.pelts == 0 ? QuestState.QuestStateStatus.Active : QuestState.QuestStateStatus.Success)
+                       .AddDialogueState("A FINE PELT", "TraderFinePelt", overrideName: "BuyFirstPelt")
+                       .AddMonetaryReward(1)
+                       .AddDialogueState("PELTS?", "TraderNoPelts", overrideName: "WaitForSecondPelt")
+                       .SetDynamicStatus(() => Part3SaveData.Data.pelts <= 1 ? QuestState.QuestStateStatus.Active : QuestState.QuestStateStatus.Success)
+                       .AddDialogueState("A FINE PELT", "TraderFinePelt", overrideName: "BuySecondPelt")
+                       .AddMonetaryReward(2)
+                       .AddDialogueState("PELTS?", "TraderNoPelts", overrideName: "WaitForThirdPelt")
+                       .SetDynamicStatus(() => Part3SaveData.Data.pelts <= 2 ? QuestState.QuestStateStatus.Active : QuestState.QuestStateStatus.Success)
+                       .AddDialogueState("A FINE PELT", "TraderFinePelt", overrideName: "BuyThirdPelt")
+                       .AddMonetaryReward(2)
+                       .AddDialogueState("PELTS?", "TraderNoPelts", overrideName: "WaitForFourthPelt")
+                       .SetDynamicStatus(() => Part3SaveData.Data.pelts <= 3 ? QuestState.QuestStateStatus.Active : QuestState.QuestStateStatus.Success)
+                       .AddDialogueState("A VERY FINE PELT", "TraderVeryFinePelt", overrideName: "BuyFourthPelt")
+                       .AddGainCardReward("Angler_Talking");
+
+            Rebecha = QuestManager.Add(P03Plugin.PluginGuid, "Rebecha").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.RebechaSolo, CompositeFigurine.FigurineType.Wildling, CompositeFigurine.FigurineType.Prospector, CompositeFigurine.FigurineType.Wildling));
+            Rebecha.SetGenerateCondition(() => false)
+                   .AddState("IT'S BROKEN", "RebechaZeroComplete")
+                   .SetDynamicStatus(() => EventManagement.CompletedZones.Count == 0 ? QuestState.QuestStateStatus.Active : QuestState.QuestStateStatus.Success)
+                   .AddDialogueState("IT'S STILL BROKEN", "RebechaOneComplete")
+                   .SetDynamicStatus(() => EventManagement.CompletedZones.Count == 1 ? QuestState.QuestStateStatus.Active : QuestState.QuestStateStatus.Failure)
+                   .AddDialogueState("IT'S FIXED", "RebechaFullyOpen", QuestState.QuestStateStatus.Failure);
+        }
+
+        [HarmonyPatch(typeof(HoloMapPeltMinigame), nameof(HoloMapPeltMinigame.Start))]
+        [HarmonyPrefix]
+        private static bool OnlyIfQuestActive(HoloMapPeltMinigame __instance)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
+            if (!TrapperPelts.IsDefaultActive())
+            {
+                __instance.gameObject.SetActive(false);
+                return false;
+            }
+
+            return true;
         }
     }
 }

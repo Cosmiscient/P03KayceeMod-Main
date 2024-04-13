@@ -18,7 +18,12 @@ namespace Infiniscryption.P03KayceeRun.Quests
         private static readonly Dictionary<string, P03AnimationController.Face> ANIMATED_FACES = new()
         {
             { $"{(int)P03ModularNPCFace.FaceSet.InspectorSolo}-{(int)P03ModularNPCFace.FaceSet.InspectorSolo}-{(int)P03ModularNPCFace.FaceSet.InspectorSolo}", P03AnimationController.Face.Inspector },
-            { $"{(int)P03ModularNPCFace.FaceSet.PikeMageSolo}-{(int)P03ModularNPCFace.FaceSet.PikeMageSolo}-{(int)P03ModularNPCFace.FaceSet.PikeMageSolo}", P03AnimationController.Face.SpearWizard }
+            { $"{(int)P03ModularNPCFace.FaceSet.PikeMageSolo}-{(int)P03ModularNPCFace.FaceSet.PikeMageSolo}-{(int)P03ModularNPCFace.FaceSet.PikeMageSolo}", P03AnimationController.Face.SpearWizard },
+            { $"{(int)P03ModularNPCFace.FaceSet.DummySolo}-{(int)P03ModularNPCFace.FaceSet.DummySolo}-{(int)P03ModularNPCFace.FaceSet.DummySolo}", P03AnimationController.Face.Thinking },
+            { $"{(int)P03ModularNPCFace.FaceSet.DredgerSolo}-{(int)P03ModularNPCFace.FaceSet.DredgerSolo}-{(int)P03ModularNPCFace.FaceSet.DredgerSolo}", P03AnimationController.Face.Dredger },
+            { $"{(int)P03ModularNPCFace.FaceSet.KayceeSolo}-{(int)P03ModularNPCFace.FaceSet.KayceeSolo}-{(int)P03ModularNPCFace.FaceSet.KayceeSolo}", P03AnimationController.Face.Kaycee },
+            { $"{(int)P03ModularNPCFace.FaceSet.LibrariansSolo}-{(int)P03ModularNPCFace.FaceSet.LibrariansSolo}-{(int)P03ModularNPCFace.FaceSet.LibrariansSolo}", P03AnimationController.Face.Librarians },
+            { $"{(int)P03ModularNPCFace.FaceSet.RebechaSolo}-{(int)P03ModularNPCFace.FaceSet.RebechaSolo}-{(int)P03ModularNPCFace.FaceSet.RebechaSolo}", P03AnimationController.Face.Mechanic }
         };
 
         public P03AnimationController.Face P03Face

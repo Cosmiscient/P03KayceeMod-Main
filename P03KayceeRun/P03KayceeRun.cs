@@ -56,9 +56,6 @@ namespace Infiniscryption.P03KayceeRun
 
             DialogueManagement.TrackForTranslation = true;
 
-            // Call dialogue sequence
-            DialogueManagement.AddSequenceDialogue();
-
             foreach (Type t in typeof(P03Plugin).Assembly.GetTypes())
             {
                 try
@@ -71,6 +68,9 @@ namespace Infiniscryption.P03KayceeRun
                     Log.LogWarning(ex);
                 }
             }
+
+            // Call dialogue sequence
+            DialogueManagement.AddSequenceDialogue();
 
             CustomCards.RegisterCustomCards(harmony);
             MultiverseCards.CreateCards();

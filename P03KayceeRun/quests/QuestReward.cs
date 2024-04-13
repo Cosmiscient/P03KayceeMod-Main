@@ -95,9 +95,28 @@ namespace Infiniscryption.P03KayceeRun.Quests
         public string CardName { get; set; }
         public string DialogueId { get; set; }
 
+        public static IEnumerator ImmediateReward(string card, string dialogue = null)
+        {
+            QuestRewardCard q = new() { CardName = card, DialogueId = dialogue };
+            yield return q.GrantRewardSequence();
+        }
+
         protected virtual IEnumerator DoCardAction(SelectableCard card, CardInfo info)
         {
             Part3SaveData.Data.deck.AddCard(CustomCards.ConvertCodeToCard(CardName));
+
+            TalkingCard tCard = card.GetComponent<TalkingCard>();
+
+            if (tCard != null)
+            {
+                string dialogue = tCard.OnDiscoveredInExplorationDialogueId ?? DialogueId;
+                if (!string.IsNullOrEmpty(dialogue))
+                {
+                    yield return tCard.PlaySoloDialogueEvent(dialogue);
+                    yield return new WaitForSeconds(0.25f);
+                    yield break;
+                }
+            }
 
             yield return String.IsNullOrEmpty(DialogueId)
                 ? new WaitForSeconds(1.5f)
@@ -324,6 +343,16 @@ namespace Infiniscryption.P03KayceeRun.Quests
         protected override IEnumerator GrantRewardSequence()
         {
             RewardAction?.Invoke();
+            yield break;
+        }
+    }
+
+    public class QuestRewardSpecialEvent : QuestReward
+    {
+        public NodeData Data { get; set; }
+
+        protected override IEnumerator GrantRewardSequence()
+        {
             yield break;
         }
     }

@@ -36,6 +36,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly StoryEvent SAW_P03_PAIDRESPAWN_EXPLAIN = NewStory("SawP03PaidRespawnExplain", save: true);
         public static readonly StoryEvent SAW_P03_BOSSPAIDRESPAWN_EXPLAIN = NewStory("SawP03PaidRespawnExplain", save: true);
         public static readonly StoryEvent GOLLY_NFT = NewStory("GollyNFTIntro", save: true);
+        public static readonly StoryEvent DEFEATED_DREDGER = NewStory("DefeatedDredger");
         public static readonly StoryEvent DEFEATED_P03 = NewStory("DefeatedP03");
         public static readonly StoryEvent DEFEATED_P03_MULTIVERSE = NewStory("DefeatedP03Multiverse");
         public static readonly StoryEvent ONLY_ONE_BOSS_LIFE = NewStory("P03AscensionOneBossLife", save: true);
@@ -434,7 +435,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 if (storyEvent == StoryEvent.HoloTechTempleSatelliteActivated)
                 {
-                    __result = true;
+                    __result = NumberOfZoneEnemiesKilled >= ENEMIES_TO_UNLOCK_BOSS;
                     return false;
                 }
 
@@ -493,6 +494,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                     if (DefaultQuestDefinitions.BombBattles.IsDefaultActive())
                         DefaultQuestDefinitions.BombBattles.IncrementQuestCounter();
+
+                    if (DefaultQuestDefinitions.KayceesFriendPartTwo.IsDefaultActive())
+                        DefaultQuestDefinitions.KayceesFriendPartTwo.IncrementQuestCounter();
                 }
             }
 

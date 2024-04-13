@@ -55,7 +55,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             int sequenceNumber = upkeepCounter <= 8 ? upkeepCounter : ((upkeepCounter - 1) % 6) + 1;
 
-            switch (upkeepCounter)
+            switch (sequenceNumber)
             {
                 case 1:
                     yield return P03AscensionOpponent.ShopForModSequence(MODS[0], upkeepCounter == 1, upkeepCounter <= 8);

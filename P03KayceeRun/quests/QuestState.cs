@@ -22,6 +22,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
             Failure = 3
         }
 
+        private static readonly Dictionary<string, QuestState> DIALOGUE_REVERSE_MAP = new();
+
         /// <summary>
         /// A story event flag for completion (success or failure) of this quest state
         /// </summary>
@@ -47,10 +49,60 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// </summary>
         public string StateName { get; private set; }
 
+        private string _dialogueId;
+
         /// <summary>
         /// The dialogue that will be spoken when interacting with the NPC that gives this quest when this quest state is active
         /// </summary>
-        public string DialogueId { get; private set; }
+        public string DialogueId
+        {
+            get => _dialogueId;
+            private set
+            {
+                if (!string.IsNullOrEmpty(_dialogueId) && DIALOGUE_REVERSE_MAP.ContainsKey(_dialogueId))
+                    DIALOGUE_REVERSE_MAP.Remove(_dialogueId);
+
+                _dialogueId = value;
+
+                if (!string.IsNullOrEmpty(value))
+                    DIALOGUE_REVERSE_MAP[value] = this;
+            }
+        }
+
+        [HarmonyPatch(typeof(DialogueEventsData), nameof(DialogueEventsData.FindEvent))]
+        [HarmonyPrefix]
+        private static bool SpecialDialogueCounter(string eventId, ref DialogueEventsData.EventSaveData __result)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
+            if (!DIALOGUE_REVERSE_MAP.ContainsKey(eventId))
+                return true;
+
+            var state = DIALOGUE_REVERSE_MAP[eventId];
+            __result = new(eventId) { repeatCount = state.DialogueRepeatCount };
+            return false;
+        }
+
+        [HarmonyPatch(typeof(DialogueEventsData), nameof(DialogueEventsData.MarkEventPlayed))]
+        [HarmonyPrefix]
+        private static bool SpecialDialogueCounterIncrease(string eventId)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
+            if (!DIALOGUE_REVERSE_MAP.ContainsKey(eventId))
+                return true;
+
+            DIALOGUE_REVERSE_MAP[eventId].DialogueRepeatCount += 1;
+            return false;
+        }
+
+        public int DialogueRepeatCount
+        {
+            get => P03AscensionSaveData.RunStateData.GetValueAsInt(P03Plugin.PluginGuid, $"{SaveKey}_DialogueRepeatCount");
+            set => P03AscensionSaveData.RunStateData.SetValue(P03Plugin.PluginGuid, $"{SaveKey}_DialogueRepeatCount", value);
+        }
 
         /// <summary>
         /// A function to get the dialogue ID in a dynamic fashion
@@ -66,6 +118,12 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// The parent quest for this quest state
         /// </summary>
         public QuestDefinition ParentQuest { get; private set; }
+
+        /// <summary>
+        /// Special node data.
+        /// </summary>
+        /// <remarks>Note that if a quest has a special node data, it is the responsibility of that node to update quest stats</remarks>
+        public NodeData SpecialNodeData { get; internal set; }
 
         internal string SaveKey => String.Format("{0}_{1}", ParentQuest.QuestName, StateName);
 

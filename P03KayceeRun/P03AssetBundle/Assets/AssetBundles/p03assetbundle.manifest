@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 2352057411
+CRC: 2704938184
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: fb06c22d9b1c584540b25669956209b4
+    Hash: 899842e34e059c78ecf6c01c839e2be0
   TypeTreeHash:
     serializedVersion: 2
     Hash: 10caaafd0ad3fcdc9870467d863128a4
@@ -70,6 +70,7 @@ Assets:
 - Assets/Textures/UFO_Middle.mat
 - Assets/Prefabs/rocket-bomb.prefab
 - Assets/Textures/PolaroidMaterial.mat
+- Assets/Prefabs/BotopiaDummy.prefab
 - Assets/Shaders/MultiplyProjectorShader.shader
 - Assets/Effects/Fire_Particles.png
 - Assets/Effects/Fire_Parent.prefab

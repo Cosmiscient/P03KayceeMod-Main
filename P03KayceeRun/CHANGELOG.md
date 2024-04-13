@@ -1,3 +1,27 @@
+# 5.0
+
+- The Great Transcendence is complete
+
+- Two new achievements (and associated stickers) have been added
+- Significantly overhauled the map generation algorithm, focused on expanding the types of terrain and environments that can be generated. The forest now has a snowline, the factory and undead crypt are now explorable, etc.
+- Added four new quests that have talking cards as their rewards for completion.
+- Two new secret areas have been added to the map; one providing a cosmetic customization opportunity and one providing an optional challenge.
+- The blocker that G0lly plays during the first phase of the boss fight now scales with difficulty.
+- Activated abilities can no longer be activated while the hammer is active.
+- Taurus now repeatedly destroys cards in the opposing slot until it is empty (e.g., Frozen Away, Bounty Hunter Brains, etc)
+- Custom cards with no names now are assigned a random name.
+- The "Buy Your Buddy" achivement now correctly unlocks at SP 6 instead of SP 5.
+- Lockjaw Cell is now a common.
+- Urchin Conduit has been added as a new rare. It is a factory conduit that spawns Urchin Cells. Consequently, Urchin Cell is no longer in the card pool.
+- Wiseclock and UFO have been retextured.
+- Oil Jerry now has a small animation when he dies to help visualize his effect.
+- Bounty Hunter kills are now tracked as statistics.
+- The Hopper sigil can now appear in the sigil machine and the Build-A-Card machine.
+- The Flammable (M0l0t0v) sigil now flips vertically when on an opponent card. It also causes cards to have the "fuse" animation.
+- Cards with holographic portraits now properly re-activate their normal portraits when transforming.
+- Amber no longer appears on the map when she shouldn't. 
+- Fixed a bug in the interaction between Electric and Sharp.
+
 # 4.4.1
 
 - Resolved a memory leak with how asset bundles and audio files were being loaded and (not always) unloaded.

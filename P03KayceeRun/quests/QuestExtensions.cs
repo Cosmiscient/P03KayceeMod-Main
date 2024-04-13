@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Patchers;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {
@@ -14,6 +15,36 @@ namespace Infiniscryption.P03KayceeRun.Quests
         public static QuestDefinition SetPriorQuest(this QuestDefinition parent, SpecialEvent prior)
         {
             parent.PriorEventId = prior;
+            return parent;
+        }
+
+        public static QuestDefinition SetPartnerQuest(this QuestDefinition parent, SpecialEvent partner)
+        {
+            parent.PartnerOfEventId = partner;
+            return parent;
+        }
+
+        public static QuestDefinition SetAllowSecretRoom(this QuestDefinition parent)
+        {
+            parent.AllowSecretRoom = true;
+            return parent;
+        }
+
+        public static QuestDefinition QuestCannotContinueAcrossMap(this QuestDefinition parent)
+        {
+            parent.QuestCanContinue = false;
+            return parent;
+        }
+
+        public static QuestDefinition SetAllowLandmarks(this QuestDefinition parent)
+        {
+            parent.AllowLandmarks = true;
+            return parent;
+        }
+
+        public static QuestDefinition AddPostGenerationAction(this QuestDefinition parent, Action<GameObject> action)
+        {
+            parent.PostGenerateAction = action;
             return parent;
         }
 
@@ -65,6 +96,15 @@ namespace Infiniscryption.P03KayceeRun.Quests
         }
 
         /// <summary>
+        /// Sets a priority calculation for the quest.
+        /// </summary>
+        public static QuestDefinition SetPriorityCalculation(this QuestDefinition parent, Func<int> priorityCalc)
+        {
+            parent.CalculatedPriority = priorityCalc;
+            return parent;
+        }
+
+        /// <summary>
         /// Restricts a quest to only be generated in a specific zone
         /// </summary>
         /// <param name="parent"></param>
@@ -90,6 +130,14 @@ namespace Infiniscryption.P03KayceeRun.Quests
         {
             QuestState state = new(parent, "InitialDialogue", hoverText, dialogueId, autoComplete: true);
             parent.InitialState = state;
+            return state;
+        }
+
+        public static QuestState AddSpecialNodeState(this QuestState parent, string hoverText, NodeData data)
+        {
+            QuestState state = new(parent.ParentQuest, $"SpecialNodeState{hoverText}", hoverText, string.Empty, false);
+            state.SpecialNodeData = data;
+            parent.SetNextState(QuestState.QuestStateStatus.Success, state);
             return state;
         }
 
@@ -167,9 +215,9 @@ namespace Infiniscryption.P03KayceeRun.Quests
         /// </summary>
         /// <param name="hoverText">The text that shows over the NPC's head when you hover over them</param>
         /// <param name="dialogueId">The dialogue that the NPC will say</param>
-        public static QuestState AddDialogueState(this QuestState parent, string hoverText, string dialogueId, QuestState.QuestStateStatus status = QuestState.QuestStateStatus.Success)
+        public static QuestState AddDialogueState(this QuestState parent, string hoverText, string dialogueId, QuestState.QuestStateStatus status = QuestState.QuestStateStatus.Success, string overrideName = null)
         {
-            QuestState state = new(parent.ParentQuest, String.Format("Dialogue_{0}", dialogueId), hoverText, dialogueId, autoComplete: true);
+            QuestState state = new(parent.ParentQuest, overrideName ?? String.Format("Dialogue_{0}", dialogueId), hoverText, dialogueId, autoComplete: true);
             parent.SetNextState(status, state);
             return state;
         }

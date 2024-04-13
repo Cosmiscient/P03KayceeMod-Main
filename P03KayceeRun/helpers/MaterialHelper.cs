@@ -122,10 +122,9 @@ namespace Infiniscryption.P03KayceeRun.Helpers
             }
         }
 
-        public static void HolofyAllRenderers(GameObject gameObject, Color color)
+        public static void HolofyAllRenderers(GameObject gameObject, Color color, float? brightness = null)
         {
-            foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>())
-                OnboardDynamicHoloPortrait.HolofyGameObject(renderer.gameObject, color);
+            OnboardDynamicHoloPortrait.HolofyGameObject(gameObject, color, brightness: brightness);
         }
 
         public static Material GetBakedEmissiveMaterial(Texture texture, Texture emissionTexture = null)
