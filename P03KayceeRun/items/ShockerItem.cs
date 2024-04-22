@@ -17,7 +17,7 @@ namespace Infiniscryption.P03KayceeRun.Items
 
         private static readonly Vector3 BASE_POSITION = new(0f, 0.2f, 0f);
 
-        private static readonly float sfxVolume = 0.3f;
+        private static readonly float sfxVolume = 0.7f;
 
         public static GameObject GetBaseGameObject(string basePrefabId, string objName)
         {

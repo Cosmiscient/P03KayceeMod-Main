@@ -436,6 +436,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     );
                     cards.CardByName("PlasmaGunner").SetWeaponMesh(DiskCardWeapon.Revolver);
 
+                    cards.CardByName("CXformerWolf").AddMetaCategories(NewBeastTransformers);
+                    cards.CardByName("CXformerRaven").AddMetaCategories(NewBeastTransformers);
+                    cards.CardByName("CXformerAdder").AddMetaCategories(NewBeastTransformers);
+
                     cards.CardByName("JuniorSage").AddAppearances(OnboardWizardCardModel.ID);
                     cards.CardByName("PracticeMage").AddAppearances(OnboardWizardCardModel.ID);
                     cards.CardByName("RubyGolem").AddAppearances(OnboardWizardCardModel.ID);
@@ -675,6 +679,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(Ability.PreventAttack)
                 .SetCost(energyCost: 5)
                 .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, FIREWALL_SMALL + "_OVERCHARGE", "Firewall", 0, 3)
+                .SetPortrait(GetTexture("portrait_mute_firewall.png", typeof(CustomCards).Assembly))
+                .AddAbilities(Ability.Reach, Ability.WhackAMole)
+                .SetCost(energyCost: 2)
+                .SetCustomCost("OverchargeCost", 1)
+                .SetCardTemple(CardTemple.Tech);
 
             var basicFirewall = CardManager.New(P03Plugin.CardPrefx, FIREWALL_SMALL, "Firewall", 0, 1)
                 .SetPortrait(GetTexture("portrait_mute_firewall.png", typeof(CustomCards).Assembly))
@@ -1177,20 +1188,28 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return retval;
         }
 
-        public static bool SlotHasTripleCard(this CardSlot slot) => slot.Card != null && slot.Card.Info.SpecialAbilities.Contains(GoobertCenterCardBehaviour.AbilityID);
+        // public static bool SlotHasTripleCard(this CardSlot slot) => slot.Card != null && GoobertCenterCardBehaviour.IsOnBoard && GoobertCenterCardBehaviour.Instance.PlayableCard.Slot == slot;
 
-        public static bool SlotCoveredByTripleCard(this CardSlot slot)
-        {
-            List<CardSlot> container = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
+        // public static bool SlotCoveredByTripleCard(this CardSlot slot)
+        // {
+        //     if (!GoobertCenterCardBehaviour.IsOnBoard)
+        //         return false;
 
-            return (slot.Index > 0 && container[slot.Index - 1].SlotHasTripleCard()) || (slot.Index + 1 < container.Count && container[slot.Index + 1].SlotHasTripleCard());
-        }
+        //     var goobertSlot = GoobertCenterCardBehaviour.GoobertCardSlot;
+        //     if (goobertSlot == null)
+        //         return false;
+
+        //     if (slot.IsPlayerSlot != goobertSlot.IsPlayerSlot)
+        //         return false;
+
+        //     return slot.Index + 1 == goobertSlot.Index || slot.Index - 1 == goobertSlot.Index;
+        // }
 
         public static bool SlotCanHoldTripleCard(this CardSlot slot, PlayableCard existingCard = null)
         {
             P03Plugin.Log.LogDebug("Checking if slot can hold triple card");
             List<CardSlot> container = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
-            int index = slot.Index;
+            int index = slot.Index % 10;
 
             if (index == 0)
             {
@@ -1207,17 +1226,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 return false;
             }
 
-            if (container[index - 1].Card != null && container[index - 1].Card != existingCard)
-            {
-                return false;
-            }
-
-            if (container[index + 1].Card != null && container[index + 1].Card != existingCard)
-            {
-                return false;
-            }
-
-            P03Plugin.Log.LogDebug("Slot can hold triple card");
             return true;
         }
     }

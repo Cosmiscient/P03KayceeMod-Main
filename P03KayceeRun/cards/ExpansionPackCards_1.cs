@@ -33,7 +33,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             // Viperbeast
             CardInfo viperBeast = CardManager.New(EXP_1_PREFIX, "ViperBeast", "V1P3R", 3, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_viperbeast.png", typeof(ExpansionPackCards_1).Assembly))
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_rattler.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 5)
                 .SetCardTemple(CardTemple.Tech)
                 .AddAbilities(Ability.Transformer);

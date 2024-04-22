@@ -94,7 +94,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
                 PlayerTerrainsResolved = FixTerrainDictionary(PlayerTerrains);
                 OpposingTerrainsResolved = FixTerrainDictionary(OpposingTerrains);
-                OpposingTerrainQueuesResolved = FixTerrainDictionary(OpposingTerrainQueuesResolved);
+                OpposingTerrainQueuesResolved = FixTerrainDictionary(OpposingTerrainQueues);
 
                 foreach (EncounterBlueprintData ebd in allEncounters)
                 {

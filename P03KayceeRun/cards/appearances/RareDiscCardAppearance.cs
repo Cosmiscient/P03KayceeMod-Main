@@ -153,7 +153,28 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         };
 
+
+        private static List<Color> CACHED_LINEAR_GRADIENT = null;
         private static List<List<Color>> CACHED_GRADIENT = null;
+
+        private static void EstablishLinearGradientCache()
+        {
+            if (CACHED_LINEAR_GRADIENT == null)
+            {
+                CACHED_LINEAR_GRADIENT = new();
+
+                for (int i = 0; i <= 100; i++)
+                {
+                    CACHED_LINEAR_GRADIENT.Add(RGB_GRADIENT.Evaluate((float)i / (float)100));
+                }
+            }
+        }
+
+        internal static Color GetLinearRGBGradient(float p)
+        {
+            EstablishLinearGradientCache();
+            return CACHED_LINEAR_GRADIENT[Mathf.FloorToInt(p)];
+        }
 
         private static void EstablishGradientCache(int width, int height)
         {

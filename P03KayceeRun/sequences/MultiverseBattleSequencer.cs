@@ -15,6 +15,7 @@ using Pixelplacement;
 using Sirenix.Serialization.Utilities;
 using Sirenix.Utilities;
 using UnityEngine;
+using Infiniscryption.P03KayceeRun.Faces;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
 {
@@ -80,14 +81,23 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 CustomCoroutine.WaitThenExecute(0.5f, () => GameObject.Destroy(obj));
         }
 
+        private static readonly ConditionalWeakTable<CardSlot, RefInt> UniverseIdLookup = new();
         public int GetUniverseId(CardSlot slot)
         {
+            if (UniverseIdLookup.TryGetValue(slot, out RefInt value))
+                return value.Value;
+
+            int result = -1;
             for (int i = 0; i < MultiverseGames.Length; i++)
             {
                 if (MultiverseGames[i].PlayerSlots.Contains(slot) || MultiverseGames[i].OpponentSlots.Contains(slot))
-                    return i;
+                {
+                    result = i;
+                    break;
+                }
             }
-            return -1;
+            UniverseIdLookup.Add(slot, new() { Value = result });
+            return result;
         }
 
         public bool OpposesInAnyUniverse(CardSlot a, CardSlot b)
@@ -242,6 +252,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 P03AscensionOpponent.CreateAllSlots();
                 // Tween each of the four things that need to move
             }
+
+
 
             yield break;
         }
@@ -414,6 +426,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public IEnumerator SetPhase(MultiverseGameState.Phase phase, bool suppressCallbacks = false)
         {
             CurrentPhase = phase;
+
+            if (phase == MultiverseGameState.Phase.PlayerCombat && P03AnimationController.Instance.CurrentFace == P03BellFace.ID)
+                P03AnimationController.Instance.FaceRenderer.DisplayFace(P03AnimationController.Face.Default);
 
             if (!suppressCallbacks && ActiveMultiverse != null)
                 yield return ActiveMultiverse.DoCallbacks(phase);
@@ -663,7 +678,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             yield return mbs.SetPhase(MultiverseGameState.Phase.GameIsOver);
             __instance.ResetGameVars();
-            mbs.ItemStartingState.AddRange(ItemsManager.Instance.SaveDataItemsList);
+            mbs.ItemStartingState.AddRange(ItemsManager.Instance.Consumables.Select(i => i.Data.name).Where(s => !s.Equals("hammer", StringComparison.InvariantCultureIgnoreCase)));
             yield return new WaitForEndOfFrame();
             yield return __instance.SetupPhase(encounterData);
             while (!__instance.GameIsOver())
@@ -1046,8 +1061,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 ViewManager.Instance.SwitchToView(View.DefaultUpwards, false, false);
                 yield return new WaitForSeconds(0.25f);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03HuntsForGrimora", TextDisplayer.MessageAdvanceMode.Input);
-                yield return new WaitForSeconds(0.25f);
                 P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Thinking);
+
+                yield return new WaitForSeconds(1.5f);
 
 
                 // Duplicate the arm
@@ -1068,16 +1084,16 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 elbow.localEulerAngles = new(13.182f, 334.1849f, 43.4195f);
                 yield return new WaitForSeconds(0.1f);
 
-                Tween.LocalPosition(elbow, new Vector3(-4.0613f, -3.3674f, 1.3031f), 2f, 0f, Tween.EaseInOut);
-                Tween.LocalPosition(wrist, new Vector3(-5.9689f, -0.0341f, -0.0775f), 2f, 0f, Tween.EaseInOut);
-                Tween.LocalRotation(wrist, new Vector3(65.9436f, 159.2189f, 172.2731f), 2f, 0f, Tween.EaseInOut);
+                Tween.LocalPosition(elbow, new Vector3(-4.0613f, -3.3674f, 1.3031f), 3f, 0f, Tween.EaseInOut);
+                Tween.LocalPosition(wrist, new Vector3(-5.9689f, -0.0341f, -0.0775f), 3f, 0f, Tween.EaseInOut);
+                Tween.LocalRotation(wrist, new Vector3(65.9436f, 159.2189f, 172.2731f), 3f, 0f, Tween.EaseInOut);
+
+                yield return new WaitForSeconds(4f);
+
+                Tween.LocalPosition(elbow, new Vector3(-3.174f, -1.9196f, -0.8266f), 2f, 0f, Tween.EaseInOut);
+                Tween.LocalRotation(elbow, new Vector3(358.182f, 304.1849f, 43.4195f), 2f, 0f, Tween.EaseInOut);
 
                 yield return new WaitForSeconds(3f);
-
-                Tween.LocalPosition(elbow, new Vector3(-3.174f, -1.9196f, -0.8266f), 1f, 0f, Tween.EaseInOut);
-                Tween.LocalRotation(elbow, new Vector3(358.182f, 304.1849f, 43.4195f), 1f, 0f, Tween.EaseInOut);
-
-                yield return new WaitForSeconds(1.5f);
 
                 Tween.LocalRotation(elbow, new Vector3(343.182f, 29.1849f, 53.4195f), 0.15f, 0f, Tween.EaseInOut);
                 yield return new WaitForSeconds(0.09f);
@@ -1109,8 +1125,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
                 var timedelta = Time.fixedDeltaTime;
 
-                Time.timeScale = 0.06f;
-                Time.fixedDeltaTime = timedelta * 0.06f;
+                Time.timeScale = 0.045f;
+                Time.fixedDeltaTime = timedelta * 0.045f;
 
                 AudioController.Instance.SetLoopPaused(true);
                 AudioController.Instance.PlaySound2D("anime_sword_hit_2", MixerGroup.TableObjectsSFX, 0.8f);
@@ -1196,8 +1212,20 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03MultiverseLost2", TextDisplayer.MessageAdvanceMode.Input);
                 yield return new WaitForSeconds(1.5f);
-                EventManagement.FinishAscension(true);
+                EventManagement.FinishAscension(false);
             }
+        }
+
+        public static List<CardSlot> GetParentSlotList(CardSlot slot)
+        {
+            List<CardSlot> slotsToCheck = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
+            if (MultiverseBattleSequencer.Instance != null && MultiverseBattleSequencer.Instance.MultiverseGames != null)
+            {
+                int uIdx = MultiverseBattleSequencer.Instance.GetUniverseId(slot);
+                var universe = MultiverseBattleSequencer.Instance.MultiverseGames[uIdx];
+                slotsToCheck = slot.IsPlayerSlot ? universe.PlayerSlots : universe.OpponentSlots;
+            }
+            return slotsToCheck;
         }
 
         protected class RefBoolean
@@ -1208,16 +1236,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         private static ConditionalWeakTable<CardSlot, RefBoolean> IsPlayerSlot = new();
 
         [HarmonyPatch(typeof(CardSlot), nameof(CardSlot.IsPlayerSlot), MethodType.Getter)]
-        [HarmonyPostfix]
-        private static void MultiverseIsPlayerSlot(CardSlot __instance, ref bool __result)
+        [HarmonyPrefix]
+        private static bool MultiverseIsPlayerSlot(CardSlot __instance, ref bool __result)
         {
-            if (Instance == null || Instance.MultiverseGames == null)
-                return;
-
             if (IsPlayerSlot.TryGetValue(__instance, out RefBoolean value))
             {
                 __result = value.Value;
-                return;
+                return false;
             }
 
             if (BoardManager.Instance.playerSlots.Contains(__instance))
@@ -1228,7 +1253,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 __result = false;
             }
-            else
+            else if (Instance != null && Instance.MultiverseGames != null)
             {
                 __result = false;
                 foreach (var universe in Instance.MultiverseGames.Where(u => u != null && u.PlayerSlots != null))
@@ -1240,9 +1265,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     }
                 }
             }
+            else
+            {
+                return true;
+            }
 
             IsPlayerSlot.Add(__instance, new() { Value = __result });
-            return;
+            return false;
         }
 
         private class RefInt
@@ -1251,17 +1280,34 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         }
         private static ConditionalWeakTable<CardSlot, RefInt> SlotIndex = new();
 
-        [HarmonyPatch(typeof(CardSlot), nameof(CardSlot.Index), MethodType.Getter)]
+        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.SetupPhase))]
         [HarmonyPostfix]
-        private static void MultiverseIndexLookup(CardSlot __instance, ref int __result)
+        internal static void ClearAllSlotCacheShenanigans()
         {
-            if (Instance == null || __result >= 0 || Instance.MultiverseGames == null)
-                return;
+            foreach (var slot in BoardManager.Instance.AllSlots)
+            {
+                SlotIndex.Remove(slot);
+                IsPlayerSlot.Remove(slot);
+            }
+        }
 
+        [HarmonyPatch(typeof(CardSlot), nameof(CardSlot.Index), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool CachedMultiverseAwareIndexLookup(CardSlot __instance, ref int __result)
+        {
             if (SlotIndex.TryGetValue(__instance, out RefInt value))
             {
                 __result = value.Value;
-                return;
+                if (__instance.transform.localPosition.y > -3f)
+                    __result %= 10;
+                return false;
+            }
+
+            if (Instance == null)
+            {
+                __result = BoardManager.Instance.GetSlots(__instance.IsPlayerSlot).IndexOf(__instance);
+                SlotIndex.Add(__instance, new() { Value = __result });
+                return false;
             }
 
             __result = -1;
@@ -1290,7 +1336,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 }
             }
             SlotIndex.Add(__instance, new() { Value = __result });
-            return;
+            if (__instance.transform.localPosition.y > -3f)
+                __result %= 10;
+            return false;
         }
 
         private static ConditionalWeakTable<PlayableCard, string> DefaultColors = new();

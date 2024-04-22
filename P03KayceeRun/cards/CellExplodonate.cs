@@ -61,14 +61,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             if (slot.Index > 0)
             {
-                yield return BombCard(friendlySlots[slot.Index - 1]);
-                yield return BombCard(opposingSlots[slot.Index - 1]);
+                yield return BombCard(friendlySlots[slot.Index % 10 - 1]);
+                yield return BombCard(opposingSlots[slot.Index % 10 - 1]);
             }
-            yield return BombCard(opposingSlots[slot.Index]);
+            yield return BombCard(opposingSlots[slot.Index % 10]);
             if (slot.Index < friendlySlots.Count - 1)
             {
-                yield return BombCard(opposingSlots[slot.Index + 1]);
-                yield return BombCard(friendlySlots[slot.Index + 1]);
+                yield return BombCard(opposingSlots[slot.Index % 10 + 1]);
+                yield return BombCard(friendlySlots[slot.Index % 10 + 1]);
             }
         }
 

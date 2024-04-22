@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
@@ -16,7 +17,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public class FullyLoadedSlot : NonCardTriggerReceiver, IPassiveAttackBuff
         {
-            public int GetPassiveAttackBuff(PlayableCard target) => target.Slot.GetSlotModification() == SlotModID ? 1 : 0;
+            public int GetPassiveAttackBuff(PlayableCard target)
+            {
+                if (GoobertCenterCardBehaviour.Instances.Count == 0)
+                    return target.Slot.GetSlotModification() == SlotModID ? 1 : 0;
+
+                var gcb = target.GetComponent<GoobertCenterCardBehaviour>();
+                if (gcb == null)
+                    return target.Slot.GetSlotModification() == SlotModID ? 1 : 0;
+
+                return gcb.AllSlots.Where(s => s.GetSlotModification() == SlotModID).Count();
+            }
         }
 
         public static SlotModificationManager.ModificationType SlotModID { get; private set; }

@@ -16,6 +16,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     [HarmonyPatch]
     public class MultiverseGameState
     {
+        public static List<ConsumableItemSlot> ConsumableSlots => ItemsManager.Instance.consumableSlots.Where(s => s is not HammerItemSlot).ToList();
+
         public enum Phase
         {
             Any = -1,
@@ -157,7 +159,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             state.ColorState = LightColorState.GetPreset(colorIndex);
 
             // Items
-            state.ItemState = new(MultiverseBattleSequencer.Instance.ItemStartingState);
+            state.ItemState = new();
+            state.ItemState.AddRange(MultiverseBattleSequencer.Instance.ItemStartingState);
 
             // Reset some basic stuff
             state.MaxEnergyState = 0;
@@ -200,8 +203,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             state.MaxEnergyState = ResourcesManager.Instance.PlayerMaxEnergy;
             state.BonesState = ResourcesManager.Instance.PlayerBones;
 
-            P03Plugin.Log.LogInfo($"Saving Items: " + string.Join(", ", ItemsManager.Instance.SaveDataItemsList));
-            state.ItemState = new(ItemsManager.Instance.SaveDataItemsList);
+            var newItems = ItemsManager.Instance.Consumables.Select(i => i.Data.name).Where(s => !s.Equals("hammer", StringComparison.InvariantCultureIgnoreCase)).ToList();
+            P03Plugin.Log.LogInfo($"Saving Items: " + string.Join(", ", newItems));
+            state.ItemState = newItems;
 
             P03Plugin.Log.LogInfo($"Saving Cards In Hand: " + string.Join(", ", PlayerHand.Instance.CardsInHand.Select(c => c.name)));
             state.HandState = new(PlayerHand.Instance.CardsInHand);
@@ -273,7 +277,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             {
                 if (Callbacks.ContainsKey(Phase.Any) && Callbacks[Phase.Any] != null)
                 {
-                    foreach (var co in Callbacks[Phase.Any])
+                    foreach (var co in Callbacks[Phase.Any].Where(co => !co.SafeIsUnityNull()))
                         yield return co.DoCallback();
 
                     Callbacks[Phase.Any].Clear();
@@ -281,7 +285,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
                 if (Callbacks.ContainsKey(phase) && Callbacks[phase] != null)
                 {
-                    foreach (var co in Callbacks[phase])
+                    foreach (var co in Callbacks[phase].Where(co => !co.SafeIsUnityNull()))
                         yield return co.DoCallback();
 
                     Callbacks[phase].Clear();
@@ -305,7 +309,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             OpponentSlots.Clear();
             PlayerSlots.Clear();
 
-            List<PlayableCard> queueCards = new(TurnManager.Instance.opponent.queuedCards);
+            List<PlayableCard> queueCards = new();
+            queueCards.AddRange(TurnManager.Instance.opponent.queuedCards);
             TurnManager.Instance.opponent.queuedCards.Clear();
 
             foreach (var card in queueCards)
@@ -435,10 +440,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             LifeManager.Instance.SetNumWeightsImmediate(PlayerDamage, OpponentDamage);
 
             // Set the item state
-            P03Plugin.Log.LogInfo("Restoring multiverse state: Resetting items");
+            P03Plugin.Log.LogInfo("Restoring multiverse state: Resetting items to " + string.Join(",", ItemState));
             ItemsManager.Instance.SaveDataItemsList.Clear();
             ItemsManager.Instance.SaveDataItemsList.AddRange(ItemState);
-            ItemsManager.Instance.UpdateItems(true);
+            UpdateItems();
 
             // Set the energy state
             P03Plugin.Log.LogInfo("Restoring multiverse state: Resetting energy");
@@ -515,6 +520,28 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return DoCallbacks(this.CurrentPhase);
 
             restoredCallback?.Invoke();
+        }
+
+        private void UpdateItems()
+        {
+            var slots = MultiverseGameState.ConsumableSlots;
+
+            foreach (var itemSlot in slots)
+            {
+                try
+                {
+                    itemSlot.DestroyItem();
+                }
+                catch
+                {
+                    // Do nothing
+                }
+            }
+
+            for (int i = 0; i < ItemState.Count; i++)
+                slots[i].CreateItem(ItemState[i], true);
+
+            ItemsManager.Instance.OnUpdateItems(true);
         }
 
         private static void SetCardSlotPosition(GameObject obj, bool onBoard)

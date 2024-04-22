@@ -350,6 +350,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 if (BoardManager.Instance.opponentSlots[i].opposingSlot == null)
                     BoardManager.Instance.opponentSlots[i].opposingSlot = BoardManager.Instance.playerSlots[i];
             }
+            MultiverseBattleSequencer.ClearAllSlotCacheShenanigans();
         }
 
         private static float GetXPos(bool beginning, bool isOpponent, bool isQueue)
@@ -499,11 +500,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // Tween each of the four things that need to move
             Transform itemTrans = ItemsManager.Instance.gameObject.transform;
-            Vector3 newItemPos = new(6.75f, itemTrans.localPosition.y, itemTrans.localPosition.z);
+            Vector3 newItemPos = new(6.75f, itemTrans.localPosition.y, itemTrans.localPosition.z + 1.3f);
             Tween.LocalPosition(itemTrans, newItemPos, durationOfEffect, 0f);
 
             Transform hammerTrans = ItemsManager.Instance.Slots.FirstOrDefault(s => s.name.ToLowerInvariant().StartsWith("hammer")).gameObject.transform;
-            Vector3 newHammerPos = new(-9.5f, hammerTrans.localPosition.y, hammerTrans.localPosition.z);
+            Vector3 newHammerPos = new(-9.5f, hammerTrans.localPosition.y, hammerTrans.localPosition.z - 1.3f);
             Tween.LocalPosition(hammerTrans, newHammerPos, durationOfEffect, 0f);
 
             Transform bellTrans = (BoardManager.Instance as BoardManager3D).bell.gameObject.transform;
@@ -930,7 +931,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.SwitchToView(View.Default, false, false);
         }
 
-        private static bool ValidCard(PlayableCard card) => card != null && card.Info.name != CustomCards.DRAFT_TOKEN && !card.Info.IsSpell();
+        private static bool ValidCard(PlayableCard card) => card != null && card.Info.name != CustomCards.DRAFT_TOKEN && !card.Info.IsSpell() && !card.Info.HasSpecialAbility(GoobertCenterCardBehaviour.AbilityID);
 
         public IEnumerator ExchangeTokensSequence()
         {

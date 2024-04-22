@@ -90,11 +90,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                             // Look for a duplicate icon
                             string duplicateName = abilityIconInteractable.transform.parent.gameObject.name + "_" + abilityIconInteractable.gameObject.name + "_rainbow";
                             Transform existing = abilityIconInteractable.transform.Find(duplicateName);
-                            P03Plugin.Log.LogInfo($"Is there already a rainbow? {existing}");
+                            //P03Plugin.Log.LogInfo($"Is there already a rainbow? {existing}");
                             Renderer rend = null;
                             if (existing.SafeIsUnityNull())
                             {
-                                P03Plugin.Log.LogInfo($"Creating rainbow");
+                                //P03Plugin.Log.LogInfo($"Creating rainbow");
                                 GameObject duplicate = GameObject.Instantiate(abilityIconInteractable.gameObject, abilityIconInteractable.transform);
                                 duplicate.name = duplicateName;
                                 duplicate.transform.localPosition = new Vector3(0f, 0f, 0.0925f);
@@ -115,14 +115,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
                                 rend = existing.gameObject.GetComponent<Renderer>();
                             }
                             AbilityInfo info = AbilitiesUtil.GetInfo(abilityIconInteractable.Ability);
-                            P03Plugin.Log.LogInfo($"Icon {abilityIconInteractable.gameObject.name} {info.rulebookName} is multiverse? {info.metaCategories.Contains(CustomCards.MultiverseAbility)}");
+                            //P03Plugin.Log.LogInfo($"Icon {abilityIconInteractable.gameObject.name} {info.rulebookName} is multiverse? {info.metaCategories.Contains(CustomCards.MultiverseAbility)}");
                             if (info.metaCategories.Contains(CustomCards.MultiverseAbility) && !abilityIconInteractable.gameObject.name.Contains("rainbow"))
                             {
                                 var texture = abilityIconInteractable.LoadIcon(null, info, (playableCard?.OpponentCard).GetValueOrDefault(false));
                                 rend.material.mainTexture = texture;
                                 rend.enabled = true;
                                 rend.gameObject.SetActive(true);
-                                Tween.Value(0f, 1f, (float v) => rend.material.SetColor("_EmissionColor", RareDiscCardAppearance.RGB_GRADIENT.Evaluate(v)), 3.5f, 0f, loop: Tween.LoopType.Loop);
+                                Tween.Value(0f, 100f, (float v) => rend.material.SetColor("_EmissionColor", RareDiscCardAppearance.GetLinearRGBGradient(v)), 3.5f, 0f, loop: Tween.LoopType.Loop);
                             }
                             else
                             {

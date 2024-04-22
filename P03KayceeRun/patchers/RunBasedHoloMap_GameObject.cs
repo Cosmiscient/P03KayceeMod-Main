@@ -768,6 +768,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             foreach (var t in deleteChildren)
                 GameObject.Destroy(t.gameObject);
 
+            UnityEngine.Object.Destroy(retval.transform.Find("smoke").gameObject);
+
             // Make a secret node to the right
             Transform rightArrow = nodeParent.Find("MoveArea_E");
             MoveHoloMapAreaNode moveRight = rightArrow.gameObject.GetComponentInChildren<MoveHoloMapAreaNode>();

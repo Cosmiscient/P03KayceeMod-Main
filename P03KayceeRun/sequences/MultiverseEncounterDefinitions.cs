@@ -274,7 +274,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             MultiverseBossPhaseOne.Add(EncounterManager.New("P03KCM_Multiverse_5_Conduits", addToPool: false));
             MultiverseBossPhaseOne[4].SetDifficulty(0, 10);
             MultiverseBossPhaseOne[4].turns = new();
-            MultiverseBossPhaseOne[4].AddTerrainRepeatRule(5);
+            MultiverseBossPhaseOne[4].AddTerrainRepeatRule(4);
 
             MultiverseBossPhaseOne[4].AddEnemyTerrainQueue(new() {
                 Enemy("AttackConduit"),

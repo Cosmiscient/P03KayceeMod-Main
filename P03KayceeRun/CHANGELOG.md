@@ -2,25 +2,38 @@
 
 - The Great Transcendence is complete
 
-- Two new achievements (and associated stickers) have been added
-- Significantly overhauled the map generation algorithm, focused on expanding the types of terrain and environments that can be generated. The forest now has a snowline, the factory and undead crypt are now explorable, etc.
-- Added four new quests that have talking cards as their rewards for completion.
-- Two new secret areas have been added to the map; one providing a cosmetic customization opportunity and one providing an optional challenge.
-- The blocker that G0lly plays during the first phase of the boss fight now scales with difficulty.
-- Activated abilities can no longer be activated while the hammer is active.
-- Taurus now repeatedly destroys cards in the opposing slot until it is empty (e.g., Frozen Away, Bounty Hunter Brains, etc)
-- Custom cards with no names now are assigned a random name.
-- The "Buy Your Buddy" achivement now correctly unlocks at SP 6 instead of SP 5.
-- Lockjaw Cell is now a common.
-- Urchin Conduit has been added as a new rare. It is a factory conduit that spawns Urchin Cells. Consequently, Urchin Cell is no longer in the card pool.
-- Wiseclock and UFO have been retextured.
-- Oil Jerry now has a small animation when he dies to help visualize his effect.
-- Bounty Hunter kills are now tracked as statistics.
-- The Hopper sigil can now appear in the sigil machine and the Build-A-Card machine.
-- The Flammable (M0l0t0v) sigil now flips vertically when on an opponent card. It also causes cards to have the "fuse" animation.
-- Cards with holographic portraits now properly re-activate their normal portraits when transforming.
-- Amber no longer appears on the map when she shouldn't. 
-- Fixed a bug in the interaction between Electric and Sharp.
+- Additions:
+  - Two new achievements (and associated stickers) have been added.
+  - One new challenge has been added.
+  - Significantly overhauled the map generation algorithm, focused on expanding the types of terrain and environments that can be generated. The forest now has a snowline, the factory and undead crypt are now explorable, etc.
+  - Added four new quests that have talking cards as their rewards for completion.
+  - Two new secret rooms have been added to the map; one providing a cosmetic customization opportunity and one with an optional minigame.
+  - Lockjaw Cell is now a common.
+  - Urchin Conduit has been added as a new rare. It is a factory conduit that spawns Urchin Cells. Consequently, Urchin Cell is no longer in the card pool.
+
+- Balance Changes
+  - The blocker that G0lly plays during the first phase of the boss fight now scales with difficulty.
+  - The "Buy Your Buddy" achievement now correctly unlocks at SP 6 instead of SP 5.
+  - There was a defect with how pre-queued opposing terrain was being processed. A number of encounters that were supposed to start with pre-defined cards in the opponent queue simply were not. Fixing this defect will have a side effect of making a handful of encounters more difficult than they were before.
+
+- Bug Fixes and Tweaks
+  - Activated abilities can no longer be activated while the hammer is active.
+  - Taurus now repeatedly destroys cards in the opposing slot until it is empty (e.g., Frozen Away, Bounty Hunter Brains, etc)
+  - Custom cards with no names now are assigned a random name.
+  - Wiseclock and UFO have been retextured.
+  - Oil Jerry now has a small animation when he dies to help visualize his effect.
+  - Bounty Hunter kills are now tracked as statistics.
+  - The Hopper sigil can now appear in the sigil machine and the Build-A-Card machine.
+  - The Flammable (M0l0t0v) sigil now flips vertically when on an opponent card. It also causes cards to have the "fuse" animation.
+  - Cards with holographic portraits now properly re-activate their normal portraits when transforming.
+  - Amber no longer appears on the map when she shouldn't. 
+  - NPCs that had unique models in the base game (e.g., Amber/Pikemage) now have the same/similar models in this mod.
+  - Expanded the bounty hunter generation algorithm with new names, dialogue, and portrait components.
+  - Fixed a bug in the interaction between Electric and Sharp.
+  - Fixed a bug where the original three beast transformation options were not appearing in the beast transformation node.
+  - The "Transform When Powered" sigil now interacts properly with all cards that have predefined evolutions.
+  - A bug fix for the Deck Editor mod by Peaiace is now included.
+  - Fixed a number of bugs with the Experiment card. This card is still quite buggy; feel free to reach out to me on Discord as you discover more bugs.
 
 # 4.4.1
 

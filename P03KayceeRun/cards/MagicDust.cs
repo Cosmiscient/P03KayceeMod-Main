@@ -38,11 +38,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 if (otherCard == null || otherCard.Slot == null)
                     yield break;
 
-                SlotModificationManager.ModificationType slotMod = otherCard.Slot.GetSlotModification();
-                if (SlotIDs.Keys.Contains(slotMod))
+                GoobertCenterCardBehaviour gcb = otherCard.GetComponent<GoobertCenterCardBehaviour>();
+                List<SlotModificationManager.ModificationType> slotMods =
+                    gcb == null ? new() { otherCard.Slot.GetSlotModification() }
+                           : gcb.AllSlots.Select(s => s.GetSlotModification()).ToList();
+
+                slotMods = slotMods.Where(s => SlotIDs.Keys.Contains(s)).ToList();
+                if (slotMods.Count > 0)
                 {
                     CardModificationInfo mod = GetGemMod(otherCard, true);
-                    mod.abilities = new() { SlotIDs[slotMod] };
+                    mod.abilities = slotMods.Select(s => SlotIDs[s]).ToList();
                     otherCard.AddTemporaryMod(mod);
                     ResourcesManager.Instance.ForceGemsUpdate();
                 }

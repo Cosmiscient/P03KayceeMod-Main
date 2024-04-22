@@ -26,7 +26,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             info.rulebookName = $"Multiverse {original.rulebookName}";
             info.rulebookDescription = "[creature] will leap across universes to block attacks that occur in this lane in any universe.";
             info.canStack = original.canStack;
-            info.powerLevel = original.powerLevel;
+            info.powerLevel = 1;
             info.activated = original.activated;
             info.opponentUsable = original.opponentUsable;
             info.passive = false;
@@ -59,10 +59,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
         public override bool RespondsToSlotTargetedForAttack(CardSlot slot, PlayableCard attacker)
         {
             if (attacker != null)
-            {
-                bool flag = attacker.HasAbility(Ability.Flying);
                 return slot.Card == null && base.Card.Slot.IsPlayerSlot == slot.IsPlayerSlot && ((slot.Index % 10) == (Card.slot.Index % 10));
-            }
             return false;
         }
 
@@ -90,7 +87,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
                 MultiverseBattleSequencer.Instance.TeleportationEffects(slot);
 
             yield return new WaitForSeconds(0.1f);
-            yield return BoardManager.Instance.AssignCardToSlot(base.Card, slot, 0.1f, null, true);
+            yield return BoardManager.Instance.AssignCardToSlot(base.Card, slot, 0.1f, null, false);
             yield return new WaitForSeconds(0.05f);
             yield break;
         }
@@ -119,7 +116,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
                 MultiverseBattleSequencer.Instance.TeleportationEffects(returnToSlot);
 
             yield return new WaitForSeconds(0.1f);
-            yield return BoardManager.Instance.AssignCardToSlot(base.Card, returnToSlot, 0.1f, null, true);
+            yield return BoardManager.Instance.AssignCardToSlot(base.Card, returnToSlot, 0.1f, null, false);
             yield return new WaitForSeconds(0.05f);
             returnToSlot = null;
             yield break;

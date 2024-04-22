@@ -20,9 +20,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             List<CardSlot> subset3 = new List<CardSlot>();
             for (int i = 0; i < slots.Length; i++)
             {
-                if (i != 0 && i != slots.Length - 1) subset1.Add(slots[i]);
+                if (i != 0 && i != slots.Length - 3) subset1.Add(slots[i]);
                 if (i != 1 && i != slots.Length - 2) subset2.Add(slots[i]);
-                if (i != 2 && i != slots.Length - 3) subset3.Add(slots[i]);
+                if (i != 2 && i != slots.Length - 1) subset3.Add(slots[i]);
             }
 
             List<CardSlot> set1Best = base.SelectSlotsForCards(cardInfos, subset1.ToArray());

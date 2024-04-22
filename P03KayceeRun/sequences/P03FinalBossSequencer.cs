@@ -277,9 +277,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 ViewManager.Instance.SwitchToView(View.DefaultUpwards);
 
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03MultiverseEscapeTwo", TextDisplayer.MessageAdvanceMode.Input);
-                ViewManager.Instance.SwitchToView(View.P03FaceClose);
                 yield return new WaitForSeconds(0.25f);
-                yield return TextDisplayer.Instance.PlayDialogueEvent("P03GreaterTranscendence", TextDisplayer.MessageAdvanceMode.Input);
 
                 P03AnimationController.Instance.SwitchToFace(P03AnimationController.Face.Thinking);
                 ViewManager.Instance.SwitchToView(View.DefaultUpwards);

@@ -56,11 +56,22 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
 
         public override bool RespondsToResolveOnBoard() => MultiverseBattleSequencer.Instance.DeadMultiverseCards.Count > 0;
 
+        private static void SetPositionOfNearBoardParent(float offset)
+        {
+            if (BoardManager.Instance is not BoardManager3D bm3d)
+                return;
+
+            JitterPosition jp = bm3d.cardNearBoardParent.GetComponent<JitterPosition>();
+            if (jp == null)
+                return;
+
+            jp.originalPos = new(jp.originalPos.x, jp.originalPos.y + offset);
+        }
+
         public override IEnumerator OnResolveOnBoard()
         {
             // This is a hack to deal with the grimora spell specifically
-            if (this.Card.Info.IsSpell() && BoardManager.Instance is BoardManager3D bm3d)
-                bm3d.cardNearBoardParent.localPosition += Vector3.down * 10f;
+            SetPositionOfNearBoardParent(-10f);
 
             ViewManager.Instance.SwitchToView(View.DeckSelection, false, true);
             SelectableCard selectedCard = null;
@@ -79,8 +90,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             MultiverseBattleSequencer.Instance.RemoveDeadMultiverseCard(selectedCard.Info);
             yield return CardSpawner.Instance.SpawnCardToHand(selectedCard.Info);
 
-            if (this.Card.Info.IsSpell() && BoardManager.Instance is BoardManager3D bm3d2)
-                bm3d2.cardNearBoardParent.localPosition += Vector3.up * 10f;
+            SetPositionOfNearBoardParent(10f);
 
             ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
         }

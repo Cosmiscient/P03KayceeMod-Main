@@ -28,7 +28,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         public override IEnumerator IntroSequence(EncounterData encounter)
         {
             this.SetSceneEffectsShown(true);
-            this.StartMainAudioLoop(this.BossLoopID);
+            AudioController.Instance.StopAllLoops();
+            AudioController.Instance.SetLoopAndPlay(this.BossLoopID, 0, true, true);
+            AudioController.Instance.SetLoopVolumeImmediate(0.4f, 0);
             yield return this.StartBattleSequence();
             yield return TextDisplayer.Instance.PlayDialogueEvent(PreIntroDialogueId, TextDisplayer.MessageAdvanceMode.Input);
             yield break;
@@ -43,11 +45,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 float durationOfEffect = 0.45f;
 
                 Transform itemTrans = ItemsManager.Instance.gameObject.transform;
-                Vector3 newItemPos = new(6.75f, itemTrans.localPosition.y, itemTrans.localPosition.z);
+                Vector3 newItemPos = new(6.75f, itemTrans.localPosition.y, itemTrans.localPosition.z + 1.3f);
                 Tween.LocalPosition(itemTrans, newItemPos, durationOfEffect, 0f);
 
                 Transform hammerTrans = ItemsManager.Instance.Slots.FirstOrDefault(s => s.name.ToLowerInvariant().StartsWith("hammer")).gameObject.transform;
-                Vector3 newHammerPos = new(-9.5f, hammerTrans.localPosition.y, hammerTrans.localPosition.z);
+                Vector3 newHammerPos = new(-9.5f, hammerTrans.localPosition.y, hammerTrans.localPosition.z - 1.3f);
                 Tween.LocalPosition(hammerTrans, newHammerPos, durationOfEffect, 0f);
 
                 Transform bellTrans = (BoardManager.Instance as BoardManager3D).bell.gameObject.transform;

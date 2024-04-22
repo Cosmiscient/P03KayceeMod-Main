@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
@@ -183,6 +184,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (info.HasAbility(CellEvolve.AbilityID))
             {
                 CardInfo cardInfo = info.Clone() as CardInfo;
+                cardInfo.mods.RemoveAll(m => m.nonCopyable);
                 CardModificationInfo cardModificationInfo = new(0, 0)
                 {
                     fromEvolve = true,
@@ -215,6 +217,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (info.HasAbility(CellDeEvolve.AbilityID))
             {
                 CardInfo cardInfo = info.Clone() as CardInfo;
+                cardInfo.mods.RemoveAll(m => m.nonCopyable);
                 CardModificationInfo cardModificationInfo = new(0, 0)
                 {
                     fromEvolve = true,
@@ -565,19 +568,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     return;
                 }
 
-                if (TurnManager.Instance != null && TurnManager.Instance.opponent != null)
+                var pCard = __instance.GetPlayableCard();
+                if (pCard != null && pCard.Info == __instance)
                 {
-                    foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
+                    if (pCard.HasAnyOfAbilities(Ability.GainGemBlue, Ability.GainGemGreen, Ability.GainGemOrange, Ability.GainGemTriple))
                     {
-                        if (slot.Card != null && slot.Card.Info == __instance)
-                        {
-                            if (slot.Card.HasAnyOfAbilities(Ability.GainGemBlue, Ability.GainGemGreen, Ability.GainGemOrange, Ability.GainGemTriple))
-                            {
-                                __result = true;
-                                return;
-                            }
-                            return;
-                        }
+                        __result = true;
+                        return;
                     }
                 }
             }
@@ -629,6 +626,5 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             __instance.nodeRenderers ??= new();
         }
-
     }
 }

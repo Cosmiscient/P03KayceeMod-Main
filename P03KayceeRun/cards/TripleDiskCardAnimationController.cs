@@ -6,6 +6,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Pixelplacement;
 using Pixelplacement.TweenSystem;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -111,39 +112,67 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     continue;
                 }
 
-                yield return sequence.Current is WaitForSeconds wfs
-                    ? wfs.m_Seconds == 0.05f ? new WaitUntil(() => !controller.attacking) : sequence.Current
-                    : sequence.Current;
+                if (sequence.Current is WaitForSeconds wfs && wfs.m_Seconds == 0.05f)
+                    yield return new WaitUntil(() => !controller.attacking);
+                else
+                    yield return sequence.Current;
             }
         }
+
+        [HarmonyPatch(typeof(CombatPhaseManager3D), nameof(CombatPhaseManager3D.InitializePhase))]
+        [HarmonyPrefix]
+        private static void DoCombatPhaseLogger(List<CardSlot> attackingSlots, bool playerIsAttacker)
+        {
+            // Remove duplicates
+            attackingSlots.RemoveAll(x => x.Card == null || x.Card.Slot != x);
+            P03Plugin.Log.LogInfo($"Starting combat phase - player? {playerIsAttacker} - turn {TurnManager.Instance.TurnNumber}. Number of attacking slots {attackingSlots.Count}");
+        }
+
+        [HarmonyPatch(typeof(CombatPhaseManager3D), nameof(CombatPhaseManager3D.InitializePhase))]
+        [HarmonyPostfix]
+        private static void DoCombatPhasePostLogger(List<CardSlot> attackingSlots, bool playerIsAttacker)
+        {
+            attackingSlots.RemoveAll(x => x.Card == null || x.Card.Slot != x);
+            P03Plugin.Log.LogInfo($"Starting combat phase - player? {playerIsAttacker} - turn {TurnManager.Instance.TurnNumber}. Number of attacking slots {attackingSlots.Count}");
+        }
+
+        [HarmonyPatch(typeof(CombatPhaseManager), nameof(CombatPhaseManager.SlotAttackSequence))]
+        [HarmonyPrefix]
+        private static void DoSlotAttackLogger(CardSlot slot)
+        {
+            List<CardSlot> opposingSlots = slot.Card.GetOpposingSlots();
+            P03Plugin.Log.LogInfo($"Starting slot attack - {slot.Card}. Number of opposing slots {opposingSlots.Count}");
+        }
+
 
         [HarmonyPatch(typeof(CombatPhaseManager), nameof(CombatPhaseManager.SlotAttackSlot))]
         [HarmonyPostfix]
         private static IEnumerator SmarterSlotAttackSlot(IEnumerator sequence, CombatPhaseManager __instance, CardSlot attackingSlot, CardSlot opposingSlot, float waitAfter = 0f)
         {
-            // If we got this far and you're attacking the wrong part of a triple card, still replace it (happens on sniper)
-            if (opposingSlot.SlotCoveredByTripleCard())
+            P03Plugin.Log.LogInfo($"Attacking card {attackingSlot.Card}. Defending card {opposingSlot.Card}");
+            if (opposingSlot.Card != null)// && GoobertCenterCardBehaviour.Instance != null && opposingSlot.Card == GoobertCenterCardBehaviour.Instance)
             {
-                List<CardSlot> friendlySlots = BoardManager.Instance.opponentSlots;
-                if (!friendlySlots.Contains(opposingSlot))
-                    friendlySlots = BoardManager.Instance.playerSlots;
-
-                CardSlot newAttackSlot = friendlySlots.FirstOrDefault(s => s.SlotHasTripleCard());
-                if (newAttackSlot != null)
+                var gcs = opposingSlot.Card.GetComponent<GoobertCenterCardBehaviour>();
+                if (gcs != null)
                 {
-                    yield return __instance.SlotAttackSlot(attackingSlot, newAttackSlot, waitAfter);
-                    yield break;
+                    if (opposingSlot != gcs.PlayableCard.slot)
+                    {
+                        P03Plugin.Log.LogInfo("Redirecting attack to another slot");
+                        yield return __instance.SlotAttackSlot(attackingSlot, gcs.PlayableCard.slot, waitAfter);
+                    }
                 }
             }
 
-            if (attackingSlot.Card == null || attackingSlot.Card.Anim is not TripleDiskCardAnimationController)
+            if (attackingSlot.Card == null || attackingSlot.Card.Anim is not TripleDiskCardAnimationController tdcac)
             {
+                P03Plugin.Log.LogInfo("Running normal attack sequence");
                 yield return sequence;
                 yield break;
             }
 
-            TripleDiskCardAnimationController controller = attackingSlot.Card.Anim as TripleDiskCardAnimationController;
-            yield return UnrollWithWait(sequence, controller);
+            P03Plugin.Log.LogInfo("Unrolling attack sequence by goobert");
+            yield return new WaitForEndOfFrame();
+            yield return UnrollWithWait(sequence, tdcac);
         }
 
         public override void PlayTransformAnimation() => AudioController.Instance.PlaySound3D("disk_card_transform", MixerGroup.CardPaperSFX, transform.position, 1f, 0f, null, null, null, null, false);

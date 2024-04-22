@@ -350,6 +350,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 ascensionData.itemUnlockEvents = new() { EventManagement.P03_SAVE_MARKER };
             }
 
+            if (LeshyIsDead && !ascensionData.activeChallenges.Contains(AscensionChallenge.FinalBoss))
+                ascensionData.activeChallenges.Add(AscensionChallenge.FinalBoss);
+
             P03Data = ascensionData;
 
             if (File.Exists(SaveFilePath))

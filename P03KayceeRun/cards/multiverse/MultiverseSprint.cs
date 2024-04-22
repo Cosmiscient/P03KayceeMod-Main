@@ -79,7 +79,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
         }
         public override bool RespondsToTurnEnd(bool playerTurnEnd)
         {
-            return MultiverseBattleSequencer.Instance != null && !hasStrafed && Card != null && Card.OpponentCard != playerTurnEnd;
+            return MultiverseBattleSequencer.Instance != null && !hasStrafed && Card != null && Card.OpponentCard != playerTurnEnd && !Card.Dead;
         }
 
         public override IEnumerator OnTurnEnd(bool playerTurnEnd)

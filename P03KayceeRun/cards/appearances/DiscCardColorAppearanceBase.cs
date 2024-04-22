@@ -324,7 +324,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 yield break;
             }
 
-            DiscCardColorAppearance appearance = drsl.GetComponentInParent<DiscCardColorAppearance>();
+            DiscCardColorAppearance appearance = drsl.transform.parent.parent.GetComponent<DiscCardColorAppearance>();
 
             Color myBarColor = drsl.defaultLightColor;
             if (appearance != null && appearance.BorderColor.HasValue)

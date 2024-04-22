@@ -540,14 +540,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (success)
             {
-                foreach (AscensionChallenge c in AscensionSaveData.Data.activeChallenges)
+                foreach (AscensionChallenge c in P03AscensionSaveData.P03Data.activeChallenges)
                 {
-                    if (!AscensionSaveData.Data.conqueredChallenges.Contains(c))
-                        AscensionSaveData.Data.conqueredChallenges.Add(c);
+                    if (!P03AscensionSaveData.P03Data.conqueredChallenges.Contains(c))
+                        P03AscensionSaveData.P03Data.conqueredChallenges.Add(c);
                 }
 
-                if (!string.IsNullOrEmpty(AscensionSaveData.Data.currentStarterDeck) && !AscensionSaveData.Data.conqueredStarterDecks.Contains(AscensionSaveData.Data.currentStarterDeck))
-                    AscensionSaveData.Data.conqueredStarterDecks.Add(AscensionSaveData.Data.currentStarterDeck);
+                if (!string.IsNullOrEmpty(P03AscensionSaveData.P03Data.currentStarterDeck) && !P03AscensionSaveData.P03Data.conqueredStarterDecks.Contains(P03AscensionSaveData.P03Data.currentStarterDeck))
+                    P03AscensionSaveData.P03Data.conqueredStarterDecks.Add(P03AscensionSaveData.P03Data.currentStarterDeck);
             }
 
             // Delete the ascension save; the run is over            
@@ -557,7 +557,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             //AscensionSaveData.Data.currentRun = null;
 
             if (CompletedZones.Count > 0)
-                AscensionSaveData.Data.numRunsSinceReachedFirstBoss = 0;
+                P03AscensionSaveData.P03Data.numRunsSinceReachedFirstBoss = 0;
 
             Part3SaveData.Data.checkpointPos = new Part3SaveData.WorldPosition(GAME_OVER, 0, 0);
 

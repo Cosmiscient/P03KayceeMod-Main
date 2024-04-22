@@ -20,6 +20,76 @@ namespace Infiniscryption.P03KayceeRun.Cards
     {
         public static SpecialTriggeredAbility AbilityID { get; private set; }
 
+        public static List<GoobertCenterCardBehaviour> Instances { get; private set; } = new();
+
+        public static bool IsOnBoard => Instances.IsOnBoard();
+
+        public enum SlotPosition
+        {
+            Center = 0,
+            Left = 1,
+            Right = 2
+        }
+
+        private SlotPosition _currentPosition = SlotPosition.Center;
+
+        public CardSlot CenterSlot
+        {
+            get
+            {
+                if (_currentPosition == SlotPosition.Left)
+                {
+                    List<CardSlot> slots = MultiverseBattleSequencer.GetParentSlotList(PlayableCard.Slot);
+                    return slots[slots.IndexOf(PlayableCard.Slot) + 1];
+                }
+                if (_currentPosition == SlotPosition.Right)
+                {
+                    List<CardSlot> slots = MultiverseBattleSequencer.GetParentSlotList(PlayableCard.Slot);
+                    return slots[slots.IndexOf(PlayableCard.Slot) - 1];
+                }
+                return PlayableCard.Slot;
+            }
+        }
+
+        public List<CardSlot> AllSlots
+        {
+            get
+            {
+                List<CardSlot> slots = MultiverseBattleSequencer.GetParentSlotList(PlayableCard.Slot);
+                int sidx = slots.IndexOf(PlayableCard.Slot);
+                if (_currentPosition == SlotPosition.Left)
+                    return new() { slots[sidx], slots[sidx + 1], slots[sidx + 2] };
+                if (_currentPosition == SlotPosition.Right)
+                    return new() { slots[sidx - 2], slots[sidx - 1], slots[sidx] };
+
+                return new() { slots[sidx - 1], slots[sidx], slots[sidx + 1] };
+            }
+        }
+
+        private void AssignToInternalSlot(SlotPosition newPosition)
+        {
+            if (newPosition != _currentPosition)
+            {
+                CardSlot centerSlot = CenterSlot;
+                if (newPosition == SlotPosition.Center)
+                {
+                    PlayableCard.slot = centerSlot;
+                }
+                else if (newPosition == SlotPosition.Left)
+                {
+                    List<CardSlot> slots = MultiverseBattleSequencer.GetParentSlotList(centerSlot);
+                    PlayableCard.slot = slots[slots.IndexOf(centerSlot) - 1];
+                }
+                else if (newPosition == SlotPosition.Right)
+                {
+                    List<CardSlot> slots = MultiverseBattleSequencer.GetParentSlotList(centerSlot);
+                    PlayableCard.slot = slots[slots.IndexOf(centerSlot) + 1];
+                }
+                P03Plugin.Log.LogInfo($"{PlayableCard} is now officially in slot {PlayableCard.Slot}");
+                _currentPosition = newPosition;
+            }
+        }
+
         static GoobertCenterCardBehaviour()
         {
             AbilityID = SpecialTriggeredAbilityManager.Add(P03Plugin.PluginGuid, "GoobertCenterCardAppearance", typeof(GoobertCenterCardBehaviour)).Id;
@@ -27,17 +97,15 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private bool IsInMycoBoss => TurnManager.Instance.Opponent is MycologistAscensionBossOpponent;
 
-        // I'm cheating and doing things in the 'respondsto' section so I guarnatee the slots are right
         public override bool RespondsToOtherCardAssignedToSlot(PlayableCard otherCard)
         {
-            ResolveOpposingSlotsForTripleCard();
+            DropHighlightedConduitsForTripleCard();
             return false;
         }
 
-        // I'm cheating and doing things in the 'respondsto' section so I guarnatee the slots are right
-        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer)
+        public override bool RespondsToOtherCardDie(PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer)
         {
-            ResolveOpposingSlotsForTripleCard();
+            DropHighlightedConduitsForTripleCard();
             return false;
         }
 
@@ -97,6 +165,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnResolveOnBoard()
         {
+            Instances.RemoveAll(g => g.SafeIsUnityNull());
+            Instances.Add(this);
             DiskCardAnimationController dcac = Card.Anim as DiskCardAnimationController;
 
             PlayableCard.RenderInfo.hidePortrait = true;
@@ -117,7 +187,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 Destroy(anim);
             goobert.transform.Find("GooBottleItem(Clone)/GooWizardBottle/GooWizard/Bottle").gameObject.SetActive(false);
             goobert.transform.Find("GooBottleItem(Clone)/GooWizardBottle/GooWizard/Cork").gameObject.SetActive(false);
-            OnboardDynamicHoloPortrait.HolofyGameObject(goobert, GameColors.Instance.brightLimeGreen);
+            OnboardDynamicHoloPortrait.HolofyGameObject(goobert, GameColors.Instance.darkLimeGreen);
 
             Transform gooWizard = goobert.transform.Find("GooBottleItem(Clone)/GooWizardBottle/GooWizard");
             gooWizard.localEulerAngles = new(90f, 0f, 0f);
@@ -153,8 +223,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Get the arm
             GameObject rightArm = Instantiate(Resources.Load<GameObject>("prefabs/map/holomapscenery/HoloClaw"), dcac.holoPortraitParent);
             GameObject leftArm = Instantiate(Resources.Load<GameObject>("prefabs/map/holomapscenery/HoloClaw"), dcac.holoPortraitParent);
-            OnboardDynamicHoloPortrait.HolofyGameObject(rightArm, GameColors.Instance.brightLimeGreen);
-            OnboardDynamicHoloPortrait.HolofyGameObject(leftArm, GameColors.Instance.brightLimeGreen);
+            OnboardDynamicHoloPortrait.HolofyGameObject(rightArm, GameColors.Instance.darkLimeGreen);
+            OnboardDynamicHoloPortrait.HolofyGameObject(leftArm, GameColors.Instance.darkLimeGreen);
             rightArm.transform.localPosition = new(-0.5f, -1f, 0f);
             leftArm.transform.localPosition = new(0.5f, -1f, 0f);
             rightArm.transform.localEulerAngles = new(0f, 0f, 270f);
@@ -176,6 +246,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             Tween.LocalScale(gameObject.transform.Find("Anim/ShieldEffect"), new Vector3(6f, 7.9f, 1.7f), restoredFromSnapshot ? 0.001f : 0.3f, 0f);
             Tween.LocalScale(gameObject.transform.Find("Anim/CardBase/HoloportraitParent"), new Vector3(.8f / 2.5f, 1f, 1f), restoredFromSnapshot ? 0.001f : 0.3f, 0f);
             Tween.LocalScale(gameObject.transform.Find("Anim/CardBase/Top/Name"), new Vector3(0.5f, -1f, 1f), restoredFromSnapshot ? 0.001f : 0.3f, 0f);
+            Tween.LocalScale(gameObject.transform.Find("Anim/CardBase/Top/Fuse"), new Vector3(1.3f, 0.4f, 1f), restoredFromSnapshot ? 0.001f : 0.3f, 0f);
 
             if (TurnManager.Instance.opponent is MycologistAscensionBossOpponent)
                 PlayableCard.AddTemporaryMod(GetExperimentModInfo());
@@ -195,7 +266,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (!restoredFromSnapshot)
                 yield return new WaitForSeconds(1.5f);
 
-            ResolveOpposingSlotsForTripleCard();
+            DropHighlightedConduitsForTripleCard();
 
             if (!IsInMycoBoss)
                 ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
@@ -206,7 +277,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private void AddMushroom(float x, float z, Transform parent)
         {
             GameObject mushroom = Instantiate(Resources.Load<GameObject>("prefabs/map/holomapscenery/HoloMushroom_1"), parent);
-            OnboardDynamicHoloPortrait.HolofyGameObject(mushroom, GameColors.Instance.brightLimeGreen);
+            OnboardDynamicHoloPortrait.HolofyGameObject(mushroom, GameColors.Instance.darkLimeGreen);
             Vector3 target = new(x, -.7f, z);
             mushroom.transform.localPosition = target + Vector3.down;
             Tween.LocalPosition(mushroom.transform, target, 1f, 0f);
@@ -244,10 +315,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private IEnumerator MakeSlotEmpty(CardSlot slot, bool left = true)
         {
-            if (slot.Card == null)
+            if (slot.Card == null || slot.Card == this.Card)
                 yield break;
 
-            List<CardSlot> friendlySlots = new(slot.Card.OpponentCard ? BoardManager.Instance.opponentSlots : BoardManager.Instance.playerSlots);
+            var friendlySlots = BoardManager.Instance.GetSlotsCopy(slot.IsPlayerSlot);
             int index = friendlySlots.IndexOf(slot);
             int nextIndex = left ? index - 1 : index + 1;
 
@@ -258,8 +329,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 yield break;
             }
 
-            yield return MakeSlotEmpty(friendlySlots[nextIndex], left);
+            if (nextIndex < 0 || nextIndex >= friendlySlots.Count)
+                yield break;
 
+            yield return MakeSlotEmpty(friendlySlots[nextIndex], left);
             yield return BoardManager.Instance.AssignCardToSlot(slot.Card, friendlySlots[nextIndex]);
         }
 
@@ -280,8 +353,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return true;
         }
 
-        private static bool IsInsideCombatPhase = false;
-
         [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.GetAdjacentSlots))]
         [HarmonyPrefix]
         private static bool GetAdjacentAccountingForTripleCard(CardSlot slot, ref List<CardSlot> __result)
@@ -289,183 +360,42 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (!P03AscensionSaveData.IsP03Run)
                 return true;
 
-            if (IsInsideCombatPhase)
+            if (TurnManager.Instance == null || TurnManager.Instance.GameIsOver() || !IsOnBoard)
                 return true;
 
-            if (TurnManager.Instance == null || TurnManager.Instance.GameIsOver())
+            if (slot.Card == null)
                 return true;
 
-            List<CardSlot> slotsToCheck = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
+            GoobertCenterCardBehaviour gcb = slot.Card.GetComponent<GoobertCenterCardBehaviour>();
 
-            if (slotsToCheck.Any(s => s.SlotHasTripleCard()))
+            if (gcb == null)
+                return true;
+
+            if (slot.Card.Dead)
+                return true;
+
+            List<CardSlot> slotsToCheck = MultiverseBattleSequencer.GetParentSlotList(slot);
+            int idx = slotsToCheck.IndexOf(slot);
+
+            __result = new();
+            for (int i = idx; i >= 0; i--)
             {
-                __result = new();
-                int sidx = slotsToCheck.IndexOf(slot);
-                if (slot.SlotHasTripleCard())
+                if (slotsToCheck[i].Card == null || slotsToCheck[i].Card != gcb.PlayableCard)
                 {
-                    // The slots adjacent to a triple card are two in either direction
-                    if (sidx >= 2)
-                        __result.Add(slotsToCheck[sidx - 2]);
-                    if (sidx + 2 < slotsToCheck.Count)
-                        __result.Add(slotsToCheck[sidx + 2]);
-
-                    return false;
+                    __result.Add(slotsToCheck[i]);
+                    break;
                 }
-
-                // Okay - what if someone is asking about the "wasted" slots underneath the triple card?
-                // Remember - the triple card is considered to be in the middle of its space
-                // In this case, we return the answer as if you asked for that card
-                if (sidx > 0 && slotsToCheck[sidx - 1].SlotHasTripleCard())
+            }
+            for (int i = idx; i < slotsToCheck.Count; i++)
+            {
+                if (slotsToCheck[i].Card == null || slotsToCheck[i].Card != slot.Card)
                 {
-                    __result = BoardManager.Instance.GetAdjacentSlots(slotsToCheck[sidx - 1]);
-                    return false;
+                    __result.Add(slotsToCheck[i]);
+                    break;
                 }
-
-                if (sidx + 1 < slotsToCheck.Count && slotsToCheck[sidx + 1].SlotHasTripleCard())
-                {
-                    __result = BoardManager.Instance.GetAdjacentSlots(slotsToCheck[sidx + 1]);
-                    return false;
-                }
-
-                // Okay, so at this point we're just asking for a normal card
-                // Check the right side
-                if (sidx + 1 < slotsToCheck.Count)
-                {
-                    if (slotsToCheck[sidx + 1].Card != null) // If there's a card there, there's not a triple card adjacent
-                    {
-                        __result.Add(slotsToCheck[sidx + 1]);
-                    }
-                    else
-                    {
-                        // okay, there's not a card there - what if there's a triple card one more slot over:
-                        if (sidx + 2 < slotsToCheck.Count)
-                        {
-                            if (slotsToCheck[sidx + 2].SlotHasTripleCard())
-                                __result.Add(slotsToCheck[sidx + 2]);
-                            else
-                                __result.Add(slotsToCheck[sidx + 1]);
-                        }
-                        else
-                        {
-                            // Okay, there's not room for a triple card so:
-                            __result.Add(slotsToCheck[sidx + 1]);
-                        }
-                    }
-                }
-
-                // Check the left side:
-                if (sidx > 0)
-                {
-                    if (slotsToCheck[sidx - 1].Card != null) // If there's a card there, there's not a triple card adjacent
-                    {
-                        __result.Add(slotsToCheck[sidx - 1]);
-                    }
-                    else
-                    {
-                        ;
-                        // okay, there's not a card there - what if there's a triple card one more slot over:
-                        if (sidx > 1)
-                        {
-                            if (slotsToCheck[sidx - 2].SlotHasTripleCard())
-                                __result.Add(slotsToCheck[sidx - 2]);
-                            else
-                                __result.Add(slotsToCheck[sidx - 1]);
-                        }
-                        else
-                        {
-                            // Okay, there's not room for a triple card so:
-                            __result.Add(slotsToCheck[sidx - 1]);
-                        }
-                    }
-                }
-
-                return false;
             }
 
-            return true;
-        }
-
-        // [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.OpponentSlotsCopy), MethodType.Getter)]
-        // [HarmonyPostfix]
-        // private static void FilterOutCoveredOpponentSlots(ref List<CardSlot> __result)
-        // {
-        //     if (!P03AscensionSaveData.IsP03Run)
-        //         return;
-
-        //     if (TurnManager.Instance == null || TurnManager.Instance.opponent == null || TurnManager.Instance.GameIsOver())
-        //         return;
-
-        //     // This cannot use ANY properties, method, or extension methods of slots
-        //     // Or risk an infinite loop
-        //     List<CardSlot> slotsToRemove = new();
-        //     for (int i = 0; i < __result.Count; i++)
-        //     {
-        //         if (__result[i].Card != null && __result[i].Card.HasSpecialAbility(AbilityID))
-        //         {
-        //             if (i > 0)
-        //                 slotsToRemove.Add(__result[i - 1]);
-        //             if (i < __result.Count - 1)
-        //                 slotsToRemove.Add(__result[i + 1]);
-        //         }
-        //     }
-        //     if (slotsToRemove.Count > 0)
-        //     {
-        //         __result = new(__result);
-        //         foreach (var slot in slotsToRemove)
-        //             __result.Remove(slot);
-        //     }
-        // }
-
-        // [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.PlayerSlotsCopy), MethodType.Getter)]
-        // [HarmonyPostfix]
-        // private static void FilterOutCoveredPlayerSlots(ref List<CardSlot> __result)
-        // {
-        //     if (!P03AscensionSaveData.IsP03Run)
-        //         return;
-
-        //     if (TurnManager.Instance == null || TurnManager.Instance.opponent == null || TurnManager.Instance.GameIsOver())
-        //         return;
-
-        //     // This cannot use ANY properties, method, or extension methods of slots
-        //     // Or risk an infinite loop
-        //     List<CardSlot> slotsToRemove = new();
-        //     for (int i = 0; i < __result.Count; i++)
-        //     {
-        //         if (__result[i].Card != null && __result[i].Card.HasSpecialAbility(AbilityID))
-        //         {
-        //             if (i > 0)
-        //                 slotsToRemove.Add(__result[i - 1]);
-        //             if (i < __result.Count - 1)
-        //                 slotsToRemove.Add(__result[i + 1]);
-        //         }
-        //     }
-        //     if (slotsToRemove.Count > 0)
-        //     {
-        //         __result = new(__result);
-        //         foreach (var slot in slotsToRemove)
-        //             __result.Remove(slot);
-        //     }
-        // }
-
-        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.AllSlots), MethodType.Getter)]
-        [HarmonyPostfix]
-        private static void FilterOutCoveredSlots(ref List<CardSlot> __result)
-        {
-            if (!P03AscensionSaveData.IsP03Run)
-                return;
-
-            // This is a bit of a hacky coverup to deal with the fact that when you ask the table manager
-            // to reset colors when the boss dies, sometimes you do this while there are still cards on the
-            // table. So if the game is essentially over, we can just leave the list of slots alone
-
-            if (TurnManager.Instance == null || TurnManager.Instance.opponent == null || TurnManager.Instance.GameIsOver())
-                return;
-
-            if (__result.Any(cs => cs.SlotCoveredByTripleCard()))
-            {
-                __result = new(__result);
-                __result.RemoveAll(cs => cs.SlotCoveredByTripleCard());
-            }
+            return false;
         }
 
         [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.SacrificesCreateRoomForCard))]
@@ -500,38 +430,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return true;
         }
 
-        internal static void ResolveOpposingSlotsForTripleCard(List<CardSlot> slots, List<CardSlot> opposingSlots, bool reset)
-        {
-            if (opposingSlots.Any(s => s.SlotHasTripleCard()) && !reset)
-            {
-                for (int i = 0; i < slots.Count; i++)
-                {
-                    slots[i].opposingSlot = i > 0 && opposingSlots[i - 1].SlotHasTripleCard()
-                        ? opposingSlots[i - 1]
-                        : i + 1 < opposingSlots.Count && opposingSlots[i + 1].SlotHasTripleCard() ? opposingSlots[i + 1] : opposingSlots[i];
-                }
-            }
-            else
-            {
-                for (int i = 0; i < slots.Count; i++)
-                    slots[i].opposingSlot = opposingSlots[i];
-            }
-        }
-
         internal static void DropHighlightedConduitsForTripleCard()
         {
             foreach (CardSlot slot in BoardManager.Instance.playerSlots.Concat(BoardManager.Instance.opponentSlots))
-                slot.gameObject.transform.Find("ConduitBorder/GravityParticles").gameObject.SetActive(!slot.SlotHasTripleCard() && !slot.SlotCoveredByTripleCard());
-        }
-
-        internal static void ResolveOpposingSlotsForTripleCard(bool reset = false)
-        {
-            if (!SaveManager.SaveFile.IsPart3)
-                return;
-
-            ResolveOpposingSlotsForTripleCard(BoardManager.Instance.playerSlots, BoardManager.Instance.opponentSlots, reset);
-            ResolveOpposingSlotsForTripleCard(BoardManager.Instance.opponentSlots, BoardManager.Instance.playerSlots, reset);
-            DropHighlightedConduitsForTripleCard();
+                slot.gameObject.transform.Find("ConduitBorder/GravityParticles").gameObject.SetActive(slot.Card == null || !slot.Card.Info.HasSpecialAbility(AbilityID));
         }
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.DoUpkeepPhase))]
@@ -541,23 +443,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (!P03AscensionSaveData.IsP03Run)
                 return;
 
-            ResolveOpposingSlotsForTripleCard();
-        }
-
-        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.DoCombatPhase))]
-        [HarmonyPostfix]
-        private static IEnumerator EnsureSlotsOnCombat(IEnumerator sequence)
-        {
-            if (!P03AscensionSaveData.IsP03Run)
-            {
-                yield return sequence;
-                yield break;
-            }
-            IsInsideCombatPhase = true;
-            ResolveOpposingSlotsForTripleCard(reset: true);
-            yield return sequence;
-            IsInsideCombatPhase = false;
-            ResolveOpposingSlotsForTripleCard(reset: false);
+            Instances.RemoveAll(g => g.SafeIsUnityNull());
+            DropHighlightedConduitsForTripleCard();
         }
 
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
@@ -567,29 +454,64 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (!P03AscensionSaveData.IsP03Run)
                 return;
 
-            ResolveOpposingSlotsForTripleCard(reset: true);
+            DropHighlightedConduitsForTripleCard();
         }
 
-        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.CreateCardInSlot))]
+        [HarmonyPatch(typeof(CardSlot), nameof(CardSlot.Card), MethodType.Getter)]
         [HarmonyPostfix]
-        private static IEnumerator EnsureNoMisaligns(IEnumerator sequence, CardInfo info, CardSlot slot, float transitionLength = 0.1f, bool resolveTriggers = true)
+        private static void TripleCardGetter(CardSlot __instance, ref PlayableCard __result)
         {
-            if (!P03AscensionSaveData.IsP03Run || !slot.SlotCoveredByTripleCard())
+            if (__result != null)
+                return;
+
+            foreach (var gcs in Instances.OnBoard().Where(g => !g.PlayableCard.Dead))
             {
-                yield return sequence;
-                yield break;
+                CardSlot slot = gcs.CenterSlot;
+                if (slot.IsPlayerSlot != __instance.IsPlayerSlot)
+                    continue;
+
+                if (slot.Index - 1 == __instance.Index || slot.Index + 1 == __instance.Index || slot.Index == __instance.Index)
+                {
+                    __result = gcs.PlayableCard;
+                    return;
+                }
             }
+        }
 
-            // This means the slot **is** covered
-            // Try to find another slot?
-            List<CardSlot> possibles = BoardManager.Instance.GetSlotsCopy(slot.IsPlayerSlot)
-                                                   .Where(s => s.Card == null && !s.SlotCoveredByTripleCard())
-                                                   .OrderBy(s => Mathf.Abs(s.Index - slot.Index))
-                                                   .ToList();
+        private static IEnumerator OriginalAssignCardToSlot(PlayableCard card, CardSlot slot, float transitionDuration = 0.1f, Action tweenCompleteCallback = null, bool resolveTriggers = true)
+        {
+            CardSlot slot2 = card.Slot;
 
-            if (possibles.Count > 0)
-                yield return BoardManager.Instance.CreateCardInSlot(info, possibles[0], transitionLength, resolveTriggers);
+            if (card.Slot != null)
+                card.Slot.Card = null;
 
+            if (slot.Card != null)
+                slot.Card.Slot = null;
+
+            card.SetEnabled(false);
+            slot.Card = card;
+            card.Slot = slot;
+            card.RenderCard();
+
+            if (!slot.IsPlayerSlot)
+                card.SetIsOpponentCard(true);
+
+            card.transform.parent = slot.transform;
+            card.Anim.PlayRiffleSound();
+            Tween.LocalPosition(card.transform, Vector3.up * (BoardManager.Instance.SlotHeightOffset + card.SlotHeightOffset), transitionDuration, 0.05f, Tween.EaseOut, Tween.LoopType.None, null, delegate ()
+            {
+                tweenCompleteCallback?.Invoke();
+                card.Anim.PlayRiffleSound();
+            }, true);
+
+            Tween.Rotation(card.transform, slot.transform.GetChild(0).rotation, transitionDuration, 0f, Tween.EaseOut, Tween.LoopType.None, null, null, true);
+            if (resolveTriggers && slot2 != card.Slot)
+            {
+                yield return Singleton<GlobalTriggerHandler>.Instance.TriggerCardsOnBoard(Trigger.OtherCardAssignedToSlot, false, new object[]
+                {
+                    card
+                });
+            }
             yield break;
         }
 
@@ -597,191 +519,140 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static IEnumerator HackyTripleCardReassignmentStrategy(IEnumerator sequence, PlayableCard card, CardSlot slot, float transitionDuration = 0.1f, Action tweenCompleteCallback = null, bool resolveTriggers = true)
         {
-            if (P03AscensionSaveData.IsP03Run)
+            if (!P03AscensionSaveData.IsP03Run)
             {
-                // If this is a triple card we might actually change which slot its being assigned to:
-                if (card.Info.specialAbilities.Contains(AbilityID))
-                {
-                    // First, let's see if we can fit in the new space:
-                    List<CardSlot> container = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
+                yield return sequence;
+                yield break;
+            }
 
-                    if (slot.SlotCanHoldTripleCard(card))
+            // If this is a triple card we might actually change which slot its being assigned to:
+            if (!card.Info.specialAbilities.Contains(AbilityID))
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            // Okay, is this not on board yet?
+            if (!card.OnBoard)
+            {
+                // If the slot can fit the card, great - just play it
+                if (slot.SlotCanHoldTripleCard(card))
+                {
+                    yield return OriginalAssignCardToSlot(card, slot, transitionDuration, tweenCompleteCallback, resolveTriggers);
+                    yield break;
+                }
+
+                // Otherwise, find a slot where it does fit
+                List<CardSlot> container = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
+                foreach (var testSlot in container)
+                {
+                    if (testSlot.SlotCanHoldTripleCard(card))
                     {
-                        yield return sequence;
+                        yield return OriginalAssignCardToSlot(card, testSlot, transitionDuration, tweenCompleteCallback, resolveTriggers);
                         yield break;
                     }
-
-                    // Okay. We don't fit. Is there any place we can fit that will cover this slot?
-                    for (int i = 1; i < container.Count - 1; i++)
-                    {
-                        if (container[i].SlotCanHoldTripleCard(card) && Math.Abs(i - slot.Index) <= 1)
-                        {
-                            yield return BoardManager.Instance.AssignCardToSlot(card, container[i], transitionDuration, tweenCompleteCallback, resolveTriggers);
-                            yield break;
-                        }
-                    }
-
-                    // We could not find a way to assign the card's location!
-                    // We will move right back to the slot we were in before!
-                    if (card.Slot != null)
-                        yield return BoardManager.Instance.AssignCardToSlot(card, card.Slot, transitionDuration, tweenCompleteCallback, resolveTriggers);
-
-                    yield break;
                 }
 
-                // If you're trying to move into a slot covered by a triple card, let's see if we can't move you somewhere else
-                if (slot.SlotCoveredByTripleCard() && card.Slot != null)
+                throw new InvalidOperationException("This shouldn't be possible - I was unable to play Goobert for some reason!");
+            }
+
+            // Okay, the card is currently on board. 
+            List<CardSlot> boardSlots = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
+            GoobertCenterCardBehaviour gcb = card.GetComponent<GoobertCenterCardBehaviour>();
+
+            // Okay - are you trying to move to the other side of the board?
+            // Secret behavior! We kill all cards in the way.
+            if (slot.IsPlayerSlot != card.Slot.IsPlayerSlot)
+            {
+                List<CardSlot> otherSlots = BoardManager.Instance.GetSlots(!slot.IsPlayerSlot);
+                CardSlot targetSlot = slot.Index == 0 ? otherSlots[1]
+                                      : slot.Index == otherSlots.Count - 1 ? otherSlots[otherSlots.Count - 2]
+                                      : slot;
+                for (int i = -1; i <= 1; i++)
+                    while (otherSlots[targetSlot.Index + i].Card != null)
+                        otherSlots[targetSlot.Index + i].Card.ExitBoard(0.5f, Vector3.down * 5);
+
+                yield return OriginalAssignCardToSlot(card, targetSlot, transitionDuration, tweenCompleteCallback, resolveTriggers);
+                yield break;
+            }
+
+            // If you're trying to move this card to a slot two spaces away from the
+            // center, we actually try to move it one slot away. We assume this is a strafe
+            if (gcb.CenterSlot.Index + 2 == slot.Index)
+            {
+                CardSlot newTarget = boardSlots[gcb.CenterSlot.Index + 1];
+                if (newTarget.SlotCanHoldTripleCard())
                 {
-                    // Okay, you're trying to move into a slot that's covered by a triple card. This probably
-                    // happened because of some strafe shenanigans. Let's just choose a different place for you to move to
-                    List<CardSlot> container = BoardManager.Instance.playerSlots;
-                    if (!container.Contains(slot))
-                        container = BoardManager.Instance.opponentSlots;
-
-                    int step = slot.Index < card.Slot.Index ? -1 : 1;
-
-                    int startIndex = card.Slot.Index + step;
-                    while (startIndex > 0 && startIndex < container.Count)
-                    {
-                        CardSlot newSlot = container[startIndex];
-                        if (newSlot.Card != null && !newSlot.SlotCoveredByTripleCard())
-                        {
-                            yield return BoardManager.Instance.AssignCardToSlot(card, newSlot, transitionDuration, tweenCompleteCallback, resolveTriggers);
-                            yield break;
-                        }
-                        startIndex += step;
-                    }
+                    yield return OriginalAssignCardToSlot(card, newTarget, transitionDuration, tweenCompleteCallback, resolveTriggers);
                     yield break;
-
+                }
+            }
+            if (gcb.CenterSlot.Index - 2 == slot.Index)
+            {
+                CardSlot newTarget = boardSlots[gcb.CenterSlot.Index - 1];
+                if (newTarget.SlotCanHoldTripleCard())
+                {
+                    yield return OriginalAssignCardToSlot(card, newTarget, transitionDuration, tweenCompleteCallback, resolveTriggers);
+                    yield break;
                 }
             }
 
-            yield return sequence;
+            // Finally, just try this
+
+            if (slot.SlotCanHoldTripleCard(card))
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            // Okay. We don't fit. Is there any place we can fit that will cover this slot?
+            // So we give up
+            card.Anim.StrongNegationEffect();
+            yield break;
         }
 
-        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.GetOpposingSlots))]
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.CardsOnBoard), MethodType.Getter)]
         [HarmonyPostfix]
-        [HarmonyAfter("cyantist.inscryption.api")]
-        private static void ReplaceAttacksOnOverlap(PlayableCard __instance, ref List<CardSlot> __result)
+        private static void RemoveDuplicateGoobertCards(ref List<PlayableCard> __result)
         {
-            if (!P03AscensionSaveData.IsP03Run)
+            if (!IsOnBoard)
                 return;
 
-            // If you attack a slot we overlap, you should attack us
-            List<CardSlot> slots = BoardManager.Instance.GetSlots(__instance.OpponentCard);
-            CardSlot tripleSlotCard = slots.FirstOrDefault(s => s.SlotHasTripleCard());
-            if (tripleSlotCard != null)
-            {
-                for (int i = 0; i < __result.Count; i++)
-                {
-                    if (__result[i].SlotCoveredByTripleCard())
-                        __result[i] = tripleSlotCard;
-                }
-            }
+            __result = __result.Distinct().ToList();
         }
-
-        [HarmonyPatch(typeof(Opponent), nameof(Opponent.QueuedCardIsBlocked))]
-        [HarmonyPrefix]
-        private static bool QueuedCardIsBlocked(PlayableCard queuedCard, ref bool __result)
-        {
-            if (!P03AscensionSaveData.IsP03Run)
-                return true;
-
-            // You can't put a queued card into a slot we overlap
-            __result = queuedCard.QueuedSlot.Card != null || queuedCard.QueuedSlot.SlotCoveredByTripleCard();
-            return false;
-        }
-
-        private static bool InVirtualSlot = false;
 
         [HarmonyPatch(typeof(CardTriggerHandler), nameof(CardTriggerHandler.RespondsToTrigger))]
-        [HarmonyPostfix]
-        private static void WouldHaveRespondedInAnotherSlot(CardTriggerHandler __instance, ref bool __result, Trigger trigger, object[] otherArgs)
+        [HarmonyPrefix]
+        private static bool WouldHaveRespondedInAnotherSlot(CardTriggerHandler __instance, ref bool __result, Trigger trigger, object[] otherArgs)
         {
-            if (!P03AscensionSaveData.IsP03Run)
-                return;
+            if (!IsOnBoard)
+                return true;
 
-            if (InVirtualSlot)
-                return;
+            GoobertCenterCardBehaviour gcb = Instances.FirstOrDefault(g => !g.SafeIsUnityNull() && g.PlayableCard != null && g.PlayableCard.TriggerHandler == __instance);
 
-            if (__result)
-                return;
+            if (gcb == null)
+                return true;
 
-            PlayableCard card = __instance.gameObject.GetComponent<PlayableCard>();
+            // Okay, we need to check if this card would respond in any of the three possible positions
+            __result = false;
+            var currentPosition = gcb._currentPosition;
 
-            if (card.SafeIsUnityNull() || card.Info == null || card.Dead)
+            P03Plugin.Log.LogInfo($"Testing {gcb.PlayableCard} to see if it will trigger {trigger}");
+            foreach (SlotPosition pos in Enum.GetValues(typeof(SlotPosition)))
             {
-                __result = false;
-                return;
-            }
-
-            if ((card.Info.specialAbilities?.Contains(AbilityID)).GetValueOrDefault())
-            {
-                if (card.Slot != null && !TurnManager.Instance.GameEnding)
+                gcb.AssignToInternalSlot(pos);
+                foreach (TriggerReceiver receiver in __instance.GetAllReceivers())
                 {
-                    // Let's see if we would have responded in a different slot
-                    List<CardSlot> overrideSlots = BoardManager.Instance.GetSlots(card.Slot.IsPlayerSlot);
-                    CardSlot leftSlot = overrideSlots[card.Slot.Index - 1];
-                    CardSlot rightSlot = overrideSlots[card.Slot.Index + 1];
-                    CardSlot originalSlot = card.Slot;
-
-                    InVirtualSlot = true;
-
-                    try
+                    if (GlobalTriggerHandler.ReceiverRespondsToTrigger(trigger, receiver, otherArgs))
                     {
-                        P03Plugin.Log.LogDebug($"Triple card did not trigger in slot {originalSlot.Index} for trigger {trigger}");
-
-                        card.slot = leftSlot;
-                        if (__instance.RespondsToTrigger(trigger, otherArgs))
-                        {
-                            P03Plugin.Log.LogDebug($"Triple card does trigger in slot {leftSlot.Index} for trigger {trigger}");
-                            __result = true;
-                            return;
-                        }
-                        card.slot = rightSlot;
-                        if (__instance.RespondsToTrigger(trigger, otherArgs))
-                        {
-                            P03Plugin.Log.LogDebug($"Triple card does trigger in slot {rightSlot.Index} for trigger {trigger}");
-                            __result = true;
-                            return;
-                        }
-                        P03Plugin.Log.LogDebug($"Triple card does not trigger in slot {leftSlot.Index} or {rightSlot.Index} for trigger {trigger}");
-                        return;
-                    }
-                    finally
-                    {
-                        card.slot = originalSlot;
-                        InVirtualSlot = false;
+                        __result = true;
+                        P03Plugin.Log.LogInfo($"Triggered in position {pos} for {receiver}");
+                        break;
                     }
                 }
             }
-        }
-
-        private static bool ReceiverRespondsToTriggerInAnyOfThreeSlots(PlayableCard card, Trigger trigger, TriggerReceiver receiver, object[] otherArgs)
-        {
-            if (GlobalTriggerHandler.ReceiverRespondsToTrigger(trigger, receiver, otherArgs))
-                return true;
-
-            List<CardSlot> overrideSlots = BoardManager.Instance.GetSlots(card.Slot.IsPlayerSlot);
-            CardSlot leftSlot = overrideSlots[card.Slot.Index - 1];
-            CardSlot rightSlot = overrideSlots[card.Slot.Index + 1];
-            CardSlot originalSlot = card.Slot;
-
-            try
-            {
-                card.slot = leftSlot;
-                if (GlobalTriggerHandler.ReceiverRespondsToTrigger(trigger, receiver, otherArgs))
-                    return true;
-
-                card.slot = rightSlot;
-                if (GlobalTriggerHandler.ReceiverRespondsToTrigger(trigger, receiver, otherArgs))
-                    return true;
-            }
-            finally
-            {
-                card.slot = originalSlot;
-            }
-
+            P03Plugin.Log.LogInfo($"Returning back to {currentPosition}");
+            gcb.AssignToInternalSlot(currentPosition);
             return false;
         }
 
@@ -789,25 +660,57 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static IEnumerator HandleTripleCardTrigger(IEnumerator sequence, CardTriggerHandler __instance, Trigger trigger, object[] otherArgs)
         {
-            if (!P03AscensionSaveData.IsP03Run)
+            if (!IsOnBoard)
             {
                 yield return sequence;
                 yield break;
             }
 
-            PlayableCard card = __instance.gameObject.GetComponent<PlayableCard>();
-            if (!card.Info.specialAbilities.Contains(AbilityID))
+            GoobertCenterCardBehaviour gcb = Instances.FirstOrDefault(g => !g.SafeIsUnityNull() && g.PlayableCard != null && g.PlayableCard.TriggerHandler == __instance);
+
+            if (gcb == null)
             {
                 yield return sequence;
                 yield break;
             }
 
+            var currentPosition = gcb._currentPosition;
             foreach (TriggerReceiver receiver in __instance.GetAllReceivers())
             {
-                if (ReceiverRespondsToTriggerInAnyOfThreeSlots(card, trigger, receiver, otherArgs))
-                    yield return GlobalTriggerHandler.Instance.TriggerSequence(trigger, receiver, otherArgs);
-            }
+                P03Plugin.Log.LogInfo($"Testing {receiver} for {gcb.PlayableCard} to see if it will trigger {trigger}");
+                List<SlotPosition> positiveResponses = new();
+                foreach (SlotPosition pos in Enum.GetValues(typeof(SlotPosition)))
+                {
+                    gcb.AssignToInternalSlot(pos);
+                    if (GlobalTriggerHandler.ReceiverRespondsToTrigger(trigger, receiver, otherArgs))
+                    {
+                        P03Plugin.Log.LogInfo($"Positive trigger for {receiver} in position {pos}");
+                        positiveResponses.Add(pos);
+                    }
+                }
 
+                // If you would have triggered in all three spaces, we only trigger
+                // from the center slot. With *ONE* exception - the ondie trigger
+                P03Plugin.Log.LogInfo($"Found {positiveResponses.Count} positive triggers for {receiver} {trigger}");
+                if (positiveResponses.Count == 3 && !GoobertCenterCardBehaviourHelpers.CanFireOnAllSlots(trigger, receiver))
+                {
+                    P03Plugin.Log.LogInfo($"Triggering {receiver} {gcb.PlayableCard} ONCE in center slot.");
+                    gcb.AssignToInternalSlot(SlotPosition.Center);
+                    yield return GlobalTriggerHandler.Instance.TriggerSequence(trigger, receiver, otherArgs);
+                }
+                else
+                {
+                    P03Plugin.Log.LogInfo($"Iterating through {positiveResponses.Count} positive triggers");
+                    foreach (var p in positiveResponses)
+                    {
+                        P03Plugin.Log.LogInfo($"Triggering {receiver} {gcb.PlayableCard} in {p}.");
+                        gcb.AssignToInternalSlot(p);
+                        yield return GlobalTriggerHandler.Instance.TriggerSequence(trigger, receiver, otherArgs);
+                    }
+                }
+            }
+            P03Plugin.Log.LogInfo($"Returning back to {currentPosition}");
+            gcb.AssignToInternalSlot(currentPosition);
             yield break;
         }
 
