@@ -80,7 +80,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         static TalkingCardSawyer()
         {
-            var talkingCard = CardManager.New(P03Plugin.CardPrefx, Name, "Dogbyte", 0, 4)
+            var talkingCard = CardManager.New(P03Plugin.CardPrefx, Name, "Dogbot", 0, 4)
                        .SetCost(energyCost: 3)
                        .AddAbilities(Ability.DoubleDeath)
                        .SetCardTemple(CardTemple.Tech);

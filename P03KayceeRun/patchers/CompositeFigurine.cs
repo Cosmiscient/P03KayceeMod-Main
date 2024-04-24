@@ -166,7 +166,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             // Add Kaycee
             FullFigurineData kayceeData = new();
-            kayceeData.Body = new() { CopyFrom = CompositeFigurine.FigurineType.Wildling };
+            kayceeData.Body = new() { CopyFrom = CompositeFigurine.FigurineType.Gravedigger };
             kayceeData.Arms = new() { CopyFrom = CompositeFigurine.FigurineType.Wildling };
 
             var kayceeIceParent = new GameObject("KayceeIce");

@@ -90,7 +90,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         public bool QuestGenerated
         {
             get => P03AscensionSaveData.RunStateData.GetValueAsBoolean(ModGuid, $"{QuestName}_GENERATED");
-            set => P03AscensionSaveData.RunStateData.SetValue(ModGuid, $"{QuestName}_GENERATED", value);
+            internal set => P03AscensionSaveData.RunStateData.SetValue(ModGuid, $"{QuestName}_GENERATED", value);
         }
 
         /// <summary>
@@ -138,7 +138,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
         {
             get => EventId == DefaultQuestDefinitions.FindGoobert.EventId ||
                     EventId == DefaultQuestDefinitions.BrokenGenerator.EventId ||
-                    EventId == DefaultQuestDefinitions.Prospector.EventId;
+                    EventId == DefaultQuestDefinitions.Prospector.EventId ||
+                    EventId == DefaultQuestDefinitions.Rebecha.EventId;
         }
 
         /// <summary>
@@ -201,6 +202,9 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
                 if (EventId == DefaultQuestDefinitions.Prospector.EventId)
                     return Part3SaveData.Data.deck.Cards.Any(c => c.name == CustomCards.BRAIN); // Always generated if you have a bounty hunter brain in your deck
+
+                if (EventId == DefaultQuestDefinitions.Rebecha.EventId)
+                    return false;
 
                 // If this is completed but there are still rewards to give?
                 if (IsCompleted && HasUngrantedRewards && QuestCanContinue)

@@ -75,7 +75,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
                        .SetCost(energyCost: 4)
                        .SetIceCube(TalkingCardJames.Name)
                        .AddAbilities(Ability.IceCube)
-                       .SetCardTemple(CardTemple.Tech);
+                       .SetCardTemple(CardTemple.Tech)
+                       .SetWeaponMesh(
+                            "p03kcm/prefabs/flamethrower",
+                            localPosition: new Vector3(0f, 0f, 0f),
+                            localRotation: new Vector3(0f, 90f, 0f),
+                            localScale: new Vector3(0.75f, 0.75f, 0.75f)
+                        );
 
             TalkingCardManager.New<TalkingCardMelter>();
 
@@ -90,10 +96,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
             RecursiveSetLayer(talkingCard.AnimatedPortrait, "CardOffscreenEmission");
 
             talkingCard.AnimatedPortrait.transform.localScale = new(1f, 1f, 1f);
-            talkingCard.AnimatedPortrait.transform.Find("Anim/Body").localPosition = new(0f, 0.2f, 0f);
+            talkingCard.AnimatedPortrait.transform.Find("Anim/Body").localPosition = new(0f, -0.2f, 0f);
+            talkingCard.AnimatedPortrait.transform.localPosition += new Vector3(0f, .4f, 0f);
 
             // Add the dialogue text
-            GameObject.Instantiate(CardLoader.GetCardByName("Angler_Talking").AnimatedPortrait.transform.Find("DialogueText").gameObject, talkingCard.AnimatedPortrait.transform);
+            var go = GameObject.Instantiate(CardLoader.GetCardByName("Angler_Talking").AnimatedPortrait.transform.Find("DialogueText").gameObject, talkingCard.AnimatedPortrait.transform);
+            go.transform.localPosition -= new Vector3(0f, .4f, 0f);
         }
     }
 }

@@ -324,7 +324,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 yield break;
             }
 
-            DiscCardColorAppearance appearance = drsl.transform.parent.parent.GetComponent<DiscCardColorAppearance>();
+            DiscCardColorAppearance appearance = drsl.GetComponentInParent<DiscCardColorAppearance>();//drsl.transform.parent.parent.GetComponent<DiscCardColorAppearance>();
 
             Color myBarColor = drsl.defaultLightColor;
             if (appearance != null && appearance.BorderColor.HasValue)
@@ -379,7 +379,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (!P03AscensionSaveData.IsP03Run || __instance is not DiskRenderStatsLayer drsl)
                 return;
 
-            DiscCardColorAppearance appearance = drsl.gameObject.transform.parent.parent.gameObject.GetComponent<DiscCardColorAppearance>();
+            DiscCardColorAppearance appearance = drsl.GetComponentInParent<DiscCardColorAppearance>();//drsl.gameObject.transform.parent.parent.gameObject.GetComponent<DiscCardColorAppearance>();
 
             if (appearance == null)
                 return;

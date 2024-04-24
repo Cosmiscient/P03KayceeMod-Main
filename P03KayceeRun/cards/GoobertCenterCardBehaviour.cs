@@ -118,6 +118,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         internal static CardModificationInfo GetExperimentModInfo()
         {
             CardModificationInfo info = new();
+            info.nameReplacement = "Experiment #" + AscensionStatsData.GetStatValue(StatManagement.EXPERIMENTS_CREATED, true);
             int randomAbilityCount = 0;
             foreach (CardInfo card in EventManagement.MycologistTestSubjects)
             {

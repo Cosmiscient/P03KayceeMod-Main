@@ -890,6 +890,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                 foreach (AbilityManager.FullAbility ab in abilities)
                 {
+                    if (ab.Id == Ability.DoubleDeath)
+                        ab.Info.rulebookName = "Double Death";
+
                     if (allP3Abs.Contains(ab.Id))
                     {
                         ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook);

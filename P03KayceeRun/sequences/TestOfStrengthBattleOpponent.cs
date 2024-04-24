@@ -35,11 +35,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             if (currentItems != null)
             {
                 P03Plugin.Log.LogDebug("Retrieved the following item data: " + string.Join(", ", currentItems));
-                Part3SaveData.Data.items.Clear();
-                Part3SaveData.Data.items.AddRange(currentItems);
-                ItemsManager.Instance.UpdateItems(false);
-                var currentItemLog = ItemsManager.Instance.consumableSlots.Select(s => s.Item.Data.name);
-                P03Plugin.Log.LogDebug("Items manager has: " + string.Join(", ", currentItemLog));
+                MultiverseGameState.UpdateItems(currentItems);
             }
             else
             {

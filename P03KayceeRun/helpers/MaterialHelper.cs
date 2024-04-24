@@ -99,7 +99,7 @@ namespace Infiniscryption.P03KayceeRun.Helpers
                     {
                         foreach (string texName in TextureNames)
                         {
-                            if (String.IsNullOrEmpty(originalTextureKey) || CardComponentHasTargetTexture(renderer, textureName, originalTextureKey.ToLowerInvariant()))
+                            if (String.IsNullOrEmpty(originalTextureKey) || CardComponentHasTargetTexture(renderer, texName, originalTextureKey.ToLowerInvariant()))
                             {
                                 foreach (Material material in renderer.materials)
                                     material.SetTexture(texName, texture);

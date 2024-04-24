@@ -830,6 +830,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     y = 3,
                     dialogueEvent = DefaultQuestDefinitions.Rebecha.EventId
                 };
+                QuestManager.Get(DefaultQuestDefinitions.Rebecha.EventId).QuestGenerated = true;
                 BuildDialogueNode(rbBp, nodes, scenery, -2f, -2f);
             }
 

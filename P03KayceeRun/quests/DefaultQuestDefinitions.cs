@@ -58,7 +58,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                     return true;
 
                 if (EventManagement.CompletedZones.Count == 0)
-                    return SeededRandom.Value(P03AscensionSaveData.RandomSeed) < 0.2f;
+                    return SeededRandom.Value(P03AscensionSaveData.RandomSeed) < 0.125f;
 
                 if (Part3SaveData.Data.deck.Cards.Any(ci => ci.appearanceBehaviour.Contains(CardAppearanceBehaviour.Appearance.DynamicPortrait)))
                     return SeededRandom.Value(P03AscensionSaveData.RandomSeed) < 0.66667f;
@@ -296,7 +296,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                         .AddGainCardReward(CustomCards.BOUNTY_HUNTER_SPAWNER);
 
             // Generator Quest
-            BrokenGenerator = QuestManager.Add(P03Plugin.PluginGuid, "Broken Generator").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.InspectorSolo, CompositeFigurine.FigurineType.Wildling));
+            BrokenGenerator = QuestManager.Add(P03Plugin.PluginGuid, "Broken Generator").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.InspectorSolo, CompositeFigurine.FigurineType.Wildling, CompositeFigurine.FigurineType.SettlerMan, CompositeFigurine.FigurineType.Robot));
             QuestState defaultState = BrokenGenerator.AddState("HELP!", "P03DamageRaceIntro");
             defaultState.AddDialogueState("OH NO...", "P03DamageRaceFailed", QuestState.QuestStateStatus.Failure);
             defaultState.AddDialogueState("PHEW!", "P03DamageRaceSuccess").AddDynamicMonetaryReward();

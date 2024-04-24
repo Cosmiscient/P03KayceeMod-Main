@@ -102,7 +102,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
             }
 
-            if (__instance is not P03AscensionOpponent and not MycologistAscensionBossOpponent)
+            if (__instance is not P03AscensionOpponent and not MycologistAscensionBossOpponent and not MultiverseBossOpponent and not DredgerBossOpponent)
             {
                 TurnManager.Instance.PostBattleSpecialNode = AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoBossRares)
                     ? new CardChoicesNodeData()

@@ -1,3 +1,59 @@
+# 5.0.3
+- Hotfixes:
+  - The dialogue for the Melter has been updated and improved to switch the voice sample sound depending upon the speaker.
+  - Talking cards now speak when in selectable card events.
+  - Talking cards no longer appear misaligned when displayed on P03's face in card upgrade events.
+  - Chippy now properly identifies card selection as a "negative" event (i.e., talking cards will use their negative reactions instead of their positive reactions when you are choosing who to shred).
+  - All talking card lines now have a slight delay at the end, which aligns with the base game behavior and should hopefully make them easier to read when discovered at the end of a quest.
+
+- Balance Change:
+  - Gas Conduit now costs 2 energy.
+
+- Some known defects that are *not* yet fixed (wait for a future patch):
+  - Stickers misbehave on talking cards.
+  - The two new talking cards have an oversized breathing animation.
+
+# 5.0.2
+- Hotfixes:
+  - The Kaycee NPC now uses the Gravedigger body instead of the Wildling body.
+  - Updated the icon for the Strange Encounters challenge.
+  - The Rebecha NPC will no longer appear on the regional maps.
+  - The carnival game should no longer softlock the game if you have less than three items.
+  - The Cell Steel Trap ability should no longer trigger when the card is not in a circuit.
+  - The odds of talking card quests being prioritized have been lowered.
+  - Fixed the border color of rare cards and the experiment card.
+
+- Some known defects that are *not* yet fixed (wait for a future patch):
+  - Stickers misbehave on talking cards.
+  - Talking cards do not properly pause their dialogue when discovered, making it hard to read their dialogue.
+  - Some talking cards do not properly talk when they appear in selection events.
+  - The two new talking cards have an oversized breathing animation.
+  - Some of the Melter's dialogue was improperly transcribed.
+
+# 5.0.1
+
+- Hotfixes:
+  - Added some better error handling for the code that generates the random bounty hunter dialogue choices to prevent errors if too many bounty hunters have been generated already.
+  - Fixed a defect where Rebecha's dialogue would not advance as the player moves from region to region.
+  - Fixed a defect where G0lly would crash to desktop in certain situations. Ooops.
+  - Fixed a defect where turning cards that provide gems into salmon would not cause the gem to be lost.
+  - Replaced the portrait for the Sawyer talking card with the correct portrait.
+  - Beating the Dredger no longer gives you an additional rare card. Ooops.
+  - The Double Death ability now has the appropriate name in the rulebook.
+  - Custom talking card dialogue has been broken down into smaller sections.
+  - The volume on the Melter talking card has been lowered.
+  - Fixed the emotion settings for a number of NPC dialogue entries.
+  - The Melter now has the Flamethrower weapon mesh properly assigned.
+  - Updated the figurine type for the Inspector NPC.
+
+- Some known defects that are *not* yet fixed (wait for a future patch):
+  - The border color on rare cards is incorrect.
+  - Stickers misbehave on talking cards.
+  - Talking cards do not properly pause their dialogue when discovered, making it hard to read their dialogue.
+  - Some talking cards do not properly talk when they appear in selection events.
+  - The two new talking cards have an oversized breathing animation.
+  - Some of the Melter's dialogue was improperly transcribed.
+
 # 5.0
 
 - The Great Transcendence is complete

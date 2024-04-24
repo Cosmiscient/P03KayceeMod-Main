@@ -441,9 +441,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // Set the item state
             P03Plugin.Log.LogInfo("Restoring multiverse state: Resetting items to " + string.Join(",", ItemState));
-            ItemsManager.Instance.SaveDataItemsList.Clear();
-            ItemsManager.Instance.SaveDataItemsList.AddRange(ItemState);
-            UpdateItems();
+            UpdateItems(ItemState);
 
             // Set the energy state
             P03Plugin.Log.LogInfo("Restoring multiverse state: Resetting energy");
@@ -522,8 +520,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             restoredCallback?.Invoke();
         }
 
-        private void UpdateItems()
+        internal static void UpdateItems(List<string> itemContents)
         {
+            ItemsManager.Instance.SaveDataItemsList.Clear();
+            ItemsManager.Instance.SaveDataItemsList.AddRange(itemContents);
+
             var slots = MultiverseGameState.ConsumableSlots;
 
             foreach (var itemSlot in slots)
@@ -538,8 +539,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 }
             }
 
-            for (int i = 0; i < ItemState.Count; i++)
-                slots[i].CreateItem(ItemState[i], true);
+            for (int i = 0; i < itemContents.Count; i++)
+                slots[i].CreateItem(itemContents[i], true);
 
             ItemsManager.Instance.OnUpdateItems(true);
         }

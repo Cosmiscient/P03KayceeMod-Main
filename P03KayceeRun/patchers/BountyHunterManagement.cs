@@ -140,7 +140,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             foreach (var mod in Part3SaveData.Data.bountyHunterMods)
                 possibles.Remove(mod.bountyHunterInfo.dialogueIndex);
 
-            __result.bountyHunterInfo.dialogueIndex = possibles[SeededRandom.Range(0, possibles.Count, P03AscensionSaveData.RandomSeed)];
+            if (possibles.Count == 0)
+            {
+                P03Plugin.Log.LogInfo($"There are {Part3SaveData.Data.bountyHunterMods.Count} unique bounty hunters in the pool already; I'm out of dialogue options! Forcing dialogue to index 3 (4)");
+                __result.bountyHunterInfo.dialogueIndex = 3;
+            }
+            else
+            {
+                __result.bountyHunterInfo.dialogueIndex = possibles[SeededRandom.Range(0, possibles.Count, P03AscensionSaveData.RandomSeed)];
+            }
         }
 
         [HarmonyPatch(typeof(BountyHunterInfo), nameof(BountyHunterInfo.GetDialogueIndex))]

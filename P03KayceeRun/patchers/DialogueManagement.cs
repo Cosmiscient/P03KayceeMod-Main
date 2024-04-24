@@ -53,6 +53,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 : Emotion.Neutral;
         }
 
+        private static string ParseCommandShortcuts(string dialogue, DialogueEvent.Speaker speaker, Emotion emotion)
+        {
+            string retval = dialogue.Replace("[james:]", "[anim:voice.speechblip_jamescobb_internal][c:bR]")
+                           .Replace("[default:]", "[c:][w:0.3][anim:voice.]");
+
+            if (speaker == TalkingCardJames.ID)
+                retval = "[c:bR]" + retval + "[c:]";
+
+            if (cardSpeakers.ContainsValue(speaker))
+                retval += "[w:0.3]";
+
+            return retval;
+        }
+
         private static Emotion ParseEmotion(this string face, Emotion defaultEmotion = Emotion.Neutral)
         {
             if (string.IsNullOrEmpty(face))
@@ -79,6 +93,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return Emotion.Neutral;
             if (face.ToLowerInvariant().Contains("leshy"))
                 return Emotion.Neutral;
+            if (face.ToLowerInvariant().Contains("dredger"))
+                return Emotion.Anger;
             return face.ParseFace().FaceEmotion();
         }
 
@@ -238,7 +254,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 lastSpeaker = speaker;
                 Emotion emotion = faceInstruction.ParseEmotion(lastEmotion);
                 lastEmotion = emotion;
-                string dialogue = cols[3];
+                string dialogue = ParseCommandShortcuts(cols[3], speaker, emotion);
                 bool wavy = !string.IsNullOrEmpty(cols[2]) && cols[2].ToLowerInvariant().Contains("y");
 
                 P03Plugin.Log.LogDebug($"{dialogueId} has speaker {speaker}");
@@ -249,7 +265,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (cardSpeakers.ContainsValue(speaker))
                 {
                     currentSpeakers.Remove(DialogueEvent.Speaker.Single);
-                    dialogue += "[w:0.3]";
                 }
 
                 AllStringsToTranslate.Add(dialogue);

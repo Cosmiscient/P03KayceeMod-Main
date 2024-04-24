@@ -124,8 +124,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield break;
             }
 
-            string cardName = EventManagement.EncounterDifficulty <= 2 ? CustomCards.GOLLY_TREE
-                              : EventManagement.EncounterDifficulty <= 4 ? "Mole_Telegrapher" :
+            string cardName = EventManagement.EncounterDifficulty <= 1 ? CustomCards.GOLLY_TREE
+                              : EventManagement.EncounterDifficulty < 4 ? "Mole_Telegrapher" :
                               CustomCards.GOLLY_MOLEMAN;
 
             CardInfo cardByName = CardLoader.GetCardByName(cardName);
@@ -143,11 +143,17 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield break;
             }
 
-            string eventName = EventManagement.EncounterDifficulty <= 2 ? "TelegrapherPlayTree"
-                              : EventManagement.EncounterDifficulty <= 4 ? "TelegrapherPlayMole" :
+            string newEventName = EventManagement.EncounterDifficulty <= 1 ? "TelegrapherPlayTree"
+                              : EventManagement.EncounterDifficulty < 4 ? "TelegrapherPlayMole" :
                               "TelegrapherPlayMoleman";
 
-            yield return TextDisplayer.Instance.PlayDialogueEvent(eventName, advanceMode, intersectMode, variableStrings, newLineCallback);
+            if (newEventName.Equals(eventId, StringComparison.InvariantCultureIgnoreCase))
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            yield return TextDisplayer.Instance.PlayDialogueEvent(newEventName, advanceMode, intersectMode, variableStrings, newLineCallback);
         }
     }
 }

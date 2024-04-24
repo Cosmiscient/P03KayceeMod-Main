@@ -150,7 +150,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Gas Conduit
             CardManager.New(EXP_2_PREFIX, "GasConduit", "Gas Conduit", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gasconduit.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 4)
+                .SetCost(energyCost: 2)
                 .SetRegionalP03Card(CardTemple.Tech)
                 .AddAbilities(ConduitGas.AbilityID, BurntOut.AbilityID);
 

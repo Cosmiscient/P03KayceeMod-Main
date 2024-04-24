@@ -96,7 +96,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield return BoardManager.Instance.CardSelector.SelectCardFrom(
                 ShreddableCards.Select(FromPlayable).ToList(),
                 null,
-                s => selectedCard = s
+                s => selectedCard = s,
+                forPositiveEffect: false
             );
 
             ViewManager.Instance.SwitchToView(View.Default, false, false);

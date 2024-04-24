@@ -67,6 +67,7 @@ namespace Infiniscryption.P03KayceeRun.CustomRules
                 //         cardSlot.Card.RemoveTemporaryMod(mod);
                 //     }
                 // });
+                ResourcesManager.Instance.ForceGemsUpdate();
                 yield return new WaitForSeconds(0.5f);
             }
             yield break;
