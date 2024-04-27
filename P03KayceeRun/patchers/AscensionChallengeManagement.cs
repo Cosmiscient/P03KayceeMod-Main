@@ -686,6 +686,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (info == null)
                 return;
 
+            // The side deck card cannot be sacrificable
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                info.traits ??= new();
+                info.traits.Add(CustomCards.Unsackable);
+            }
+
             if (AscensionSaveData.Data.ChallengeIsActive(TURBO_VESSELS) && info.name.StartsWith("EmptyVessel"))
             {
                 CardModificationInfo mod = new()

@@ -35,7 +35,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public static readonly Trait UpgradeVirus = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "UpgradeMachineVirus");
         public static readonly Trait Unrotateable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "Unrotateable");
         public static readonly Trait QuestCard = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "QuestCard");
-        public static readonly Trait FastGlobalSpell = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "FastGlobalSpell");
+        //public static readonly Trait FastGlobalSpell = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "FastGlobalSpell");
+        public static readonly Trait Unsackable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "Unsackable");
 
         public static readonly Texture2D DUMMY_DECAL = TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly);
         public static readonly Texture2D DUMMY_DECAL_2 = TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly);
@@ -1230,6 +1231,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
 
             return true;
+        }
+
+        [HarmonyPatch(typeof(CardInfo), nameof(CardInfo.Sacrificable), MethodType.Getter)]
+        [HarmonyPostfix]
+        private static void ApplyUnsackable(CardInfo __instance, ref bool __result)
+        {
+            __result = __result && !__instance.traits.Contains(Unsackable);
         }
     }
 }

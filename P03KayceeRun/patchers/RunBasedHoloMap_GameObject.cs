@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
@@ -1152,13 +1153,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                                 string locKey = comps[1];
                                 string[] xyz = locKey.Split(',');
-                                obj.transform.localPosition = new(float.Parse(xyz[0]), float.Parse(xyz[1]), float.Parse(xyz[2]));
+                                obj.transform.localPosition = new(float.Parse(xyz[0], CultureInfo.InvariantCulture), float.Parse(xyz[1], CultureInfo.InvariantCulture), float.Parse(xyz[2], CultureInfo.InvariantCulture));
 
                                 if (comps.Length > 2)
                                 {
                                     string rotKey = cornerPrefabKey.Split('|')[2];
                                     string[] xyzr = rotKey.Split(',');
-                                    obj.transform.localEulerAngles = new(float.Parse(xyzr[0]), float.Parse(xyzr[1]), float.Parse(xyzr[2]));
+                                    obj.transform.localEulerAngles = new(float.Parse(xyzr[0], CultureInfo.InvariantCulture), float.Parse(xyzr[1], CultureInfo.InvariantCulture), float.Parse(xyzr[2], CultureInfo.InvariantCulture));
                                 }
                             }
                         }
@@ -1200,13 +1201,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                                 string locKey = comps[1];
                                 string[] xyz = locKey.Split(',');
-                                obj.transform.localPosition = new(float.Parse(xyz[0]), float.Parse(xyz[1]), float.Parse(xyz[2]));
+                                obj.transform.localPosition = new(float.Parse(xyz[0], CultureInfo.InvariantCulture), float.Parse(xyz[1], CultureInfo.InvariantCulture), float.Parse(xyz[2], CultureInfo.InvariantCulture));
 
                                 if (comps.Length > 2)
                                 {
                                     string rotKey = wallPrefabKey.Split('|')[2];
                                     string[] xyzr = rotKey.Split(',');
-                                    obj.transform.localEulerAngles = new(float.Parse(xyzr[0]), float.Parse(xyzr[1]), float.Parse(xyzr[2]));
+                                    obj.transform.localEulerAngles = new(float.Parse(xyzr[0], CultureInfo.InvariantCulture), float.Parse(xyzr[1], CultureInfo.InvariantCulture), float.Parse(xyzr[2], CultureInfo.InvariantCulture));
                                 }
                             }
                         }

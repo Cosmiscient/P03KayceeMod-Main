@@ -1,3 +1,23 @@
+# 5.0.6
+- Cards in the side deck can no longer be sacrificed to pay blood costs. This is *almost* a completely meaningless change, but is setting up some behaviors for future card expansions.
+
+# 5.0.5
+- Hotfixes:
+  - Fixed a defect where the game would softlock in geographies that use the `,` symbol as a decimal marker.
+
+- Some known defects that are *still not* yet fixed (wait for a future patch):
+  - Stickers misbehave on talking cards.
+  - The two new talking cards have an oversized breathing animation.
+
+# 5.0.4
+- Hotfixes:
+  - Fixed a defect inadvertently caused by the last hotfix - talking cards no longer softlock the game when discovered.
+  - Modifications made to the training dummy are now transferred to the Lonely Wizbot
+
+- Some known defects that are *still not* yet fixed (wait for a future patch):
+  - Stickers misbehave on talking cards.
+  - The two new talking cards have an oversized breathing animation.
+
 # 5.0.3
 - Hotfixes:
   - The dialogue for the Melter has been updated and improved to switch the voice sample sound depending upon the speaker.

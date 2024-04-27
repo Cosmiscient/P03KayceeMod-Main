@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Quests;
@@ -16,8 +17,21 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
             ViewManager.Instance.SwitchToView(View.Default);
+
+            List<CardModificationInfo> mods = PlayableCard.Info.Mods?.Select(m => (CardModificationInfo)m.Clone()).ToList();
+            if (mods != null && mods.Count == 0)
+                mods = null;
+
             Part3SaveData.Data.deck.RemoveCardByName(PlayableCard.Info.name);
-            yield return QuestRewardCard.ImmediateReward("BlueMage_Talking");
+
+            yield return QuestRewardCard.ImmediateReward("BlueMage_Talking", mods: mods);
+
+            CardInfo card = CardLoader.GetCardByName("BlueMage_Talking");
+            if (mods != null)
+            {
+                card.mods ??= new();
+                card.mods.AddRange(mods);
+            }
             yield return CardSpawner.Instance.SpawnCardToHand(CardLoader.GetCardByName("BlueMage_Talking"), null);
             yield return new WaitForSeconds(0.45f);
         }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
@@ -335,7 +336,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             {
                 if (p.Length == 4)
                 {
-                    retval.Add(p[0], new(float.Parse(p[1]), float.Parse(p[2]), float.Parse(p[3])));
+                    retval.Add(p[0], new(float.Parse(p[1], CultureInfo.InvariantCulture), float.Parse(p[2], CultureInfo.InvariantCulture), float.Parse(p[3], CultureInfo.InvariantCulture)));
                 }
             }
 

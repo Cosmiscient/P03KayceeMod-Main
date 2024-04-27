@@ -16,7 +16,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (P03AscensionSaveData.IsP03Run)
             {
                 __instance.CardCameraParent ??= CardRenderCamera.Instance.GetLiveRenderCamera(__instance.Card.StatsLayer)?.transform;
-                __instance.Text = __instance.gameObject.GetComponent<SequentialText>() ?? __instance.gameObject.GetComponent<SequentialText>() ?? __instance.CardCameraParent?.GetComponentInChildren<SequentialText>();
+                __instance.Text ??= __instance.gameObject.GetComponent<SequentialText>() ?? __instance.gameObject.GetComponent<SequentialText>() ?? __instance.CardCameraParent?.GetComponentInChildren<SequentialText>();
             }
         }
 
@@ -27,7 +27,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (P03AscensionSaveData.IsP03Run)
             {
                 __instance.CardCameraParent ??= CardRenderCamera.Instance.GetLiveRenderCamera(__instance.Card.StatsLayer)?.transform;
-                __instance.Text = __instance.gameObject.GetComponent<SequentialText>() ?? __instance.gameObject.GetComponent<SequentialText>() ?? __instance.CardCameraParent?.GetComponentInChildren<SequentialText>();
+                __instance.Text ??= __instance.gameObject.GetComponent<SequentialText>() ?? __instance.gameObject.GetComponent<SequentialText>() ?? __instance.CardCameraParent?.GetComponentInChildren<SequentialText>();
             }
 
             yield return sequence;

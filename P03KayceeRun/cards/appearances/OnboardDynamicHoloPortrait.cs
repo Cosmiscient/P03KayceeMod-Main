@@ -140,7 +140,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 string[] colorSplit = colorKey.Split(',');
                 if (colorSplit.Length == 3)
-                    color = new Color(float.Parse(colorSplit[0]), float.Parse(colorSplit[1]), float.Parse(colorSplit[2]));
+                    color = new Color(float.Parse(colorSplit[0], CultureInfo.InvariantCulture), float.Parse(colorSplit[1], CultureInfo.InvariantCulture), float.Parse(colorSplit[2], CultureInfo.InvariantCulture));
             }
 
             string shaderKeyAll = Card.Info.GetExtendedProperty(SHADER_KEY);

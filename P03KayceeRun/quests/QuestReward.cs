@@ -94,16 +94,17 @@ namespace Infiniscryption.P03KayceeRun.Quests
     {
         public string CardName { get; set; }
         public string DialogueId { get; set; }
+        private List<CardModificationInfo> mods = new();
 
-        public static IEnumerator ImmediateReward(string card, string dialogue = null)
+        public static IEnumerator ImmediateReward(string card, string dialogue = null, List<CardModificationInfo> mods = null)
         {
-            QuestRewardCard q = new() { CardName = card, DialogueId = dialogue };
+            QuestRewardCard q = new() { CardName = card, DialogueId = dialogue, mods = mods };
             yield return q.GrantRewardSequence();
         }
 
         protected virtual IEnumerator DoCardAction(SelectableCard card, CardInfo info)
         {
-            Part3SaveData.Data.deck.AddCard(CustomCards.ConvertCodeToCard(CardName));
+            Part3SaveData.Data.deck.AddCard(info);
 
             TalkingCard tCard = card.GetComponent<TalkingCard>();
 
@@ -153,6 +154,11 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 yield break;
 
             CardInfo cardInfo = CustomCards.ConvertCodeToCard(CardName);
+            if (mods != null)
+            {
+                cardInfo.mods ??= new();
+                cardInfo.mods.AddRange(mods);
+            }
 
             yield return DisplayCard(cardInfo);
             yield return DoCardAction(lastCreatedCard, cardInfo);

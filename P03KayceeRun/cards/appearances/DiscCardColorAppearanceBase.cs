@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
@@ -176,11 +177,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 else
                 {
                     return keyComponents.Length == 2
-                        ? GetColorFromString(keyComponents[0]) * float.Parse(keyComponents[1])
+                        ? GetColorFromString(keyComponents[0]) * float.Parse(keyComponents[1], CultureInfo.InvariantCulture)
                         : keyComponents.Length == 3
-                                            ? new Color(float.Parse(keyComponents[0]), float.Parse(keyComponents[1]), float.Parse(keyComponents[2]))
+                                            ? new Color(float.Parse(keyComponents[0], CultureInfo.InvariantCulture), float.Parse(keyComponents[1], CultureInfo.InvariantCulture), float.Parse(keyComponents[2], CultureInfo.InvariantCulture))
                                             : keyComponents.Length == 4
-                                                                ? new Color(float.Parse(keyComponents[0]), float.Parse(keyComponents[1]), float.Parse(keyComponents[2]), float.Parse(keyComponents[3]))
+                                                                ? new Color(float.Parse(keyComponents[0], CultureInfo.InvariantCulture), float.Parse(keyComponents[1], CultureInfo.InvariantCulture), float.Parse(keyComponents[2], CultureInfo.InvariantCulture), float.Parse(keyComponents[3], CultureInfo.InvariantCulture))
                                                                 : null;
                 }
             }
