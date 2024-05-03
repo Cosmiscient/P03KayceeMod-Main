@@ -6,8 +6,10 @@ using System.Runtime.CompilerServices;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
+using InscryptionAPI.Guid;
 using InscryptionAPI.Regions;
 using UnityEngine;
 
@@ -35,18 +37,37 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        [HarmonyPatch(typeof(CardDisplayer3D), nameof(CardDisplayer3D.DisplayInfo))]
+        [HarmonyPrefix]
+        private static void AlwaysClearThePrefabPortrait(CardDisplayer3D __instance, PlayableCard playableCard)
+        {
+            if (playableCard != null
+                && (__instance.info?.HasAbility(Ability.Transformer)).GetValueOrDefault(false)
+                && (__instance.info.animatedPortrait != null || __instance.info.evolveParams?.evolution?.animatedPortrait != null))
+            {
+                if (__instance.instantiatedPortraitObj != null)
+                {
+                    GameObject.Destroy(__instance.instantiatedPortraitObj);
+                }
+                __instance.portraitPrefab = null;
+            }
+        }
+
         [HarmonyPatch(typeof(Card), nameof(Card.SetInfo))]
         [HarmonyPrefix]
         private static void RemoveApperanceBehavioursBeforeSettingInfo(Card __instance, CardInfo info)
         {
             if (__instance.Info != null && !__instance.Info.name.Equals(info.name))
             {
+                P03Plugin.Log.LogDebug($"Switching card from {__instance.Info.name} to {info.name}");
                 foreach (CardAppearanceBehaviour.Appearance appearance in __instance.Info.appearanceBehaviour)
                 {
                     Type type = CustomType.GetType("DiskCardGame", appearance.ToString());
                     Component c = __instance.gameObject.GetComponent(type);
                     if (c != null)
                     {
+                        if (c is CardAppearanceBehaviour cab)
+                            cab.ResetAppearance();
                         UnityEngine.Object.DestroyImmediate(c);
                     }
                 }
@@ -64,6 +85,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         dcac.holoPortraitParent.gameObject.SetActive(false);
                     }
                 }
+                // You know what - for good measure - just stop live rendering at all
+                // If that's relevant
+                CardRenderCamera.Instance?.StopLiveRenderCard(__instance.StatsLayer);
             }
         }
 
@@ -613,6 +637,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             __instance.ChoosingSlot = false;
         }
 
+        [HarmonyPatch(typeof(SelectableCardArray), nameof(SelectableCardArray.SelectCardFrom))]
+        [HarmonyPostfix]
+        private static IEnumerator EnsureCursorSelectable(IEnumerator sequence)
+        {
+            bool interactionDisabled = InteractionCursor.Instance.InteractionDisabled;
+            InteractionCursor.Instance.InteractionDisabled = false;
+            yield return sequence;
+            InteractionCursor.Instance.InteractionDisabled = interactionDisabled;
+        }
+
         [HarmonyPatch(typeof(Card), nameof(Card.SetInfo))]
         [HarmonyPrefix]
         private static void ResetHidePortrait(Card __instance)
@@ -626,5 +660,149 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             __instance.nodeRenderers ??= new();
         }
+
+        [HarmonyPatch(typeof(BuildACardInfo), nameof(BuildACardInfo.Initialize))]
+        [HarmonyPostfix]
+        private static void BACNotCopyable(BuildACardInfo __instance)
+        {
+            __instance.mod.nonCopyable = true;
+        }
+
+        [HarmonyPatch(typeof(BuildACardInfo), nameof(BuildACardInfo.ToCardInfo))]
+        [HarmonyPostfix]
+        private static void BuildCardDifferently(ref CardInfo __result)
+        {
+            __result.mods.Add(new(__result.mods[0].attackAdjustment, __result.mods[0].healthAdjustment));
+            __result.mods[0].attackAdjustment = 0;
+            __result.mods[0].healthAdjustment = 0;
+        }
+
+        [HarmonyPatch(typeof(BoardState.SlotState))]
+        [HarmonyPatch(new Type[] { typeof(CardSlot) })]
+        [HarmonyPatch(MethodType.Constructor)]
+        [HarmonyPrefix]
+        private static bool RemoveGoobertDuplicates(BoardState.SlotState __instance, CardSlot slot)
+        {
+            if (slot != null && slot.Card != null && slot.Card.slot != slot)
+                return false;
+            return true;
+        }
+
+        private static readonly Trait NonDoubleDeathable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "NoDoubleDeath");
+
+        [HarmonyPatch(typeof(DoubleDeath), nameof(DoubleDeath.RespondsToOtherCardDie))]
+        [HarmonyPrefix]
+        private static bool FixedDoubleDeathResponds(DoubleDeath __instance, PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer, ref bool __result)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
+            return __instance.Card.OnBoard && deathSlot.Card != null && deathSlot.Card.OpponentCard == __instance.Card.OpponentCard && deathSlot.Card != __instance.Card && !card.HasTrait(NonDoubleDeathable) && deathSlot.Card == card;
+        }
+
+        [HarmonyPatch(typeof(DoubleDeath), nameof(DoubleDeath.OnOtherCardDie))]
+        [HarmonyPostfix]
+        private static IEnumerator FixedDoubleDeath(IEnumerator sequence, CardSlot deathSlot, DoubleDeath __instance)
+        {
+            yield return __instance.PreSuccessfulTriggerSequence();
+            CardInfo deathInfo = (CardInfo)deathSlot.Card.Info.Clone();
+            deathInfo.mods = deathSlot.Card.Info.mods?.Select(m => (CardModificationInfo)m.Clone()).ToList();
+            deathInfo.mods ??= new();
+            deathInfo.mods.AddRange(deathSlot.Card.TemporaryMods.Select(m => (CardModificationInfo)m.Clone()));
+            deathInfo.traits ??= new();
+            deathInfo.traits.Add(NonDoubleDeathable);
+            __instance.currentlyResurrectingCards.Add(deathInfo);
+            yield return BoardManager.Instance.CreateCardInSlot(deathInfo, deathSlot, 0.1f, true);
+            yield return new WaitForSeconds(0.1f);
+            if (deathSlot.Card != null)
+            {
+                yield return deathSlot.Card.Die(false, __instance.Card, true);
+            }
+            yield return __instance.LearnAbility(0.5f);
+            __instance.currentlyResurrectingCards.Clear();
+            yield break;
+        }
+
+        // private static ConditionalWeakTable<GlobalTriggerHandler, MultiverseBattleSequencer.RefBoolean> _stackInvalid = new();
+        // internal static bool StackInvalid
+        // {
+        //     get
+        //     {
+        //         if (GlobalTriggerHandler.Instance == null)
+        //             return false;
+
+        //         if (!_stackInvalid.TryGetValue(GlobalTriggerHandler.Instance, out var result))
+        //             return false;
+
+        //         return result.Value;
+        //     }
+        //     set
+        //     {
+        //         if (GlobalTriggerHandler.Instance == null)
+        //             return;
+
+        //         _stackInvalid.Remove(GlobalTriggerHandler.Instance);
+        //         _stackInvalid.Add(GlobalTriggerHandler.Instance, new() { Value = value });
+        //     }
+        // }
+
+        // private static float DefaultFixedDeltaTime = -1f;
+
+        // [HarmonyPatch(typeof(GlobalTriggerHandler), nameof(GlobalTriggerHandler.ResetStackSizeAndTriggerCount))]
+        // [HarmonyPostfix]
+        // private static void ResetInvalidStackIndicator()
+        // {
+        //     DefaultFixedDeltaTime = Time.fixedDeltaTime;
+        //     StackInvalid = false;
+        // }
+
+        // [HarmonyPatch(typeof(GlobalTriggerHandler), nameof(GlobalTriggerHandler.TriggerSequence))]
+        // [HarmonyPostfix]
+        // private static IEnumerator NotWhenStackIsInvalid(IEnumerator sequence, GlobalTriggerHandler __instance, TriggerReceiver receiver)
+        // {
+        //     P03Plugin.Log.LogInfo($"Stack Size: {__instance.StackSize}");
+        //     if (__instance.StackSize >= 100)
+        //     {
+        //         StackInvalid = true;
+        //     }
+        //     else if (__instance.StackSize >= 80 && !StackInvalid)
+        //     {
+        //         Time.timeScale = 5f;
+        //         Time.fixedDeltaTime = 5f * DefaultFixedDeltaTime;
+        //     }
+        //     else if (__instance.StackSize >= 60 && !StackInvalid)
+        //     {
+        //         Time.timeScale = 4f;
+        //         Time.fixedDeltaTime = 4f * DefaultFixedDeltaTime;
+        //     }
+        //     else if (__instance.StackSize >= 40 && !StackInvalid)
+        //     {
+        //         Time.timeScale = 3f;
+        //         Time.fixedDeltaTime = 3f * DefaultFixedDeltaTime;
+        //     }
+        //     else if (__instance.StackSize >= 20 && !StackInvalid)
+        //     {
+        //         Time.timeScale = 2f;
+        //         Time.fixedDeltaTime = 2f * DefaultFixedDeltaTime;
+        //     }
+        //     else if (!StackInvalid && DefaultFixedDeltaTime > 0f)
+        //     {
+        //         Time.timeScale = 1f;
+        //         Time.fixedDeltaTime = DefaultFixedDeltaTime;
+        //     }
+
+        //     if (StackInvalid)
+        //     {
+        //         receiver.Activating = false;
+        //         if (receiver.DestroyAfterActivation)
+        //             receiver.Destroy();
+        //     }
+        //     else
+        //     {
+        //         yield return sequence;
+        //     }
+        //     if (__instance.StackSize == 0)
+        //         StackInvalid = false;
+        // }
     }
 }

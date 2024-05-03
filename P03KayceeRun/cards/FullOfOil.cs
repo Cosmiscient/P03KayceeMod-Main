@@ -92,7 +92,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield break;
         }
 
-        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
+        private CardSlot oldSlot = null;
+
+        public override bool RespondsToPreDeathAnimation(bool wasSacrifice) => Card.OnBoard;
+
+        public override IEnumerator OnPreDeathAnimation(bool wasSacrifice)
+        {
+            oldSlot = Card.Slot;
+            yield break;
+        }
+
+        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => oldSlot != null;
 
 
     }

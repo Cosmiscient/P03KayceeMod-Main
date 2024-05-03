@@ -1228,7 +1228,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return slotsToCheck;
         }
 
-        protected class RefBoolean
+        internal class RefBoolean
         {
             public bool Value;
         }

@@ -226,7 +226,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 if (PartnerOfEventId != SpecialEvent.None)
                 {
                     QuestDefinition partnerQuest = QuestManager.Get(PartnerOfEventId);
-                    if (partnerQuest.QuestGenerated && !partnerQuest.IsCompleted)
+                    if (partnerQuest.QuestGenerated && !partnerQuest.IsCompleted && (!QuestGenerated || QuestCanContinue))
                         return true;
                 }
 

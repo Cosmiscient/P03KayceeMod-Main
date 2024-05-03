@@ -95,18 +95,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static void AddAdditionalStats()
         {
-            // First - we tracked bounty hunters separately for a long time. I need to make sure
-            // that the all-time stat for bounty hunters matches the other thing we're tracking
-            // This is a goofy hack that I hate but it's my fault for not tracking bounty hunters
-            // this way the whole time
-            P03AscensionSaveData.P03Data.stats ??= new();
-            P03AscensionSaveData.P03Data.stats.allTimeStats ??= new();
-            var bhStat = P03AscensionSaveData.P03Data.stats.allTimeStats.FirstOrDefault(s => s.type == BOUNTY_HUNTERS_KILLED);
-            if (bhStat == null)
-                P03AscensionSaveData.P03Data.stats.allTimeStats.Add(new(BOUNTY_HUNTERS_KILLED, P03AchievementManagement.BountyHuntersKilled));
-            else if (bhStat.value < P03AchievementManagement.BountyHuntersKilled)
-                bhStat.value = P03AchievementManagement.BountyHuntersKilled;
-
             // Add the additional stats
             AscensionStatsScreen statScreen = AscensionMenuScreens.Instance.statsScreen.GetComponentInChildren<AscensionStatsScreen>();
 
@@ -153,10 +141,45 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        [HarmonyPatch(typeof(AscensionStatsData), nameof(AscensionStatsData.AddRunStatsToAllTime))]
+        [HarmonyPostfix]
+        private static void AddP03RunStatsToAllTime()
+        {
+            // This can't hurt. If the current stats data is p03 data, this will do nothing
+            // as a postfix because the run stats will already be cleared.
+            // IF this current stats data is not p03 data and this is not a p03 game, this
+            // should do nothing because there are no p03 run stats.
+            // If this current stats data is not p03 data and this is a p03 game, this was 
+            // desperately needed.
+            var p03runstats = P03AscensionSaveData.P03Data.stats;
+            foreach (AscensionStat ascensionStat in p03runstats.currentRunStats)
+            {
+                AscensionStatsData.UpdateStatInList(p03runstats.allTimeStats, ascensionStat.type, ascensionStat.value);
+            }
+            p03runstats.currentRunStats = new List<AscensionStat>();
+        }
+
         [HarmonyPatch(typeof(AscensionStatsData), nameof(AscensionStatsData.GetStatValue))]
         [HarmonyPostfix]
         private static void IncludeP03Stats(AscensionStat.Type type, bool allTime, ref int __result)
         {
+            // First - we tracked bounty hunters separately for a long time. I need to make sure
+            // that the all-time stat for bounty hunters matches the other thing we're tracking
+            // This is a goofy hack that I hate but it's my fault for not tracking bounty hunters
+            // this way the whole time
+            P03AscensionSaveData.P03Data.stats.allTimeStats ??= new();
+            if (type == BOUNTY_HUNTERS_KILLED)
+            {
+                var bhStat = P03AscensionSaveData.P03Data.stats.allTimeStats.FirstOrDefault(s => s.type == BOUNTY_HUNTERS_KILLED);
+                if (bhStat == null)
+                    P03AscensionSaveData.P03Data.stats.allTimeStats.Add(new(BOUNTY_HUNTERS_KILLED, P03AchievementManagement.BountyHuntersKilled));
+                else if (bhStat.value < P03AchievementManagement.BountyHuntersKilled)
+                    bhStat.value = P03AchievementManagement.BountyHuntersKilled;
+            }
+
+            if (AscensionSaveData.Data == P03AscensionSaveData.P03Data)
+                return;
+
             AscensionStat ascensionStat = (allTime ? P03AscensionSaveData.P03Data.stats.allTimeStats : P03AscensionSaveData.P03Data.stats.currentRunStats).Find((AscensionStat x) => x.type == type);
             if (ascensionStat != null)
             {

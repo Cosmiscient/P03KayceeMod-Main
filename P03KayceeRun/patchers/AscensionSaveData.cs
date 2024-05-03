@@ -79,6 +79,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         RunStateData ??= new();
                     }
                 }
+                RunStateData ??= new();
                 __result = RunStateData;
                 return false;
             }

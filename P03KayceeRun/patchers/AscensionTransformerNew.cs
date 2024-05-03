@@ -201,40 +201,78 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         [HarmonyPatch(typeof(Transformer), nameof(Transformer.GetTransformCardInfo))]
         [HarmonyPostfix]
-        private static void ReverseStatsFromCopyableMods(ref Transformer __instance, ref CardInfo __result)
+        [HarmonyAfter("cyantist.inscryption.api")]
+        [HarmonyPriority(HarmonyLib.Priority.VeryLow)]
+        private static void CompletelyTakeoverTransformerBehavior(ref Transformer __instance, ref CardInfo __result)
         {
-            CardModificationInfo statReversingMod = null;
-            foreach (CardModificationInfo myMod in __instance.Card.Info.Mods.Where(m => m != null && !m.nonCopyable))
-            {
-                foreach (CardModificationInfo targetMod in __result.Mods.Where(m => m != null && !m.nonCopyable))
-                {
-                    if (myMod.attackAdjustment == targetMod.attackAdjustment
-                        && myMod.healthAdjustment == targetMod.healthAdjustment
-                        && myMod.energyCostAdjustment == targetMod.energyCostAdjustment)
-                    {
-                        statReversingMod ??= new();
-                        statReversingMod.attackAdjustment -= targetMod.attackAdjustment;
-                        statReversingMod.healthAdjustment -= targetMod.healthAdjustment;
-                        statReversingMod.energyCostAdjustment -= targetMod.energyCostAdjustment;
-                    }
-                }
-            }
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
 
-            if (statReversingMod != null)
-                __result.Mods.Add(statReversingMod);
-        }
-
-        [HarmonyPatch(typeof(Transformer), nameof(Transformer.GetTransformCardInfo))]
-        [HarmonyPrefix]
-        private static bool FixCXFormer(ref Transformer __instance, ref CardInfo __result)
-        {
+            // If this is the transformer side, then the evolve params contain the original
+            // And we just transform back to that.
             if (__instance.Card.Info.name.Contains("CXformer"))
             {
                 __result = __instance.Card.Info.evolveParams.evolution.Clone() as CardInfo;
-                return false;
+                __result.mods = __instance.Card.Info.evolveParams.evolution.mods?.Select(m => (CardModificationInfo)m.Clone()).ToList();
+                return;
             }
 
-            return true;
+            // Okay, this is NOT the transformer side. Time for us to build the transformer
+            __result = null;
+            CardModificationInfo tMod = __instance.Card.Info.Mods.FirstOrDefault((CardModificationInfo m) => !string.IsNullOrEmpty(m.transformerBeastCardId));
+            if (tMod != null)
+            {
+                __result = CardLoader.GetCardByName(tMod.transformerBeastCardId);
+            }
+            else if (__instance.Card.Info.evolveParams != null && __instance.Card.Info.evolveParams.evolution != null)
+            {
+                __result = __instance.Card.Info.evolveParams.evolution.Clone() as CardInfo;
+                __result.mods = __instance.Card.Info.evolveParams.evolution.mods?.Select(m => (CardModificationInfo)m.Clone()).ToList();
+            }
+
+            if (__result == null)
+            {
+                __result = CardLoader.GetCardByName("CXformerAdder");
+            }
+
+            __result.mods ??= new();
+
+            // Store the current card in the evolve params of the new card
+            __result.evolveParams = new();
+            __result.evolveParams.evolution = (CardInfo)__instance.Card.Info.Clone();
+            __result.evolveParams.evolution.mods = __instance.Card.Info.mods?.Select(m => (CardModificationInfo)m.Clone()).ToList();
+
+            // Figure out what the correct set of abilities is
+            List<Ability> modAbilities = new List<Ability>();
+            if (__instance.Card.Info.mods != null)
+            {
+                foreach (CardModificationInfo cardModificationInfo in __instance.Card.Info.mods)
+                {
+                    if (cardModificationInfo.buildACardPortraitInfo != null)
+                        continue;
+
+                    modAbilities.AddRange(cardModificationInfo.abilities);
+                }
+            }
+
+            __result.mods.Add(new()
+            {
+                healthAdjustment = __instance.Card.Info.Health - __result.Health,
+                energyCostAdjustment = __instance.Card.Info.EnergyCost - __result.energyCost,
+                attackAdjustment = modAbilities.Contains(Ability.PermaDeath) || modAbilities.Contains(NewPermaDeath.AbilityID) ? 1 : 0,
+                abilities = modAbilities
+            });
+        }
+
+        [HarmonyPatch(typeof(Transformer), nameof(Transformer.EvolveInheritsInfoMods), MethodType.Getter)]
+        [HarmonyPrefix]
+        private static bool DontEvolveInP03Sometimes(Transformer __instance, ref bool __result)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
+            __result = false;
+            return false;
         }
 
         private static int getCardAdjustment(bool energyChange, string beastCardName)

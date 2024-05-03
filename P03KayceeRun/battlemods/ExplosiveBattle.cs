@@ -24,6 +24,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             );
             BattleModManager.SetGlobalActivationRule(ID,
                 () => AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOMB_CHALLENGE.challengeType)
+                      || P03Plugin.Instance.DebugCode.Contains("bomb")
                       || DefaultQuestDefinitions.BombBattles.IsDefaultActive());
         }
 

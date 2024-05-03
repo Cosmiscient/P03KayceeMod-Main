@@ -796,7 +796,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAppearances(OnboardDynamicHoloPortrait.ID)
                 .AddAbilities(FriendliesMagicDust.AbilityID)
                 .SetCost(energyCost: 3)
-                .AddTraits(Trait.Gem)
+                //.AddTraits(Trait.Gem)
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/map/holomapscenery/HoloGemBlue|prefabs/map/holomapscenery/HoloGemGreen|prefabs/map/holomapscenery/HoloGemOrange|prefabs/map/holomapscenery/HoloRock_3")
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.HIDE_CHILDREN, "Dirt|Dirt|Dirt|nothing")
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "-0.2655,-0.0873,0.3273|0.3164,-0.2364,0.3055|0.4109,0.0437,0|0,-.5,0")

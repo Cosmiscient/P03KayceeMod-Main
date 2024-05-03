@@ -57,13 +57,9 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("talking"))
                     return true;
 
-                if (EventManagement.CompletedZones.Count == 0)
-                    return SeededRandom.Value(P03AscensionSaveData.RandomSeed) < 0.125f;
-
-                if (Part3SaveData.Data.deck.Cards.Any(ci => ci.appearanceBehaviour.Contains(CardAppearanceBehaviour.Appearance.DynamicPortrait)))
-                    return SeededRandom.Value(P03AscensionSaveData.RandomSeed) < 0.66667f;
-
-                return false;
+                float threshold = 0.1f;
+                threshold += 0.1f * (float)Part3SaveData.Data.deck.Cards.Count(ci => ci.appearanceBehaviour.Contains(CardAppearanceBehaviour.Appearance.DynamicPortrait));
+                return SeededRandom.Value(P03AscensionSaveData.RandomSeed) < threshold;
             }
         }
 
@@ -393,6 +389,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             LibrarianPaperwork = QuestManager.Add(P03Plugin.PluginGuid, "LibrarianPaperwork").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.LibrariansSolo, CompositeFigurineManager.None));
             LibrarianPaperwork.SetPartnerQuest(KayceesFriend.EventId)
                               .SetAllowLandmarks()
+                              .QuestCannotContinueAcrossMap()
                               .SetValidRoomCondition(bp => (bp.specialTerrain & HoloMapBlueprint.FAST_TRAVEL_NODE) != 0)
                               .AddPostGenerationAction(go => go.transform.localPosition = new(-0.9469f, 1.1f, 0.6946f));
             KayceesFriend.SetGenerateCondition(() => EventManagement.CurrentZone == RunBasedHoloMap.Zone.Undead)
@@ -515,7 +512,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             Rebecha.SetGenerateCondition(() => false)
                    .AddState("IT'S BROKEN", "RebechaZeroComplete")
                    .SetDynamicStatus(() => EventManagement.CompletedZones.Count == 0 ? QuestState.QuestStateStatus.Active : QuestState.QuestStateStatus.Success)
-                   .AddDialogueState("IT'S STILL BROKEN", "RebechaOneComplete")
+                   .AddNamedState("RebechaPhaseTwo", "IT'S STILL BROKEN", "RebechaOneComplete")
                    .SetDynamicStatus(() => EventManagement.CompletedZones.Count == 1 ? QuestState.QuestStateStatus.Active : QuestState.QuestStateStatus.Failure)
                    .AddDialogueState("IT'S FIXED", "RebechaFullyOpen", QuestState.QuestStateStatus.Failure);
         }

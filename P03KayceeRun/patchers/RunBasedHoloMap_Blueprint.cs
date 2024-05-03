@@ -845,7 +845,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
 
                 for (int s = 0; s < lines.Count; s++)
-                    P03Plugin.Log.LogInfo(lines[s]);
+                    P03Plugin.Log.LogDebug(lines[s]);
             }
         }
 
@@ -1177,26 +1177,26 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     numberOfEncountersAdded += 1;
             }
 
-            P03Plugin.Log.LogInfo($"I have created {numberOfEncountersAdded} enemy encounters");
+            P03Plugin.Log.LogDebug($"I have created {numberOfEncountersAdded} enemy encounters");
 
             // Add one trade node
             bool traded = DiscoverAndCreateTrade(bpBlueprint, retval);
-            P03Plugin.Log.LogInfo($"Created a trade node? {traded}");
+            P03Plugin.Log.LogDebug($"Created a trade node? {traded}");
 
             if (!traded)
             {
                 traded = ForceTrade(bpBlueprint, retval);
-                P03Plugin.Log.LogInfo($"Forcing a trade. Successful? {traded}");
+                P03Plugin.Log.LogDebug($"Forcing a trade. Successful? {traded}");
             }
 
             if (AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BATTLE_MODIFIERS))
             {
                 BuildBattleModifiers(retval, region, order, seed);
-                P03Plugin.Log.LogInfo($"I have set up battle modifiers");
+                P03Plugin.Log.LogDebug($"I have set up battle modifiers");
             }
 
             // Add four card choice nodes
-            P03Plugin.Log.LogInfo($"Adding upgrades");
+            P03Plugin.Log.LogDebug($"Adding upgrades");
             int cardChoiceNodes = 0;
             for (int i = 1; i < 5; i++) // one for each color 1-4
             {
@@ -1219,7 +1219,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             retval.GetRandomPointOfInterest().upgrade = AscensionRecycleCardNodeData.AscensionRecycleCard;
 
             // Add two hidden currency nodes
-            P03Plugin.Log.LogInfo($"Adding hidden currency nodes");
+            P03Plugin.Log.LogDebug($"Adding hidden currency nodes");
             for (int i = 0; i < 2; i++)
             {
                 HoloMapBlueprint tbp2 = retval.GetRandomPointOfInterest();
@@ -1287,21 +1287,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (bpCopy.Count > 0)
             {
-                P03Plugin.Log.LogInfo($"Map failed validation - could not visit entire map from start. {bpCopy.Count} nodes remaining");
+                P03Plugin.Log.LogDebug($"Map failed validation - could not visit entire map from start. {bpCopy.Count} nodes remaining");
                 return false;
             }
 
             // Make sure there is a boss node
             if (!blueprint.Any(bp => bp.opponent != Opponent.Type.Default))
             {
-                P03Plugin.Log.LogInfo("Map failed validation - no boss");
+                P03Plugin.Log.LogDebug("Map failed validation - no boss");
                 return false;
             }
 
             // Make sure there are four enemy nodes
             if (blueprint.Where(bp => bp.specialDirection != 0 && bp.specialDirectionType == HoloMapBlueprint.BATTLE).Count() < 4)
             {
-                P03Plugin.Log.LogInfo("Map failed validation - not enough enemy encounters");
+                P03Plugin.Log.LogDebug("Map failed validation - not enough enemy encounters");
                 return false;
             }
 

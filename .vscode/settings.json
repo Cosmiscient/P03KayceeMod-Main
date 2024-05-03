@@ -12,5 +12,11 @@
     "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "fullSolution",
     "dotnet.server.useOmnisharp": true,
     "csharp.suppressBuildAssetsNotification": false,
+    "[python]": {
+        "editor.formatOnType": true,
+        "editor.formatOnSave": true,
+        "editor.wordBasedSuggestions": "off",
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
     "omnisharp.organizeImportsOnFormat": true,
 }

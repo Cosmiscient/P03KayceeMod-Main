@@ -209,7 +209,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(FullOfOil.AbilityID);
 
             // Necrobot
-            CardManager.New(EXP_1_PREFIX, "Necrobot", "Necronomaton", 1, 1)
+            CardManager.New(EXP_1_PREFIX, "Necrobot", "Necronomaton", 1, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_necrobot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Undead)

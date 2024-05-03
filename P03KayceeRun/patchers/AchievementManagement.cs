@@ -358,6 +358,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 UnlockedCurrency = ModdedAchievementManager.AchievementById(MASSIVE_OVERKILL).IsUnlocked;
                 InitialCurrency = Part3SaveData.Data.currency;
                 TippedScalesTurns = 0;
+
+                BountyHunterDied = false;
+                BountyHunterEntered = false;
             }
         }
 
@@ -453,7 +456,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static void BountyHunterEntered()
         {
             if (P03AscensionSaveData.IsP03Run && CardBattleAchievementMonitor.Instance != null)
+            {
+                P03Plugin.Log.LogDebug($"I have observed a bounty hunter entering battle");
                 CardBattleAchievementMonitor.Instance.BountyHunterEntered = true;
+            }
         }
 
         [HarmonyPatch(typeof(BountyHunter), nameof(BountyHunter.OnDie))]
@@ -464,7 +470,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return;
 
             if (CardBattleAchievementMonitor.Instance != null)
+            {
+                P03Plugin.Log.LogDebug("I have observed a bounty hunter dying");
                 CardBattleAchievementMonitor.Instance.BountyHunterDied = true;
+            }
 
             BountyHuntersKilled++;
             AscensionStatsData.TryIncrementStat(StatManagement.BOUNTY_HUNTERS_KILLED);

@@ -132,7 +132,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             DialogueEvent.Speaker speaker = defaultSpeaker;
             if (face.ToLowerInvariant().Contains("card"))
                 speaker = DialogueEvent.Speaker.AnglerTalkingCard;
-            else if (face.ToLowerInvariant().Contains("Bounty"))
+            else if (face.ToLowerInvariant().Contains("bounty"))
                 speaker = DialogueEvent.Speaker.P03BountyHunter;
             else if (face.ToLowerInvariant().Contains("leshy"))
                 speaker = DialogueEvent.Speaker.Leshy;

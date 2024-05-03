@@ -1,4 +1,7 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Patchers;
@@ -58,6 +61,38 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 __instance.Face.voiceSoundId = voiceId;
             }
             return false;
+        }
+
+        [HarmonyPatch(typeof(TalkingCard), nameof(TalkingCard.RespondsToDrawn))]
+        [HarmonyPrefix]
+        private static bool CheckNamesNotInstances(TalkingCard __instance, ref bool __result)
+        {
+            __result = !TurnManager.Instance.TalkingCardsDrawnThisGame.Any(i => i.name.Equals(__instance.Card.Info.name, System.StringComparison.InvariantCultureIgnoreCase));
+            return false;
+        }
+
+        [HarmonyPatch(typeof(SelectableCardArray), nameof(SelectableCardArray.SelectCardFrom))]
+        [HarmonyPostfix]
+        private static IEnumerator ChangeToNegativeEffectSometimes(IEnumerator sequence, SelectableCardArray __instance, List<CardInfo> cards, CardPile pile, Action<SelectableCard> cardSelectedCallback, Func<bool> cancelCondition, bool forPositiveEffect)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            if (__instance == SpecialNodeHandler.Instance.tradeCardsSequencer?.cardArray
+               || __instance == SpecialNodeHandler.Instance.recycleCardSequencer?.cardArray
+               || __instance == SpecialNodeHandler.Instance.buildACardSequencer?.cardArray)
+            {
+                if (!forPositiveEffect)
+                    yield return sequence;
+                else
+                    yield return __instance.SelectCardFrom(cards, pile, cardSelectedCallback, cancelCondition, false);
+                yield break;
+            }
+
+            yield return sequence;
         }
     }
 }

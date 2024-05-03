@@ -114,10 +114,22 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private List<Ability> CardGemAbilities => new(AllGemAbilities.Where(Card.HasAbility));
 
+        private CardSlot oldSlot = null;
+
+        public override bool RespondsToPreDeathAnimation(bool wasSacrifice) => Card.OnBoard;
+
+        public override IEnumerator OnPreDeathAnimation(bool wasSacrifice)
+        {
+            oldSlot = Card.Slot;
+            yield break;
+        }
+
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
             Ability target = CardGemAbilities[0];
-            yield return Card.Slot.SetSlotModification(SlotIDs.First(kvp => kvp.Value == target).Key);
+
+            if (oldSlot != null)
+                yield return oldSlot.SetSlotModification(SlotIDs.First(kvp => kvp.Value == target).Key);
             yield break;
         }
 

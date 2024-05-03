@@ -54,7 +54,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
 
         public override bool RespondsToOtherCardResolve(PlayableCard otherCard)
         {
-            return !Card.Dead && !otherCard.Dead &&
+            return Card.OnBoard && !Card.Dead && !otherCard.Dead &&
             (
                 otherCard.Slot == Card.Slot.opposingSlot ||
                 (MultiverseBattleSequencer.Instance != null && MultiverseBattleSequencer.Instance.OpposesInAnyUniverse(Card.Slot, otherCard.Slot))

@@ -39,6 +39,9 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
 
         public override bool RespondsToSlotTargetedForAttack(CardSlot slot, PlayableCard attacker)
         {
+            if (!Card.OnBoard)
+                return false;
+
             if (attacker != null)
             {
                 bool flag = attacker.HasAbility(Ability.Flying);

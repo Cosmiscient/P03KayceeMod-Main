@@ -39,7 +39,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
 
         public override bool RespondsToOtherCardResolve(PlayableCard otherCard)
         {
-            return otherCard != null && otherCard.Slot != null && (otherCard.OpponentCard != Card.OpponentCard) && otherCard.Slot != Card.Slot.opposingSlot;
+            return Card.OnBoard && otherCard != null && otherCard.Slot != null && (otherCard.OpponentCard != Card.OpponentCard) && otherCard.Slot != Card.Slot.opposingSlot;
         }
 
         public override IEnumerator OnOtherCardResolve(PlayableCard otherCard)

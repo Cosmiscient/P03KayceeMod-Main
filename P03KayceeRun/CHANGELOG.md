@@ -1,5 +1,45 @@
+# 5.0.12
+- More bug fixes!
+  - Fixed a bug where a card with both Frozen Away and Full of Oil would softlock the game when it died.
+  - Fixed some bugs with the Double Death sigil to prevent infinite loops.
+  - Fixed The Perfect Crime achievement, which had been broken to where most players could not earn it.
+
+# 5.0.11
+- Another emergency bug fix for the day: Fixed a defect where going to Resplendent Bastion sometimes caused the game to loop indefinitely while trying to generate the map.
+
+# 5.0.10
+- Emergency bug fix: the starter deck screen is no longer broken
+
+# 5.0.9
+- Bug Fixes
+  - Fixed a defect that prevented partner NPCs (like the Librarians and the Trader) from spawning.
+  - The Experiment should no longer duplicate with the photographer drone.
+  - Fixed a defect with one of the special cards in the final boss challenge.
+  - Fixed some bugs with Transformer and build-a-bot cards. Note: Transformer has historically been the buggiest thing in this mod, and it's even weirdly buggy in the base game in some cases. There is a non-zero chance I broke something else that I haven't come across yet while fixing this issue. Only time will tell.
+
+
+# 5.0.8
+- Balance Changes
+  - Reduced the frequency at which talking card quests appear.
+- Bug Fixes
+  - Fixed a defect where hammering a card with Tutor ability while the Double Death sigil is on the board caused a softlock.
+  - Properly parsed new bounty hunter dialogue as being spoken by bounty hunters.
+  - Removed the Gem trait from Mox Obelisk
+
+# 5.0.7
+- Balance Changes
+  - Necronomaton now has 3 health instead of 1.
+- Bug Fixes
+  - Rebecha no longer shares a common node id with other interactables in the central hub node. This *really* resolves the softlock I thought I had fixed in the last patch.
+  - Talking cards no longer trigger their "drawn" dialogue multiple times in a game if they have the Unkillable or Fecundity sigils.
+  - Talking cards now use their "negative" dialogue when being selected to be traded away or recycled.
+  - Fixed a broken interaction between Frozen Away and sigils that modify slots when the card dies.
+  - Fixed yet another scripting error that was causing the Librarians to appear in multiple maps.
+
 # 5.0.6
 - Cards in the side deck can no longer be sacrificed to pay blood costs. This is *almost* a completely meaningless change, but is setting up some behaviors for future card expansions.
+- Fixed a scripting error in Rebecha's dialogue that could softlock the game in some scenarios.
+- Fixed a scripting error with the Librarians can could cause them to continue to appear in multiple maps.
 
 # 5.0.5
 - Hotfixes:
