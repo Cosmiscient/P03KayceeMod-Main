@@ -1,7 +1,9 @@
 # P03 Kaycee's Mod
-## Version 4.0: Expansion Pack 2, Achievements, and Stickers!
+## Version 5.0: The Great Transcendence
 
-**Join our Discord!! [https://discord.gg/PxCHsKtfGc](https://discord.gg/PxCHsKtfGc)**
+**Read the Wiki!! [https://p03kcmod.wiki.gg/wiki/Main_Page](https://p03kcmod.wiki.gg/wiki/Main_Page)**
+
+**Join our Discord!! [https://discord.gg/cvmjmSs7CS](https://discord.gg/cvmjmSs7CS)**
 
 **HYPE ALERT!! NEW TRAILER ONLINE!!**
 
@@ -15,12 +17,18 @@ Installing this mod will give you the option to play against either Leshy or P03
 
 [Follow this link](https://www.youtube.com/watch?v=ASOJ4idMRxk) to an easy-to-follow guide for how to get started with Inscryption modding.
 
+## Whats new in version 5.0?
+
+- **Final Boss Challenge**: The mod now has a final boss challenge that unlocks once you reach the final challenge level. Activating this challenge will cause a new final boss to appear at the very end of the game.
+- **Better Map Generation**: The procedurally generated map has been significantly upgraded with more varied terrain.
+- **Customizable Player Figurine**: A secret map room has been added that allows you to change your player figurine.
+- **Talking Cards**: Four talking cards have been added to the mod. They appear as rewards for new quests that are part of the quest pool.
+
 ## What's new in version 4.0?
 
 - **Expansion Pack 2**: With 50 new cards and all-new mechanics!
 - **Achievements**: That happy little ding and extra rush of dopamine when you do something extra special.
 - **Stickers**: Unlockable cosmetics to customize your cards and show off your swag. If you want some *extra* swag, I **highly** recommend installing the [High Res Mod](https://inscryption.thunderstore.io/package/overfall/InscryptionHighRes/) to really make those stickers pop. 
-- **Modified Battles**: P03 got bored - battles sometimes have extra modifiers on them.
 - **New Items**: The UFO abducts a card from the board and puts it in your hand. And the Laser Rifle upgrades any card by giving it the Sniper ability for the rest of the battle.
 - **Faster Navigation**: You can now fast travel to any room that you've visited before by clicking it on the minimap. And rather than clicking arrows, you can also travel through the map by using the IJKL keys on your keyboard like arrow keys.
 
@@ -123,8 +131,8 @@ While the full credits will play in-game when you win for the first time, I have
 - [API](https://inscryption.thunderstore.io/package/API_dev/API/)
 - [Achievements](https://inscryption.thunderstore.io/package/Infiniscryption/Achievements/)
 - [Spells](https://inscryption.thunderstore.io/package/WhistleWind/New_Spell_Card_Toolkit/)
+- [Pack Manager](https://inscryption.thunderstore.io/package/Infiniscryption/Pack_Management_API/)
 
 And these aren't required, but **highly** recommended:
 
 - [High Res Mod](https://inscryption.thunderstore.io/package/overfall/InscryptionHighRes/)
-- [Pack Manager](https://inscryption.thunderstore.io/package/Infiniscryption/Pack_Management_API/)

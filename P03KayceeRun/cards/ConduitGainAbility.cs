@@ -27,6 +27,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
 
+        public override bool RespondsToOtherCardAssignedToSlot(PlayableCard otherCard) => true;
+
+        public override IEnumerator OnOtherCardAssignedToSlot(PlayableCard otherCard)
+        {
+            ManageAllActiveAbilityMods();
+            yield break;
+        }
+
         public override IEnumerator OnResolveOnBoard()
         {
             ActiveAbilities.Add(this);

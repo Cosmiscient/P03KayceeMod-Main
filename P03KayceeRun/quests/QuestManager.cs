@@ -88,10 +88,23 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
             if (possibles.Count > 0)
             {
+                int maxPriority = possibles.Max(p => Get(p).CalculatedPriority());
+                possibles.RemoveAll(se => Get(se).CalculatedPriority() != maxPriority);
                 SpecialEvent randomEvent = possibles[SeededRandom.Range(0, possibles.Count, P03AscensionSaveData.RandomSeed)];
                 QuestDefinition selected = Get(randomEvent);
                 selected.QuestGenerated = true;
                 events.Add(new(randomEvent, selected.GenerateRoomFilter()));
+            }
+
+            // Now we check all the must be generateds AGAIN - just in case we triggered any partner quests
+            foreach (QuestDefinition quest in AllQuests.Values.Where(q => q.MustBeGenerated))
+            {
+                // Make sure we don't generate twice of course
+                if (!events.Any(e => e.Item1 == quest.EventId))
+                {
+                    quest.QuestGenerated = true;
+                    events.Add(new(quest.EventId, quest.GenerateRoomFilter()));
+                }
             }
 
             return events;

@@ -6,7 +6,30 @@ import functools
 import glob
 import time
 from dotenv import load_dotenv
+import sys
 load_dotenv()
+
+def _do_it_twice(func):
+    @functools.wraps(func)
+    def twice_func(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except:
+            print('Taking a 5 second break')
+            time.sleep(5)
+            try:
+                return func(*args, **kwargs)
+            except:
+                print('Taking a 20 second break')
+                time.sleep(20)
+                try:
+                    return func(*args, **kwargs)
+                except:
+                    print('Taking a 35 second break')
+                    time.sleep(35)
+                    return func(*args, **kwargs)
+
+    return twice_func
 
 # Some basic error handling
 if "INSCRYPTION_PATH" not in os.environ:
@@ -15,6 +38,8 @@ if "INSCRYPTION_PATH" not in os.environ:
 if not os.path.exists(os.path.join(os.environ["INSCRYPTION_PATH"], "cardexports")):
     raise RuntimeError("No metadata found in Inscryption game directory. Run P03 in Kaycee's Mod, go to the main map screen in-game, and enter the CTRL+SHIFT+E key combination. Wait for it to finish, close the game, then come back here.")
 
+@functools.cache
+@_do_it_twice
 def login() -> mwclient.Site:
     site = mwclient.Site('p03kcmod.wiki.gg', httpauth=(os.environ["PYWIKI_DEV_USER"], os.environ["PIWIKI_DEV_PASSWORD"]), path="/")
     site.login(os.environ["PYWIKI_USER"], os.environ["PYWIKI_PASSWORD"])
@@ -314,3 +339,88 @@ def publish_ability_pages(overwrite_if_exists=False):
         number_of_cards, page_contents = generate_ability_page(aname)
         if page_contents != None and number_of_cards > 0:
             edit_page_contents(client, aname, page_contents, overwrite_if_exists=overwrite_if_exists)
+
+def get_page_safe(client: mwclient.Site, page_name: str) -> Page:
+    try:
+        return client.pages[page_name]
+    except:
+        print("Taking a break")
+        time.sleep(30)
+        return client.pages[page_name]
+    
+@_do_it_twice
+def touch_page(page) -> set[str]:
+    print(f'Touching page {page.name}')
+    page.touch()
+    return set([p.name for p in page.categories()])
+
+@_do_it_twice
+def get_all_pages_in_category(category_name: str) -> list[Page]:
+    client = login()
+    return list(client.categories[category_name])
+
+def touch_all_category(category_name: str) -> set[str]:
+    all_cats = set()
+    for page in get_all_pages_in_category(category_name):
+        all_cats = all_cats.union(touch_page(page))
+    return all_cats
+
+@functools.cache
+@_do_it_twice
+def unobtainable_cards():
+    client = login()
+    transformer_cards = list(p.name for p in client.categories["Transformer Cards"])
+    unob_cards = list(p.name for p in client.categories["Unobtainable Cards"] if p.name not in transformer_cards)
+    return unob_cards
+
+@_do_it_twice
+def get_page_text(page: Page) -> str:
+    return page.text()
+
+@_do_it_twice
+def update_category_page(category_name: str, contents: str):
+    client = login()
+    category = client.categories[category_name]
+    category.edit(contents)
+
+def update_card_categories(category_name: str, include_unobtainable: bool):
+    """Updates the card category summary for a given category"""
+    print(f"Building category summary page for {category_name}")
+
+    if category_name == "Unobtainable Cards" or include_unobtainable:
+        unob_cards = []
+    else:
+        unob_cards = unobtainable_cards()
+
+    outtext = '<gallery mode="nolines">\n'
+    #xp2_cards = list(p for p in site.categories["Base Game Cards"] if p.name not in unob_cards)
+    for p in get_all_pages_in_category(category_name):
+        if p.name in unob_cards:
+            continue
+        text = get_page_text(p)
+        fname = [l.replace('| id = ', '') for l in text.splitlines() if "id = " in l]
+        if len(fname) == 0:
+            continue
+        fname = fname[0]
+        outtext += f'File:{fname}.png|[[{p.name}]]\n'
+    outtext += '</gallery>'
+
+    update_category_page(category_name, outtext)
+
+def set_all_category_pages():
+    if "--skip-touch" not in sys.argv:
+        all_cats = touch_all_category("Cards")
+
+        for cat in all_cats:
+            if "Card" in cat or "Art" in cat:
+                update_card_categories(cat.replace("Category:", ""), "Art" in cat)
+    else:
+        client = login()
+        for cat in client.categories:
+            if "Card" in cat.name or "Art" in cat.name:
+                update_card_categories(cat.name.replace("Category:", ""), "Art" in cat.name)
+
+
+if __name__ == '__main__':
+    if "--cat-update" in sys.argv:
+        set_all_category_pages()

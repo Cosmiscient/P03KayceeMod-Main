@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
@@ -16,19 +17,41 @@ namespace Infiniscryption.P03KayceeRun.Cards
     {
         private readonly Dictionary<string, Color?> _setColors = new();
 
+        private readonly Dictionary<bool, Dictionary<string, Color?>> _cachedColors = new() { { true, new() }, { false, new() } };
+
         protected virtual Color? LookupColor(string key) => null;
+
+        private Card _cacheCard = null;
+        private PlayableCard _cachedPlayableCard = null;
+        protected bool IsOpponentAppearance
+        {
+            get
+            {
+                if (_cacheCard == null)
+                {
+                    _cacheCard = this.Card;
+                    _cachedPlayableCard = this.Card as PlayableCard;
+                }
+                return _cachedPlayableCard != null && _cachedPlayableCard.OpponentCard;
+            }
+        }
 
         private Color? GetColor(string key)
         {
             if (_setColors.ContainsKey(key))
                 return _setColors[key];
 
-            _setColors[key] = LookupColor(key);
+            var cache = _cachedColors[IsOpponentAppearance];
 
-            if (!_setColors[key].HasValue)
-                _setColors[key] = GetColorFromString(Card.Info.GetExtendedProperty(key));
+            if (cache.ContainsKey(key))
+                return cache[key];
 
-            return _setColors[key];
+            cache[key] = LookupColor(key);
+
+            if (!cache[key].HasValue)
+                cache[key] = GetColorFromString(Card.Info.GetExtendedProperty(key));
+
+            return cache[key];
         }
 
         private bool? _holofy = null;
@@ -154,11 +177,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 else
                 {
                     return keyComponents.Length == 2
-                        ? GetColorFromString(keyComponents[0]) * float.Parse(keyComponents[1])
+                        ? GetColorFromString(keyComponents[0]) * float.Parse(keyComponents[1], CultureInfo.InvariantCulture)
                         : keyComponents.Length == 3
-                                            ? new Color(float.Parse(keyComponents[0]), float.Parse(keyComponents[1]), float.Parse(keyComponents[2]))
+                                            ? new Color(float.Parse(keyComponents[0], CultureInfo.InvariantCulture), float.Parse(keyComponents[1], CultureInfo.InvariantCulture), float.Parse(keyComponents[2], CultureInfo.InvariantCulture))
                                             : keyComponents.Length == 4
-                                                                ? new Color(float.Parse(keyComponents[0]), float.Parse(keyComponents[1]), float.Parse(keyComponents[2]), float.Parse(keyComponents[3]))
+                                                                ? new Color(float.Parse(keyComponents[0], CultureInfo.InvariantCulture), float.Parse(keyComponents[1], CultureInfo.InvariantCulture), float.Parse(keyComponents[2], CultureInfo.InvariantCulture), float.Parse(keyComponents[3], CultureInfo.InvariantCulture))
                                                                 : null;
                 }
             }
@@ -302,7 +325,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 yield break;
             }
 
-            DiscCardColorAppearance appearance = drsl.GetComponentInParent<DiscCardColorAppearance>();
+            DiscCardColorAppearance appearance = drsl.GetComponentInParent<DiscCardColorAppearance>();//drsl.transform.parent.parent.GetComponent<DiscCardColorAppearance>();
 
             Color myBarColor = drsl.defaultLightColor;
             if (appearance != null && appearance.BorderColor.HasValue)
@@ -357,7 +380,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (!P03AscensionSaveData.IsP03Run || __instance is not DiskRenderStatsLayer drsl)
                 return;
 
-            DiscCardColorAppearance appearance = drsl.gameObject.transform.parent.parent.gameObject.GetComponent<DiscCardColorAppearance>();
+            DiscCardColorAppearance appearance = drsl.GetComponentInParent<DiscCardColorAppearance>();//drsl.gameObject.transform.parent.parent.gameObject.GetComponent<DiscCardColorAppearance>();
 
             if (appearance == null)
                 return;

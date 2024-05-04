@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Triggers;
@@ -50,7 +51,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             List<CardSlot> retval = new();
 
-            int slot = Card.Slot.Index;
+            var slotParent = MultiverseBattleSequencer.GetParentSlotList(Card.Slot);
+            int slot = slotParent.IndexOf(Card.Slot);
             List<CardSlot> opposingSlots = BoardManager.Instance.GetSlots(Card.OpponentCard);
             if (slot > 0 && CanAttackSlot(opposingSlots[slot - 1]))
                 retval.Add(opposingSlots[slot - 1]);

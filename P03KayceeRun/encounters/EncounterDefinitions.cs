@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 
@@ -107,6 +108,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         internal static EncounterBlueprintData PhotographerBossP1;
         internal static EncounterBlueprintData PhotographerBossP2;
         internal static EncounterBlueprintData GeneratorDamageRace;
+        internal static EncounterBlueprintData DredgerBattle;
 
         internal static void BuildEncounters()
         {
@@ -2334,6 +2336,63 @@ namespace Infiniscryption.P03KayceeRun.Encounters
                 Enemy(null, replacement: "EmptyVessel_GreenGem", difficulty: 2, overclock: 4, overclockAbility: Ability.GainGemOrange)
             );
 
+            // Remember - the dredger battle has the dredger dropping in scraps every three turn as well
+            DredgerBattle = EncounterManager.New("P03KCM_DredgerBattle", addToPool: false);
+            DredgerBattle.SetDifficulty(0, 6);
+            DredgerBattle.turns = new();
+
+            DredgerBattle.turns.AddTurn(
+                Enemy("Steambot")
+            );
+
+            DredgerBattle.turns.AddTurn(
+                Enemy("P03KCMXP2_UrchinConduit"),
+                Enemy("ConduitTower")
+            );
+
+            DredgerBattle.turns.AddTurn();
+
+            DredgerBattle.turns.AddTurn(
+                Enemy("Steambot")
+            );
+
+            DredgerBattle.turns.AddTurn(
+                Enemy("AttackConduit"),
+                Enemy("P03KCMXP2_UrchinCell"),
+                Enemy("ConduitTower")
+            );
+
+            DredgerBattle.turns.AddTurn();
+
+            DredgerBattle.turns.AddTurn(
+                Enemy("Steambot")
+            );
+
+            DredgerBattle.turns.AddTurn(
+                Enemy("P03KCMXP2_UrchinConduit"),
+                Enemy("ConduitTower")
+            );
+
+            DredgerBattle.turns.AddTurn();
+
+            DredgerBattle.turns.AddTurn(
+                Enemy("Steambot"),
+                Enemy("Steambot")
+            );
+
+            DredgerBattle.turns.AddTurn();
+
+            DredgerBattle.turns.AddTurn();
+
+            DredgerBattle.turns.AddTurn(
+                Enemy("AttackConduit"),
+                Enemy("P03KCMXP2_UrchinCell"),
+                Enemy("ConduitTower")
+            );
+
+            DredgerBattle.turns.AddTurn();
+
+            DredgerBattle.ContinueOn("Steambot", null, "Steambot", null, "Steambot;Steambot", null);
         }
     }
 }

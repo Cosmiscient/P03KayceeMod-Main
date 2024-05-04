@@ -46,10 +46,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         }
 
+        private bool _startedInQueue = false;
+
         public override void ApplyAppearance()
         {
-            if (Card.Anim is WizardCardAnimationController wcac && Card is PlayableCard pCard && pCard.OnBoard)
+            if (Card.Anim is WizardCardAnimationController wcac && Card is PlayableCard pCard)
             {
+                if (pCard.InOpponentQueue)
+                {
+                    _startedInQueue = true;
+                    return;
+                }
+                if (!pCard.OnBoard)
+                    return;
+
                 GameObject prefab = GetPrefab();
                 if (prefab == null)
                     return;
@@ -72,7 +82,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         wcac.WizardPortrait.gemType = GemType.Orange;
                         wcac.WizardPortrait.enabled = true;
                     }
-                    if (prefab.name.EndsWith("PracticeMage"))
+                    if (prefab.name.EndsWith("PracticeMage") && !_startedInQueue)
                         wizard.transform.Find("Anim/archeryTarget").localEulerAngles = new(0f, 0f, 40f);
                     //wizard.SetActive(false);
                 }

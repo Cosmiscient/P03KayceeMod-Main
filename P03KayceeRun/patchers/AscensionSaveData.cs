@@ -29,6 +29,23 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         internal static bool P03RunExists => P03Data != null && P03Data.currentRun != null && P03Data.currentRun.playerLives > 0;
 
+        internal static bool LeshyIsDead => (P03Data?.itemUnlockEvents.Contains(EventManagement.LESHY_IS_DEAD)).GetValueOrDefault(false);
+
+        internal static void SetLeshyDead(bool dead, bool immediate)
+        {
+            if (P03Data == null)
+                return;
+
+            if (dead && !P03Data.itemUnlockEvents.Contains(EventManagement.LESHY_IS_DEAD))
+                P03Data.itemUnlockEvents.Add(EventManagement.LESHY_IS_DEAD);
+
+            if (!dead && P03Data.itemUnlockEvents.Contains(EventManagement.LESHY_IS_DEAD))
+                P03Data.itemUnlockEvents.Remove(EventManagement.LESHY_IS_DEAD);
+
+            if (immediate)
+                SaveManager.SaveToFile(false);
+        }
+
         [HarmonyPatch(typeof(AscensionSaveData), nameof(AscensionSaveData.Data), MethodType.Getter)]
         [HarmonyPrefix]
         private static bool GetP03SaveData(ref AscensionSaveData __result)
@@ -62,6 +79,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         RunStateData ??= new();
                     }
                 }
+                RunStateData ??= new();
                 __result = RunStateData;
                 return false;
             }
@@ -112,8 +130,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // || (!SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part1")
             // && AscensionSaveData.Data != null && AscensionSaveData.Data.currentRun != null && AscensionSaveData.Data.currentRun.playerLives > 0
             // && ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "IsP03Run"));
-            get => (SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part3") && SaveFile.IsAscension)
-                || ScreenManagement.ScreenState == CardTemple.Tech;
+            get => SaveFile.IsAscension && (SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part3") || ScreenManagement.ScreenState == CardTemple.Tech);
         }
 
         private static string ToCompressedJSON(object data)
@@ -311,6 +328,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyAfter(new string[] { "cyantist.inscryption.api" })]
         private static void LoadPart3AscensionSaveData()
         {
+            EnsurePart3Saved();
             P03Plugin.Log.LogInfo($"Loading from the save file. Getting Part3 save [{SaveKey}]");
             string part3Data = ModdedSaveManager.SaveData.GetValue(P03Plugin.PluginGuid, SaveKey);
             Part3SaveData data = FromCompressedJSON<Part3SaveData>(part3Data);
@@ -332,6 +350,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 ascensionData.Initialize();
                 ascensionData.itemUnlockEvents = new() { EventManagement.P03_SAVE_MARKER };
             }
+
+            if (LeshyIsDead && !ascensionData.activeChallenges.Contains(AscensionChallenge.FinalBoss))
+                ascensionData.activeChallenges.Add(AscensionChallenge.FinalBoss);
 
             P03Data = ascensionData;
 
@@ -504,7 +525,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                     if (MaxNumberOfItems >= 1)
                     {
-                        __instance.items.Add(ShockerItem.ItemData.name);
+                        if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("wiseclock"))
+                            __instance.items.Add(WiseclockItem.ItemData.name);
+                        else
+                            __instance.items.Add(ShockerItem.ItemData.name);
                     }
 
                     if (MaxNumberOfItems >= 2 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoHook))

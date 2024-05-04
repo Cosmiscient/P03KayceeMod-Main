@@ -37,5 +37,23 @@ namespace Infiniscryption.P03KayceeRun.Cards
         }
 
         public override bool RespondsToUpkeep(bool playerUpkeep) => base.RespondsToUpkeep(playerUpkeep) && ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
+
+        public override CardInfo GetTransformCardInfo()
+        {
+            var tInfo = base.GetTransformCardInfo();
+            if (!tInfo.HasAbility(CellDeEvolve.AbilityID))
+            {
+                // This can only happen if the card has evolve params
+
+                CardModificationInfo mod = new(CellDeEvolve.AbilityID);
+                mod.fromEvolve = true;
+                mod.nonCopyable = true;
+                mod.negateAbilities.Add(CellEvolve.AbilityID);
+                tInfo.mods.Add(mod);
+                tInfo.evolveParams = new() { evolution = Card.Info.Clone() as CardInfo, turnsToEvolve = 1 };
+
+            }
+            return tInfo;
+        }
     }
 }

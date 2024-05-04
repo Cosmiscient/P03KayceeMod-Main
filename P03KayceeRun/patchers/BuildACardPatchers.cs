@@ -31,6 +31,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             Ability.GainGemOrange,
             TreeStrafe.AbilityID,
             Ability.ExplodeGems,
+            LatchFlying.AbilityID,
             LatchRampage.AbilityID,
             LatchSwapper.AbilityID,
             Ability.GemDependant,
@@ -38,9 +39,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             SnakeStrafe.AbilityID,
             Ability.DrawCopy,
             BurntOut.AbilityID,
+            DoubleSprint.AbilityID,
             Molotov.AbilityID,
             FireBomb.AbilityID,
-            MissileStrike.AbilityID
+            MissileStrike.AbilityID,
+            Hopper.AbilityID
         };
 
         [HarmonyPatch(typeof(BuildACardInfo), nameof(BuildACardInfo.GetValidAbilities))]
@@ -162,7 +165,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     handler.ScreenParent = __instance;
                 }
                 handler.KeyboardInput = "ENTER NAME HERE";
-                __instance.info.nameIndices = new int[] { -1, -1, -1 };
+
+                // Create some dummy name indices
+                int seed = P03AscensionSaveData.RandomSeed;
+                __instance.info.nameIndices = new int[] {
+                    -1 - SeededRandom.Range(0, BuildACardInfo.NUM_NAME_OPTIONS, seed++),
+                    -1 - SeededRandom.Range(0, BuildACardInfo.NUM_NAME_OPTIONS, seed++),
+                    -1 - SeededRandom.Range(0, BuildACardInfo.NUM_NAME_OPTIONS, seed++)
+                };
             }
         }
 
@@ -185,7 +195,26 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (__instance.nameIndices == null || __instance.nameIndices[0] < 0)
             {
-                __result = __instance.mod.nameReplacement;
+                if (!string.IsNullOrEmpty(__instance.mod.nameReplacement))
+                {
+                    __result = __instance.mod.nameReplacement;
+                }
+                else
+                {
+                    __result = "";
+                    for (int i = 0; i < __instance.nameIndices.Length; i++)
+                    {
+                        if (i == 2)
+                        {
+                            __result += BuildACardInfo.FINAL_NAME_SPACING[-1 - __instance.nameIndices[i]] ? "" : " ";
+                        }
+                        else if (i == 1)
+                        {
+                            __result += " ";
+                        }
+                        __result += Localization.Translate(BuildACardInfo.NAME_OPTIONS[i][-1 - __instance.nameIndices[i]]);
+                    }
+                }
                 return false;
             }
             return true;

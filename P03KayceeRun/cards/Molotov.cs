@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
+using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
@@ -10,6 +11,7 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
+    [HarmonyPatch]
     public class Molotov : AbilityBehaviour
     {
         public static Ability AbilityID { get; private set; }
@@ -23,6 +25,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.canStack = false;
             info.powerLevel = 0;
             info.opponentUsable = false;
+            info.flipYIfOpponent = true;
             info.passive = false;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular, FireBomb.FlamingAbility };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_molotov.png", typeof(Molotov).Assembly));
@@ -105,6 +108,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 yield return BombCard(adjSlots[0], Card);
             }
+        }
+
+        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.UpdateFaceUpOnBoardEffects))]
+        [HarmonyPostfix]
+        private static void SetExplosiveForMolotov(PlayableCard __instance)
+        {
+            if (!__instance.Dead && __instance.HasAbility(AbilityID))
+                __instance.Anim.SetExplosive(true);
         }
     }
 }

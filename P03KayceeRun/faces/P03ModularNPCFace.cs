@@ -32,7 +32,14 @@ namespace Infiniscryption.P03KayceeRun.Faces
             BountyHunter = 16,
             Prospector = 17,
             PikeMageSolo = 18,
-            InspectorSolo = 19
+            InspectorSolo = 19,
+            DummySolo = 20,
+            DredgerSolo = 21,
+            KayceeSolo = 22,
+            LibrariansSolo = 23,
+            TrapperSolo = 24,
+            TraderSolo = 25,
+            RebechaSolo = 26
         }
 
         public static GameObject NPCFaceObject { get; private set; }
@@ -53,7 +60,17 @@ namespace Infiniscryption.P03KayceeRun.Faces
             for (int i = 0; i < LAYER_NAMES.Length; i++)
             {
                 for (int j = 0; j < NUMBER_OF_CHOICES; j++)
-                    NPC_SPRITES[i, j] = TextureHelper.GetImageAsTexture($"npc {LAYER_NAMES[i]} {j + 1}.png", typeof(P03ModularNPCFace).Assembly).ConvertTexture();
+                {
+                    try
+                    {
+                        NPC_SPRITES[i, j] = TextureHelper.GetImageAsTexture($"npc {LAYER_NAMES[i]} {j + 1}.png", typeof(P03ModularNPCFace).Assembly).ConvertTexture();
+                    }
+                    catch
+                    {
+                        // I know 21 is blank. Fill missing with blank
+                        NPC_SPRITES[i, j] = TextureHelper.GetImageAsTexture($"npc {LAYER_NAMES[i]} 21.png", typeof(P03ModularNPCFace).Assembly).ConvertTexture();
+                    }
+                }
             }
         }
 

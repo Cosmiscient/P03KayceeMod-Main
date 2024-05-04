@@ -31,8 +31,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static Achievement PLASMA_JIMMY_CRAZY { get; private set; }
         public static Achievement FULLY_OVERCLOCKED { get; private set; }
         public static Achievement FAST_GENERATOR { get; private set; }
+        public static Achievement TEST_OF_STRENGTH { get; private set; }
+        public static Achievement MULTIVERSE { get; private set; }
 
-        private static int BountyHuntersKilled
+        internal static int BountyHuntersKilled
         {
             get => ModdedSaveManager.SaveData.GetValueAsInt(P03Plugin.PluginGuid, "BountyHuntersKilledLifetime");
             set => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "BountyHuntersKilledLifetime", value);
@@ -226,11 +228,29 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             FAST_GENERATOR = ModdedAchievementManager.New(
                 P03Plugin.PluginGuid,
                 "Burning Adrenaline",
-                "Repair the generator in three turns or less",
+                "Repair the generator in four turns or less",
                 true,
                 grp.ID,
                 TextureHelper.GetImageAsTexture("achievement_generator.png", typeof(P03AchievementManagement).Assembly)
             ).ID; // [hermes boots, shoe with wings on it] sticker
+
+            TEST_OF_STRENGTH = ModdedAchievementManager.New(
+                P03Plugin.PluginGuid,
+                "Carnival Clown",
+                "Achieve a high score of 50 or more on the test of strength",
+                true,
+                grp.ID,
+                TextureHelper.GetImageAsTexture("achievement_test_of_strength.png", typeof(P03AchievementManagement).Assembly)
+            ).ID;
+
+            MULTIVERSE = ModdedAchievementManager.New(
+                P03Plugin.PluginGuid,
+                "Verse Riff",
+                "Understand the true meaning of the Great Transcendence",
+                true,
+                grp.ID,
+                TextureHelper.GetImageAsTexture("achievement_multiverse.png", typeof(P03AchievementManagement).Assembly)
+            ).ID;
         }
 
         private class CardBattleAchievementMonitor : Singleton<CardBattleAchievementMonitor>
@@ -338,6 +358,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 UnlockedCurrency = ModdedAchievementManager.AchievementById(MASSIVE_OVERKILL).IsUnlocked;
                 InitialCurrency = Part3SaveData.Data.currency;
                 TippedScalesTurns = 0;
+
+                BountyHunterDied = false;
+                BountyHunterEntered = false;
             }
         }
 
@@ -433,7 +456,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static void BountyHunterEntered()
         {
             if (P03AscensionSaveData.IsP03Run && CardBattleAchievementMonitor.Instance != null)
+            {
+                P03Plugin.Log.LogDebug($"I have observed a bounty hunter entering battle");
                 CardBattleAchievementMonitor.Instance.BountyHunterEntered = true;
+            }
         }
 
         [HarmonyPatch(typeof(BountyHunter), nameof(BountyHunter.OnDie))]
@@ -444,9 +470,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return;
 
             if (CardBattleAchievementMonitor.Instance != null)
+            {
+                P03Plugin.Log.LogDebug("I have observed a bounty hunter dying");
                 CardBattleAchievementMonitor.Instance.BountyHunterDied = true;
+            }
 
             BountyHuntersKilled++;
+            AscensionStatsData.TryIncrementStat(StatManagement.BOUNTY_HUNTERS_KILLED);
+
             if (BountyHuntersKilled >= 30)
                 AchievementManager.Unlock(KILL_30_BOUNTY_HUNTERS);
         }
@@ -455,7 +486,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPrefix]
         private static void CheckingForBACAchievement(int baseStatPoints)
         {
-            if (baseStatPoints >= 5 && P03AscensionSaveData.IsP03Run)
+            if (baseStatPoints >= 6 && P03AscensionSaveData.IsP03Run)
                 AchievementManager.Unlock(MAX_SP_CARD);
         }
 

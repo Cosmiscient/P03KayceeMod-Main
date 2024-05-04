@@ -36,6 +36,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly StoryEvent SAW_P03_PAIDRESPAWN_EXPLAIN = NewStory("SawP03PaidRespawnExplain", save: true);
         public static readonly StoryEvent SAW_P03_BOSSPAIDRESPAWN_EXPLAIN = NewStory("SawP03PaidRespawnExplain", save: true);
         public static readonly StoryEvent GOLLY_NFT = NewStory("GollyNFTIntro", save: true);
+        public static readonly StoryEvent DEFEATED_DREDGER = NewStory("DefeatedDredger");
         public static readonly StoryEvent DEFEATED_P03 = NewStory("DefeatedP03");
         public static readonly StoryEvent DEFEATED_P03_MULTIVERSE = NewStory("DefeatedP03Multiverse");
         public static readonly StoryEvent ONLY_ONE_BOSS_LIFE = NewStory("P03AscensionOneBossLife", save: true);
@@ -47,6 +48,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly StoryEvent SAW_NEW_ORB = NewStory("P03HammerOrb", save: true);
         public static readonly StoryEvent GOT_STICKER_INTRODUCTION = NewStory("P03GotStickerIntro", save: true);
         public static readonly StoryEvent P03_SAVE_MARKER = NewStory("P03SaveMarker", save: true);
+
+        internal static readonly StoryEvent LESHY_IS_DEAD = NewStory("P03LeshyIsDead", save: true);
 
         public const string GAME_OVER = "GameOverZone";
 
@@ -432,7 +435,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 if (storyEvent == StoryEvent.HoloTechTempleSatelliteActivated)
                 {
-                    __result = true;
+                    __result = NumberOfZoneEnemiesKilled >= ENEMIES_TO_UNLOCK_BOSS;
                     return false;
                 }
 
@@ -466,7 +469,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (drbs.damageDealt >= DamageRaceBattleSequencer.DAMAGE_TO_SUCCEED)
                 {
                     DefaultQuestDefinitions.BrokenGenerator.InitialState.Status = QuestState.QuestStateStatus.Success;
-                    if (__instance.TurnNumber <= 3)
+                    if (__instance.TurnNumber <= 4)
                         AchievementManager.Unlock(P03AchievementManagement.FAST_GENERATOR);
                 }
                 else
@@ -491,6 +494,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                     if (DefaultQuestDefinitions.BombBattles.IsDefaultActive())
                         DefaultQuestDefinitions.BombBattles.IncrementQuestCounter();
+
+                    if (DefaultQuestDefinitions.KayceesFriendPartTwo.IsDefaultActive())
+                        DefaultQuestDefinitions.KayceesFriendPartTwo.IncrementQuestCounter();
                 }
             }
 
@@ -534,14 +540,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             if (success)
             {
-                foreach (AscensionChallenge c in AscensionSaveData.Data.activeChallenges)
+                foreach (AscensionChallenge c in P03AscensionSaveData.P03Data.activeChallenges)
                 {
-                    if (!AscensionSaveData.Data.conqueredChallenges.Contains(c))
-                        AscensionSaveData.Data.conqueredChallenges.Add(c);
+                    if (!P03AscensionSaveData.P03Data.conqueredChallenges.Contains(c))
+                        P03AscensionSaveData.P03Data.conqueredChallenges.Add(c);
                 }
 
-                if (!string.IsNullOrEmpty(AscensionSaveData.Data.currentStarterDeck) && !AscensionSaveData.Data.conqueredStarterDecks.Contains(AscensionSaveData.Data.currentStarterDeck))
-                    AscensionSaveData.Data.conqueredStarterDecks.Add(AscensionSaveData.Data.currentStarterDeck);
+                if (!string.IsNullOrEmpty(P03AscensionSaveData.P03Data.currentStarterDeck) && !P03AscensionSaveData.P03Data.conqueredStarterDecks.Contains(P03AscensionSaveData.P03Data.currentStarterDeck))
+                    P03AscensionSaveData.P03Data.conqueredStarterDecks.Add(P03AscensionSaveData.P03Data.currentStarterDeck);
             }
 
             // Delete the ascension save; the run is over            
@@ -551,7 +557,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             //AscensionSaveData.Data.currentRun = null;
 
             if (CompletedZones.Count > 0)
-                AscensionSaveData.Data.numRunsSinceReachedFirstBoss = 0;
+                P03AscensionSaveData.P03Data.numRunsSinceReachedFirstBoss = 0;
 
             Part3SaveData.Data.checkpointPos = new Part3SaveData.WorldPosition(GAME_OVER, 0, 0);
 

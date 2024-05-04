@@ -340,7 +340,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             }
         }
 
-        private void FixOpposingSlots()
+        private static void FixOpposingSlots()
         {
             for (int i = 0; i < BoardManager.Instance.playerSlots.Count; i++)
             {
@@ -350,9 +350,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 if (BoardManager.Instance.opponentSlots[i].opposingSlot == null)
                     BoardManager.Instance.opponentSlots[i].opposingSlot = BoardManager.Instance.playerSlots[i];
             }
+            MultiverseBattleSequencer.ClearAllSlotCacheShenanigans();
         }
 
-        private float GetXPos(bool beginning, bool isOpponent, bool isQueue)
+        private static float GetXPos(bool beginning, bool isOpponent, bool isQueue)
         {
             return !isOpponent
                 ? beginning ? BoardManager.Instance.playerSlots.First().transform.localPosition.x : BoardManager.Instance.playerSlots.Last().transform.localPosition.x
@@ -361,8 +362,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 : beginning ? BoardManager.Instance.opponentSlots.First().transform.localPosition.x : BoardManager.Instance.opponentSlots.Last().transform.localPosition.x;
         }
 
-        private IEnumerator CreateSlot(HighlightedInteractable prefab, bool beginning, Transform parent, bool isOpponent, bool isQueue)
+        internal static HighlightedInteractable CreateSlot(bool beginning, bool isOpponent, bool isQueue)
         {
+            HighlightedInteractable prefab = isQueue ? OpponentQueueSlotPrefab : CardSlotPrefab;
+            Transform parent = BoardManager3D.Instance.gameObject.transform.Find(isOpponent ? "OpponentSlots" : "PlayerSlots");
+
             HighlightedInteractable slot = Instantiate(prefab, parent);
             string nameBase = isOpponent ? "OpponentSlot" : "Playerslot";
             nameBase += beginning ? "-1" : "5";
@@ -395,20 +399,20 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             }
 
             BoardManager.Instance.allSlots = null;
-            List<CardSlot> dummy = BoardManager.Instance.AllSlots; // Force the boardmanager to reset its list of slots
+            List<CardSlot> dummy = BoardManager.Instance.AllSlots;
+
+            return slot;
+        }
+
+        private IEnumerator CreateSlotSequence(bool beginning, bool isOpponent, bool isQueue)
+        {
+            // Force the boardmanager to reset its list of slots
+            HighlightedInteractable slot = CreateSlot(beginning, isOpponent, isQueue);
 
             if (isQueue)
                 slot.SetColors(queueSlotColors[0], queueSlotColors[1], queueSlotColors[2]);
             else
                 slot.SetColors(slotColors[0], slotColors[1], slotColors[2]);
-
-            // if (FasterEvents)
-            // {
-            //     slot.OnCursorEnter();
-            //     yield return new WaitForSeconds(0.05f);
-            //     slot.OnCursorExit();
-            //     yield break;
-            // }
 
             GameObject lightning = Instantiate(ResourceBank.Get<GameObject>("Prefabs/Environment/TableEffects/LightningBolt"));
             lightning.GetComponent<LightningBoltScript>().EndObject = slot.gameObject;
@@ -417,6 +421,28 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return new WaitForSeconds(0.95f);
             slot.OnCursorExit();
             yield break;
+        }
+
+        internal static void CreateAllSlots()
+        {
+            CreateSlot(true, false, false);
+            CreateSlot(true, true, false);
+            CreateSlot(true, true, true);
+            CreateSlot(false, false, false);
+            CreateSlot(false, true, false);
+            CreateSlot(false, true, true);
+            FixOpposingSlots();
+        }
+
+        private IEnumerator CreateAllSlotsSequence()
+        {
+            yield return CreateSlotSequence(true, false, false);
+            yield return CreateSlotSequence(true, true, false);
+            yield return CreateSlotSequence(true, true, true);
+            yield return CreateSlotSequence(false, false, false);
+            yield return CreateSlotSequence(false, true, false);
+            yield return CreateSlotSequence(false, true, true);
+            FixOpposingSlots();
         }
 
         private IEnumerator PhaseThreeSequence()
@@ -474,11 +500,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // Tween each of the four things that need to move
             Transform itemTrans = ItemsManager.Instance.gameObject.transform;
-            Vector3 newItemPos = new(6.75f, itemTrans.localPosition.y, itemTrans.localPosition.z);
+            Vector3 newItemPos = new(6.75f, itemTrans.localPosition.y, itemTrans.localPosition.z + 1.3f);
             Tween.LocalPosition(itemTrans, newItemPos, durationOfEffect, 0f);
 
             Transform hammerTrans = ItemsManager.Instance.Slots.FirstOrDefault(s => s.name.ToLowerInvariant().StartsWith("hammer")).gameObject.transform;
-            Vector3 newHammerPos = new(-9.5f, hammerTrans.localPosition.y, hammerTrans.localPosition.z);
+            Vector3 newHammerPos = new(-9.5f, hammerTrans.localPosition.y, hammerTrans.localPosition.z - 1.3f);
             Tween.LocalPosition(hammerTrans, newHammerPos, durationOfEffect, 0f);
 
             Transform bellTrans = (BoardManager.Instance as BoardManager3D).bell.gameObject.transform;
@@ -491,17 +517,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return new WaitForSeconds(durationOfEffect);
 
             // Create two new slots
-            Transform playerSlots = BoardManager3D.Instance.gameObject.transform.Find("PlayerSlots");
-            Transform opponentSlots = BoardManager3D.Instance.gameObject.transform.Find("OpponentSlots");
-
-            yield return CreateSlot(CardSlotPrefab, true, playerSlots, false, false);
-            yield return CreateSlot(CardSlotPrefab, true, opponentSlots, true, false);
-            yield return CreateSlot(OpponentQueueSlotPrefab, true, opponentSlots, true, true);
-            yield return CreateSlot(CardSlotPrefab, false, playerSlots, false, false);
-            yield return CreateSlot(CardSlotPrefab, false, opponentSlots, true, false);
-            yield return CreateSlot(OpponentQueueSlotPrefab, false, opponentSlots, true, true);
-
-            FixOpposingSlots();
+            yield return CreateAllSlotsSequence();
 
             CameraEffects.Instance.StopShake();
             AudioController.Instance.FadeSourceVolume(source, 0f, 1f);
@@ -915,7 +931,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             ViewManager.Instance.SwitchToView(View.Default, false, false);
         }
 
-        private static bool ValidCard(PlayableCard card) => card != null && card.Info.name != CustomCards.DRAFT_TOKEN && !card.Info.IsSpell();
+        private static bool ValidCard(PlayableCard card) => card != null && card.Info.name != CustomCards.DRAFT_TOKEN && !card.Info.IsSpell() && !card.Info.HasSpecialAbility(GoobertCenterCardBehaviour.AbilityID);
 
         public IEnumerator ExchangeTokensSequence()
         {

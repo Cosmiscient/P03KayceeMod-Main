@@ -36,6 +36,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override bool RespondsToTakeDamage(PlayableCard source) => base.RespondsToTakeDamage(source) && ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
 
+        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => base.RespondsToDie(wasSacrifice, killer) && ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
+
         public override bool RespondsToPreDeathAnimation(bool wasSacrifice) => base.RespondsToPreDeathAnimation(wasSacrifice) && ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
     }
 }

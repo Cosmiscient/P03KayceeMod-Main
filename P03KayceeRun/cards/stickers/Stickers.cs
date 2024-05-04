@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
@@ -100,7 +101,9 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             { "sticker_wizardhat", P03AchievementManagement.PLASMA_JIMMY_CRAZY },
             { "sticker_guillotine", P03AchievementManagement.FULLY_OVERCLOCKED },
             { "sticker_mushroom", P03AchievementManagement.MYCOLOGISTS_COMPLETED },
-            { "sticker_winged_shoes", P03AchievementManagement.FAST_GENERATOR }
+            { "sticker_winged_shoes", P03AchievementManagement.FAST_GENERATOR },
+            { "sticker_teddybear", P03AchievementManagement.TEST_OF_STRENGTH },
+            { "sticker_brain", P03AchievementManagement.MULTIVERSE }
         };
 
         internal static string AddAbilitySticker(AbilityManager.FullAbility ability)
@@ -333,7 +336,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             {
                 if (p.Length == 4)
                 {
-                    retval.Add(p[0], new(float.Parse(p[1]), float.Parse(p[2]), float.Parse(p[3])));
+                    retval.Add(p[0], new(float.Parse(p[1], CultureInfo.InvariantCulture), float.Parse(p[2], CultureInfo.InvariantCulture), float.Parse(p[3], CultureInfo.InvariantCulture)));
                 }
             }
 

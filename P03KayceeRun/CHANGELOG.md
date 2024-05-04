@@ -1,3 +1,168 @@
+# 5.0.12
+- More bug fixes!
+  - Fixed a bug where a card with both Frozen Away and Full of Oil would softlock the game when it died.
+  - Fixed some bugs with the Double Death sigil to prevent infinite loops.
+  - Fixed The Perfect Crime achievement, which had been broken to where most players could not earn it.
+
+# 5.0.11
+- Another emergency bug fix for the day: Fixed a defect where going to Resplendent Bastion sometimes caused the game to loop indefinitely while trying to generate the map.
+
+# 5.0.10
+- Emergency bug fix: the starter deck screen is no longer broken
+
+# 5.0.9
+- Bug Fixes
+  - Fixed a defect that prevented partner NPCs (like the Librarians and the Trader) from spawning.
+  - The Experiment should no longer duplicate with the photographer drone.
+  - Fixed a defect with one of the special cards in the final boss challenge.
+  - Fixed some bugs with Transformer and build-a-bot cards. Note: Transformer has historically been the buggiest thing in this mod, and it's even weirdly buggy in the base game in some cases. There is a non-zero chance I broke something else that I haven't come across yet while fixing this issue. Only time will tell.
+
+
+# 5.0.8
+- Balance Changes
+  - Reduced the frequency at which talking card quests appear.
+- Bug Fixes
+  - Fixed a defect where hammering a card with Tutor ability while the Double Death sigil is on the board caused a softlock.
+  - Properly parsed new bounty hunter dialogue as being spoken by bounty hunters.
+  - Removed the Gem trait from Mox Obelisk
+
+# 5.0.7
+- Balance Changes
+  - Necronomaton now has 3 health instead of 1.
+- Bug Fixes
+  - Rebecha no longer shares a common node id with other interactables in the central hub node. This *really* resolves the softlock I thought I had fixed in the last patch.
+  - Talking cards no longer trigger their "drawn" dialogue multiple times in a game if they have the Unkillable or Fecundity sigils.
+  - Talking cards now use their "negative" dialogue when being selected to be traded away or recycled.
+  - Fixed a broken interaction between Frozen Away and sigils that modify slots when the card dies.
+  - Fixed yet another scripting error that was causing the Librarians to appear in multiple maps.
+
+# 5.0.6
+- Cards in the side deck can no longer be sacrificed to pay blood costs. This is *almost* a completely meaningless change, but is setting up some behaviors for future card expansions.
+- Fixed a scripting error in Rebecha's dialogue that could softlock the game in some scenarios.
+- Fixed a scripting error with the Librarians can could cause them to continue to appear in multiple maps.
+
+# 5.0.5
+- Hotfixes:
+  - Fixed a defect where the game would softlock in geographies that use the `,` symbol as a decimal marker.
+
+- Some known defects that are *still not* yet fixed (wait for a future patch):
+  - Stickers misbehave on talking cards.
+  - The two new talking cards have an oversized breathing animation.
+
+# 5.0.4
+- Hotfixes:
+  - Fixed a defect inadvertently caused by the last hotfix - talking cards no longer softlock the game when discovered.
+  - Modifications made to the training dummy are now transferred to the Lonely Wizbot
+
+- Some known defects that are *still not* yet fixed (wait for a future patch):
+  - Stickers misbehave on talking cards.
+  - The two new talking cards have an oversized breathing animation.
+
+# 5.0.3
+- Hotfixes:
+  - The dialogue for the Melter has been updated and improved to switch the voice sample sound depending upon the speaker.
+  - Talking cards now speak when in selectable card events.
+  - Talking cards no longer appear misaligned when displayed on P03's face in card upgrade events.
+  - Chippy now properly identifies card selection as a "negative" event (i.e., talking cards will use their negative reactions instead of their positive reactions when you are choosing who to shred).
+  - All talking card lines now have a slight delay at the end, which aligns with the base game behavior and should hopefully make them easier to read when discovered at the end of a quest.
+
+- Balance Change:
+  - Gas Conduit now costs 2 energy.
+
+- Some known defects that are *not* yet fixed (wait for a future patch):
+  - Stickers misbehave on talking cards.
+  - The two new talking cards have an oversized breathing animation.
+
+# 5.0.2
+- Hotfixes:
+  - The Kaycee NPC now uses the Gravedigger body instead of the Wildling body.
+  - Updated the icon for the Strange Encounters challenge.
+  - The Rebecha NPC will no longer appear on the regional maps.
+  - The carnival game should no longer softlock the game if you have less than three items.
+  - The Cell Steel Trap ability should no longer trigger when the card is not in a circuit.
+  - The odds of talking card quests being prioritized have been lowered.
+  - Fixed the border color of rare cards and the experiment card.
+
+- Some known defects that are *not* yet fixed (wait for a future patch):
+  - Stickers misbehave on talking cards.
+  - Talking cards do not properly pause their dialogue when discovered, making it hard to read their dialogue.
+  - Some talking cards do not properly talk when they appear in selection events.
+  - The two new talking cards have an oversized breathing animation.
+  - Some of the Melter's dialogue was improperly transcribed.
+
+# 5.0.1
+
+- Hotfixes:
+  - Added some better error handling for the code that generates the random bounty hunter dialogue choices to prevent errors if too many bounty hunters have been generated already.
+  - Fixed a defect where Rebecha's dialogue would not advance as the player moves from region to region.
+  - Fixed a defect where G0lly would crash to desktop in certain situations. Ooops.
+  - Fixed a defect where turning cards that provide gems into salmon would not cause the gem to be lost.
+  - Replaced the portrait for the Sawyer talking card with the correct portrait.
+  - Beating the Dredger no longer gives you an additional rare card. Ooops.
+  - The Double Death ability now has the appropriate name in the rulebook.
+  - Custom talking card dialogue has been broken down into smaller sections.
+  - The volume on the Melter talking card has been lowered.
+  - Fixed the emotion settings for a number of NPC dialogue entries.
+  - The Melter now has the Flamethrower weapon mesh properly assigned.
+  - Updated the figurine type for the Inspector NPC.
+
+- Some known defects that are *not* yet fixed (wait for a future patch):
+  - The border color on rare cards is incorrect.
+  - Stickers misbehave on talking cards.
+  - Talking cards do not properly pause their dialogue when discovered, making it hard to read their dialogue.
+  - Some talking cards do not properly talk when they appear in selection events.
+  - The two new talking cards have an oversized breathing animation.
+  - Some of the Melter's dialogue was improperly transcribed.
+
+# 5.0
+
+- The Great Transcendence is complete
+
+- Additions:
+  - Two new achievements (and associated stickers) have been added.
+  - One new challenge has been added.
+  - Significantly overhauled the map generation algorithm, focused on expanding the types of terrain and environments that can be generated. The forest now has a snowline, the factory and undead crypt are now explorable, etc.
+  - Added four new quests that have talking cards as their rewards for completion.
+  - Two new secret rooms have been added to the map; one providing a cosmetic customization opportunity and one with an optional minigame.
+  - Lockjaw Cell is now a common.
+  - Urchin Conduit has been added as a new rare. It is a factory conduit that spawns Urchin Cells. Consequently, Urchin Cell is no longer in the card pool.
+
+- Balance Changes
+  - The blocker that G0lly plays during the first phase of the boss fight now scales with difficulty.
+  - The "Buy Your Buddy" achievement now correctly unlocks at SP 6 instead of SP 5.
+  - There was a defect with how pre-queued opposing terrain was being processed. A number of encounters that were supposed to start with pre-defined cards in the opponent queue simply were not. Fixing this defect will have a side effect of making a handful of encounters more difficult than they were before.
+
+- Bug Fixes and Tweaks
+  - Activated abilities can no longer be activated while the hammer is active.
+  - Taurus now repeatedly destroys cards in the opposing slot until it is empty (e.g., Frozen Away, Bounty Hunter Brains, etc)
+  - Custom cards with no names now are assigned a random name.
+  - Wiseclock and UFO have been retextured.
+  - Oil Jerry now has a small animation when he dies to help visualize his effect.
+  - Bounty Hunter kills are now tracked as statistics.
+  - The Hopper sigil can now appear in the sigil machine and the Build-A-Card machine.
+  - The Flammable (M0l0t0v) sigil now flips vertically when on an opponent card. It also causes cards to have the "fuse" animation.
+  - Cards with holographic portraits now properly re-activate their normal portraits when transforming.
+  - Amber no longer appears on the map when she shouldn't. 
+  - NPCs that had unique models in the base game (e.g., Amber/Pikemage) now have the same/similar models in this mod.
+  - Expanded the bounty hunter generation algorithm with new names, dialogue, and portrait components.
+  - Fixed a bug in the interaction between Electric and Sharp.
+  - Fixed a bug where the original three beast transformation options were not appearing in the beast transformation node.
+  - The "Transform When Powered" sigil now interacts properly with all cards that have predefined evolutions.
+  - A bug fix for the Deck Editor mod by Peaiace is now included.
+  - Fixed a number of bugs with the Experiment card. This card is still quite buggy; feel free to reach out to me on Discord as you discover more bugs.
+
+# 4.4.1
+
+- Resolved a memory leak with how asset bundles and audio files were being loaded and (not always) unloaded.
+- Improved the performance of rendering RGB cards and made them only render on player cards.
+- Fixed a defect where the Data Cube didn't work in generator battles
+- All turbo vessels now are marked to flip their portraits when strafe goes in the opposite direction
+- Fixed an issue with the rulebook as it related to a special item.
+- Properly marked both sides of Asmanteus as being rare colored.
+- Fixed an issue with how the generator battle resolved.
+- Fixed an issue with how certain 3D cards rendered in the final boss battle.
+- Made the "Burning Adrenaline" secret achievement slightly less difficult to unlock.
+
 # 4.4
 
 - Balance change: The "Overwhelming Entrance" sigil (3leph4nt's sigil) is now an activated ability that still triggers on entering play. The activation cost is 4 energy. This allows you to retrigger the Elephant's disruptive effect multiple times during battle. Additionally, this effect now shuffles the opponent queue and no longer shuffles terrain.

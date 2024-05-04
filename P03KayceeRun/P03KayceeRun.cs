@@ -5,9 +5,13 @@ using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03KayceeRun.Cards.Multiverse;
 using Infiniscryption.P03KayceeRun.Encounters;
+using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Quests;
+using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 using UnityEngine.SceneManagement;
@@ -52,9 +56,6 @@ namespace Infiniscryption.P03KayceeRun
 
             DialogueManagement.TrackForTranslation = true;
 
-            // Call dialogue sequence
-            DialogueManagement.AddSequenceDialogue();
-
             foreach (Type t in typeof(P03Plugin).Assembly.GetTypes())
             {
                 try
@@ -68,12 +69,17 @@ namespace Infiniscryption.P03KayceeRun
                 }
             }
 
+            // Call dialogue sequence
+            DialogueManagement.AddSequenceDialogue();
+
             CustomCards.RegisterCustomCards(harmony);
+            MultiverseCards.CreateCards();
             StarterDecks.RegisterStarterDecks();
             AscensionChallengeManagement.UpdateP03Challenges();
             BossManagement.RegisterBosses();
             DefaultQuestDefinitions.DefineAllQuests();
             EncounterHelper.BuildEncounters();
+            MultiverseEncounters.CreateMultiverseEncounters();
             DialogueManagement.TrackForTranslation = false;
             DialogueManagement.ResolveCurrentTranslation();
 
@@ -88,6 +94,12 @@ namespace Infiniscryption.P03KayceeRun
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void FixDeckEditor() => Traverse.Create(Chainloader.PluginInfos["inscryption_deckeditor"].Instance as DeckEditor).Field("save").SetValue(SaveManager.SaveFile);
+
+        private void OnDestroy()
+        {
+            AudioHelper.FlushAudioClipCache();
+            AssetBundleManager.CleanUp();
+        }
 
         public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {

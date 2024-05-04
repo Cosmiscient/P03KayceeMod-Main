@@ -94,7 +94,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
                 PlayerTerrainsResolved = FixTerrainDictionary(PlayerTerrains);
                 OpposingTerrainsResolved = FixTerrainDictionary(OpposingTerrains);
-                OpposingTerrainQueuesResolved = FixTerrainDictionary(OpposingTerrainQueuesResolved);
+                OpposingTerrainQueuesResolved = FixTerrainDictionary(OpposingTerrainQueues);
 
                 foreach (EncounterBlueprintData ebd in allEncounters)
                 {
@@ -305,7 +305,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             return resolvedCards.Select(l => l == null || l.Count == 0 ? null : l[0]).ToList();
         }
 
-        private static Tuple<List<CardInfo>, List<CardInfo>, List<CardInfo>> GetTerrainForBlueprint(EncounterBlueprintData data, int difficulty)
+        internal static Tuple<List<CardInfo>, List<CardInfo>, List<CardInfo>> GetTerrainForBlueprint(EncounterBlueprintData data, int difficulty)
         {
             if (data == null || string.IsNullOrEmpty(data.name))
                 return null;

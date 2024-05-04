@@ -5,6 +5,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Sequences;
+using InscryptionAPI.Helpers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
@@ -12,6 +13,186 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     [HarmonyPatch]
     public static class BountyHunterManagement
     {
+        private static readonly List<Sprite> AdditionalFaceSprites = new();
+        private static readonly List<Sprite> AdditionalHatSprites = new();
+        private static readonly List<Sprite> AdditionalMouthSprites = new();
+        private static readonly List<Sprite> AdditionalEyesSprites = new();
+
+        private static readonly List<string> Names = new(BountyHunterGenerator.NAMES);
+        private static readonly List<string> Prefixes = new(BountyHunterGenerator.NAME_PREFIXES);
+        private static readonly List<string> Suffixes = new(BountyHunterGenerator.NAME_SUFFIXES);
+
+
+        private static Sprite MakeDefaultSprite(string path)
+        {
+            Texture2D texture = TextureHelper.GetImageAsTexture(path, typeof(BountyHunterManagement).Assembly);
+            return Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        }
+
+        static BountyHunterManagement()
+        {
+            for (int i = 5; i <= 8; i++)
+            {
+                AdditionalFaceSprites.Add(MakeDefaultSprite($"bountyhunter_face_{i}.png"));
+                AdditionalHatSprites.Add(MakeDefaultSprite($"bountyhunter_hat_{i}.png"));
+                AdditionalMouthSprites.Add(MakeDefaultSprite($"bountyhunter_mouth_{i}.png"));
+                AdditionalEyesSprites.Add(MakeDefaultSprite($"bountyhunter_eyes_{i}.png"));
+            }
+
+            Names.AddRange(new List<string>() {
+                "LIONEL",
+                "LOUIS",
+                "LOU",
+                "JAMES",
+                "PARTS",
+                "JIMMY",
+                "KLAXON",
+                "POE",
+                "DANNY",
+                "MULLINS",
+                "LUKE",
+                "BOMB",
+                "KARD",
+                "BRICK",
+                "SMACK",
+                "HACK",
+                "BRASH",
+                "ZACK",
+                "BOOM",
+                "ROCKET",
+                "SNILL",
+                "ZAP",
+                "HOTS",
+                "BURNER"
+            });
+
+            Prefixes.AddRange(new List<string>() {
+                "DE-",
+                "DU",
+                "DER",
+                "VAN DER",
+                "BA",
+                "FAIR",
+                "DO"
+            });
+
+            Suffixes.AddRange(new List<string>() {
+                "STER",
+                "STAIN",
+                ".EXE",
+                "EMA",
+                "EVSKI",
+                "EZ",
+                "ON",
+                "ALOT"
+            });
+        }
+
+        [HarmonyPatch(typeof(BountyHunterGenerator), nameof(BountyHunterGenerator.GenerateName))]
+        [HarmonyPrefix]
+        private static bool GenerateNameP03KCM(BountyHunterGenerator __instance, ref string __result)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
+            string text = Localization.Translate(Names[Random.Range(0, Names.Count)]);
+            string text2 = Localization.Translate(Names[Random.Range(0, Names.Count)]);
+            if (text.Length + text2.Length <= 10)
+            {
+                if (CustomRandom.Bool())
+                {
+                    text2 = string.Format("{0}{1}", Localization.Translate(Prefixes[Random.Range(0, Prefixes.Count)]), text2);
+                }
+                else
+                {
+                    text2 = string.Format("{0}{1}", text2, Localization.Translate(Suffixes[Random.Range(0, Suffixes.Count)]));
+                }
+            }
+            __result = string.Format("{0} {1}", text, text2);
+            return false;
+        }
+
+        [HarmonyPatch(typeof(BountyHunterInfo), nameof(BountyHunterInfo.RandomizeIndices))]
+        [HarmonyPrefix]
+        private static bool IndicesForP03KCM(BountyHunterInfo __instance)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
+            __instance.faceIndex = Random.Range(0, 4 + AdditionalFaceSprites.Count);
+            __instance.hatIndex = Random.Range(0, 4 + AdditionalHatSprites.Count);
+            __instance.mouthIndex = Random.Range(0, 4 + AdditionalMouthSprites.Count);
+            __instance.eyesIndex = Random.Range(0, 4 + AdditionalEyesSprites.Count);
+            return false;
+        }
+
+        [HarmonyPatch(typeof(BountyHunterGenerator), nameof(BountyHunterGenerator.GenerateMod))]
+        [HarmonyPostfix]
+        private static void RandomizeDialogue(ref CardModificationInfo __result)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
+            // Select from the list of valid dialogue IDs
+            // Dialogue IDs are 0-indexed on the mod, but 1-indexed in the dialogue file.
+            // Yes that's annoying.
+            List<int> possibles = new List<int>() { 0, 1, 2, 3, 4, 5, 6 };
+            foreach (var mod in Part3SaveData.Data.bountyHunterMods)
+                possibles.Remove(mod.bountyHunterInfo.dialogueIndex);
+
+            if (possibles.Count == 0)
+            {
+                P03Plugin.Log.LogInfo($"There are {Part3SaveData.Data.bountyHunterMods.Count} unique bounty hunters in the pool already; I'm out of dialogue options! Forcing dialogue to index 3 (4)");
+                __result.bountyHunterInfo.dialogueIndex = 3;
+            }
+            else
+            {
+                __result.bountyHunterInfo.dialogueIndex = possibles[SeededRandom.Range(0, possibles.Count, P03AscensionSaveData.RandomSeed)];
+            }
+        }
+
+        [HarmonyPatch(typeof(BountyHunterInfo), nameof(BountyHunterInfo.GetDialogueIndex))]
+        [HarmonyPrefix]
+        private static bool AscensionDialogue(BountyHunterInfo __instance, ref int __result)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return false;
+
+            __result = __instance.dialogueIndex + 1;
+            return false;
+        }
+
+
+        [HarmonyPatch(typeof(BountyHunterPortrait), nameof(BountyHunterPortrait.Generate))]
+        [HarmonyPrefix]
+        private static bool GenerateP03KCMPortrait(BountyHunterPortrait __instance, int faceIndex, int hatIndex, int mouthIndex, int eyesIndex)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
+            if (faceIndex < 4)
+                __instance.face.sprite = ResourceBank.Get<Sprite>("Art/Cards/BountyHunterPortraits/bountyhunter_face_" + (faceIndex + 1).ToString());
+            else
+                __instance.face.sprite = AdditionalFaceSprites[faceIndex - 4];
+
+            if (hatIndex < 4)
+                __instance.hat.sprite = ResourceBank.Get<Sprite>("Art/Cards/BountyHunterPortraits/bountyhunter_hat_" + (hatIndex + 1).ToString());
+            else
+                __instance.hat.sprite = AdditionalHatSprites[hatIndex - 4];
+
+            if (mouthIndex < 4)
+                __instance.mouth.sprite = ResourceBank.Get<Sprite>("Art/Cards/BountyHunterPortraits/bountyhunter_mouth_" + (mouthIndex + 1).ToString());
+            else
+                __instance.mouth.sprite = AdditionalMouthSprites[mouthIndex - 4];
+
+            if (eyesIndex < 4)
+                __instance.eyes.sprite = ResourceBank.Get<Sprite>("Art/Cards/BountyHunterPortraits/bountyhunter_eyes_" + (eyesIndex + 1).ToString());
+            else
+                __instance.eyes.sprite = AdditionalEyesSprites[eyesIndex - 4];
+
+            return false;
+        }
+
         private static bool SlotHasBrain(CardSlot slot)
         {
             if (slot.Card != null && slot.Card.Info.name.Equals(CustomCards.BRAIN))

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -36,6 +38,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 typeof(SapphirePower),
                 TextureHelper.GetImageAsTexture("ability_sapphire_power.png", typeof(SapphirePower).Assembly)
             ).Id;
+
+            MultiverseGameState.StateRestored += (state) => UpdateCount();
         }
 
         public override bool RespondsToOtherCardAssignedToSlot(PlayableCard otherCard) => true;
@@ -62,9 +66,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             yield break;
         }
 
-        private void UpdateCount()
+        internal static void UpdateCount()
         {
-            List<CardSlot> slots = BoardManager.Instance.GetSlots(!Card.OpponentCard);
+            List<CardSlot> slots = BoardManager.Instance.GetSlots(true);
             NumberOfActiveAbilities = slots.Where(s => s.Card != null && !s.Card.Dead && s.Card.HasAbility(AbilityID)).Count();
         }
 
@@ -74,6 +78,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.EnergyCost), MethodType.Getter)]
         [HarmonyPostfix]
+        [HarmonyPriority(HarmonyLib.Priority.VeryLow)]
         private static void AdjustCostForSapphirePower(PlayableCard __instance, ref int __result)
         {
             __result -= NumberOfActiveAbilities;

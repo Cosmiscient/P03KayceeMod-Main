@@ -27,5 +27,11 @@ namespace Infiniscryption.P03KayceeRun.Helpers
 
             bundle.Unload(false);
         }
+
+        internal static void CleanUp()
+        {
+            foreach (string key in Prefabs.Keys)
+                GameObject.Destroy(Prefabs[key]);
+        }
     }
 }

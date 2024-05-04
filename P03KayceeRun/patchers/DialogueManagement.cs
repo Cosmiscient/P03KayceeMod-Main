@@ -4,11 +4,14 @@ using System.IO;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Dialogue;
+using InscryptionAPI.Guid;
 using Sirenix.Serialization.Utilities;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -17,6 +20,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     {
         internal static List<string> AllStringsToTranslate = new();
         internal static bool TrackForTranslation = false;
+        private static readonly Dictionary<string, DialogueEvent.Speaker> cardSpeakers = new();
+
+        internal static DialogueEvent.Speaker NewCardSpeaker(string speaker)
+        {
+            var result = GuidManager.GetEnumValue<DialogueEvent.Speaker>(P03Plugin.PluginGuid, speaker);
+            cardSpeakers.Add(speaker.ToLowerInvariant(), result);
+            return result;
+        }
 
 
         private static Emotion FaceEmotion(this P03AnimationController.Face face)
@@ -29,6 +40,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 ? Emotion.Anger
                 : face == P03AnimationController.Face.Happy
                 ? Emotion.Neutral
+                : face == P03TrollFace.ID
+                ? Emotion.Laughter
                 : face == P03AnimationController.Face.MycologistAngry
                 ? Emotion.Anger
                 : face == P03AnimationController.Face.MycologistLaughing
@@ -40,8 +53,24 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 : Emotion.Neutral;
         }
 
-        private static Emotion ParseEmotion(this string face)
+        private static string ParseCommandShortcuts(string dialogue, DialogueEvent.Speaker speaker, Emotion emotion)
         {
+            string retval = dialogue.Replace("[james:]", "[anim:voice.speechblip_jamescobb_internal][c:bR]")
+                           .Replace("[default:]", "[c:][w:0.3][anim:voice.]");
+
+            if (speaker == TalkingCardJames.ID)
+                retval = "[c:bR]" + retval + "[c:]";
+
+            if (cardSpeakers.ContainsValue(speaker))
+                retval += "[w:0.3]";
+
+            return retval;
+        }
+
+        private static Emotion ParseEmotion(this string face, Emotion defaultEmotion = Emotion.Neutral)
+        {
+            if (string.IsNullOrEmpty(face))
+                return defaultEmotion; ;
             if (face.ToLowerInvariant().Contains("goocurious"))
                 return Emotion.Neutral;
             if (face.ToLowerInvariant().Contains("goo"))
@@ -50,6 +79,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return Emotion.Curious;
             if (face.ToLowerInvariant().Contains("frustrated"))
                 return Emotion.Anger;
+            if (face.ToLowerInvariant().Contains("angry"))
+                return Emotion.Anger;
+            if (face.ToLowerInvariant().Contains("anger"))
+                return Emotion.Anger;
+            if (face.ToLowerInvariant().Contains("happy"))
+                return Emotion.Neutral;
             if (face.ToLowerInvariant().Contains("laughter"))
                 return Emotion.Laughter;
             if (face.ToLowerInvariant().Contains("grimora"))
@@ -58,7 +93,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 return Emotion.Neutral;
             if (face.ToLowerInvariant().Contains("leshy"))
                 return Emotion.Neutral;
+            if (face.ToLowerInvariant().Contains("dredger"))
+                return Emotion.Anger;
             return face.ParseFace().FaceEmotion();
+        }
+
+        private static P03AnimationController.Face ParseEnumFace(this string face)
+        {
+            string faceLower = face.ToLowerInvariant();
+            foreach (var enumVal in Enum.GetValues(typeof(P03AnimationController.Face)))
+            {
+                if (faceLower.Contains(enumVal.ToString().ToLowerInvariant()))
+                    return (P03AnimationController.Face)enumVal;
+            }
+            return P03AnimationController.Face.NoChange;
         }
 
         private static P03AnimationController.Face ParseFace(this string face)
@@ -66,87 +114,48 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return String.IsNullOrEmpty(face)
                 ? P03AnimationController.Face.NoChange
                 : face.ToLowerInvariant().StartsWith("npc")
-                ? P03ModularNPCFace.ModularNPCFace
-                : (P03AnimationController.Face)Enum.Parse(typeof(P03AnimationController.Face), face);
+                ? P03AnimationController.Face.NoChange
+                : face.ToLowerInvariant().Contains("troll")
+                ? P03TrollFace.ID
+                : face.ParseEnumFace();
         }
 
-        private static void AddDialogue(string id, List<string> lines, List<string> faces, List<string> dialogueWavies)
+        private static DialogueEvent.Speaker ParseSpeaker(this string face, DialogueEvent.Speaker defaultSpeaker = DialogueEvent.Speaker.P03)
         {
-            //P03Plugin.Log.LogInfo($"Creating dialogue {id}, {string.Join(",", lines)}");
+            if (string.IsNullOrEmpty(face))
+                return defaultSpeaker;
 
-            DialogueEvent.Speaker speaker = DialogueEvent.Speaker.P03;
-            if (faces.Exists(s => s.ToLowerInvariant().Contains("leshy")))
+            foreach (var kvp in cardSpeakers)
+                if (face.ToLowerInvariant().Contains(kvp.Key))
+                    return kvp.Value;
+
+            DialogueEvent.Speaker speaker = defaultSpeaker;
+            if (face.ToLowerInvariant().Contains("card"))
+                speaker = DialogueEvent.Speaker.AnglerTalkingCard;
+            else if (face.ToLowerInvariant().Contains("bounty"))
+                speaker = DialogueEvent.Speaker.P03BountyHunter;
+            else if (face.ToLowerInvariant().Contains("leshy"))
                 speaker = DialogueEvent.Speaker.Leshy;
-            else if (faces.Exists(s => s.ToLowerInvariant().Contains("grimora")))
+            else if (face.ToLowerInvariant().Contains("grimora"))
                 speaker = DialogueEvent.Speaker.Grimora;
-            else if (faces.Exists(s => s.ToLowerInvariant().Contains("magnificus")))
+            else if (face.ToLowerInvariant().Contains("magnificus"))
                 speaker = DialogueEvent.Speaker.Magnificus;
-            else if (faces.Exists(s => s.ToLowerInvariant().Contains("telegrapher")))
+            else if (face.ToLowerInvariant().Contains("telegrapher"))
                 speaker = DialogueEvent.Speaker.P03Telegrapher;
-            else if (faces.Exists(s => s.ToLowerInvariant().Contains("archivist")))
+            else if (face.ToLowerInvariant().Contains("archivist"))
                 speaker = DialogueEvent.Speaker.P03Archivist;
-            else if (faces.Exists(s => s.ToLowerInvariant().Contains("photographer")))
+            else if (face.ToLowerInvariant().Contains("photographer"))
                 speaker = DialogueEvent.Speaker.P03Photographer;
-            else if (faces.Exists(s => s.ToLowerInvariant().Contains("canvas")))
+            else if (face.ToLowerInvariant().Contains("canvas"))
                 speaker = DialogueEvent.Speaker.P03Canvas;
-            else if (faces.Exists(s => s.ToLowerInvariant().Contains("goo")))
+            else if (face.ToLowerInvariant().Contains("goo"))
                 speaker = DialogueEvent.Speaker.Goo;
-            else if (faces.Exists(s => s.ToLowerInvariant().Contains("side")))
+            else if (face.ToLowerInvariant().Contains("side"))
                 speaker = DialogueEvent.Speaker.P03MycologistSide;
-            else if (faces.Exists(s => s.ToLowerInvariant().Contains("mycolo")))
+            else if (face.ToLowerInvariant().Contains("mycolo"))
                 speaker = DialogueEvent.Speaker.P03MycologistMain;
 
-            bool leshy = speaker is DialogueEvent.Speaker.Leshy or DialogueEvent.Speaker.Goo or DialogueEvent.Speaker.Grimora or DialogueEvent.Speaker.Magnificus;
-
-            // Track for translation
-            AllStringsToTranslate.AddRange(lines);
-
-            if (string.IsNullOrEmpty(id))
-                return;
-
-            //DialogueDataUtil.Data.events.Add(new DialogueEvent()
-            //{
-            //    id = id,
-            //    speakers = new List<DialogueEvent.Speaker>() { DialogueEvent.Speaker.Single, speaker },
-            //    mainLines = new(faces.Zip(lines, (face, line) => new DialogueEvent.Line()
-            //    {
-            //        text = line,
-            //        specialInstruction = "",
-            //        p03Face = leshy ? P03AnimationController.Face.NoChange : ParseFace(face),
-            //        speakerIndex = 1,
-            //        emotion = leshy ? leshyEmotion : ParseFace(face).FaceEmotion()
-            //    })
-            //    .Zip(dialogueWavies, delegate (DialogueEvent.Line line, string wavy)
-            //    {
-            //        if (!string.IsNullOrEmpty(wavy) && wavy.ToLowerInvariant() == "y")
-            //            line.letterAnimation = TextDisplayer.LetterAnimation.WavyJitter;
-            //        return line;
-            //    }).ToList())
-            //});
-
-            DialogueEvent dialogueEvent = new()
-            {
-                id = id,
-                speakers = new List<DialogueEvent.Speaker>() { DialogueEvent.Speaker.Single, speaker },
-                mainLines = new(faces.Zip(lines, (face, line) => new DialogueEvent.Line()
-                {
-                    text = line,
-                    specialInstruction = "",
-                    p03Face = leshy ? P03AnimationController.Face.NoChange : ParseFace(face),
-                    speakerIndex = 1,
-                    emotion = ParseEmotion(face)
-                })
-                .Zip(dialogueWavies, delegate (DialogueEvent.Line line, string wavy)
-                {
-                    if (!string.IsNullOrEmpty(wavy) && wavy.ToLowerInvariant() == "y")
-                        line.letterAnimation = TextDisplayer.LetterAnimation.WavyJitter;
-                    return line;
-                }).ToList())
-            };
-
-            //Debug.Log("DIALOGUE EVENT DEBUG: " + dialogueEvent.id);
-
-            DialogueManager.Add(P03Plugin.PluginGuid, dialogueEvent);
+            return speaker;
         }
 
         public static List<string> SplitColumn(string col, char sep = ',', char quote = '"')
@@ -187,61 +196,94 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             string[] lines = database.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
             string dialogueId = string.Empty;
-            List<string> dialogueLines = new();
-            List<string> dialogueWavies = new();
-            List<string> dialogueFaces = new();
+            string lastSeenFaceInstruction = string.Empty;
+            DialogueEvent.Speaker lastSpeaker = DialogueEvent.Speaker.P03;
+            Emotion lastEmotion = Emotion.Neutral;
+
+            List<DialogueEvent.Line> currentLines = new();
+            List<List<DialogueEvent.Line>> replacementLines = new();
+            List<DialogueEvent.Speaker> currentSpeakers = new() { DialogueEvent.Speaker.Single };
+
             foreach (string line in lines.Skip(1))
             {
                 List<string> cols = SplitColumn(line);
 
-                if (string.IsNullOrEmpty(cols[0]))
+                if (!string.IsNullOrEmpty(cols[0]))
                 {
-                    dialogueLines.Add(cols[3]);
-                    dialogueWavies.Add(cols[2]);
-                    dialogueFaces.Add(cols[1]);
-                    continue;
+                    if (cols[0].StartsWith("|"))
+                    {
+                        replacementLines.Add(new());
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(dialogueId))
+                        {
+                            DialogueEvent newEvent = new()
+                            {
+                                id = dialogueId,
+                                speakers = currentSpeakers,
+                                mainLines = new(currentLines)
+                            };
+
+                            if (replacementLines.Count > 0)
+                                newEvent.repeatLines = replacementLines.Select(
+                                    llines => new DialogueEvent.LineSet(llines)
+                                ).ToList();
+
+                            currentLines = new();
+                            currentSpeakers = new() { DialogueEvent.Speaker.Single };
+                            replacementLines = new();
+
+                            DialogueManager.Add(P03Plugin.PluginGuid, newEvent);
+                        }
+
+                        dialogueId = cols[0];
+                        lastSeenFaceInstruction = string.Empty;
+                        lastSpeaker = DialogueEvent.Speaker.P03;
+                        lastEmotion = Emotion.Neutral;
+                    }
                 }
 
-                AddDialogue(dialogueId, dialogueLines, dialogueFaces, dialogueWavies);
+                if (!string.IsNullOrEmpty(cols[1]))
+                    lastSeenFaceInstruction = cols[1];
 
-                dialogueId = cols[0];
-                dialogueLines = new() { cols[3] };
-                dialogueWavies.Add(cols[2]);
-                dialogueFaces = new() { cols[1] };
+                string faceInstruction = lastSeenFaceInstruction;
+
+                P03AnimationController.Face face = faceInstruction.ParseFace();
+                DialogueEvent.Speaker speaker = faceInstruction.ParseSpeaker(lastSpeaker);
+                lastSpeaker = speaker;
+                Emotion emotion = faceInstruction.ParseEmotion(lastEmotion);
+                lastEmotion = emotion;
+                string dialogue = ParseCommandShortcuts(cols[3], speaker, emotion);
+                bool wavy = !string.IsNullOrEmpty(cols[2]) && cols[2].ToLowerInvariant().Contains("y");
+
+                P03Plugin.Log.LogDebug($"{dialogueId} has speaker {speaker}");
+
+                if (!currentSpeakers.Contains(speaker))
+                    currentSpeakers.Add(speaker);
+
+                if (cardSpeakers.ContainsValue(speaker))
+                {
+                    currentSpeakers.Remove(DialogueEvent.Speaker.Single);
+                }
+
+                AllStringsToTranslate.Add(dialogue);
+
+                DialogueEvent.Line newLine = new()
+                {
+                    text = dialogue,
+                    specialInstruction = "",
+                    p03Face = face,
+                    speakerIndex = currentSpeakers.IndexOf(speaker),
+                    emotion = emotion,
+                    letterAnimation = wavy ? TextDisplayer.LetterAnimation.Jitter : TextDisplayer.LetterAnimation.None
+                };
+
+                if (replacementLines.Count > 0)
+                    replacementLines.Last().Add(newLine);
+                else
+                    currentLines.Add(newLine);
             }
-
-            AddDialogue(dialogueId, dialogueLines, dialogueFaces, dialogueWavies);
-
-            //Old audio code
-
-            //AudioHelper.LoadAudioClip("goovoice_curious#1", group:"SFX");
-            //AudioHelper.LoadAudioClip("goovoice_curious#2", group:"SFX");
-            //AudioHelper.LoadAudioClip("goovoice_curious#3", group:"SFX");
-            //AudioHelper.LoadAudioClip("bottle_break", group:"SFX");
-
-            //AudioHelper.LoadAudioClip("P03_Phase1", group:"Loops");
-            //AudioHelper.LoadAudioClip("P03_Phase2", group:"Loops");
-            //AudioHelper.LoadAudioClip("P03_Phase3", group:"Loops");
-
-            //Up to date audio code
-
-            //string path1 = AudioHelper.FindAudioClip("goovoice_curious#1");
-            //string path2 = AudioHelper.FindAudioClip("goovoice_curious#2");
-            //string path3 = AudioHelper.FindAudioClip("goovoice_curious#3");
-            //string path4 = AudioHelper.FindAudioClip("bottle_break");
-
-            //string path5 = AudioHelper.FindAudioClip("P03_Phase1");
-            //string path6 = AudioHelper.FindAudioClip("P03_Phase2");
-            //string path7 = AudioHelper.FindAudioClip("P03_Phase3");
-
-            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path1);
-            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path2);
-            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path3);
-            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path4);
-
-            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path5);
-            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path6);
-            //InscryptionAPI.Sound.SoundManager.LoadAudioClip(path7);
         }
 
         private static int offset = 0;

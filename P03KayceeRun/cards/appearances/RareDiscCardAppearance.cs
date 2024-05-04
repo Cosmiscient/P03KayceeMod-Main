@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Patchers;
@@ -14,6 +15,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
     public class RareDiscCardAppearance : DiscCardColorAppearance
     {
         private static bool RGBIsActive => SaveManager.SaveFile.unlockedAchievements.Contains(P03AchievementManagement.SKULLSTORM) || P03Plugin.Instance.DebugCode.Contains("rgb");
+
+        internal bool IsRGBEligible
+        {
+            get
+            {
+                if (!RGBIsActive)
+                    return false;
+
+                return !IsOpponentAppearance;
+            }
+        }
 
         private static readonly Dictionary<string, Color?> configColors = new();
         private static readonly Dictionary<string, Color> defaultColors = new()
@@ -68,7 +80,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             if (c.HasValue)
                 return c;
 
-            var lookup = RGBIsActive ? defaultRGBColors : defaultColors;
+            var lookup = IsRGBEligible ? defaultRGBColors : defaultColors;
             return lookup.ContainsKey(key) ? lookup[key] : null;
         }
 
@@ -141,6 +153,47 @@ namespace Infiniscryption.P03KayceeRun.Cards
             }
         };
 
+
+        private static List<Color> CACHED_LINEAR_GRADIENT = null;
+        private static List<List<Color>> CACHED_GRADIENT = null;
+
+        private static void EstablishLinearGradientCache()
+        {
+            if (CACHED_LINEAR_GRADIENT == null)
+            {
+                CACHED_LINEAR_GRADIENT = new();
+
+                for (int i = 0; i <= 100; i++)
+                {
+                    CACHED_LINEAR_GRADIENT.Add(RGB_GRADIENT.Evaluate((float)i / (float)100));
+                }
+            }
+        }
+
+        internal static Color GetLinearRGBGradient(float p)
+        {
+            EstablishLinearGradientCache();
+            return CACHED_LINEAR_GRADIENT[Mathf.FloorToInt(p)];
+        }
+
+        private static void EstablishGradientCache(int width, int height)
+        {
+            if (CACHED_GRADIENT != null)
+                if (CACHED_GRADIENT.Count < width || CACHED_GRADIENT[0].Count < height)
+                    CACHED_GRADIENT.Clear();
+
+            if (CACHED_GRADIENT == null)
+            {
+                CACHED_GRADIENT = new();
+                for (int i = 0; i < width; i++)
+                {
+                    CACHED_GRADIENT.Add(new());
+                    for (int j = 0; j < height; j++)
+                        CACHED_GRADIENT[i].Add(RGB_GRADIENT.Evaluate(((float)(i + j)) / FULL_SIZE));
+                }
+            }
+        }
+
         private const float FULL_SIZE = 250f + 365f;
 
         private static readonly Texture2D SPECULAR_MAP = TextureHelper.GetImageAsTexture("rare_specular_fractal.png", typeof(RareDiscCardAppearance).Assembly, FilterMode.Trilinear);
@@ -163,11 +216,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static void RBGifyCard(RenderStatsLayer __instance, Texture tex, bool emission)
         {
-            if (RGBIsActive && emission && __instance is DiskRenderStatsLayer drsl && tex is Texture2D texture)
+            if (emission && __instance is DiskRenderStatsLayer drsl && tex is Texture2D texture && RGBIsActive)
             {
-                Card card = drsl.gameObject.GetComponentInParent<Card>();
-                if (card != null && card.Info.appearanceBehaviour.Contains(ID))
+                RareDiscCardAppearance rareApp = drsl.gameObject.transform.parent.parent.gameObject.GetComponent<RareDiscCardAppearance>();
+                if (rareApp != null && rareApp.IsRGBEligible)
                 {
+                    EstablishGradientCache(texture.width, texture.height);
                     for (int x = 0; x < tex.width; x++)
                     {
                         for (int y = 0; y < tex.height; y++)
@@ -175,7 +229,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                             Color ex = texture.GetPixel(x, y);
                             if (ex != Color.black)
                             {
-                                Color newColor = RGB_GRADIENT.Evaluate(((float)(x + y)) / FULL_SIZE);
+                                Color newColor = CACHED_GRADIENT[x][y];
                                 newColor *= ex;
                                 newColor.a = ex.a;
                                 texture.SetPixel(x, y, newColor);

@@ -113,5 +113,47 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     statPoints--;
             }
         }
+
+        [HarmonyPatch(typeof(TelegrapherBossOpponent), nameof(TelegrapherBossOpponent.PlayMole))]
+        [HarmonyPostfix]
+        private static IEnumerator ReplaceMoleForAscension(IEnumerator sequence)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            string cardName = EventManagement.EncounterDifficulty <= 1 ? CustomCards.GOLLY_TREE
+                              : EventManagement.EncounterDifficulty < 4 ? "Mole_Telegrapher" :
+                              CustomCards.GOLLY_MOLEMAN;
+
+            CardInfo cardByName = CardLoader.GetCardByName(cardName);
+            yield return BoardManager.Instance.CreateCardInSlot(cardByName, BoardManager.Instance.OpponentSlotsCopy[2], 0.1f, true);
+            yield break;
+        }
+
+        [HarmonyPatch(typeof(TextDisplayer), nameof(TextDisplayer.PlayDialogueEvent))]
+        [HarmonyPostfix]
+        private static IEnumerator ReplaceMoleDialogueForAscension(IEnumerator sequence, string eventId, TextDisplayer.MessageAdvanceMode advanceMode, TextDisplayer.EventIntersectMode intersectMode, string[] variableStrings, Action<DialogueEvent.Line> newLineCallback)
+        {
+            if (!P03AscensionSaveData.IsP03Run || !eventId.Equals("TelegrapherPlayMole", StringComparison.InvariantCultureIgnoreCase))
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            string newEventName = EventManagement.EncounterDifficulty <= 1 ? "TelegrapherPlayTree"
+                              : EventManagement.EncounterDifficulty < 4 ? "TelegrapherPlayMole" :
+                              "TelegrapherPlayMoleman";
+
+            if (newEventName.Equals(eventId, StringComparison.InvariantCultureIgnoreCase))
+            {
+                yield return sequence;
+                yield break;
+            }
+
+            yield return TextDisplayer.Instance.PlayDialogueEvent(newEventName, advanceMode, intersectMode, variableStrings, newLineCallback);
+        }
     }
 }

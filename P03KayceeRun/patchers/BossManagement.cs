@@ -15,8 +15,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static readonly string P03FinalBossAI = AIManager.Add(P03Plugin.PluginGuid, "P03FinalBossAI", typeof(P03FinalBossOpponentAI)).Id;
         public static Opponent.Type P03FinalBossOpponent { get; private set; }
         public static Opponent.Type P03MultiverseOpponent { get; private set; }
-
-        private const int BOSS_MONEY_REWARD = 5;
+        public static Opponent.Type TestOfStrengthOpponent { get; private set; }
+        public static Opponent.Type DredgerOpponent { get; private set; }
 
         //10 was way too quiet... 0.15?
         public static float bossMusicVolume = 0.15f;
@@ -102,7 +102,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 }
             }
 
-            if (__instance is not P03AscensionOpponent and not MycologistAscensionBossOpponent)
+            if (__instance is not P03AscensionOpponent and not MycologistAscensionBossOpponent and not MultiverseBossOpponent and not DredgerBossOpponent)
             {
                 TurnManager.Instance.PostBattleSpecialNode = AscensionSaveData.Data.ChallengeIsActive(AscensionChallenge.NoBossRares)
                     ? new CardChoicesNodeData()
@@ -351,6 +351,18 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             P03FinalBossOpponent = OpponentManager.Add(P03Plugin.PluginGuid, "P03AscensionFinalBoss", string.Empty, typeof(P03AscensionOpponent))
                 .SetNewSequencer(P03Plugin.PluginGuid, "P03FinalBossSequencer", typeof(P03FinalBossSequencer))
+                .Id;
+
+            P03MultiverseOpponent = OpponentManager.Add(P03Plugin.PluginGuid, "P03MultiverseBoss", string.Empty, typeof(MultiverseBossOpponent))
+                .SetNewSequencer(P03Plugin.PluginGuid, "MultiverseBattleSequencer", typeof(MultiverseBattleSequencer))
+                .Id;
+
+            TestOfStrengthOpponent = OpponentManager.Add(P03Plugin.PluginGuid, "TestOfStrengthOpponent", string.Empty, typeof(TestOfStrengthBattleOpponent))
+                .SetNewSequencer(P03Plugin.PluginGuid, "TestOfStrengthSequencer", typeof(TestOfStrengthBattleSequencer))
+                .Id;
+
+            DredgerOpponent = OpponentManager.Add(P03Plugin.PluginGuid, "DredgerOpponent", string.Empty, typeof(DredgerBossOpponent))
+                .SetNewSequencer(P03Plugin.PluginGuid, "DredgerP03Sequencer", typeof(Infiniscryption.P03KayceeRun.Sequences.DredgerBattleSequencer))
                 .Id;
         }
     }

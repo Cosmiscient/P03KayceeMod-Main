@@ -23,7 +23,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return true;
         }
 
-        private static string GetUserName()
+        internal static string GetUserName()
         {
             try
             {

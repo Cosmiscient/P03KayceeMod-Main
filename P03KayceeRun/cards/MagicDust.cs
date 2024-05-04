@@ -38,11 +38,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 if (otherCard == null || otherCard.Slot == null)
                     yield break;
 
-                SlotModificationManager.ModificationType slotMod = otherCard.Slot.GetSlotModification();
-                if (SlotIDs.Keys.Contains(slotMod))
+                GoobertCenterCardBehaviour gcb = otherCard.GetComponent<GoobertCenterCardBehaviour>();
+                List<SlotModificationManager.ModificationType> slotMods =
+                    gcb == null ? new() { otherCard.Slot.GetSlotModification() }
+                           : gcb.AllSlots.Select(s => s.GetSlotModification()).ToList();
+
+                slotMods = slotMods.Where(s => SlotIDs.Keys.Contains(s)).ToList();
+                if (slotMods.Count > 0)
                 {
                     CardModificationInfo mod = GetGemMod(otherCard, true);
-                    mod.abilities = new() { SlotIDs[slotMod] };
+                    mod.abilities = slotMods.Select(s => SlotIDs[s]).ToList();
                     otherCard.AddTemporaryMod(mod);
                     ResourcesManager.Instance.ForceGemsUpdate();
                 }
@@ -109,10 +114,22 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         private List<Ability> CardGemAbilities => new(AllGemAbilities.Where(Card.HasAbility));
 
+        private CardSlot oldSlot = null;
+
+        public override bool RespondsToPreDeathAnimation(bool wasSacrifice) => Card.OnBoard;
+
+        public override IEnumerator OnPreDeathAnimation(bool wasSacrifice)
+        {
+            oldSlot = Card.Slot;
+            yield break;
+        }
+
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
             Ability target = CardGemAbilities[0];
-            yield return Card.Slot.SetSlotModification(SlotIDs.First(kvp => kvp.Value == target).Key);
+
+            if (oldSlot != null)
+                yield return oldSlot.SetSlotModification(SlotIDs.First(kvp => kvp.Value == target).Key);
             yield break;
         }
 

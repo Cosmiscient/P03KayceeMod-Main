@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using DiskCardGame.CompositeRules;
+using GBC;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Helpers;
@@ -34,6 +35,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         internal static List<ChallengeManager.FullChallenge> PageOneChallenges = new();
 
         internal static readonly int[] ChallengePointsPerLevel = new int[] { 5, 20, 45, 70, 100 };
+
+        internal static readonly Sprite SKULL_SPRITE = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_skull.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon);
+        internal static readonly Sprite SKULL_EYES_SPRITE = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_skull_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon);
+        internal static AscensionChallengeInfo FAKE_FINAL_BOSS_INFO { get; private set; }
 
         public static bool SKULL_STORM_ACTIVE
         {
@@ -93,6 +98,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         public static void UpdateP03Challenges()
         {
+            FAKE_FINAL_BOSS_INFO = new()
+            {
+                challengeType = AscensionChallenge.FinalBoss,
+                title = "Final Boss",
+                description = "Description for the Final Boss challenge",
+                iconSprite = SKULL_SPRITE,
+                activatedSprite = SKULL_EYES_SPRITE,
+                pointValue = 15
+            };
+
             // Page 2+ challenges, managed entirely by the challenge manager
             BOMB_CHALLENGE = ChallengeManager.AddSpecific(P03Plugin.PluginGuid,
             "Explosive Bots",
@@ -287,11 +302,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     UnlockLevel = 6
                 },
 
+                // Final Boss
                 new() {
-                    Challenge = ChallengeManager.BaseGameChallenges.First(fc => fc.Challenge.challengeType == AscensionChallenge.FinalBoss),
+                    Challenge = new() {
+                        challengeType = AscensionChallenge.FinalBoss,
+                        title = "The Great Transcendence",
+                        description = "Unlock the secrets of the Great Transcendence",
+                        iconSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_multiverse.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        activatedSprite = TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("ascensionicon_multiverse_activated.png", typeof(AscensionChallengeManagement).Assembly), TextureHelper.SpriteType.ChallengeIcon),
+                        pointValue = 15
+                    },
                     AppearancesInChallengeScreen = 1,
-                    UnlockLevel = 15
-                }
+                    UnlockLevel = 8,
+                },
             });
 
             // PatchedChallengesReference = new() {
@@ -554,6 +577,107 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
+        private static void EnsureSingletonFinalBoss()
+        {
+            while (P03AscensionSaveData.P03Data.activeChallenges.Where(c => c == AscensionChallenge.FinalBoss).Count() > 1)
+            {
+                P03AscensionSaveData.P03Data.activeChallenges.Remove(AscensionChallenge.FinalBoss);
+                AscensionChallengeScreen.Instance?.challengeLevelText?.UpdateText();
+            }
+        }
+
+        [HarmonyPatch(typeof(AscensionIconInteractable), nameof(AscensionIconInteractable.OnCursorSelectStart))]
+        [HarmonyPrefix]
+        private static bool SpecialFinalBossClick(AscensionIconInteractable __instance)
+        {
+            if (P03AscensionSaveData.IsP03Run &&
+                __instance.challengeInfo.challengeType == AscensionChallenge.FinalBoss
+                && !P03AscensionSaveData.P03Data.conqueredChallenges.Contains(AscensionChallenge.FinalBoss)
+                && AscensionUnlockSchedule.ChallengeIsUnlockedForLevel(__instance.challengeInfo.challengeType, P03AscensionSaveData.P03Data.challengeLevel)
+                && !P03AscensionSaveData.LeshyIsDead
+                && __instance.clickable)
+            {
+                __instance.clickable = false;
+
+                if (__instance.iconRenderer != null)
+                    __instance.iconRenderer.enabled = false;
+
+                if (__instance.activatedRenderer != null)
+                    __instance.activatedRenderer.enabled = false;
+
+                __instance.gameObject.SetActive(false);
+                P03AscensionSaveData.P03Data.activeChallenges.Add(AscensionChallenge.FinalBoss);
+
+                GBCUIManager.Instance.transform.parent.GetComponentInChildren<ScreenGlitchEffect>().SetIntensity(1f, .4f);
+                GBC.CameraEffects.Instance.Shake(0.1f, .4f);
+                AudioController.Instance.PlaySound2D("glitch", MixerGroup.VideoCam, 1f);
+
+                EnsureSingletonFinalBoss();
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(AscensionIconInteractable), nameof(AscensionIconInteractable.AssignInfo))]
+        [HarmonyPrefix]
+        private static bool SpecialFinalBossIcon(AscensionChallengeInfo info, AscensionIconInteractable __instance)
+        {
+            if (P03AscensionSaveData.IsP03Run &&
+                info.challengeType == AscensionChallenge.FinalBoss
+                && !P03AscensionSaveData.P03Data.conqueredChallenges.Contains(AscensionChallenge.FinalBoss)
+                && AscensionUnlockSchedule.ChallengeIsUnlockedForLevel(info.challengeType, P03AscensionSaveData.P03Data.challengeLevel))
+            {
+                __instance.challengeInfo = info;
+                __instance.gameObject.SetActive(true);
+                if (P03AscensionSaveData.LeshyIsDead)
+                {
+                    __instance.clickable = false;
+
+                    if (__instance.iconRenderer != null)
+                    {
+                        __instance.iconRenderer.sprite = info.iconSprite;
+                        __instance.iconRenderer.enabled = true;
+                    }
+
+                    if (__instance.activatedRenderer != null)
+                    {
+                        __instance.activatedRenderer.sprite = info.activatedSprite;
+                        __instance.activatedRenderer.enabled = true;
+                    }
+                    AscensionChallengeScreen.Instance?.SetChallengeActivated(info, true);
+                }
+                else if (P03AscensionSaveData.P03Data.activeChallenges.Contains(info.challengeType))
+                {
+                    __instance.clickable = false;
+                    __instance.gameObject.SetActive(false);
+
+                    if (__instance.iconRenderer != null)
+                        __instance.iconRenderer.enabled = false;
+
+                    if (__instance.activatedRenderer != null)
+                        __instance.activatedRenderer.enabled = false;
+                }
+                else
+                {
+                    __instance.clickable = true;
+                    __instance.challengeInfo = FAKE_FINAL_BOSS_INFO;
+
+                    if (__instance.iconRenderer != null)
+                    {
+                        __instance.iconRenderer.enabled = true;
+                        __instance.iconRenderer.sprite = SKULL_SPRITE;
+                    }
+
+                    if (__instance.activatedRenderer != null)
+                        __instance.activatedRenderer.sprite = SKULL_EYES_SPRITE;
+                }
+                EnsureSingletonFinalBoss();
+                return false;
+            }
+            return true;
+        }
+
+
         private static readonly Texture2D TURBO_SPRINTER_TEXTURE = TextureHelper.GetImageAsTexture("portrait_turbovessel.png", typeof(AscensionChallengeManagement).Assembly);
         [HarmonyPatch(typeof(Part3CardDrawPiles), nameof(Part3CardDrawPiles.AddModsToVessel))]
         [HarmonyPostfix]
@@ -561,6 +685,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             if (info == null)
                 return;
+
+            // The side deck card cannot be sacrificable
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                info.traits ??= new();
+                info.traits.Add(CustomCards.Unsackable);
+            }
 
             if (AscensionSaveData.Data.ChallengeIsActive(TURBO_VESSELS) && info.name.StartsWith("EmptyVessel"))
             {

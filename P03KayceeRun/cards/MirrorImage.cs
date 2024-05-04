@@ -37,7 +37,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             List<CardSlot> possibles = new();
             foreach (CardSlot slot in BoardManager.Instance.playerSlots.Concat(BoardManager.Instance.opponentSlots))
             {
-                if (slot.Card != null && slot.Card != this.Card && !slot.Card.HasAbility(AbilityID))
+                if (slot.Card != null && slot.Card != this.Card && !slot.Card.HasAbility(AbilityID) && !slot.Card.Info.HasSpecialAbility(GoobertCenterCardBehaviour.AbilityID))
                     possibles.Add(slot);
             }
 

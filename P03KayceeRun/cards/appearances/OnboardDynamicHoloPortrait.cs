@@ -84,7 +84,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                                float.Parse(offsetSplit[2], CultureInfo.InvariantCulture));
         }
 
-        public static void HolofyGameObject(GameObject obj, Color color, string shaderKey = "SFHologram/HologramShader", bool inChildren = true, Material reference = null, bool destroyComponents = false)
+        public static void HolofyGameObject(GameObject obj, Color color, string shaderKey = "SFHologram/HologramShader", bool inChildren = true, Material reference = null, bool destroyComponents = false, float? brightness = null)
         {
             if (destroyComponents)
             {
@@ -123,6 +123,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         material.SetColor("_RimColor", color);
                     if (material.HasProperty("_Color"))
                         material.SetColor("_Color", halfMain);
+
+                    if (brightness.HasValue && material.HasProperty("_Brightness"))
+                        material.SetFloat("_Brightness", brightness.Value);
                 }
             }
         }
@@ -137,7 +140,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             {
                 string[] colorSplit = colorKey.Split(',');
                 if (colorSplit.Length == 3)
-                    color = new Color(float.Parse(colorSplit[0]), float.Parse(colorSplit[1]), float.Parse(colorSplit[2]));
+                    color = new Color(float.Parse(colorSplit[0], CultureInfo.InvariantCulture), float.Parse(colorSplit[1], CultureInfo.InvariantCulture), float.Parse(colorSplit[2], CultureInfo.InvariantCulture));
             }
 
             string shaderKeyAll = Card.Info.GetExtendedProperty(SHADER_KEY);
@@ -206,14 +209,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
             portraitSpawned = true;
         }
 
+        public bool HoloPortraitSpawned => Card.Anim is DiskCardAnimationController dcac && dcac.holoPortraitParent.childCount > 0 && dcac.holoPortraitParent.GetChild(0).gameObject.active;
+
         public override void ApplyAppearance()
         {
             bool showInHand = Card.Info.GetExtendedPropertyAsBool(IN_HAND).GetValueOrDefault(false);
             if (Card.Anim is DiskCardAnimationController dcac && Card is PlayableCard pCard && (pCard.OnBoard || showInHand) && !portraitSpawned)
             {
                 SpawnHoloPortrait(dcac);
-                Card.renderInfo.hidePortrait = portraitSpawned;
             }
+
+            Card.renderInfo.hidePortrait = HoloPortraitSpawned;
         }
 
         public override void OnPreRenderCard() => ApplyAppearance();

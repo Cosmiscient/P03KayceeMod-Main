@@ -150,7 +150,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             // Gas Conduit
             CardManager.New(EXP_2_PREFIX, "GasConduit", "Gas Conduit", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gasconduit.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 4)
+                .SetCost(energyCost: 2)
                 .SetRegionalP03Card(CardTemple.Tech)
                 .AddAbilities(ConduitGas.AbilityID, BurntOut.AbilityID);
 
@@ -185,11 +185,21 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(LatchNullConduit.AbilityID);
 
             // Urch1n Cell
-            CardManager.New(EXP_2_PREFIX, "UrchinCell", "Urch1n Cell", 0, 3)
+            CardManager.New(EXP_2_PREFIX, "UrchinCell", "Urch1n Cell", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_urchin_cell.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
-                .SetRegionalP03Card(CardTemple.Tech, CardTemple.Nature)
+                .SetCardTemple(CardTemple.Tech)
+                //.SetRegionalP03Card(CardTemple.Tech, CardTemple.Nature)
                 .AddAbilities(Ability.Sharp, CellDeSubmerge.AbilityID);
+
+            // Urch1n Conduit
+            CardManager.New(EXP_2_PREFIX, "UrchinConduit", "Urch1n Conduit", 0, 3)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_urchin_conduit.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 3)
+                .SetRegionalP03Card(CardTemple.Tech, CardTemple.Nature)
+                .SetRare()
+                //.SetRegionalP03Card(CardTemple.Tech, CardTemple.Nature)
+                .AddAbilities(ConduitSpawnUrchin.AbilityID);
 
             // Rh1n0
             CardManager.New(EXP_2_PREFIX, "Rhino", "Rh1n0", 0, 2)
@@ -407,7 +417,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_lockjaw_cell.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetRegionalP03Card(CardTemple.Tech)
-                .SetRare()
                 .AddAbilities(Ability.Reach, CellSteelTrap.AbilityID);
 
             // Bleene's Acolyte

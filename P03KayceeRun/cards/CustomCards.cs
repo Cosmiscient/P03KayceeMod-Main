@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Cards.Multiverse;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
@@ -26,13 +27,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public static readonly CardMetaCategory UndeadRegion = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "UndeadRegionCards");
 
         public static readonly AbilityMetaCategory MultiverseAbility = GuidManager.GetEnumValue<AbilityMetaCategory>(P03Plugin.PluginGuid, "MultiverseAbility");
+        public static bool IsMultiverseCard(this CardInfo info) => info.Abilities.Any(ab => AbilitiesUtil.GetInfo(ab).metaCategories.Contains(MultiverseAbility));
+        public static bool IsMultiverseCard(this PlayableCard card) => card.AllAbilities().Any(ab => AbilitiesUtil.GetInfo(ab).metaCategories.Contains(MultiverseAbility));
 
         public static readonly CardMetaCategory NewBeastTransformers = GuidManager.GetEnumValue<CardMetaCategory>(P03Plugin.PluginGuid, "NewBeastTransformers");
 
         public static readonly Trait UpgradeVirus = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "UpgradeMachineVirus");
         public static readonly Trait Unrotateable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "Unrotateable");
         public static readonly Trait QuestCard = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "QuestCard");
-        public static readonly Trait FastGlobalSpell = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "FastGlobalSpell");
+        //public static readonly Trait FastGlobalSpell = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "FastGlobalSpell");
+        public static readonly Trait Unsackable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "Unsackable");
 
         public static readonly Texture2D DUMMY_DECAL = TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly);
         public static readonly Texture2D DUMMY_DECAL_2 = TextureHelper.GetImageAsTexture("portrait_triplemox_color_decal_1.png", typeof(CustomCards).Assembly);
@@ -42,6 +46,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string UNC_TOKEN = "P03KCM_Draft_Token_Uncommon";
         public const string RARE_DRAFT_TOKEN = "P03KCM_Draft_Token_Rare";
         public const string GOLLYCOIN = "P03KCM_GollyCoin";
+        public const string GOLLY_TREE = "P03KCM_GollyTree";
+        public const string GOLLY_MOLEMAN = "P03KCM_GollyMoleMan";
         public const string BLOCKCHAIN = "P03KCM_Blockchain";
         public const string NFT = "P03KCM_NFT";
         public const string OLD_DATA = "P03KCM_OLD_DATA";
@@ -65,8 +71,20 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string FAILED_EXPERIMENT_BASE = "P03KCM_FAILED_EXPERIMENT";
         public const string MYCO_HEALING_CONDUIT = "P03KCM_MYCO_HEALING_CONDUIT";
         public const string MYCO_CONSTRUCT_BASE = "P03KCM_MYCO_CONSTRUCT_BASE";
+        public const string TRAINING_DUMMY = "P03KCM_TRAINING_DUMMY";
 
         public const string TURBO_MINECART = "P03KCM_TURBO_MINECART";
+
+        public const string MAG_BRUSH = "P03KCM_MAG_BRUSH";
+        public const string GRIM_QUIL = "P03KCM_GRIM_QUIL";
+
+        public const string PILE_OF_SCRAP = "P03KCM_PILE_OF_SCRAP";
+        public const string PAPERWORK_A = "P03KCM_PAPERWORK_A";
+        public const string PAPERWORK_B = "P03KCM_PAPERWORK_B";
+        public const string PAPERWORK_C = "P03KCM_PAPERWORK_C";
+
+        public const string HOLO_PELT = "P03KCM_HOLO_PELT";
+        public const string SINGLE_USE_TRAP = "P03KCM_SINGLE_USE_TRAP";
 
         public const string TURBO_VESSEL = "P03KCM_TURBO_VESSEL";
         public const string TURBO_VESSEL_BLUEGEM = "P03KCM_TURBO_VESSEL_BLUEGEM";
@@ -419,6 +437,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     );
                     cards.CardByName("PlasmaGunner").SetWeaponMesh(DiskCardWeapon.Revolver);
 
+                    cards.CardByName("CXformerWolf").AddMetaCategories(NewBeastTransformers);
+                    cards.CardByName("CXformerRaven").AddMetaCategories(NewBeastTransformers);
+                    cards.CardByName("CXformerAdder").AddMetaCategories(NewBeastTransformers);
+
                     cards.CardByName("JuniorSage").AddAppearances(OnboardWizardCardModel.ID);
                     cards.CardByName("PracticeMage").AddAppearances(OnboardWizardCardModel.ID);
                     cards.CardByName("RubyGolem").AddAppearances(OnboardWizardCardModel.ID);
@@ -488,6 +510,33 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             CardManager.BaseGameCards.First(c => c.name == "MineCart").SetEvolve(minecartrad, 1);
 
+            CardManager.New(P03Plugin.CardPrefx, PILE_OF_SCRAP, "Scrap Pile", 0, 1)
+                .SetPortrait(GetTexture("portrait_scrappile.png", typeof(CustomCards).Assembly))
+                .AddSpecialAbilities(ScrapDropBehaviour.ID)
+                .SetCost(energyCost: 2)
+                .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, PAPERWORK_A, "ALPHA.DOC", 0, 2)
+                .SetPortrait(GetTexture("portrait_paperwork.png", typeof(CustomCards).Assembly))
+                .AddSpecialAbilities(FilePaperworkInOrder.ID)
+                .AddAppearances(PaperworkDecalAppearance.ID)
+                .SetCost(energyCost: 1)
+                .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, PAPERWORK_B, "BETA.DOC", 0, 2)
+                .SetPortrait(GetTexture("portrait_paperwork.png", typeof(CustomCards).Assembly))
+                .AddSpecialAbilities(FilePaperworkInOrder.ID)
+                .AddAppearances(PaperworkDecalAppearance.ID)
+                .SetCost(energyCost: 1)
+                .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, PAPERWORK_C, "GAMMA.DOC", 0, 2)
+                .SetPortrait(GetTexture("portrait_paperwork.png", typeof(CustomCards).Assembly))
+                .AddSpecialAbilities(FilePaperworkInOrder.ID)
+                .AddAppearances(PaperworkDecalAppearance.ID)
+                .SetCost(energyCost: 1)
+                .SetCardTemple(CardTemple.Tech);
+
             CardManager.New(P03Plugin.CardPrefx, DRAFT_TOKEN, "Basic Token", 0, 1)
                 .SetPortrait(GetTexture("portrait_drafttoken.png", typeof(CustomCards).Assembly))
                 .SetPixelPortrait(GetTexture("pixel_drafttoken.png", typeof(CustomCards).Assembly))
@@ -553,17 +602,25 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ch2.temple = CardTemple.Tech;
             CardManager.BaseGameCards.CardByName("AboveCurve").SetEvolve(ch2, 1);
 
+            CardManager.New(P03Plugin.CardPrefx, TRAINING_DUMMY, "Training Dummy", 0, 7)
+                    .SetPortrait(GetTexture("portrait_dumbot.png", typeof(CustomCards).Assembly))
+                    .SetCost(energyCost: 6)
+                    .SetSpecialAbilities(DummyBreak.ID)
+                    .SetCardTemple(CardTemple.Tech);
+
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL, "Turbo Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.ConduitNull)
                     .SetFlippedPortrait()
+                    .SetStrafeFlipsPortrait(true)
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_BLUEGEM, "Turbo Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemBlue)
+                    .SetStrafeFlipsPortrait(true)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
@@ -571,6 +628,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemOrange)
+                    .SetStrafeFlipsPortrait(true)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
@@ -579,20 +637,56 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemGreen)
                     .SetFlippedPortrait()
+                    .SetStrafeFlipsPortrait(true)
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_LEAPBOT, "Turbo L33pb0t", 0, 2)
                     .SetPortrait(GetTexture("portrait_TurboL33pBot.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(Ability.Reach, DoubleSprint.AbilityID)
+                    .SetStrafeFlipsPortrait(true)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, CustomCards.GOLLY_TREE, "Tree", 0, 2)
+                .SetAltPortrait(TextureHelper.GetImageAsTexture("portrait_golly_tree.png", typeof(CustomCards).Assembly, FilterMode.Trilinear))
+                .AddAppearances(HighResAlternatePortrait.ID)
+                .SetCardTemple(CardTemple.Tech)
+                .AddAbilities(Ability.Reach);
+
+            CardManager.New(P03Plugin.CardPrefx, CustomCards.GOLLY_MOLEMAN, "Mole Man", 0, 6)
+                .SetAltPortrait(TextureHelper.GetImageAsTexture("portrait_golly_moleman.png", typeof(CustomCards).Assembly, FilterMode.Trilinear))
+                .AddAppearances(HighResAlternatePortrait.ID)
+                .SetCardTemple(CardTemple.Tech)
+                .AddAbilities(Ability.Reach, Ability.WhackAMole);
+
+            CardManager.New(P03Plugin.CardPrefx, CustomCards.MAG_BRUSH, "MAGBRUSH.EXE", 0, 0)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_brush.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 2)
+                .SetTargetedSpell()
+                .SetSpellAppearanceP03()
+                .AddSpecialAbilities(MultiverseRandomSigilBehaviour.AbilityID)
+                .AddAbilities(GuidManager.GetEnumValue<Ability>("zorro.infiniscryption.sigils", "Give Sigils"));
+
+            CardManager.New(P03Plugin.CardPrefx, CustomCards.GRIM_QUIL, "GRIMQUIL.EXE", 0, 0)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_quill.png", typeof(ExpansionPackCards_2).Assembly))
+                .SetCost(energyCost: 3)
+                .SetInstaGlobalSpell()
+                .SetSpellAppearanceP03()
+                .AddAbilities(MultiverseTutor.AbilityID);
 
             CardManager.New(P03Plugin.CardPrefx, FIREWALL, "Firewall", 0, 3)
                 .SetPortrait(GetTexture("portrait_firewall.png", typeof(CustomCards).Assembly))
                 .AddAbilities(Ability.PreventAttack)
                 .SetCost(energyCost: 5)
                 .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, FIREWALL_SMALL + "_OVERCHARGE", "Firewall", 0, 3)
+                .SetPortrait(GetTexture("portrait_mute_firewall.png", typeof(CustomCards).Assembly))
+                .AddAbilities(Ability.Reach, Ability.WhackAMole)
+                .SetCost(energyCost: 2)
+                .SetCustomCost("OverchargeCost", 1)
+                .SetCardTemple(CardTemple.Tech);
 
             var basicFirewall = CardManager.New(P03Plugin.CardPrefx, FIREWALL_SMALL, "Firewall", 0, 1)
                 .SetPortrait(GetTexture("portrait_mute_firewall.png", typeof(CustomCards).Assembly))
@@ -702,7 +796,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAppearances(OnboardDynamicHoloPortrait.ID)
                 .AddAbilities(FriendliesMagicDust.AbilityID)
                 .SetCost(energyCost: 3)
-                .AddTraits(Trait.Gem)
+                //.AddTraits(Trait.Gem)
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/map/holomapscenery/HoloGemBlue|prefabs/map/holomapscenery/HoloGemGreen|prefabs/map/holomapscenery/HoloGemOrange|prefabs/map/holomapscenery/HoloRock_3")
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.HIDE_CHILDREN, "Dirt|Dirt|Dirt|nothing")
                 .SetExtendedProperty(OnboardDynamicHoloPortrait.OFFSET_KEY, "-0.2655,-0.0873,0.3273|0.3164,-0.2364,0.3055|0.4109,0.0437,0|0,-.5,0")
@@ -797,6 +891,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                 foreach (AbilityManager.FullAbility ab in abilities)
                 {
+                    if (ab.Id == Ability.DoubleDeath)
+                        ab.Info.rulebookName = "Double Death";
+
                     if (allP3Abs.Contains(ab.Id))
                     {
                         ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook);
@@ -1095,35 +1192,28 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return retval;
         }
 
-        // [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.EnergyCost), MethodType.Getter)]
-        // [HarmonyPostfix]
-        // private static void AdjustCostForTempMods(ref PlayableCard __instance, ref int __result)
+        // public static bool SlotHasTripleCard(this CardSlot slot) => slot.Card != null && GoobertCenterCardBehaviour.IsOnBoard && GoobertCenterCardBehaviour.Instance.PlayableCard.Slot == slot;
+
+        // public static bool SlotCoveredByTripleCard(this CardSlot slot)
         // {
-        //     if (__instance.temporaryMods != null)
-        //     {
-        //         foreach (CardModificationInfo tMod in __instance.temporaryMods)
-        //         {
-        //             __result += tMod.energyCostAdjustment;
-        //         }
-        //     }
+        //     if (!GoobertCenterCardBehaviour.IsOnBoard)
+        //         return false;
 
-        //     __result = Mathf.Max(0, __result);
+        //     var goobertSlot = GoobertCenterCardBehaviour.GoobertCardSlot;
+        //     if (goobertSlot == null)
+        //         return false;
+
+        //     if (slot.IsPlayerSlot != goobertSlot.IsPlayerSlot)
+        //         return false;
+
+        //     return slot.Index + 1 == goobertSlot.Index || slot.Index - 1 == goobertSlot.Index;
         // }
-
-        public static bool SlotHasTripleCard(this CardSlot slot) => slot.Card != null && slot.Card.Info.SpecialAbilities.Contains(GoobertCenterCardBehaviour.AbilityID);
-
-        public static bool SlotCoveredByTripleCard(this CardSlot slot)
-        {
-            List<CardSlot> container = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
-
-            return (slot.Index > 0 && container[slot.Index - 1].SlotHasTripleCard()) || (slot.Index + 1 < container.Count && container[slot.Index + 1].SlotHasTripleCard());
-        }
 
         public static bool SlotCanHoldTripleCard(this CardSlot slot, PlayableCard existingCard = null)
         {
             P03Plugin.Log.LogDebug("Checking if slot can hold triple card");
             List<CardSlot> container = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
-            int index = slot.Index;
+            int index = slot.Index % 10;
 
             if (index == 0)
             {
@@ -1140,18 +1230,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 return false;
             }
 
-            if (container[index - 1].Card != null && container[index - 1].Card != existingCard)
-            {
-                return false;
-            }
-
-            if (container[index + 1].Card != null && container[index + 1].Card != existingCard)
-            {
-                return false;
-            }
-
-            P03Plugin.Log.LogDebug("Slot can hold triple card");
             return true;
+        }
+
+        [HarmonyPatch(typeof(CardInfo), nameof(CardInfo.Sacrificable), MethodType.Getter)]
+        [HarmonyPostfix]
+        private static void ApplyUnsackable(CardInfo __instance, ref bool __result)
+        {
+            __result = __result && !__instance.traits.Contains(Unsackable);
         }
     }
 }

@@ -5,6 +5,7 @@ using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Guid;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {
@@ -37,6 +38,12 @@ namespace Infiniscryption.P03KayceeRun.Quests
         public SpecialEvent PriorEventId { get; set; } = SpecialEvent.None;
 
         /// <summary>
+        /// The partner event. If set, this will cause this quest to function as a "sibling" of the partner quest.
+        /// It will only get generated if the partner gets generated, and it will get generated on the same map.
+        /// </summary>
+        public SpecialEvent PartnerOfEventId { get; set; } = SpecialEvent.None;
+
+        /// <summary>
         /// The starting state for the quest
         /// </summary>
         public QuestState InitialState { get; set; }
@@ -47,9 +54,35 @@ namespace Infiniscryption.P03KayceeRun.Quests
         public Func<bool> GenerateCondition { get; set; }
 
         /// <summary>
+        /// If true, the quest can appear in a secret room.
+        /// To force it in a secret room, set this true and then use GenerateCondition to force it in a secret room.
+        /// </summary>
+        public bool AllowSecretRoom { get; set; } = false;
+
+        /// <summary>
+        /// If true, the quest can appear in a landmark room.
+        /// </summary>
+        public bool AllowLandmarks { get; set; } = false;
+
+        /// <summary>
+        /// If true, the quest can continue across map changes
+        /// </summary>
+        public bool QuestCanContinue { get; set; } = true;
+
+        /// <summary>
+        /// Calculates the priority of this quest
+        /// </summary>
+        public Func<int> CalculatedPriority { get; set; } = () => 1;
+
+        /// <summary>
         /// Any additional conditions to force the quest to be generated
         /// </summary>
         public Func<bool> MustBeGeneratedConditon { get; set; }
+
+        /// <summary>
+        /// Any code to run on the NPC after it's generated
+        /// </summary>
+        public Action<GameObject> PostGenerateAction { get; set; }
 
         /// <summary>
         /// Indicates if the quest has been generated
@@ -57,7 +90,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
         public bool QuestGenerated
         {
             get => P03AscensionSaveData.RunStateData.GetValueAsBoolean(ModGuid, $"{QuestName}_GENERATED");
-            set => P03AscensionSaveData.RunStateData.SetValue(ModGuid, $"{QuestName}_GENERATED", value);
+            internal set => P03AscensionSaveData.RunStateData.SetValue(ModGuid, $"{QuestName}_GENERATED", value);
         }
 
         /// <summary>
@@ -67,31 +100,35 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
         internal Predicate<HoloMapBlueprint> GenerateRoomFilter()
         {
+            int startingQuad = RunBasedHoloMap.GetStartingQuadrant(EventManagement.CurrentZone);
             // Special rules for special quests
             if (EventId == DefaultQuestDefinitions.FindGoobert.EventId)
             {
                 return EventManagement.CompletedZones.Count == 0
                     ? ((HoloMapBlueprint bp) => bp.isSecretRoom)
-                    : ((HoloMapBlueprint bp) => !bp.isSecretRoom && bp.color != 1);
+                    : ((HoloMapBlueprint bp) => !bp.isSecretRoom && bp.color != startingQuad);
             }
 
             if (EventId == DefaultQuestDefinitions.BrokenGenerator.EventId)
                 return (HoloMapBlueprint bp) => bp.isSecretRoom;
 
             if (EventId == DefaultQuestDefinitions.Prospector.EventId)
-                return (HoloMapBlueprint bp) => !bp.isSecretRoom && bp.color != 1;
+                return (HoloMapBlueprint bp) => !bp.isSecretRoom && bp.color != startingQuad && (bp.specialTerrain & HoloMapBlueprint.LANDMARKER) == 0;
+
+            Predicate<HoloMapBlueprint> landmark = AllowLandmarks ? (bp) => true : (bp) => (bp.specialTerrain & HoloMapBlueprint.LANDMARKER) == 0;
+            Predicate<HoloMapBlueprint> secret = AllowSecretRoom ? (bp) => true : (bp) => !bp.isSecretRoom;
 
             // Use special conditions if necessary
             if (ValidRoomCondition != null)
             {
                 Predicate<HoloMapBlueprint> special = ValidRoomCondition;
-                return (HoloMapBlueprint bp) => !bp.isSecretRoom && special(bp);
+                return (HoloMapBlueprint bp) => landmark(bp) && secret(bp) && special(bp);
             }
 
             // If this is a generic quest
             return PriorEventId != SpecialEvent.None || CurrentState.Status != QuestState.QuestStateStatus.NotStarted
-                ? ((HoloMapBlueprint bp) => !bp.isSecretRoom && bp.color != 1)
-                : ((HoloMapBlueprint bp) => !bp.isSecretRoom && bp.color == 1);
+                ? ((HoloMapBlueprint bp) => secret(bp) && landmark(bp) && bp.color != startingQuad)
+                : ((HoloMapBlueprint bp) => secret(bp) && landmark(bp) && bp.color == startingQuad);
         }
 
         /// <summary>
@@ -101,7 +138,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
         {
             get => EventId == DefaultQuestDefinitions.FindGoobert.EventId ||
                     EventId == DefaultQuestDefinitions.BrokenGenerator.EventId ||
-                    EventId == DefaultQuestDefinitions.Prospector.EventId;
+                    EventId == DefaultQuestDefinitions.Prospector.EventId ||
+                    EventId == DefaultQuestDefinitions.Rebecha.EventId;
         }
 
         /// <summary>
@@ -128,6 +166,10 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 if (PriorEventId != SpecialEvent.None)
                     return false;
 
+                // Does this quest have a partner? If so, no. You can't randomly select this
+                if (PartnerOfEventId != SpecialEvent.None)
+                    return false;
+
                 // Calculate my quest size. There has to be enough time to finish this quest
                 if ((4 - EventManagement.CompletedZones.Count) < QuestManager.CalculateQuestSize(EventId))
                     return false;
@@ -149,8 +191,10 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 {
                     if (EventManagement.CompletedZones.Count == 0)
                         return true; // Always generated on map one
+
                     return EventManagement.CompletedZones.Count == 1
-&& DefaultQuestDefinitions.FindGoobert.CurrentState.Status == QuestState.QuestStateStatus.Active;
+                            && DefaultQuestDefinitions.FindGoobert.CurrentState.Status == QuestState.QuestStateStatus.Active
+                            && EventManagement.CurrentZone == DefaultQuestDefinitions.GoobertDropoffZone;
                 }
 
                 if (EventId == DefaultQuestDefinitions.BrokenGenerator.EventId)
@@ -159,8 +203,11 @@ namespace Infiniscryption.P03KayceeRun.Quests
                 if (EventId == DefaultQuestDefinitions.Prospector.EventId)
                     return Part3SaveData.Data.deck.Cards.Any(c => c.name == CustomCards.BRAIN); // Always generated if you have a bounty hunter brain in your deck
 
+                if (EventId == DefaultQuestDefinitions.Rebecha.EventId)
+                    return false;
+
                 // If this is completed but there are still rewards to give?
-                if (IsCompleted && HasUngrantedRewards)
+                if (IsCompleted && HasUngrantedRewards && QuestCanContinue)
                     return true;
 
                 // Oh duh, this cannot be in a "must be generated" state if it has been completed
@@ -176,12 +223,20 @@ namespace Infiniscryption.P03KayceeRun.Quests
                         return true;
                 }
 
+                if (PartnerOfEventId != SpecialEvent.None)
+                {
+                    QuestDefinition partnerQuest = QuestManager.Get(PartnerOfEventId);
+                    if (partnerQuest.QuestGenerated && !partnerQuest.IsCompleted && (!QuestGenerated || QuestCanContinue))
+                        return true;
+                }
+
+
                 // Does this have a must be generated condition?
                 if (MustBeGeneratedConditon != null)
                     return MustBeGeneratedConditon();
 
                 // Is this quest currently active? That means it wasn't finished and needs to be generated again
-                return CurrentState.Status == QuestState.QuestStateStatus.Active;
+                return CurrentState.Status == QuestState.QuestStateStatus.Active && QuestCanContinue;
             }
         }
 
