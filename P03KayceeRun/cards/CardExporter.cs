@@ -201,19 +201,24 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             yield return new WaitForSeconds(0.3f);
 
-            foreach (P03AnimationController.Face face in Enum.GetValues(typeof(P03AnimationController.Face)))
+            foreach (P03AnimationController.Face face in GuidManager.GetValues<P03AnimationController.Face>())
             {
                 if (face == P03AnimationController.Face.NUM_FACES)
                     continue;
 
+
                 string facecode = face.ToString().ToLowerInvariant();
                 P03AnimationController.Instance.headAnim.Rebind();
                 yield return new WaitForSeconds(0.1f);
-                P03AnimationController.Instance.transform.Find("Body/RotatingHead/Head/HeadAnim/Head-Cable-Left").gameObject.SetActive(false);
-                P03AnimationController.Instance.transform.Find("Body/RotatingHead/Head/HeadAnim/Head-Cable-Right").gameObject.SetActive(false);
-                P03AnimationController.Instance.SetAntennaShown(face == P03AnimationController.Face.TelegrapherBossOnline);
-                P03AnimationController.Instance.ShowInfected(facecode.Contains("myco"));
-                P03AnimationController.Instance.SwitchToFace(face, false, false);
+                try
+                {
+                    P03AnimationController.Instance.transform.Find("Body/RotatingHead/Head/HeadAnim/Head-Cable-Left").gameObject.SetActive(false);
+                    P03AnimationController.Instance.transform.Find("Body/RotatingHead/Head/HeadAnim/Head-Cable-Right").gameObject.SetActive(false);
+                    P03AnimationController.Instance.SetAntennaShown(face == P03AnimationController.Face.TelegrapherBossOnline);
+                    P03AnimationController.Instance.ShowInfected(facecode.Contains("myco"));
+                    P03AnimationController.Instance.SwitchToFace(face, false, false);
+                }
+                catch { }
                 yield return new WaitForSeconds(facecode.Contains("myco") ? 1.0f : 0.1f);
 
                 string outfile = $"cardexports/p03face_{facecode}.png";

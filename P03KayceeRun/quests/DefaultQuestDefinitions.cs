@@ -295,7 +295,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             BrokenGenerator = QuestManager.Add(P03Plugin.PluginGuid, "Broken Generator").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.InspectorSolo, CompositeFigurine.FigurineType.Wildling, CompositeFigurine.FigurineType.SettlerMan, CompositeFigurine.FigurineType.Robot));
             QuestState defaultState = BrokenGenerator.AddState("HELP!", "P03DamageRaceIntro");
             defaultState.AddDialogueState("OH NO...", "P03DamageRaceFailed", QuestState.QuestStateStatus.Failure);
-            defaultState.AddDialogueState("PHEW!", "P03DamageRaceSuccess").AddDynamicMonetaryReward();
+            defaultState.AddDialogueState("PHEW!", "P03DamageRaceSuccess").AddDynamicMonetaryReward(low: true);
 
             // Pyromania
             Pyromania = QuestManager.Add(P03Plugin.PluginGuid, "Pyromania").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Pyromaniac, CompositeFigurine.FigurineType.Enchantress));

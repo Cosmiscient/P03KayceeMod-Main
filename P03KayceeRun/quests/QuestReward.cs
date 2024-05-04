@@ -84,7 +84,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
                 Tuple<int, int> range = EventManagement.CurrencyGainRange;
 
-                return Low ? range.Item1 : (range.Item1 + range.Item2) / 2;
+                return Low ? range.Item1 : range.Item2;
             }
             set => base.Amount = value;
         }
