@@ -13,6 +13,11 @@
     <NoWarn></NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <NoWarn>Publicizer001</NoWarn>
+    <NoWarn>Harmony003</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
       <PackageReference Include="BepInEx.Analyzers" Version="1.0.8">
           <PrivateAssets>all</PrivateAssets>

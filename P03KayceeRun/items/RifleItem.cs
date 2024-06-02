@@ -16,8 +16,6 @@ namespace Infiniscryption.P03KayceeRun.Items
     {
         public static ConsumableItemData ItemData { get; private set; }
 
-        private static readonly float sfxVolume = 0.3f;
-
         static RifleItem()
         {
             // string prefabPathKey = "p03kayceemodufo";

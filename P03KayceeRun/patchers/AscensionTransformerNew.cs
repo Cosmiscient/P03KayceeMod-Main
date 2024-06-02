@@ -10,9 +10,6 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     [HarmonyPatch]
     public class AscensionTransformerNew
     {
-        private static readonly bool allBeastTransformersAssigned = false;
-        private static readonly List<CardInfo> allBeastTransformers = new();
-
         internal static readonly List<BeastInfo> beastInfoList = new() {
             new ("CXformerWolf", 0, 1),
             new ("CXformerRaven", 0, 1),

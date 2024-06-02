@@ -43,14 +43,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
             StartCoroutine(ExportAllCards());
         }
 
-        [SerializeField]
-        private readonly GameObject temporaryHolding;
-
-        [SerializeField]
-        private readonly PlayableCard dummyCard;
-
-        private static readonly RenderStatsLayer statsLayer = null;
-
         private bool IsTalkingCard(CardInfo info) => info.appearanceBehaviour.Contains(CardAppearanceBehaviour.Appearance.DynamicPortrait) || info.animatedPortrait != null;
 
         [SerializeField]

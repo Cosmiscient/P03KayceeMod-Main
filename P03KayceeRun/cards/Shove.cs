@@ -13,7 +13,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
-        private readonly bool ActivatedThisTurn = false;
         private bool didPush;
         protected bool movingLeft;
 

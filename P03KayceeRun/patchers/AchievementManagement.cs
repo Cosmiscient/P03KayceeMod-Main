@@ -75,7 +75,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             CONTROL_NFT = ModdedAchievementManager.New(
                 P03Plugin.PluginGuid,
                 "Avatar",
-                "Take ownership of one of G0lly!'s beloved trinkets",
+                "Take ownership of one of G0lly's beloved trinkets",
                 false,
                 grp.ID,
                 TextureHelper.GetImageAsTexture("achievement_nft.png", typeof(P03AchievementManagement).Assembly)
@@ -183,7 +183,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             SCALES_TILTED_3X = ModdedAchievementManager.New(
                 P03Plugin.PluginGuid,
                 "Absolution",
-                "Have the scales tiled 4 points against you on three different turns",
+                "Have the scales tilted 4 points against you on three different turns",
                 false,
                 grp.ID,
                 TextureHelper.GetImageAsTexture("achievement_scales.png", typeof(P03AchievementManagement).Assembly)

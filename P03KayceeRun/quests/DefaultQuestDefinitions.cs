@@ -187,7 +187,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             ILoveBones = QuestManager.Add(P03Plugin.PluginGuid, "I Love Bones")
                                      .OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Faceless, CompositeFigurine.FigurineType.Gravedigger));
             ILoveBones.SetRegionCondition(RunBasedHoloMap.Zone.Undead)
-                      .AddDialogueState("I LOVE BONES!!", "P03ILoveBones")
+                      .AddState("I LOVE BONES!!", "P03ILoveBones")
                       .SetDynamicStatus(() =>
                       {
                           return Part3SaveData.Data.deck.Cards.Where(
@@ -308,7 +308,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
             // Conveyors
             Conveyors = QuestManager.Add(P03Plugin.PluginGuid, "Conveyors").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Steambot, CompositeFigurine.FigurineType.Robot));
-            Conveyors.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.ALL_CONVEYOR.challengeType))
+            Conveyors.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.ALL_CONVEYOR))
                      .AddDialogueState("CONVEYOR FIELD TRIALS", "P03ConveyorQuestStart")
                      .AddDialogueState("START FIELD TRIALS?", "P03ConveyorQuestStarting")
                      .AddDefaultActiveState("FIELD TRIALS IN PROGRESS", "P03ConveyorQuestActive")
@@ -319,7 +319,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
             // Bombs
             BombBattles = QuestManager.Add(P03Plugin.PluginGuid, "BombBattles").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.MrsBomb, CompositeFigurine.FigurineType.Robot));
-            BombBattles.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOMB_CHALLENGE.challengeType))
+            BombBattles.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOMB_CHALLENGE))
                      .AddDialogueState("BOOM BOOM BOOM", "P03BombQuestStart")
                      .AddDialogueState("LET'S BLOW IT UP", "P03BombQuestStarting")
                      .AddDefaultActiveState("KEEP UP THE BOOM", "P03BombQuestActive")

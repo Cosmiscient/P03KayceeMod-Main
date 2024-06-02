@@ -32,6 +32,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public bool ScalesTippedToOpponent { get; private set; } = false;
         public bool GameIsOver { get; private set; } = false;
+        public bool TransitioningBellState { get; internal set; }
 
         public MultiverseGameState.Phase CurrentPhase { get; private set; } = MultiverseGameState.Phase.GameIsOver;
 
@@ -837,6 +838,20 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return tm.opponent.QueueNewCards(true, true);
         }
 
+        [HarmonyPatch(typeof(CombatBell), nameof(CombatBell.PressingAllowed))]
+        [HarmonyPostfix]
+        private static void DontPressBellWhenTransitioning(ref bool __result)
+        {
+            if (Instance == null)
+                return;
+
+            if (Instance.TransitioningBellState || Instance.MultiverseTravelLocked)
+            {
+                __result = false;
+                return;
+            }
+        }
+
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.SetupPhase))]
         [HarmonyPostfix]
         private static IEnumerator MultiverseSetupPhase(IEnumerator sequence, EncounterData encounterData, TurnManager __instance)
@@ -1196,6 +1211,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 scrybes.leshy.SetEyesAnimated(false);
 
                 AchievementManager.Unlock(P03AchievementManagement.MULTIVERSE);
+                if (AscensionChallengeManagement.SKULL_STORM_ACTIVE)
+                    AchievementManager.Unlock(P03AchievementManagement.SKULLSTORM);
                 yield return new WaitForSeconds(1.5f);
                 PauseMenu.pausingDisabled = false;
                 EventManagement.FinishAscension(true);

@@ -23,7 +23,7 @@ namespace Infiniscryption.PackManagerP03Plugin
         public const string P03PluginGuid = "zorro.inscryption.infiniscryption.p03kayceerun";
 
         public const string PluginGuid = "zorro.inscryption.infiniscryption.deckeditor.p03plugin";
-        public const string PluginName = "Infiniscryption Deck Editor - P03 Plugin";
+        public const string PluginName = "Deck Editor Patch - IT'S OKAY IF THIS PLUGIN FAILS TO LOAD!!";
         public const string PluginVersion = "2.0";
 
         private void Awake()

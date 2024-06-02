@@ -385,6 +385,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_leapbot_neo.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetCardTemple(CardTemple.Tech)
+                .AddAppearances(RareDiscCardAppearance.ID)
                 .AddAbilities(Ability.Reach, Hopper.AbilityID);
 
             CardManager.BaseGameCards.First(c => c.name == "LeapBot").SetEvolve(lpneo, 1);

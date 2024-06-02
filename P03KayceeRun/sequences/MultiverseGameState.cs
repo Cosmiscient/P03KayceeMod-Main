@@ -275,20 +275,20 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         {
             if (Callbacks != null)
             {
-                if (Callbacks.ContainsKey(Phase.Any) && Callbacks[Phase.Any] != null)
+                List<Phase> phases = new() { Phase.Any, phase };
+                foreach (var p in phases)
                 {
-                    foreach (var co in Callbacks[Phase.Any].Where(co => !co.SafeIsUnityNull()))
-                        yield return co.DoCallback();
+                    if (Callbacks.ContainsKey(p) && Callbacks[p] != null)
+                    {
+                        IMultiverseDelayedCoroutine callback = null;
+                        while ((callback = Callbacks[p].FirstOrDefault(co => !co.SafeIsUnityNull())) != null)
+                        {
+                            yield return callback.DoCallback();
+                            Callbacks[p].Remove(callback);
+                        }
 
-                    Callbacks[Phase.Any].Clear();
-                }
-
-                if (Callbacks.ContainsKey(phase) && Callbacks[phase] != null)
-                {
-                    foreach (var co in Callbacks[phase].Where(co => !co.SafeIsUnityNull()))
-                        yield return co.DoCallback();
-
-                    Callbacks[phase].Clear();
+                        Callbacks[p].Clear();
+                    }
                 }
             }
             yield break;
@@ -510,6 +510,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // Fire event
             MultiverseGameState.StateRestored?.Invoke(this);
+
+            // Temporarily disable the bell
+            MultiverseBattleSequencer.Instance.TransitioningBellState = true;
+            CustomCoroutine.WaitThenExecute(1f, () => MultiverseBattleSequencer.Instance.TransitioningBellState = false);
 
             // Wait for everything to calm down
             yield return new WaitForSeconds(0.4f);

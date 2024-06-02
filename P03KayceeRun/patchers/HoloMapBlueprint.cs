@@ -135,7 +135,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 List<string> retval = new();
                 string code = ((specialTerrain & LANDMARKER) != 0) ? "L" : opponent != Opponent.Type.Default ? "B" : specialDirection != RunBasedHoloMap.BLANK ? "E" : upgrade != HoloMapNode.NodeDataType.MoveArea ? "U" : " ";
                 retval.Add("#---#");
-                retval.Add((arrowDirections & RunBasedHoloMap.NORTH) != 0 ? $"|{color}| |" : $"|{color}  |");
+
+                string npc = dialogueEvent == SpecialEvent.None ? " " : "N";
+
+                retval.Add((arrowDirections & RunBasedHoloMap.NORTH) != 0 ? $"|{color}|{npc}|" : $"|{color} {npc}|");
                 retval.Add("|" + ((arrowDirections & RunBasedHoloMap.WEST) != 0 ? $"-{code}" : $" {code}") + ((arrowDirections & RunBasedHoloMap.EAST) != 0 ? "-|" : " |"));
                 retval.Add((arrowDirections & RunBasedHoloMap.SOUTH) != 0 ? "| | |" : "|   |");
                 retval.Add("#---#");

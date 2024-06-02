@@ -21,7 +21,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public static readonly Vector3 DEFAULT_SCALE_VECTOR = new(DEFAULT_SCALE, DEFAULT_SCALE, DEFAULT_SCALE);
 
-        private SpriteRenderer SpriteRenderer;
         public Renderer FrameRenderer;
         public Renderer ContentsRenderer;
         private Texture2D ScreenshotTexture;
@@ -83,6 +82,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public static readonly Color FrameColor = new(0f, 0.085f, 0.085f, 1.0f);
 
+#pragma warning disable CS0114
         private void LateUpdate()
         {
             if (CaptureScreenshotNextFrame)
@@ -91,6 +91,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 CaptureScreenshotNextFrame = false;
             }
         }
+#pragma warning restore CS0114
 
         public static MultiverseTelevisionScreen Create(Transform parent, bool hugeScreen = false)
         {

@@ -193,7 +193,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                         return true; // Always generated on map one
 
                     return EventManagement.CompletedZones.Count == 1
-                            && DefaultQuestDefinitions.FindGoobert.CurrentState.Status == QuestState.QuestStateStatus.Active
+                            && CurrentState.Status == QuestState.QuestStateStatus.Active
                             && EventManagement.CurrentZone == DefaultQuestDefinitions.GoobertDropoffZone;
                 }
 

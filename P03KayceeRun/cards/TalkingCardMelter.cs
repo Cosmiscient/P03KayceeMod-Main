@@ -87,21 +87,26 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             talkingCard.AnimatedPortrait.GetComponentInChildren<CharacterFace>().voiceSoundId = _faceInfo.voiceId;
 
-            talkingCard.RemoveAppearances(CardAppearanceBehaviour.Appearance.AnimatedPortrait);
-            talkingCard.AddAppearances(CardAppearanceBehaviour.Appearance.DynamicPortrait);
+            // A quick check to see if the API has been updated yet
+            if (talkingCard.appearanceBehaviour.Contains(CardAppearanceBehaviour.Appearance.AnimatedPortrait))
+            {
 
-            foreach (var rend in talkingCard.AnimatedPortrait.GetComponentsInChildren<SpriteRenderer>())
-                rend.color = new(0f, 0.755f, 1f);
+                talkingCard.RemoveAppearances(CardAppearanceBehaviour.Appearance.AnimatedPortrait);
+                talkingCard.AddAppearances(CardAppearanceBehaviour.Appearance.DynamicPortrait);
 
-            RecursiveSetLayer(talkingCard.AnimatedPortrait, "CardOffscreenEmission");
+                foreach (var rend in talkingCard.AnimatedPortrait.GetComponentsInChildren<SpriteRenderer>())
+                    rend.color = new(0f, 0.755f, 1f);
 
-            talkingCard.AnimatedPortrait.transform.localScale = new(1f, 1f, 1f);
-            talkingCard.AnimatedPortrait.transform.Find("Anim/Body").localPosition = new(0f, -0.2f, 0f);
-            talkingCard.AnimatedPortrait.transform.localPosition += new Vector3(0f, .4f, 0f);
+                RecursiveSetLayer(talkingCard.AnimatedPortrait, "CardOffscreenEmission");
 
-            // Add the dialogue text
-            var go = GameObject.Instantiate(CardLoader.GetCardByName("Angler_Talking").AnimatedPortrait.transform.Find("DialogueText").gameObject, talkingCard.AnimatedPortrait.transform);
-            go.transform.localPosition -= new Vector3(0f, .4f, 0f);
+                talkingCard.AnimatedPortrait.transform.localScale = new(1f, 1f, 1f);
+                talkingCard.AnimatedPortrait.transform.Find("Anim/Body").localPosition = new(0f, -0.2f, 0f);
+                talkingCard.AnimatedPortrait.transform.localPosition += new Vector3(0f, .4f, 0f);
+
+                // Add the dialogue text
+                var go = GameObject.Instantiate(CardLoader.GetCardByName("Angler_Talking").AnimatedPortrait.transform.Find("DialogueText").gameObject, talkingCard.AnimatedPortrait.transform);
+                go.transform.localPosition -= new Vector3(0f, .4f, 0f);
+            }
         }
     }
 }

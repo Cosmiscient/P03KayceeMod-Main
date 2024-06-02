@@ -655,6 +655,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(Ability.Reach);
 
             CardManager.New(P03Plugin.CardPrefx, CustomCards.GOLLY_MOLEMAN, "Mole Man", 0, 6)
+                .SetCost(bloodCost: 1)
                 .SetAltPortrait(TextureHelper.GetImageAsTexture("portrait_golly_moleman.png", typeof(CustomCards).Assembly, FilterMode.Trilinear))
                 .AddAppearances(HighResAlternatePortrait.ID)
                 .SetCardTemple(CardTemple.Tech)
@@ -893,6 +894,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     if (ab.Id == Ability.DoubleDeath)
                         ab.Info.rulebookName = "Double Death";
+
+                    if (ab.Id == Ability.ActivatedDealDamage)
+                        ab.Info.rulebookName = "Head Shot";
 
                     if (allP3Abs.Contains(ab.Id))
                     {

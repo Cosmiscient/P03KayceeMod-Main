@@ -14,7 +14,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
     {
         // These blueprints are special; they're for bosses and aren't in the normal pool
         internal static List<EncounterBlueprintData> MultiverseBossPhaseOne;
-        internal static List<EncounterBlueprintData> MultiverseBossPhaseTwo;
 
         // Design spec:
         // P03 1 plays a deck of animals. This includes multiversal moles and dogs

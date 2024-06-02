@@ -29,7 +29,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 iconPath: "p03kcm/prefabs/arrow-repeat"
             );
             BattleModManager.SetGlobalActivationRule(ID,
-                () => AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.ALL_CONVEYOR.challengeType)
+                () => AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.ALL_CONVEYOR)
                       || DefaultQuestDefinitions.Conveyors.IsDefaultActive());
         }
 
@@ -39,8 +39,8 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
         {
             if (TurnManager.Instance.TurnNumber > 1 && playerUpkeep)
             {
-                if (TurnManager.Instance.TurnNumber == 2 && AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.ALL_CONVEYOR.challengeType))
-                    ChallengeActivationUI.Instance.ShowActivation(AscensionChallengeManagement.ALL_CONVEYOR.challengeType);
+                if (TurnManager.Instance.TurnNumber == 2 && AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.ALL_CONVEYOR))
+                    ChallengeActivationUI.Instance.ShowActivation(AscensionChallengeManagement.ALL_CONVEYOR);
 
                 yield return BoardManager.Instance.MoveAllCardsClockwise();
             }

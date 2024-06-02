@@ -9,6 +9,7 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Quests;
+using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Saves;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
@@ -103,6 +104,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     retval += Part3SaveData.Data != null && Part3SaveData.Data.playerPos != null ? Part3SaveData.Data.playerPos.gridX : 0;
                     retval += Part3SaveData.Data != null && Part3SaveData.Data.playerPos != null ? 100000 * Part3SaveData.Data.playerPos.gridY : 0;
 
+                    if (MultiverseBattleSequencer.Instance != null)
+                        retval += 11111 * MultiverseBattleSequencer.Instance.CurrentMultiverseId;
+
                     return retval;
                 }
                 catch
@@ -130,7 +134,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // || (!SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part1")
             // && AscensionSaveData.Data != null && AscensionSaveData.Data.currentRun != null && AscensionSaveData.Data.currentRun.playerLives > 0
             // && ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "IsP03Run"));
-            get => SaveFile.IsAscension && (SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part3") || ScreenManagement.ScreenState == CardTemple.Tech);
+            get => SaveFile.IsAscension && (SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("part3") || (SceneLoader.ActiveSceneName.ToLowerInvariant().Contains("ascension") && ScreenManagement.ScreenState == CardTemple.Tech));
         }
 
         private static string ToCompressedJSON(object data)
@@ -214,6 +218,15 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 if (P03Data != null)
                     ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "P03AscensionSaveDataProgress", ToCompressedJSON(P03Data));
+
+                // We have some really, really weird issues with items. Let's make sure that the save file
+                // has the current item state
+                if (ItemsManager.Instance != null && ItemsManager.Instance.Consumables != null)
+                {
+                    var newItems = ItemsManager.Instance.Consumables.Where(i => i != null && i.Data != null).Select(i => i.Data.name).Where(s => !s.Equals("hammer", StringComparison.InvariantCultureIgnoreCase)).ToList();
+                    SaveManager.SaveFile.part3Data.items.Clear();
+                    SaveManager.SaveFile.part3Data.items.AddRange(newItems);
+                }
 
                 P03Plugin.Log.LogInfo($"Saving P03 Save Data {SaveKey}");
                 ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, SaveKey, ToCompressedJSON(SaveManager.SaveFile.part3Data));
@@ -323,6 +336,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return data;
         }
 
+        private static bool _initializingDuringLoad = false;
+
         [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LoadFromFile))]
         [HarmonyPostfix]
         [HarmonyAfter(new string[] { "cyantist.inscryption.api" })]
@@ -331,18 +346,22 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             EnsurePart3Saved();
             P03Plugin.Log.LogInfo($"Loading from the save file. Getting Part3 save [{SaveKey}]");
             string part3Data = ModdedSaveManager.SaveData.GetValue(P03Plugin.PluginGuid, SaveKey);
+
             Part3SaveData data = FromCompressedJSON<Part3SaveData>(part3Data);
 
             if (data == default(Part3SaveData))
             {
+                _initializingDuringLoad = true;
                 data = new Part3SaveData();
                 data.Initialize();
+                _initializingDuringLoad = false;
             }
 
             SaveManager.SaveFile.part3Data = data;
 
             string part3AscensionData = ModdedSaveManager.SaveData.GetValue(P03Plugin.PluginGuid, "P03AscensionSaveDataProgress");
             AscensionSaveData ascensionData = FromCompressedJSON<AscensionSaveData>(part3AscensionData);
+
 
             if (ascensionData == default(AscensionSaveData))
             {
@@ -351,10 +370,13 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 ascensionData.itemUnlockEvents = new() { EventManagement.P03_SAVE_MARKER };
             }
 
+
             if (LeshyIsDead && !ascensionData.activeChallenges.Contains(AscensionChallenge.FinalBoss))
                 ascensionData.activeChallenges.Add(AscensionChallenge.FinalBoss);
 
+
             P03Data = ascensionData;
+
 
             if (File.Exists(SaveFilePath))
             {
@@ -468,7 +490,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         [HarmonyPostfix]
         private static void RewritePart3IntroSequence(ref Part3SaveData __instance)
         {
-            if (!P03Plugin.Initialized)
+            P03Plugin.Log.LogInfo($"Part3 Init {P03Plugin.Initialized}. During load? {_initializingDuringLoad}");
+            if (!P03Plugin.Initialized || _initializingDuringLoad)
                 return;
 
             if (SaveFile.IsAscension && AscensionSaveData.Data.currentRun != null)

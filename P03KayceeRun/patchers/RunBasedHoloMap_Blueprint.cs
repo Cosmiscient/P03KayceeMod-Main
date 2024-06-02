@@ -1236,7 +1236,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
 
             // Add story events data
-            DiscoverAndCreateSecretRoom(bpBlueprint, retval, seed * 2);
+            if (CompletedRegions.Count < 3)
+                DiscoverAndCreateSecretRoom(bpBlueprint, retval, seed * 2);
+
             BuildStoryEvents(retval, region);
 
             // Add the pelts

@@ -19,7 +19,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = original.rulebookName;
-            info.rulebookDescription = original.rulebookDescription.Replace("1 Energy", "3 Energy");
+            info.rulebookDescription = original.rulebookDescription.Replace("1 Energy", "2 Energy");
             info.canStack = original.canStack;
             info.powerLevel = original.powerLevel - 1;
             info.activated = original.activated;
@@ -31,11 +31,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 P03Plugin.PluginGuid,
                 info,
                 typeof(ExpensiveActivatedRandomPowerEnergy),
-                TextureHelper.GetImageAsTexture("ActivatedRandomPowerEnergy-3Energy.png", typeof(ExpensiveActivatedRandomPowerEnergy).Assembly)
+                TextureHelper.GetImageAsTexture("ActivatedRandomPowerEnergy-2Energy.png", typeof(ExpensiveActivatedRandomPowerEnergy).Assembly)
             ).Id;
         }
 
-        public override int EnergyCost => 3;
+        public override int EnergyCost => 2;
 
         public override bool RespondsToUpkeep(bool playerUpkeep) => !playerUpkeep && Card.OpponentCard;
 

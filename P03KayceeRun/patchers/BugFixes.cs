@@ -11,6 +11,7 @@ using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Regions;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
@@ -690,6 +691,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static readonly Trait NonDoubleDeathable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "NoDoubleDeath");
 
+        private const string RESURRECTED_KEY = "HasBeenResurrectedByDoubleDeath";
+        private static bool CanBeDoubleDeathed(PlayableCard card) => !card.TemporaryMods.Any(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(RESURRECTED_KEY));
+
         [HarmonyPatch(typeof(DoubleDeath), nameof(DoubleDeath.RespondsToOtherCardDie))]
         [HarmonyPrefix]
         private static bool FixedDoubleDeathResponds(DoubleDeath __instance, PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer, ref bool __result)
@@ -697,7 +701,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (!P03AscensionSaveData.IsP03Run)
                 return true;
 
-            return __instance.Card.OnBoard && deathSlot.Card != null && deathSlot.Card.OpponentCard == __instance.Card.OpponentCard && deathSlot.Card != __instance.Card && !card.HasTrait(NonDoubleDeathable) && deathSlot.Card == card;
+            return __instance.Card.OnBoard && deathSlot.Card != null && deathSlot.Card.OpponentCard == __instance.Card.OpponentCard && deathSlot.Card != __instance.Card && CanBeDoubleDeathed(card) && deathSlot.Card == card;
         }
 
         [HarmonyPatch(typeof(DoubleDeath), nameof(DoubleDeath.OnOtherCardDie))]
@@ -709,10 +713,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             deathInfo.mods = deathSlot.Card.Info.mods?.Select(m => (CardModificationInfo)m.Clone()).ToList();
             deathInfo.mods ??= new();
             deathInfo.mods.AddRange(deathSlot.Card.TemporaryMods.Select(m => (CardModificationInfo)m.Clone()));
-            deathInfo.traits ??= new();
-            deathInfo.traits.Add(NonDoubleDeathable);
             __instance.currentlyResurrectingCards.Add(deathInfo);
-            yield return BoardManager.Instance.CreateCardInSlot(deathInfo, deathSlot, 0.1f, true);
+            yield return BoardManager.Instance.CreateCardInSlot(deathInfo, deathSlot, 0.1f, false);
+            if (deathSlot.Card != null)
+            {
+                deathSlot.Card.AddTemporaryMod(new() { singletonId = RESURRECTED_KEY });
+                if (deathSlot.Card.TriggerHandler.RespondsToTrigger(Trigger.ResolveOnBoard))
+                    yield return deathSlot.Card.TriggerHandler.OnTrigger(Trigger.ResolveOnBoard);
+
+                yield return Singleton<GlobalTriggerHandler>.Instance.TriggerCardsOnBoard(Trigger.OtherCardResolve, false, deathSlot.Card);
+            }
             yield return new WaitForSeconds(0.1f);
             if (deathSlot.Card != null)
             {
@@ -723,86 +733,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             yield break;
         }
 
-        // private static ConditionalWeakTable<GlobalTriggerHandler, MultiverseBattleSequencer.RefBoolean> _stackInvalid = new();
-        // internal static bool StackInvalid
-        // {
-        //     get
-        //     {
-        //         if (GlobalTriggerHandler.Instance == null)
-        //             return false;
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.AssignCardToSlot))]
+        [HarmonyPostfix]
+        private static IEnumerator EnsureAssignCardToSlotHappensOnlyWhenEverythingIsGood(IEnumerator sequence, PlayableCard card, CardSlot slot)
+        {
+            if (card.SafeIsUnityNull() || card.Dead)
+                yield break;
 
-        //         if (!_stackInvalid.TryGetValue(GlobalTriggerHandler.Instance, out var result))
-        //             return false;
+            if (slot.SafeIsUnityNull())
+                yield break;
 
-        //         return result.Value;
-        //     }
-        //     set
-        //     {
-        //         if (GlobalTriggerHandler.Instance == null)
-        //             return;
-
-        //         _stackInvalid.Remove(GlobalTriggerHandler.Instance);
-        //         _stackInvalid.Add(GlobalTriggerHandler.Instance, new() { Value = value });
-        //     }
-        // }
-
-        // private static float DefaultFixedDeltaTime = -1f;
-
-        // [HarmonyPatch(typeof(GlobalTriggerHandler), nameof(GlobalTriggerHandler.ResetStackSizeAndTriggerCount))]
-        // [HarmonyPostfix]
-        // private static void ResetInvalidStackIndicator()
-        // {
-        //     DefaultFixedDeltaTime = Time.fixedDeltaTime;
-        //     StackInvalid = false;
-        // }
-
-        // [HarmonyPatch(typeof(GlobalTriggerHandler), nameof(GlobalTriggerHandler.TriggerSequence))]
-        // [HarmonyPostfix]
-        // private static IEnumerator NotWhenStackIsInvalid(IEnumerator sequence, GlobalTriggerHandler __instance, TriggerReceiver receiver)
-        // {
-        //     P03Plugin.Log.LogInfo($"Stack Size: {__instance.StackSize}");
-        //     if (__instance.StackSize >= 100)
-        //     {
-        //         StackInvalid = true;
-        //     }
-        //     else if (__instance.StackSize >= 80 && !StackInvalid)
-        //     {
-        //         Time.timeScale = 5f;
-        //         Time.fixedDeltaTime = 5f * DefaultFixedDeltaTime;
-        //     }
-        //     else if (__instance.StackSize >= 60 && !StackInvalid)
-        //     {
-        //         Time.timeScale = 4f;
-        //         Time.fixedDeltaTime = 4f * DefaultFixedDeltaTime;
-        //     }
-        //     else if (__instance.StackSize >= 40 && !StackInvalid)
-        //     {
-        //         Time.timeScale = 3f;
-        //         Time.fixedDeltaTime = 3f * DefaultFixedDeltaTime;
-        //     }
-        //     else if (__instance.StackSize >= 20 && !StackInvalid)
-        //     {
-        //         Time.timeScale = 2f;
-        //         Time.fixedDeltaTime = 2f * DefaultFixedDeltaTime;
-        //     }
-        //     else if (!StackInvalid && DefaultFixedDeltaTime > 0f)
-        //     {
-        //         Time.timeScale = 1f;
-        //         Time.fixedDeltaTime = DefaultFixedDeltaTime;
-        //     }
-
-        //     if (StackInvalid)
-        //     {
-        //         receiver.Activating = false;
-        //         if (receiver.DestroyAfterActivation)
-        //             receiver.Destroy();
-        //     }
-        //     else
-        //     {
-        //         yield return sequence;
-        //     }
-        //     if (__instance.StackSize == 0)
-        //         StackInvalid = false;
-        // }
+            yield return sequence;
+        }
     }
 }

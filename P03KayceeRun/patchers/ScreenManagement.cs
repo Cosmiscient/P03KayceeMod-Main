@@ -156,7 +156,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 if (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("scarletskull"))
                     AchievementManager.Unlock(P03AchievementManagement.SKULLSTORM);
             }
-            if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKey(KeyCode.P) && Input.GetKey(KeyCode.R) && Input.GetKey(KeyCode.E))
+            if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKey(KeyCode.L) && Input.GetKey(KeyCode.N))
             {
                 P03Plugin.Log.LogInfo("Resetting P03 Challenge Level");
                 P03AscensionSaveData.P03Data.challengeLevel = 1;

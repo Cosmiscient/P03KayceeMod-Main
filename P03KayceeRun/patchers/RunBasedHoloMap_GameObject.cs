@@ -213,6 +213,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             SpecialNodePrefabs.AddReplace(TradeChipsNodeData.TradeChipsForCards, () => GetDraftNode());
             SpecialNodePrefabs.AddReplace(UnlockAscensionItemNodeData.UnlockItemsAscension, () => GetItemNode());
             SpecialNodePrefabs.AddReplace(AscensionRecycleCardNodeData.AscensionRecycleCard, () => GetRecycleNode());
+            SpecialNodePrefabs.AddReplace(SwapCardCostNodeData.SwapCardCost, () => GetCostSwapNode());
             SpecialNodePrefabs.AddReplace(HoloMapNode.NodeDataType.BossBattle, () => GetGameObject("TempleWizardBoss", "Nodes/BossNode3D"));
 
             // Special terrain prefabs
@@ -339,6 +340,35 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             retval.SetActive(false);
 
             P03Plugin.Log.LogDebug($"Build draft node {retval}");
+            return retval;
+        }
+
+        private static GameObject GetCostSwapNode()
+        {
+            GameObject baseObject = GetGameObject("Shop", "Nodes/ShopNode3D_ShieldGenItem");
+            GameObject retval = UnityEngine.Object.Instantiate(baseObject);
+
+            // Turn this into a trade node
+            HoloMapSpecialNode nodeData = retval.GetComponentInChildren<HoloMapSpecialNode>();
+            nodeData.nodeType = SwapCardCostNodeData.SwapCardCost;
+            nodeData.repeatable = false;
+
+            GameObject card = retval.transform.Find("UnlockItemNode3D_ShieldGenerator/RendererParent/Renderer").gameObject;
+            Renderer cardRenderer = card.GetComponent<Renderer>();
+            card.transform.localScale = Vector3.zero;
+
+            GameObject resourceNode = UnityEngine.Object.Instantiate(AssetBundleManager.Prefabs["ResourceNode"], card.transform.parent);
+            resourceNode.transform.localScale = new(0.015f, 0.015f, 0.015f);
+            resourceNode.transform.localPosition = new(0f, 0f, -0.2f);
+            resourceNode.transform.localEulerAngles = new(70f, 0f, 180f);
+            Renderer resourceRenderer = resourceNode.GetComponentInChildren<Renderer>();
+            resourceRenderer.material = new(cardRenderer.material.shader);
+            resourceRenderer.material.CopyPropertiesFromMaterial(cardRenderer.material);
+            nodeData.nodeRenderers.Add(resourceRenderer);
+
+            retval.SetActive(false);
+
+            P03Plugin.Log.LogDebug($"Built swap cost ndoe node {retval}");
             return retval;
         }
 
@@ -788,7 +818,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             BuildSpecialNode(HoloMapNode.NodeDataType.BuildACard, HoloMapBlueprint.FULL_BRIDGE, Zone.Neutral, nodeParent, sceneryParent, -1.5f, 1f);
             BuildSpecialNode(HoloMapNode.NodeDataType.AttachGem, HoloMapBlueprint.FULL_BRIDGE, Zone.Neutral, nodeParent, sceneryParent, -1.5f, -1f);
             BuildSpecialNode(HoloMapNode.NodeDataType.AddCardAbility, HoloMapBlueprint.FULL_BRIDGE, Zone.Neutral, nodeParent, sceneryParent, -2.5f, 0f);
-            BuildSpecialNode(UnlockAscensionItemNodeData.UnlockItemsAscension, 0, Zone.Neutral, nodeParent, sceneryParent, 2.5f, 0f);
+
+            // Testing
+            if (P03Plugin.Instance.DebugCode.Contains("swap"))
+                BuildSpecialNode(SwapCardCostNodeData.SwapCardCost, 0, Zone.Neutral, nodeParent, sceneryParent, 2.5f, 0f);
+            else
+                BuildSpecialNode(UnlockAscensionItemNodeData.UnlockItemsAscension, 0, Zone.Neutral, nodeParent, sceneryParent, 2.5f, 0f);
 
             HoloMapArea area = retval.GetComponent<HoloMapArea>();
             area.firstEnterDialogueId = "P03FinalShopNode";

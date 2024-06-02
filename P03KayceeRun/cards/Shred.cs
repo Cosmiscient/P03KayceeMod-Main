@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
+using Infiniscryption.Spells.Patchers;
 using Infiniscryption.Spells.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
@@ -22,7 +23,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Shred";
-            info.rulebookDescription = "Shred a card from your hand to get +1 Attack (until end of turn). The shredded card counts as having died.";
+            info.rulebookDescription = "Shred a card from your hand to get +1 Attack (until end of turn). The shredded card behaves as if it died. Unkillable cards and cards Made of Stone cannot be shredded.";
             info.canStack = false;
             info.powerLevel = 2;
             info.opponentUsable = false;
@@ -81,7 +82,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         private static List<PlayableCard> ShreddableCards => PlayerHand.Instance.CardsInHand.Where(
             c => !c.Info.HasTrait(Trait.Uncuttable) &&
                  !c.HasAbility(Ability.MadeOfStone) &&
-                 !c.HasAnyOfSpecialAbilities(TargetedSpellAbility.ID, GlobalSpellAbility.ID)
+                 !c.HasAbility(Ability.DrawCopyOnDeath) &&
+                 !c.Info.IsSpell()
         ).ToList();
 
         public override IEnumerator Activate()

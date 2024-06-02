@@ -18,10 +18,6 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
         public static Ability AbilityID { get; private set; }
         public override Ability Ability => AbilityID;
 
-        private bool hasStrafed = false;
-
-        private CardSlot strafeToSlot = null;
-
         static MultiverseStrike()
         {
             var original = AbilityManager.AllAbilityInfos.AbilityByID(Ability.DoubleStrike);
