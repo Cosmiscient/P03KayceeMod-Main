@@ -34,13 +34,13 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 if (Card.Slot.opposingSlot.Card != null)
                 {
                     if (Card.Slot.opposingSlot.Card.Anim is DiskCardAnimationController)
-                        return CardLoader.GetCardByName("EmptyVessel");
+                        return CardLoader.GetCardByName(CustomCards.PILE_OF_SCRAP_EMPTY);
                     if (Card.Slot.opposingSlot.Card.Anim is PaperCardAnimationController)
                         return CardLoader.GetCardByName("PeltWolf");
                 }
 
-                if (SaveManager.SaveFile.IsPart1)
-                    return CardLoader.GetCardByName("EmptyVessel");
+                if (SaveManager.SaveFile.IsPart3)
+                    return CardLoader.GetCardByName(CustomCards.PILE_OF_SCRAP_EMPTY);
 
                 return CardLoader.GetCardByName("PeltWolf");
             }

@@ -3,6 +3,7 @@ using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+using InscryptionAPI.Card;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
@@ -28,6 +29,38 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 HealthChange = healthChange;
                 EnergyChange = energyChange;
             }
+        }
+
+        private static bool ShouldGetCardForDeckInsteadOfEvent = false;
+
+        [HarmonyPatch(typeof(MenuController), nameof(MenuController.TransitionToAscensionMenu))]
+        [HarmonyPrefix]
+        private static void EnsureGetCardForDeckResets() => ShouldGetCardForDeckInsteadOfEvent = false;
+
+        [HarmonyPatch(typeof(CreateTransformerSequencer), nameof(CreateTransformerSequencer.GetValidCardsFromDeck))]
+        [HarmonyPostfix]
+        private static void SetGetNewCardsForDeckSequence(List<CardInfo> __result)
+        {
+            if (__result != null && __result.Count == 0)
+            {
+                ShouldGetCardForDeckInsteadOfEvent = true;
+            }
+        }
+
+        [HarmonyPatch(typeof(GameFlowManager), nameof(GameFlowManager.TransitionToGameState))]
+        [HarmonyPrefix]
+        private static bool GetCardsInstead(GameFlowManager __instance)
+        {
+            if (ShouldGetCardForDeckInsteadOfEvent)
+            {
+                ShouldGetCardForDeckInsteadOfEvent = false;
+
+                var data = new CardChoiceGenerator.BeastTransformerNodeFallbackChoicesNodeData();
+                __instance.TransitionToGameState(GameState.SpecialCardSequence, data);
+
+                return false;
+            }
+            return true;
         }
 
         [HarmonyPatch(typeof(CreateTransformerSequencer), nameof(CreateTransformerSequencer.ShowDetailsOnScreen))]
@@ -254,9 +287,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             __result.mods.Add(new()
             {
+                nameReplacement = __instance.Card.Info.DisplayedNameEnglish,
                 healthAdjustment = __instance.Card.Info.Health - __result.Health,
                 energyCostAdjustment = __instance.Card.Info.EnergyCost - __result.energyCost,
                 attackAdjustment = modAbilities.Contains(Ability.PermaDeath) || modAbilities.Contains(NewPermaDeath.AbilityID) ? 1 : 0,
+                gemify = __instance.Card.IsGemified(),
                 abilities = modAbilities
             });
         }

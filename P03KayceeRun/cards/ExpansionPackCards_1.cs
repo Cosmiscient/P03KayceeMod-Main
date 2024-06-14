@@ -32,14 +32,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             wolfBot.SetEvolve(wolfBeast, 1);
 
             // Viperbeast
-            CardInfo viperBeast = CardManager.New(EXP_1_PREFIX, "ViperBeast", "V1P3R", 3, 1)
+            CardInfo viperBeast = CardManager.New(EXP_1_PREFIX, "ViperBeast", "PYTH0N", 3, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_rattler.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 5)
                 .SetCardTemple(CardTemple.Tech)
                 .AddAbilities(Ability.Transformer);
 
             // Viperbot
-            CardInfo viperBot = CardManager.New(EXP_1_PREFIX, "ViperBot", "V1P3R", 1, 1)
+            CardInfo viperBot = CardManager.New(EXP_1_PREFIX, "ViperBot", "PYTH0N", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_viperbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 5)

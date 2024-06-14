@@ -1219,7 +1219,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             retval.GetRandomPointOfInterest().upgrade = AscensionRecycleCardNodeData.AscensionRecycleCard;
 
             // Add two hidden currency nodes
-            P03Plugin.Log.LogDebug($"Adding hidden currency nodes");
+            P03Plugin.Log.LogDebug($"Adding currency nodes");
             for (int i = 0; i < 2; i++)
             {
                 HoloMapBlueprint tbp2 = retval.GetRandomPointOfInterest();
@@ -1233,6 +1233,18 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 HoloMapBlueprint tbp2 = retval.GetRandomPointOfInterest();
                 if (tbp2 != null)
                     tbp2.upgrade = REGION_DATA[cRegion].DefaultReward;
+            }
+
+            // If there are cards of every cost in the pool, add two cost change nodes
+            if (EventManagement.AllFourResourcesInPool)
+            {
+                P03Plugin.Log.LogDebug($"Adding 2 cost swap nodes");
+                for (int i = 0; i < 2; i++)
+                {
+                    HoloMapBlueprint tbp2 = retval.GetRandomPointOfInterest();
+                    if (tbp2 != null)
+                        tbp2.upgrade = SwapCardCostNodeData.SwapCardCost;
+                }
             }
 
             // Add story events data

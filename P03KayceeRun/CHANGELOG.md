@@ -1,3 +1,16 @@
+# 5.0.20
+- Enhancement: Added a new behavior for when the Skeleclock, Gemify, and Beast Transformer nodes don't have any valid cards to upgrade in your deck. The Beast Transformer node will allow you to select a random Beast card to add to your deck. The Gemify node will allow you to add a Mox Sigil to your cards. And the Skeleclock node will let you choose a card to add to your deck that has been skeleclocked.
+- Enhancement: A new upgrade node is now technically available. This node allows you to adjust the card cost of cards in your deck between energy, bones, blood, and gems. **However** this node only appears if there are already cards in the card pool with bones, blood, and gems cost. Since this does not happen in this mod, you won't see this unless you install other mods that add cards with other costs. Think of this as a "preview" feature in advance of additional work to come.
+- Bug fix: Fixed a case where the Steel Trap sigil was still giving out Wolf Pelts.
+- Bug fix: Gemfication properly copies to transforming cards.
+- Hopeful bug fix: Added some additional validation checks when fast traveling to hopefully prevent random crashes when using the waypoint machine.
+- Minor bug fix: Transforming cards will keep their original names when transforming.
+- Minor bug fix: Changed the order that abilities trigger during the final challenge boss.
+- Non functional change: The Steel Trap sigil will now give out "Junk" instead of "Empty Vessels"
+- Non functional change: V1P3R is now called PYTH0N
+- Non functional change: Updated bounty hunter art
+- Non functional change: Updated the portrait for "yarr.torrent"
+
 # 5.0.19
 - Balance Change: Gamblobot's ability now costs 2 energy instead of 3.
 - Bug Fix: Cards attacking the Experiment should no longer also attack the player.

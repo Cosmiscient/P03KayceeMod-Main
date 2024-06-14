@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>Infiniscryption.P03KayceeRun</AssemblyName>
-    <Description>P03 in Kaycee's Mod</Description>
+    <AssemblyName>Infiniscryption.P03ExpansionPack3Plugin</AssemblyName>
+    <Description>P03 KCM Expansion Pack 3</Description>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>9.0</LangVersion>
@@ -31,22 +31,22 @@
 
   <ItemGroup>
     <Reference Include="DeckEditor" Private="false">
-      <HintPath>.\lib\DeckEditor.dll</HintPath>
+      <HintPath>..\P03KayceeRun\lib\DeckEditor.dll</HintPath>
     </Reference>
     <Reference Include="InscryptionAPI" Private="false">
-      <HintPath>.\lib\InscryptionAPI.dll</HintPath>
+      <HintPath>..\P03KayceeRun\lib\InscryptionAPI.dll</HintPath>
     </Reference>
     <Reference Include="InscryptionCommunityPatch" Private="false">
-      <HintPath>.\lib\InscryptionCommunityPatch.dll</HintPath>
+      <HintPath>..\P03KayceeRun\lib\InscryptionCommunityPatch.dll</HintPath>
     </Reference>
     <Reference Include="Infiniscryption.PackManagement" Private="false">
-      <HintPath>.\lib\Infiniscryption.PackManager.dll</HintPath>
+      <HintPath>..\P03KayceeRun\lib\Infiniscryption.PackManager.dll</HintPath>
     </Reference>
     <Reference Include="Infiniscryption.Achievements" Private="false">
-      <HintPath>.\lib\Infiniscryption.Achievements.dll</HintPath>
+      <HintPath>..\P03KayceeRun\lib\Infiniscryption.Achievements.dll</HintPath>
     </Reference>
     <Reference Include="Infiniscryption.Spells" Private="false">
-      <HintPath>.\lib\Infiniscryption.Spells.dll</HintPath>
+      <HintPath>..\P03KayceeRun\lib\Infiniscryption.Spells.dll</HintPath>
     </Reference>
   </ItemGroup>
   
@@ -65,8 +65,12 @@
     <EmbeddedResource Include="$(ProjectDir)\data\*.dat" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\P03KayceeRun\P03KayceeRun.csproj" />
+  </ItemGroup>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /Y $(ProjectDir)\lib\*.dll $(TargetDir)" />
+    <Exec Command="xcopy /Y $(ProjectDir)\..\P03KayceeRun\lib\*.dll $(TargetDir)" />
     <!--
     <Exec Command="xcopy /Y $(ProjectDir)\lib\*.dll $(TargetDir)" />
     <Exec Command="$(PkgILRepack)\tools\ILRepack /out:$(ProjectDir)\Compiled\Infiniscryption.P03KayceeRun.dll $(TargetPath) $(ProjectDir)../Core/Compiled/Infiniscryption.Core.dll /lib:$(TargetDir)" />
@@ -81,7 +85,7 @@
     -->
     <Exec Command="xcopy /Y $(ProjectDir)\assets\*.wav $(ProjectDir)\package\plugins\wavs" />
     <Exec Command="xcopy /Y $(ProjectDir)\assets\*.mp3 $(ProjectDir)\package\plugins\wavs" />
-    <Exec Command="xcopy /Y $(ProjectDir)\P03AssetBundle\Assets\AssetBundles\p03assetbundle $(ProjectDir)\package\plugins\assetfiles" />
+    <!--<Exec Command="xcopy /Y $(ProjectDir)\P03AssetBundle\Assets\AssetBundles\p03assetbundle $(ProjectDir)\package\plugins\assetfiles" />-->
     <Exec Command="xcopy /Y $(TargetPath) $(ProjectDir)\package" />
     <!--
     <Exec Command="xcopy /Y $(ProjectDir)\assets\*.png $(ProjectDir)\package\BepInEx\plugins\Infiniscryption\assets" />

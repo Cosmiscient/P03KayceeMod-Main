@@ -590,6 +590,48 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         }
 
         [HarmonyPatch(typeof(HoloMapAreaManager), nameof(HoloMapAreaManager.MoveToAreaDirectly))]
+        [HarmonyPrefix]
+        private static bool EnsureProperDestination(HoloMapAreaManager __instance, Part3SaveData.WorldPosition worldPosition)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+                return true;
+
+            if (__instance.CurrentArea != null)
+            {
+                GameObject.Destroy(__instance.CurrentArea.gameObject);
+            }
+            __instance.CurrentWorld = HoloMapDataLoader.GetWorldById(worldPosition.worldId);
+            HoloMapArea holoMapArea = null;
+            try
+            {
+                holoMapArea = __instance.SpawnArea(worldPosition.gridX, worldPosition.gridY);
+            }
+            catch // This happens if the current position doesn't work
+            {
+                // We adjust the world position we were given
+                string[] idSplit = worldPosition.worldId.Split('_');
+                Zone regionCode = (Zone)Enum.Parse(typeof(Zone), idSplit[2]);
+                var startingPos = GetStartingSpace(regionCode);
+                if (worldPosition.gridX != startingPos.Item1 || worldPosition.gridY != startingPos.Item2)
+                {
+                    worldPosition.gridX = startingPos.Item1;
+                    worldPosition.gridY = startingPos.Item2;
+                    __instance.MoveToAreaDirectly(worldPosition);
+                    return false;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Somehow I'm trying to go to an invalid location. {worldPosition.worldId}, {worldPosition.gridX}, {worldPosition.gridY}");
+                }
+            }
+            holoMapArea.OnAreaEnabled();
+            PlayerMarker.Instance.SetPosition(holoMapArea.CenterPosition);
+            __instance.StartCoroutine(HoloGameMap.Instance.FlickerHoloElements(true, 2));
+            Part3SaveData.Data.playerPos = new Part3SaveData.WorldPosition(worldPosition);
+            return false;
+        }
+
+        [HarmonyPatch(typeof(HoloMapAreaManager), nameof(HoloMapAreaManager.MoveToAreaDirectly))]
         [HarmonyPostfix]
         private static void WeirdBossSavingBehavior(HoloMapAreaManager __instance)
         {

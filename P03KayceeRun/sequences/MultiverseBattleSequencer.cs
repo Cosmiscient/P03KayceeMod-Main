@@ -1018,10 +1018,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         [HarmonyPostfix]
         private static IEnumerator MultiverseTriggerHandler(IEnumerator sequence, Trigger trigger, bool triggerFacedown, object[] otherArgs)
         {
-            yield return sequence;
-
             if (MultiverseBattleSequencer.Instance == null)
+            {
+                yield return sequence;
                 yield break;
+            }
 
             List<TriggerReceiver> receivers = new();
             foreach (var universe in MultiverseBattleSequencer.Instance.MultiverseGames)
@@ -1043,6 +1044,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 if (GlobalTriggerHandler.ReceiverRespondsToTrigger(trigger, receiver, otherArgs))
                     yield return GlobalTriggerHandler.Instance.TriggerSequence(trigger, receiver, otherArgs);
             }
+
+            // Now run the original set of triggers
+            yield return sequence;
             yield break;
         }
 

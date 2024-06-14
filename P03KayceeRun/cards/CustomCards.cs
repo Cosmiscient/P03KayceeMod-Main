@@ -79,6 +79,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string GRIM_QUIL = "P03KCM_GRIM_QUIL";
 
         public const string PILE_OF_SCRAP = "P03KCM_PILE_OF_SCRAP";
+        public const string PILE_OF_SCRAP_EMPTY = "P03KCM_EMPTY_PILE_OF_SCRAP";
+
         public const string PAPERWORK_A = "P03KCM_PAPERWORK_A";
         public const string PAPERWORK_B = "P03KCM_PAPERWORK_B";
         public const string PAPERWORK_C = "P03KCM_PAPERWORK_C";
@@ -437,9 +439,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     );
                     cards.CardByName("PlasmaGunner").SetWeaponMesh(DiskCardWeapon.Revolver);
 
-                    cards.CardByName("CXformerWolf").AddMetaCategories(NewBeastTransformers);
-                    cards.CardByName("CXformerRaven").AddMetaCategories(NewBeastTransformers);
-                    cards.CardByName("CXformerAdder").AddMetaCategories(NewBeastTransformers);
+                    cards.CardByName("CXformerWolf").AddMetaCategories(NewBeastTransformers).SetCost(energyCost: 6);
+                    cards.CardByName("CXformerElk").AddMetaCategories(NewBeastTransformers).SetCost(energyCost: 6);
+                    cards.CardByName("CXformerRaven").AddMetaCategories(NewBeastTransformers).SetCost(energyCost: 6);
+                    cards.CardByName("CXformerAdder").AddMetaCategories(NewBeastTransformers).SetCost(energyCost: 4);
 
                     cards.CardByName("JuniorSage").AddAppearances(OnboardWizardCardModel.ID);
                     cards.CardByName("PracticeMage").AddAppearances(OnboardWizardCardModel.ID);
@@ -514,6 +517,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(GetTexture("portrait_scrappile.png", typeof(CustomCards).Assembly))
                 .AddSpecialAbilities(ScrapDropBehaviour.ID)
                 .SetCost(energyCost: 2)
+                .SetCardTemple(CardTemple.Tech);
+
+            CardManager.New(P03Plugin.CardPrefx, PILE_OF_SCRAP_EMPTY, "Junk", 0, 1)
+                .SetPortrait(GetTexture("portrait_scrappile.png", typeof(CustomCards).Assembly))
+                .SetCost(energyCost: 1)
                 .SetCardTemple(CardTemple.Tech);
 
             CardManager.New(P03Plugin.CardPrefx, PAPERWORK_A, "ALPHA.DOC", 0, 2)
@@ -732,7 +740,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, CONTRABAND, "yarr.torrent", 0, 1)
-                .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_captivefile"))
+                .SetPortrait(GetTexture("portrait_yarr.png", typeof(CustomCards).Assembly))
                 .AddAbilities(Ability.PermaDeath)
                 .AddAppearances(QuestCardAppearance.ID)
                 .AddTraits(QuestCard)
