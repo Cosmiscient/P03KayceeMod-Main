@@ -8,6 +8,7 @@ using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Quests;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Slots;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.BattleMods
@@ -68,7 +69,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         public IEnumerator OnBattleModSetup()
         {
-            SlotModificationManager.Instance.OverrideDefaultSlotTexture(CardTemple.Tech, PLAYER_CONVEYOR_SLOTS, OPPONENT_CONVEYOR_SLOTS);
+            SlotModificationManager.OverrideDefaultSlotTexture(CardTemple.Tech, PLAYER_CONVEYOR_SLOTS, OPPONENT_CONVEYOR_SLOTS);
             foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
             {
                 slot.ResetSlotTexture();
@@ -80,7 +81,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         public IEnumerator OnBattleModCleanup()
         {
-            SlotModificationManager.Instance.ResetDefaultSlotTexture(CardTemple.Tech);
+            SlotModificationManager.ResetDefaultSlotTexture(CardTemple.Tech);
             foreach (CardSlot slot in BoardManager.Instance.AllSlotsCopy)
             {
                 slot.ResetSlotTexture();

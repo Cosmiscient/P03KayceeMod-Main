@@ -9,6 +9,7 @@ using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Triggers;
 using UnityEngine;
+using InscryptionAPI.Slots;
 
 namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
 {

@@ -5,6 +5,7 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Slots;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -51,7 +52,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             if (oldSlot != null)
             {
-                AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, oldSlot.transform.position, .7f);
+                if (BoardManager.Instance is BoardManager3D)
+                    AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, oldSlot.transform.position, .7f);
+
                 // The fireball should play and then delete itself, but we'll destroy it after some time anyway
                 GameObject fireball = Instantiate(AssetBundleManager.Prefabs["Fire_Ball"], oldSlot.transform);
                 CustomCoroutine.WaitThenExecute(3f, delegate ()

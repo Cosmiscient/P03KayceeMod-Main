@@ -16,6 +16,7 @@ using Sirenix.Serialization.Utilities;
 using Sirenix.Utilities;
 using UnityEngine;
 using Infiniscryption.P03KayceeRun.Faces;
+using InscryptionAPI.Slots;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
 {

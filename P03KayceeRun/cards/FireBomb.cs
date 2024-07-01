@@ -9,7 +9,9 @@ using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
 using InscryptionAPI.Triggers;
+using InscryptionAPI.Slots;
 using UnityEngine;
+using GBC;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -46,92 +48,111 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return OnFire[fireLevel];
         }
 
-        public class BurningSlot : NonCardTriggerReceiver, ISlotModificationChanged
+        public abstract class BurningSlotBase : SlotModificationBehaviour
         {
+            public abstract int BurnTurns { get; }
+
             public static bool CardIsFireproof(PlayableCard card) => card.HasAbility(Ability.MadeOfStone);
 
-            public IEnumerator OnSlotModificationChanged(CardSlot slot, SlotModificationManager.ModificationType previous, SlotModificationManager.ModificationType current)
+            protected void SynchronizeFlames()
             {
-                int fireIdx = OnFire.IndexOf(current);
+                if (Slot is PixelCardSlot)
+                    return;
 
-                Transform flames = slot.transform.Find("Flames");
-                if (flames != null && fireIdx == -1)
+                Transform flames = Slot.transform.Find("Flames");
+                if (BurnTurns <= 0 && flames != null)
+                {
                     CustomCoroutine.WaitOnConditionThenExecute(() => GlobalTriggerHandler.Instance.StackSize == 0, () => Destroy(flames.gameObject));
+                }
+                else
+                {
+                    if (flames == null)
+                    {
+                        GameObject newFlames = Instantiate(AssetBundleManager.Prefabs["Fire_Parent"], Slot.transform);
+                        newFlames.name = "Flames";
+                        newFlames.transform.localPosition = new(0f, 0f, -0.95f);
+                        flames = newFlames.transform;
+                    }
 
-                if (fireIdx == -1)
-                    yield break;
+                    for (int i = 1; i <= 4; i++)
+                        flames.transform.Find($"Fire_System_{i}").gameObject.SetActive(i == BurnTurns);
+                }
+            }
 
-                GameObject newFlames = flames == null ? Instantiate(AssetBundleManager.Prefabs["Fire_Parent"], slot.transform) : flames.gameObject;
-                newFlames.name = "Flames";
-                newFlames.transform.localPosition = new(0f, 0f, -0.95f);
-
-                // This bit sets the number that shows through the flames
-                for (int i = 1; i <= 4; i++)
-                    newFlames.transform.Find($"Fire_System_{i}").gameObject.SetActive(i == fireIdx + 1);
+            public override IEnumerator Setup()
+            {
+                SynchronizeFlames();
 
                 yield return new WaitForEndOfFrame();
             }
 
-            public bool RespondsToSlotModificationChanged(CardSlot slot, SlotModificationManager.ModificationType previous, SlotModificationManager.ModificationType current) => true;
-
-            public override bool RespondsToTurnEnd(bool playerTurnEnd)
+            public override IEnumerator Cleanup(SlotModificationManager.ModificationType replacement)
             {
-                return BoardManager.Instance.GetSlots(playerTurnEnd).Any(s => s != null && OnFire.Contains(s.GetSlotModification()));
+                if (OnFire.Contains(replacement))
+                    yield break;
+
+                Transform flames = Slot.transform.Find("Flames");
+                if (flames != null)
+                    CustomCoroutine.WaitOnConditionThenExecute(() => GlobalTriggerHandler.Instance.StackSize == 0, () => Destroy(flames.gameObject));
+                yield break;
             }
+
+            public override bool RespondsToTurnEnd(bool playerTurnEnd) => BurnTurns > 0 && playerTurnEnd == Slot.IsPlayerSlot;
 
             public override IEnumerator OnTurnEnd(bool playerTurnEnd)
             {
-                List<CardSlot> slots = BoardManager.Instance.GetSlots(playerTurnEnd);
-                P03Plugin.Log.LogInfo($"About to execute fire update on {slots.Count} slots");
-                foreach (CardSlot slot in slots.Where(s => s != null))
+                if (Slot.Card != null && Slot.Card.Info != null)
                 {
-                    if (OnFire.Contains(slot.GetSlotModification()))
+                    if (!CardIsFireproof(Slot.Card))
                     {
-                        if (slot.Card != null && slot.Card.Info != null)
+                        if (Slot.Card.Info.name.Equals("Tree_Hologram") || Slot.Card.Info.name.Equals("Tree_Hologram_SnowCovered"))
                         {
-                            if (!CardIsFireproof(slot.Card))
+                            Slot.Card.SetInfo(CardLoader.GetCardByName("DeadTree"));
+                            yield return new WaitForSeconds(0.25f);
+                            if (Slot.Card.Health <= 0)
                             {
-                                if (slot.Card.Info.name.Equals("Tree_Hologram") || slot.Card.Info.name.Equals("Tree_Hologram_SnowCovered"))
-                                {
-                                    slot.Card.SetInfo(CardLoader.GetCardByName("DeadTree"));
-                                    yield return new WaitForSeconds(0.25f);
-                                    if (slot.Card.Health <= 0)
-                                    {
-                                        yield return slot.Card.Die(false);
-                                        yield return new WaitForSeconds(0.15f);
-                                    }
-                                }
-                                else
-                                {
-                                    if (slot.Card.Health == 1)
-                                        DefaultQuestDefinitions.Pyromania.IncrementQuestCounter(onlyIfActive: true);
-
-                                    yield return slot.Card.TakeDamage(1, null);
-
-                                    if (slot.Card != null && !slot.Card.Dead)
-                                    {
-                                        if (slot.Card.HasAbility(Ability.SwapStats))
-                                        {
-                                            SwapStats component = slot.Card.GetComponent<SwapStats>();
-                                            if (component != null)
-                                                yield return component.OnTakeDamage(slot.Card);
-                                        }
-                                    }
-                                    yield return new WaitForSeconds(0.15f);
-                                }
+                                yield return Slot.Card.Die(false);
+                                yield return new WaitForSeconds(0.15f);
                             }
                         }
+                        else
+                        {
+                            if (Slot.Card.Health == 1)
+                                DefaultQuestDefinitions.Pyromania.IncrementQuestCounter(onlyIfActive: true);
 
-                        int idx = OnFire.IndexOf(slot.GetSlotModification());
-                        yield return idx <= 0
-                            ? slot.SetSlotModification(SlotModificationManager.ModificationType.NoModification)
-                            : (object)slot.SetSlotModification(OnFire[idx - 1]);
+                            yield return Slot.Card.TakeDamage(1, null);
 
-                        yield return new WaitForSeconds(0.15f);
+                            if (Slot.Card != null && !Slot.Card.Dead)
+                            {
+                                if (Slot.Card.HasAbility(Ability.SwapStats))
+                                {
+                                    SwapStats component = Slot.Card.GetComponent<SwapStats>();
+                                    if (component != null)
+                                        yield return component.OnTakeDamage(Slot.Card);
+                                }
+                            }
+                            yield return new WaitForSeconds(0.15f);
+                        }
                     }
+                }
+
+                // Reduce the number of turns remaining
+                if (BurnTurns == 1)
+                {
+                    yield return Slot.SetSlotModification(SlotModificationManager.ModificationType.NoModification);
+                }
+                else
+                {
+                    yield return Slot.SetSlotModification(OnFire[BurnTurns - 2]);
+                    yield return new WaitForSeconds(0.15f);
                 }
             }
         }
+
+        public class BurningSlotFour : BurningSlotBase { public override int BurnTurns => 4; }
+        public class BurningSlotThree : BurningSlotBase { public override int BurnTurns => 3; }
+        public class BurningSlotTwo : BurningSlotBase { public override int BurnTurns => 2; }
+        public class BurningSlotOne : BurningSlotBase { public override int BurnTurns => 1; }
 
         static FireBomb()
         {
@@ -152,16 +173,37 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 TextureHelper.GetImageAsTexture("ability_fire_bomb.png", typeof(FireBomb).Assembly)
             ).Id;
 
-            OnFire = new();
-            for (int i = 1; i <= 4; i++)
+            OnFire = new()
             {
-                OnFire.Add(SlotModificationManager.New(
+                SlotModificationManager.New(
                     P03Plugin.PluginGuid,
-                    $"OnFire{i}",
-                    typeof(BurningSlot),
-                    TextureHelper.GetImageAsTexture($"card_slot_fire_{i}.png", typeof(FireBomb).Assembly)
-                ));
-            }
+                    "OnFire1",
+                    typeof(BurningSlotOne),
+                    TextureHelper.GetImageAsTexture("card_slot_fire_1.png", typeof(FireBomb).Assembly),
+                    TextureHelper.GetImageAsTexture("pixel_slot_fire_1.png", typeof(FireBomb).Assembly)
+                ),
+                SlotModificationManager.New(
+                    P03Plugin.PluginGuid,
+                    "OnFire2",
+                    typeof(BurningSlotTwo),
+                    TextureHelper.GetImageAsTexture("card_slot_fire_2.png", typeof(FireBomb).Assembly),
+                    TextureHelper.GetImageAsTexture("pixel_slot_fire_2.png", typeof(FireBomb).Assembly)
+                ),
+                SlotModificationManager.New(
+                    P03Plugin.PluginGuid,
+                    "OnFire3",
+                    typeof(BurningSlotThree),
+                    TextureHelper.GetImageAsTexture("card_slot_fire_3.png", typeof(FireBomb).Assembly),
+                    TextureHelper.GetImageAsTexture("pixel_slot_fire_3.png", typeof(FireBomb).Assembly)
+                ),
+                SlotModificationManager.New(
+                    P03Plugin.PluginGuid,
+                    "OnFire4",
+                    typeof(BurningSlotFour),
+                    TextureHelper.GetImageAsTexture("card_slot_fire_4.png", typeof(FireBomb).Assembly),
+                    TextureHelper.GetImageAsTexture("pixel_slot_fire_4.png", typeof(FireBomb).Assembly, FilterMode.Point)
+                )
+            };
 
             AbilityInfo fsInfo = ScriptableObject.CreateInstance<AbilityInfo>();
             fsInfo.rulebookName = "Flame Stoker";
@@ -185,7 +227,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public static IEnumerator SetSlotOnFireBasic(int fireLevel, CardSlot targetSlot, CardSlot attackingSlot)
         {
             GameObject fireball = Instantiate(AssetBundleManager.Prefabs["Fire_Ball"], targetSlot.transform);
-            AudioController.Instance.PlaySound3D("fireball", MixerGroup.TableObjectsSFX, fireball.transform.position, 0.5f);
+
+            if (BoardManager.Instance is BoardManager3D)
+                AudioController.Instance.PlaySound3D("fireball", MixerGroup.TableObjectsSFX, fireball.transform.position, 0.5f);
+
             CustomCoroutine.WaitThenExecute(3f, delegate ()
             {
                 if (fireball != null)

@@ -5,6 +5,7 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Slots;
 using Pixelplacement;
 using Sirenix.Serialization.Utilities;
 using UnityEngine;
@@ -56,7 +57,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             yield return new WaitForSeconds(speed);
 
-            AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, target.transform.position, .7f);
+            if (BoardManager.Instance is BoardManager3D)
+                AudioController.Instance.PlaySound3D("molotov", MixerGroup.TableObjectsSFX, target.transform.position, .7f);
 
             target.Card?.Anim.PlayHitAnimation();
 
@@ -85,10 +87,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public static IEnumerator BombCard(CardSlot target, PlayableCard attacker, int level = 2, float speed = 0.35f)
         {
-            yield return ThrowMolotov(target, attacker, speed);
-            yield return new WaitForSeconds(speed * 2f);
-            yield return target.SetSlotModification(FireBomb.GetFireLevel(level, target, attacker));
-            yield return new WaitForSeconds(speed / 2f);
+            if (BoardManager.Instance is BoardManager3D)
+            {
+                yield return ThrowMolotov(target, attacker, speed);
+                yield return new WaitForSeconds(speed * 2f);
+                yield return target.SetSlotModification(FireBomb.GetFireLevel(level, target, attacker));
+                yield return new WaitForSeconds(speed / 2f);
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.1f);
+                yield return target.SetSlotModification(FireBomb.GetFireLevel(level, target, attacker));
+            }
             yield break;
         }
 
@@ -96,16 +106,18 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
         public override IEnumerator OnPreDeathAnimation(bool wasSacrifice)
         {
-            Card.Anim.LightNegationEffect();
             List<CardSlot> adjSlots = BoardManager.Instance.GetAdjacentSlots(Card.Slot);
             if (adjSlots.Count > 0 && adjSlots[0].Index < Card.Slot.Index)
             {
+                Card.Anim.StrongNegationEffect();
                 yield return BombCard(adjSlots[0], Card);
                 adjSlots.RemoveAt(0);
             }
+            Card.Anim.StrongNegationEffect();
             yield return BombCard(Card.Slot.opposingSlot, Card);
             if (adjSlots.Count > 0 && adjSlots[0].Index > Card.Slot.Index)
             {
+                Card.Anim.StrongNegationEffect();
                 yield return BombCard(adjSlots[0], Card);
             }
         }

@@ -4,6 +4,7 @@ using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Slots;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -14,22 +15,17 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
-        public class SolarHeartSlot : NonCardTriggerReceiver, ISlotModificationChanged
+        public class SolarHeartSlot : SlotModificationBehaviour
         {
-            public IEnumerator OnSlotModificationChanged(CardSlot slot, SlotModificationManager.ModificationType previous, SlotModificationManager.ModificationType current)
+            public override IEnumerator Setup()
             {
-                if (current == SlotModID)
-                {
-                    if (slot.Card != null && !slot.WithinConduitCircuit)
-                        slot.Card.RenderCard();
+                if (Slot.Card != null && !Slot.WithinConduitCircuit)
+                    Slot.Card.RenderCard();
 
-                    slot.SetWithinConduitCircuit(true);
+                Slot.SetWithinConduitCircuit(true);
 
-                    yield return new WaitForEndOfFrame();
-                }
+                yield return new WaitForEndOfFrame();
             }
-
-            public bool RespondsToSlotModificationChanged(CardSlot slot, SlotModificationManager.ModificationType previous, SlotModificationManager.ModificationType current) => true;
         }
 
         public static SlotModificationManager.ModificationType SlotModID { get; private set; }
@@ -56,8 +52,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             SlotModID = SlotModificationManager.New(
                 P03Plugin.PluginGuid,
                 "SolarHeart",
-                typeof(SolarHeartSlot),
-                null
+                typeof(SolarHeartSlot)
             );
         }
 

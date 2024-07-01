@@ -5,6 +5,7 @@ using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Slots;
 using InscryptionAPI.Triggers;
 using UnityEngine;
 
@@ -15,18 +16,11 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
-        public class FullyLoadedSlot : NonCardTriggerReceiver, IPassiveAttackBuff
+        public class FullyLoadedSlot : SlotModificationBehaviour, IPassiveAttackBuff
         {
             public int GetPassiveAttackBuff(PlayableCard target)
             {
-                if (GoobertCenterCardBehaviour.Instances.Count == 0)
-                    return target.Slot.GetSlotModification() == SlotModID ? 1 : 0;
-
-                var gcb = target.GetComponent<GoobertCenterCardBehaviour>();
-                if (gcb == null)
-                    return target.Slot.GetSlotModification() == SlotModID ? 1 : 0;
-
-                return gcb.AllSlots.Where(s => s.GetSlotModification() == SlotModID).Count();
+                return Slot.Card == target ? 1 : 0;
             }
         }
 
@@ -55,7 +49,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 P03Plugin.PluginGuid,
                 "FullyLoaded",
                 typeof(FullyLoadedSlot),
-                TextureHelper.GetImageAsTexture("cardslot_fully_loaded.png", typeof(FullyLoaded).Assembly)
+                TextureHelper.GetImageAsTexture("cardslot_fully_loaded.png", typeof(FullyLoaded).Assembly),
+                TextureHelper.GetImageAsTexture("pixel_slot_fully_loaded.png", typeof(FullyLoaded).Assembly)
             );
         }
 

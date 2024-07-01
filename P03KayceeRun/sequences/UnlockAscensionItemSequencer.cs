@@ -124,10 +124,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             return true;
         }
 
+        public static List<string> ValidItems => new() { "Battery", ShockerItem.ItemData.name, "ShieldGenerator", LifeItem.ItemData.name, "BombRemote", WiseclockItem.ItemData.name, UfoItem.ItemData.name, RifleItem.ItemData.name };
+
         private List<ConsumableItemData> GetItems()
         {
             int randomSeed = P03AscensionSaveData.RandomSeed;
-            List<string> items = new() { "Battery", ShockerItem.ItemData.name, "ShieldGenerator", LifeItem.ItemData.name, "BombRemote", WiseclockItem.ItemData.name, UfoItem.ItemData.name, RifleItem.ItemData.name };
+            List<string> items = new(ValidItems);
             while (items.Count > 3)
                 items.RemoveAt(SeededRandom.Range(0, items.Count, randomSeed++));
 

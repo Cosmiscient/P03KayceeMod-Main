@@ -4,7 +4,6 @@ using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
-using Infiniscryption.P03ExpansionPack3;
 using UnityEngine;
 
 namespace Infiniscryption.P03ExpansionPack3.Sigils
@@ -38,6 +37,9 @@ namespace Infiniscryption.P03ExpansionPack3.Sigils
         public override IEnumerator OnSlotTargetedForAttack(CardSlot slot, PlayableCard attacker)
         {
             CardModificationInfo newShieldMod = new(Ability.DeathShield);
+            slot.Card.AddTemporaryMod(newShieldMod);
+            yield return new WaitForSeconds(0.2f);
+            yield return LearnAbility();
             yield break;
         }
     }

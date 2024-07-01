@@ -4,6 +4,7 @@ using System.Linq;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Slots;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
@@ -13,57 +14,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
-        public static readonly Dictionary<SlotModificationManager.ModificationType, Ability> SlotIDs = new();
+        public static readonly Dictionary<Ability, SlotModificationManager.ModificationType> SlotIDs = new();
 
-        public static List<Ability> AllGemAbilities = new() { Ability.GainGemTriple, Ability.GainGemOrange, Ability.GainGemGreen, Ability.GainGemBlue };
+        public static readonly List<Ability> AllGemAbilities = new() { Ability.GainGemTriple, Ability.GainGemOrange, Ability.GainGemGreen, Ability.GainGemBlue };
 
-        public class MagicDustSlot : NonCardTriggerReceiver
-        {
-            public override bool RespondsToOtherCardAssignedToSlot(PlayableCard otherCard) => true;
-
-            private const string MOD_ID = "MAGIC_DUST_ID";
-
-            private static CardModificationInfo GetGemMod(PlayableCard card, bool create = false)
-            {
-                card.temporaryMods ??= new();
-                CardModificationInfo mod = card.TemporaryMods.FirstOrDefault(m => m != null && !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(MOD_ID));
-                if (mod == null && create)
-                    mod = new() { singletonId = MOD_ID };
-
-                return mod;
-            }
-
-            public override IEnumerator OnOtherCardAssignedToSlot(PlayableCard otherCard)
-            {
-                if (otherCard == null || otherCard.Slot == null)
-                    yield break;
-
-                GoobertCenterCardBehaviour gcb = otherCard.GetComponent<GoobertCenterCardBehaviour>();
-                List<SlotModificationManager.ModificationType> slotMods =
-                    gcb == null ? new() { otherCard.Slot.GetSlotModification() }
-                           : gcb.AllSlots.Select(s => s.GetSlotModification()).ToList();
-
-                slotMods = slotMods.Where(s => SlotIDs.Keys.Contains(s)).ToList();
-                if (slotMods.Count > 0)
-                {
-                    CardModificationInfo mod = GetGemMod(otherCard, true);
-                    mod.abilities = slotMods.Select(s => SlotIDs[s]).ToList();
-                    otherCard.AddTemporaryMod(mod);
-                    ResourcesManager.Instance.ForceGemsUpdate();
-                }
-                else
-                {
-                    CardModificationInfo mod = GetGemMod(otherCard);
-                    if (mod != null)
-                    {
-                        otherCard.RemoveTemporaryMod(mod);
-                        ResourcesManager.Instance.ForceGemsUpdate();
-                    }
-                }
-            }
-        }
-
-        public static SlotModificationManager.ModificationType SlotModID { get; private set; }
+        public class TripleGemSlot : SlotModificationGainAbilityBehaviour { protected override Ability AbilityToGain => Ability.GainGemTriple; }
+        public class OrangeGemSlot : SlotModificationGainAbilityBehaviour { protected override Ability AbilityToGain => Ability.GainGemOrange; }
+        public class GreenGemSlot : SlotModificationGainAbilityBehaviour { protected override Ability AbilityToGain => Ability.GainGemGreen; }
+        public class BlueGemSlot : SlotModificationGainAbilityBehaviour { protected override Ability AbilityToGain => Ability.GainGemBlue; }
 
         static MagicDust()
         {
@@ -83,33 +41,41 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 TextureHelper.GetImageAsTexture("ability_magic_dust.png", typeof(MagicDust).Assembly)
             ).Id;
 
-            SlotIDs[SlotModificationManager.New(
+            SlotIDs[Ability.GainGemBlue] =
+                SlotModificationManager.New(
                 P03Plugin.PluginGuid,
-                "BlueGemslot",
-                typeof(MagicDustSlot),
-                TextureHelper.GetImageAsTexture("cardslot_blue_gem.png", typeof(MagicDust).Assembly)
-            )] = Ability.GainGemBlue;
+                "BlueGemSlot",
+                typeof(BlueGemSlot),
+                TextureHelper.GetImageAsTexture("cardslot_blue_gem.png", typeof(MagicDust).Assembly),
+                TextureHelper.GetImageAsTexture("pixel_slot_blue_gem.png", typeof(MagicDust).Assembly)
+            );
 
-            SlotIDs[SlotModificationManager.New(
+            SlotIDs[Ability.GainGemOrange] =
+                SlotModificationManager.New(
                 P03Plugin.PluginGuid,
-                "GreenGemslot",
-                typeof(MagicDustSlot),
-                TextureHelper.GetImageAsTexture("cardslot_green_gem.png", typeof(MagicDust).Assembly)
-            )] = Ability.GainGemGreen;
+                "OrangeGemSlot",
+                typeof(OrangeGemSlot),
+                TextureHelper.GetImageAsTexture("cardslot_orange_gem.png", typeof(MagicDust).Assembly),
+                TextureHelper.GetImageAsTexture("pixel_slot_orange_gem.png", typeof(MagicDust).Assembly)
+            );
 
-            SlotIDs[SlotModificationManager.New(
+            SlotIDs[Ability.GainGemGreen] =
+                SlotModificationManager.New(
                 P03Plugin.PluginGuid,
-                "OrangeGemslot",
-                typeof(MagicDustSlot),
-                TextureHelper.GetImageAsTexture("cardslot_orange_gem.png", typeof(MagicDust).Assembly)
-            )] = Ability.GainGemOrange;
+                "GreenGemSlot",
+                typeof(GreenGemSlot),
+                TextureHelper.GetImageAsTexture("cardslot_green_gem.png", typeof(MagicDust).Assembly),
+                TextureHelper.GetImageAsTexture("pixel_slot_green_gem.png", typeof(MagicDust).Assembly)
+            );
 
-            SlotIDs[SlotModificationManager.New(
+            SlotIDs[Ability.GainGemTriple] =
+                SlotModificationManager.New(
                 P03Plugin.PluginGuid,
-                "TripleGemslot",
-                typeof(MagicDustSlot),
-                TextureHelper.GetImageAsTexture("cardslot_triple_gem.png", typeof(MagicDust).Assembly)
-            )] = Ability.GainGemTriple;
+                "TripleGemSlot",
+                typeof(TripleGemSlot),
+                TextureHelper.GetImageAsTexture("cardslot_triple_gem.png", typeof(MagicDust).Assembly),
+                TextureHelper.GetImageAsTexture("pixel_slot_all_gem.png", typeof(MagicDust).Assembly)
+            );
         }
 
         private List<Ability> CardGemAbilities => new(AllGemAbilities.Where(Card.HasAbility));
@@ -129,7 +95,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             Ability target = CardGemAbilities[0];
 
             if (oldSlot != null)
-                yield return oldSlot.SetSlotModification(SlotIDs.First(kvp => kvp.Value == target).Key);
+                yield return oldSlot.SetSlotModification(SlotIDs[target]);
             yield break;
         }
 

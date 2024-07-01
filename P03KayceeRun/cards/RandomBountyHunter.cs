@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -61,6 +62,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void UpdatedDisplayNameTheHardWay(ref CardInfo __instance, ref string __result)
         {
+            if (!P03AscensionSaveData.IsP03Run)
+                return;
+
             if (__instance.HasAbility(AbilityID))
             {
                 if (TurnManager.Instance != null && !TurnManager.Instance.GameEnded)
@@ -111,7 +115,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         }
                     }
                 }
-                P03Plugin.Log.LogDebug($"RBH Card Name is {__result}");
             }
         }
     }

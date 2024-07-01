@@ -5,6 +5,7 @@ using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Cards;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Slots;
 using Pixelplacement;
 using UnityEngine;
 

@@ -116,7 +116,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             }
         }
 
-        internal static int MaxNumberOfItems => 3 - AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.LessConsumables);
+        public static int MaxNumberOfItems => 3 - AscensionSaveData.Data.GetNumChallengesOfTypeActive(AscensionChallenge.LessConsumables);
 
         private static string SaveKey
         {
