@@ -54,7 +54,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 P03Plugin.PluginGuid,
                 info,
                 typeof(FilePaperworkStamp),
-                TextureHelper.GetImageAsTexture("ability_activatedstamppaperwork.png", typeof(TakeDamageSigil).Assembly)
+                TextureHelper.GetImageAsTexture("ability_activatedstamppaperwork.png", typeof(FilePaperworkStamp).Assembly)
             ).Id;
         }
 

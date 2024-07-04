@@ -8,6 +8,7 @@ using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Cards.Multiverse;
 using Infiniscryption.P03KayceeRun.Faces;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
@@ -31,6 +32,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             OpponentCombat = 8,
             OpponentEnd = 9,
             AfterOpponent = 10
+        }
+
+        static MultiverseGameState()
+        {
+            MultiverseGameState.StateRestored += (state) => SapphirePower.UpdateCount();
         }
 
         private static GameObject _offboardHandParent;

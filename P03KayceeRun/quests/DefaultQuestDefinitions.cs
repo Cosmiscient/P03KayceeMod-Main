@@ -10,6 +10,7 @@ using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 using Infiniscryption.P03KayceeRun.Encounters;
+using Infiniscryption.P03SigilLibrary.Sigils;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {
@@ -299,12 +300,18 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
             // Pyromania
             Pyromania = QuestManager.Add(P03Plugin.PluginGuid, "Pyromania").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Pyromaniac, CompositeFigurine.FigurineType.Enchantress));
-            Pyromania.SetGenerateCondition(() => Part3SaveData.Data.deck.Cards.Where(c => c.Abilities.Any(a => AbilitiesUtil.GetInfo(a).metaCategories.Contains(FireBomb.FlamingAbility))).Count() >= 2)
+            Pyromania.SetGenerateCondition(() => Part3SaveData.Data.deck.Cards.Where(c => c.Abilities.Any(a => AbilitiesUtil.GetInfo(a).metaCategories.Contains(BurningSlotBase.FlamingAbility))).Count() >= 2)
                      .AddDialogueState("BURN BABY BURN", "P03PyroQuestStart")
                      .AddDefaultActiveState("BURN BABY BURN", "P03PyroQuestInProgress")
                      .WaitForQuestCounter(BURNED_CARDS)
                      .AddDialogueState("SO SATISFYING...", "P03PyroQuestComplete")
                      .AddGainCardReward(ExpansionPackCards_2.FLAME_CHARMER_CARD);
+
+            BurningSlotBase.FireDamageTrigger += delegate (int damage, PlayableCard card)
+            {
+                if (card.Health == 1)
+                    DefaultQuestDefinitions.Pyromania.IncrementQuestCounter(onlyIfActive: true);
+            };
 
             // Conveyors
             Conveyors = QuestManager.Add(P03Plugin.PluginGuid, "Conveyors").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Steambot, CompositeFigurine.FigurineType.Robot));

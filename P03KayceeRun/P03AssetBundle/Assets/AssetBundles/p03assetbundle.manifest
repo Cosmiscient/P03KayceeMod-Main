@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 2066439874
+CRC: 1456498934
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: e7c43ae8053922c972acab1b2815b025
+    Hash: 921ea242675895030f0f11114319f704
   TypeTreeHash:
     serializedVersion: 2
     Hash: 10caaafd0ad3fcdc9870467d863128a4
@@ -45,7 +45,6 @@ Assets:
 - Assets/Prefabs/Clock3.prefab
 - Assets/Prefabs/Question.prefab
 - Assets/Textures/Tractorbeam.mat
-- Assets/Prefabs/Molotov.prefab
 - Assets/Effects/Cyberspace_Particles.prefab
 - Assets/Prefabs/UFO.prefab
 - Assets/Textures/UFO_Black_Down.mat
@@ -58,7 +57,6 @@ Assets:
 - Assets/Prefabs/latcher-claw.prefab
 - Assets/Models/FingerGun.obj
 - Assets/Effects/Fire_Flamethrower.prefab
-- Assets/Effects/Fire_Ball.prefab
 - Assets/Effects/Fire_Glow.mat
 - Assets/Shaders/StickerStencilApply.shader
 - Assets/Models/bottle.fbx
@@ -76,7 +74,6 @@ Assets:
 - Assets/Prefabs/BotopiaDummy.prefab
 - Assets/Shaders/MultiplyProjectorShader.shader
 - Assets/Effects/Fire_Particles.png
-- Assets/Effects/Fire_Parent.prefab
 - Assets/Textures/UFO_Base.mat
 - Assets/Models/syringe_gun_low.fbx
 - Assets/Effects/UFO_Particles.png

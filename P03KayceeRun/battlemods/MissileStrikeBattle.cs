@@ -5,6 +5,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using Pixelplacement;
 using UnityEngine;
 

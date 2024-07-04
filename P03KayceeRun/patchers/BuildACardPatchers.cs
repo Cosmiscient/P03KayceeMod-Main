@@ -3,6 +3,7 @@ using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using TMPro;
 using UnityEngine;
 

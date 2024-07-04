@@ -3,8 +3,7 @@ using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03ExpansionPack3.Sigils;
-using Infiniscryption.Spells.Sigils;
-using Infiniscryption.P03ExpansionPack3.Managers;
+using Infiniscryption.P03SigilLibrary.Sigils;
 
 namespace Infiniscryption.P03ExpansionPack3
 {
@@ -90,20 +89,12 @@ namespace Infiniscryption.P03ExpansionPack3
                 .AddAbilities(Ability.ActivatedDealDamage, ActivatedStrafeSelf.AbilityID);
 
             // Battery Mage
-            CardManager.New(P03Pack3Plugin.CardPrefix, "BatteryMage", "Battery Mage", 1, 1)
+            CardManager.New(P03Pack3Plugin.CardPrefix, "GreenEnergyBot", "Green Energy Bot", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_battery_mage.png", typeof(Cards).Assembly))
                 //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
                 .SetCost(gemsCost: new() { GemType.Green })
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(Ability.GainBattery, Ability.GemDependant);
-
-            // Blast
-            CardManager.New(P03Pack3Plugin.CardPrefix, "BLAST", "Blast!", 0, 0)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_blast.png", typeof(Cards).Assembly))
-                .SetCost(energyCost: 2)
-                .SetTargetedSpell()
-                .SetSpellAppearanceP03()
-                .AddAbilities(CatchFire.AbilityID);
 
             // Mortar Droid
             CardManager.New(P03Pack3Plugin.CardPrefix, "MortarDroid", "Mortar Droid", 1, 1)

@@ -4,6 +4,7 @@ using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Sequences;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 

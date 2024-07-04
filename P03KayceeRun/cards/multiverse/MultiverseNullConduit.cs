@@ -30,6 +30,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             info.passive = original.passive;
             info.conduit = original.conduit;
             info.conduitCell = original.conduitCell;
+            info.hasColorOverride = true;
+            info.colorOverride = Color.black;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, CustomCards.MultiverseAbility };
 
             AbilityID = AbilityManager.Add(

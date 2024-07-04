@@ -9,6 +9,8 @@ using Infiniscryption.P03KayceeRun.Cards.Multiverse;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03SigilLibrary.Sigils;
+using Infiniscryption.Spells.Patchers;
 using Infiniscryption.Spells.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
@@ -219,6 +221,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     EnergyConduitAppearnace.ID
                 };
             }
+
+            if (cardToModify.IsSpell())
+                cardToModify.SetSpellAppearanceP03();
         }
 
         private static void SpellCommand(StatIconManager.FullStatIcon info, bool revert)
@@ -426,6 +431,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     cards.CardByName("TechMoxTriple").AddMetaCategories(WizardRegion);
                     cards.CardByName("EnergyRoller").AddMetaCategories(CardMetaCategory.Rare);
                     cards.CardByName("Librarian").AddAppearances(LibrarianSizeTitle.ID);
+                    cards.CardByName("P03SIG_Salmon")?.SetWeaponMesh(DiskCardWeapon.Fish);
                     cards.CardByName("AboveCurve").SetWeaponMesh(
                         "p03kcm/prefabs/FingerGun",
                         localPosition: new Vector3(0f, -0.66f, 0f),
@@ -519,11 +525,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 2)
                 .SetCardTemple(CardTemple.Tech);
 
-            CardManager.New(P03Plugin.CardPrefx, PILE_OF_SCRAP_EMPTY, "Junk", 0, 1)
-                .SetPortrait(GetTexture("portrait_scrappile.png", typeof(CustomCards).Assembly))
-                .SetCost(energyCost: 1)
-                .SetCardTemple(CardTemple.Tech);
-
             CardManager.New(P03Plugin.CardPrefx, PAPERWORK_A, "ALPHA.DOC", 0, 2)
                 .SetPortrait(GetTexture("portrait_paperwork.png", typeof(CustomCards).Assembly))
                 .AddSpecialAbilities(FilePaperworkInOrder.ID)
@@ -583,14 +584,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddTraits(QuestCard)
                 .temple = CardTemple.Tech;
 
-            CardManager.New(P03Plugin.CardPrefx, CODE_BLOCK, "Code Snippet", 1, 2)
-                .SetPortrait(GetTexture("portrait_code.png", typeof(CustomCards).Assembly))
-                .AddTraits(Programmer.CodeTrait)
-                .temple = CardTemple.Tech;
-
             CardManager.New(P03Plugin.CardPrefx, CODE_BUG, "Bug", 2, 1)
                 .SetPortrait(GetTexture("portrait_bug.png", typeof(CustomCards).Assembly))
-                .AddTraits(Programmer.CodeTrait)
                 .AddAbilities(Ability.Brittle)
                 .temple = CardTemple.Tech;
 
@@ -874,7 +869,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             goobertCardBase.AddAppearances(GooDiscCardAppearance.ID);
             goobertCardBase.AddSpecialAbilities(GoobertCenterCardBehaviour.AbilityID);
             goobertCardBase.AddAbilities(TripleCardStrike.AbilityID);
-            goobertCardBase.AddTraits(Unrotateable, Trait.Uncuttable);
+            goobertCardBase.AddTraits(Unrotateable, Trait.Uncuttable, MirrorImage.Uncopyable);
             goobertCardBase.temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, SKELETON_LORD, "Skeleton Master", 0, 4)

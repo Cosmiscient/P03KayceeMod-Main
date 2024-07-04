@@ -17,7 +17,7 @@ namespace Infiniscryption.P03KayceeRun.CustomRules
 
         public static Dictionary<CardTemple, string> SalmonNames = new()
         {
-            { CardTemple.Tech, $"{ExpansionPackCards_1.EXP_1_PREFIX}_Salmon" },
+            { CardTemple.Tech, "P03SIG_Salmon" },
             { CardTemple.Undead, $"{ExpansionPackCards_1.EXP_1_PREFIX}_Salmon_Undead" },
             { CardTemple.Wizard, $"{ExpansionPackCards_1.EXP_1_PREFIX}_Salmon_Wizard" },
             { CardTemple.Nature, $"{ExpansionPackCards_1.EXP_1_PREFIX}_Salmon_Nature" }

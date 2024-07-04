@@ -3,6 +3,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.Achievements;
 using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Saves;
 
@@ -251,6 +252,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 grp.ID,
                 TextureHelper.GetImageAsTexture("achievement_multiverse.png", typeof(P03AchievementManagement).Assembly)
             ).ID;
+
+            NewPermaDeath.PermadeathTrigger += delegate (Card card)
+            {
+                if (card.Info.HasTrait(CustomCards.QuestCard))
+                    AchievementManager.Unlock(P03AchievementManagement.KILL_QUEST_CARD);
+            };
         }
 
         private class CardBattleAchievementMonitor : Singleton<CardBattleAchievementMonitor>

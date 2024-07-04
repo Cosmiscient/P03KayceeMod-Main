@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using UnityEngine;
 
@@ -21,6 +22,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         static ReplicaAppearanceBehavior()
         {
             ID = CardAppearanceBehaviourManager.Add(P03Plugin.PluginGuid, "ReplicaAppearanceBehavior", typeof(EnergyConduitAppearnace)).Id;
+            AbilityIconBehaviours.AddGemReRenderAppearance(ID);
         }
 
         [HarmonyPatch(typeof(CardDisplayer3D), nameof(CardDisplayer3D.DisplayInfo))]

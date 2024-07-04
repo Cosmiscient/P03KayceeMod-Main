@@ -1,7 +1,11 @@
 ManifestFileVersion: 0
-CRC: 2821004976
+CRC: 437168766
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
       Name: p03assetbundle
       Dependencies: {}
+    Info_1:
+      Name: p03sigilbundle
+      Dependencies:
+        Dependency_0: p03assetbundle

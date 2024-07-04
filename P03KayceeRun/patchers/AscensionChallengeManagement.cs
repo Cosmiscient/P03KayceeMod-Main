@@ -9,6 +9,7 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Items;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Ascension;
 using InscryptionAPI.Card;
 using InscryptionAPI.Guid;

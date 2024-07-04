@@ -10,12 +10,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <DefaultItemExcludes>$(DefaultItemExcludes);P03AssetBundle\**\*.*</DefaultItemExcludes>
-    <NoWarn></NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <NoWarn>Publicizer001</NoWarn>
-    <NoWarn>Harmony003</NoWarn>
+    <NoWarn>Publicizer001,Harmony003</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,6 +43,10 @@
     <Reference Include="Infiniscryption.Spells" Private="false">
       <HintPath>.\lib\Infiniscryption.Spells.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\P03SigilLibrary\P03SigilLibrary.csproj" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
