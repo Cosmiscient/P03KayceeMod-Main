@@ -20,7 +20,7 @@ namespace Infiniscryption.P03KayceeRun
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency("cyantist.inscryption.api")]
     [BepInDependency("zorro.inscryption.infiniscryption.achievements")]
-    [BepInDependency("zorro.inscryption.infiniscryption.spells")]
+    [BepInDependency("zorro.inscryption.infiniscryption.p03sigillibrary")]
     public class P03Plugin : BaseUnityPlugin
     {
 
@@ -88,7 +88,7 @@ namespace Infiniscryption.P03KayceeRun
 
             Initialized = true;
 
-            Logger.LogInfo($"Plugin {PluginName} is loaded!");
+            Logger.LogInfo($"Plugin {PluginName} is loaded and ready to go!");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

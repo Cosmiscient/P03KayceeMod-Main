@@ -10,12 +10,12 @@ using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
 {
-    public class ActivatedDrawBlast : ActivatedAbilityBehaviour, IFuelCostActivation
+    public class ActivatedDrawBlast : FuelActivatedAbilityBehaviour
     {
         public static Ability AbilityID { get; private set; }
         public override Ability Ability => AbilityID;
 
-        public int FuelCost => 1;
+        public override int FuelCost => 1;
 
         static ActivatedDrawBlast()
         {
@@ -37,7 +37,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             ).Id;
         }
 
-        public override IEnumerator Activate()
+        public override IEnumerator ActivateAfterSpendFuel()
         {
             yield return PreSuccessfulTriggerSequence();
             if (ViewManager.Instance.CurrentView != View.Default)

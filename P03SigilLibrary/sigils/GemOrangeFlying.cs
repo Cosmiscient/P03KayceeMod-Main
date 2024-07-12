@@ -18,7 +18,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Orange Mox Airborne";
-            info.rulebookDescription = "If you control an Orange Mox, this card will ignore opposing cards and strike an opponent directly.";
+            info.rulebookDescription = "If you control an Orange Mox, [creature] will ignore opposing cards and strike an opponent directly.";
             info.canStack = true;
             info.powerLevel = 1;
             info.opponentUsable = true;

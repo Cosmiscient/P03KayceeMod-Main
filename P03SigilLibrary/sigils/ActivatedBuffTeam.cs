@@ -11,19 +11,12 @@ using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
 {
-    public class ActivatedBuffTeam : ActivatedAbilityBehaviour, IPassiveAttackBuff, IFuelCostActivation
+    public class ActivatedBuffTeam : FuelActivatedAbilityBehaviour, IPassiveAttackBuff
     {
         public static Ability AbilityID { get; private set; }
         public override Ability Ability => AbilityID;
 
-        private static bool hasActivated;
-
-        public int FuelCost => 1;
-
-        public override bool CanActivate()
-        {
-            return !hasActivated;
-        }
+        public override int FuelCost => 1;
 
         static ActivatedBuffTeam()
         {
@@ -45,31 +38,21 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             ).Id;
         }
 
-        public override bool RespondsToUpkeep(bool playerUpkeep) => true;
-
-        public override IEnumerator OnUpkeep(bool playerUpkeep)
-        {
-            hasActivated = false;
-            if (!playerUpkeep && !Card.OpponentCard)
-                yield return Activate();
-        }
-
         public override bool RespondsToOtherCardResolve(PlayableCard otherCard) => otherCard == this.Card && this.Card.OpponentCard;
 
         public override IEnumerator OnOtherCardResolve(PlayableCard otherCard)
         {
-            yield return Activate();
+            yield return OnActivatedAbility();
         }
 
-        public override IEnumerator Activate()
+        public override IEnumerator ActivateAfterSpendFuel()
         {
-            hasActivated = true;
             yield return LearnAbility(0.1f);
         }
 
         public int GetPassiveAttackBuff(PlayableCard target)
         {
-            return hasActivated && target.IsPlayerCard() == this.Card.IsPlayerCard() ? 1 : 0;
+            return this.hasActivatedThisTurn && target.IsPlayerCard() == this.Card.IsPlayerCard() ? 1 : 0;
         }
     }
 }

@@ -55,11 +55,24 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     matchCount += playableCard.EligibleForGemBonus(GemType.Green) ? 1 : 0;
                     matchCount += playableCard.EligibleForGemBonus(GemType.Orange) ? 2 : 0;
                 }
-                else
+                else if (key.ToLowerInvariant().Equals("bleene"))
                 {
                     matchCount += playableCard.EligibleForGemBonus(GemType.Blue) ? 1 : 0;
                     matchCount += playableCard.EligibleForGemBonus(GemType.Green) ? 2 : 0;
                 }
+                else if (key.ToLowerInvariant().Equals("blue"))
+                {
+                    matchCount += playableCard.EligibleForGemBonus(GemType.Blue) ? 2 : 1;
+                }
+                else if (key.ToLowerInvariant().Equals("green"))
+                {
+                    matchCount += playableCard.EligibleForGemBonus(GemType.Green) ? 2 : 1;
+                }
+                else if (key.ToLowerInvariant().Equals("orange"))
+                {
+                    matchCount += playableCard.EligibleForGemBonus(GemType.Orange) ? 2 : 1;
+                }
+
 
                 if (matchCount == 0)
                     decals.Add(CustomCards.DUMMY_DECAL);

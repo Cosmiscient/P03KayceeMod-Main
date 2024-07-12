@@ -93,25 +93,5 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 fuelDecal.enabled = false;
             }
         }
-
-        [HarmonyPatch(typeof(ActivatedAbilityBehaviour), nameof(ActivatedAbilityBehaviour.CanAfford))]
-        [HarmonyPostfix]
-        private static void CanAffordFuel(ActivatedAbilityBehaviour __instance, ref bool __result)
-        {
-            if (__instance is IFuelCostActivation ifc)
-                __result = __result && __instance.Card.GetCurrentFuel() >= ifc.FuelCost;
-        }
-
-        [HarmonyPatch(typeof(ActivatedAbilityBehaviour), nameof(ActivatedAbilityBehaviour.OnActivatedAbility))]
-        [HarmonyPostfix]
-        private static IEnumerator SpendFuelOnActivated(IEnumerator sequence, ActivatedAbilityBehaviour __instance)
-        {
-            if (__instance is IFuelCostActivation ifc)
-                if (__instance.CanAfford() && __instance.CanActivate() && ifc.FuelCost > 0)
-                    if (!__instance.Card.TrySpendFuel(ifc.FuelCost))
-                        yield break;
-
-            yield return sequence;
-        }
     }
 }

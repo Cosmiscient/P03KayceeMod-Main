@@ -8,13 +8,14 @@ using HarmonyLib;
 using Infiniscryption.P03SigilLibrary.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
+using InscryptionAPI.Guid;
 using UnityEngine.SceneManagement;
 
 namespace Infiniscryption.P03SigilLibrary
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency("cyantist.inscryption.api")]
-    [BepInDependency("zorro.inscryption.infiniscryption.p03kayceerun")]
+    [BepInDependency("zorro.inscryption.infiniscryption.spells")]
     public class P03SigilLibraryPlugin : BaseUnityPlugin
     {
 
@@ -36,6 +37,13 @@ namespace Infiniscryption.P03SigilLibrary
             Log = Logger;
 
             Harmony harmony = new(PluginGuid);
+
+            // Patch the API first, then patch everything else:
+            var targetMethod = typeof(AbilityManager).GetMethod(nameof(AbilityManager.Add), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+            var patchMethod = typeof(AbilityDocumentation).GetMethod(nameof(AbilityDocumentation.CaptureAbilityInfoForDocumentation), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+            Logger.LogDebug($"Deck editor fixer: Target Method {targetMethod}, Patch method {patchMethod}");
+            harmony.Patch(targetMethod, prefix: new HarmonyMethod(patchMethod));
+
             harmony.PatchAll();
 
             foreach (Type t in typeof(P03SigilLibraryPlugin).Assembly.GetTypes())
@@ -53,7 +61,9 @@ namespace Infiniscryption.P03SigilLibrary
 
             Initialized = true;
 
-            Logger.LogInfo($"Plugin {PluginName} is loaded!");
+            AbilityDocumentation.GenerateDocumentation();
+
+            Logger.LogInfo($"Plugin {PluginName} is loaded and ready for action!");
         }
 
         public static int RandomSeed

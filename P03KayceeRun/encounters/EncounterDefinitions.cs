@@ -1330,7 +1330,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 1
             techObnoxiousConduits.turns.AddTurn(
-                Enemy("P03KCMXP2_UrchinCell", overclock: 3)
+                Enemy("P03SIG_UrchinCell", overclock: 3)
             );
 
             // TURN 2
@@ -1346,20 +1346,20 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 4
             techObnoxiousConduits.turns.AddTurn(
-                Enemy("P03KCMXP2_UrchinCell", overclock: 3),
+                Enemy("P03SIG_UrchinCell", overclock: 3),
                 Enemy("Insectodrone", replacement: "CellTri", difficulty: 4),
                 Enemy(null, replacement: "P03KCMXP2_LockjawCell", difficulty: 5)
             );
 
             // TURN 5
             techObnoxiousConduits.turns.AddTurn(
-                Enemy("P03KCMXP2_UrchinCell", replacement: "P03KCMXP2_LockjawCell", difficulty: 5),
+                Enemy("P03SIG_UrchinCell", replacement: "P03KCMXP2_LockjawCell", difficulty: 5),
                 Enemy("CellTri")
             );
 
             // TURN 6
             techObnoxiousConduits.turns.AddTurn(
-                Enemy("P03KCMXP2_UrchinCell", replacement: "Insectodrone", difficulty: 5),
+                Enemy("P03SIG_UrchinCell", replacement: "Insectodrone", difficulty: 5),
                 Enemy("Insectodrone"),
                 Enemy(null, replacement: "P03KCMXP2_Suicell", difficulty: 2)
             );
@@ -2359,7 +2359,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             DredgerBattle.turns.AddTurn(
                 Enemy("AttackConduit"),
-                Enemy("P03KCMXP2_UrchinCell"),
+                Enemy("P03SIG_UrchinCell"),
                 Enemy("ConduitTower")
             );
 
@@ -2387,7 +2387,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             DredgerBattle.turns.AddTurn(
                 Enemy("AttackConduit"),
-                Enemy("P03KCMXP2_UrchinCell"),
+                Enemy("P03SIG_UrchinCell"),
                 Enemy("ConduitTower")
             );
 

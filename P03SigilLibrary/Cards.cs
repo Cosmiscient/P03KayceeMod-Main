@@ -41,6 +41,12 @@ namespace Infiniscryption.P03SigilLibrary
                 .SetTargetedSpell()
                 .AddAbilities(CatchFire.AbilityID);
 
+            CardManager.New(P03SigilLibraryPlugin.CardPrefix, "DEFEND", "Defend!", 0, 0)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_defend.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 2)
+                .SetTargetedSpell()
+                .AddAbilities(GainShield.AbilityID);
+
             CardManager.New(P03SigilLibraryPlugin.CardPrefix, "EMPTY_PILE_OF_SCRAP", "Junk", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_scrappile.png", typeof(Cards).Assembly))
                 .SetCost(energyCost: 1)

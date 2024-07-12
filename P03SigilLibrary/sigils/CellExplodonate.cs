@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
 {
-    public class CellExplodonate : AbilityBehaviour, IOnBellRung
+    public class CellExplodonate : Explodonate, IOnBellRung
     {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
@@ -38,39 +38,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             ).Id;
         }
 
-        private IEnumerator BombCard(CardSlot slot)
-        {
-            if (slot.Card == null)
-                yield break;
-
-            GameObject bomb = Instantiate(ResourceBank.Get<GameObject>("Prefabs/Cards/SpecificCardModels/DetonatorHoloBomb"));
-            bomb.transform.position = Card.transform.position + (Vector3.up * 0.1f);
-            Tween.Position(bomb.transform, slot.Card.transform.position + (Vector3.up * 0.1f), 0.5f, 0f, Tween.EaseLinear, Tween.LoopType.None, null, null, true);
-            yield return new WaitForSeconds(0.5f);
-            slot.Card.Anim.PlayHitAnimation();
-            Destroy(bomb);
-            yield return slot.Card.TakeDamage(10, Card);
-            yield break;
-        }
-
-        private IEnumerator Explodonate()
-        {
-            CardSlot slot = Card.Slot;
-            List<CardSlot> friendlySlots = BoardManager.Instance.GetSlotsCopy(!Card.OpponentCard);
-            List<CardSlot> opposingSlots = BoardManager.Instance.GetSlotsCopy(Card.OpponentCard);
-
-            if (slot.Index > 0)
-            {
-                yield return BombCard(friendlySlots[slot.Index % 10 - 1]);
-                yield return BombCard(opposingSlots[slot.Index % 10 - 1]);
-            }
-            yield return BombCard(opposingSlots[slot.Index % 10]);
-            if (slot.Index < friendlySlots.Count - 1)
-            {
-                yield return BombCard(opposingSlots[slot.Index % 10 + 1]);
-                yield return BombCard(friendlySlots[slot.Index % 10 + 1]);
-            }
-        }
+        public override bool RespondsToPreDeathAnimation(bool wasSacrifice) => ShouldExplode && base.RespondsToPreDeathAnimation(wasSacrifice);
 
         private bool ShouldExplode => !Card.Dead && Card.Slot != null && ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
 
@@ -97,9 +65,5 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         public override IEnumerator OnUpkeep(bool playerUpkeep) { yield return Card.Die(false, null); }
 
         public IEnumerator OnBellRung(bool playerCombatPhase) { yield return Card.Die(false, null); }
-
-        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
-
-        public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer) { yield return Explodonate(); }
     }
 }

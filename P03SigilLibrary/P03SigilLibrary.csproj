@@ -56,8 +56,8 @@
   <ItemGroup>
     <EmbeddedResource Include="$(ProjectDir)\assets\*.png" />
     <!--<EmbeddedResource Include="$(ProjectDir)\assets\*.wav" />-->
-    <EmbeddedResource Include="$(ProjectDir)\data\*.csv" />
-    <EmbeddedResource Include="$(ProjectDir)\data\*.dat" />
+    <!-- <EmbeddedResource Include="$(ProjectDir)\data\*.csv" />
+    <EmbeddedResource Include="$(ProjectDir)\data\*.dat" /> -->
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

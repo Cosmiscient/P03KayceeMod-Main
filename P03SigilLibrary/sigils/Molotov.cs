@@ -73,10 +73,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
         public static IEnumerator BombCardsAsync(List<CardSlot> target, PlayableCard attacker, int level = 2, float speed = 0.35f)
         {
-            for (int i = 0; i < target.Count; i++)
-                attacker.StartCoroutine(ThrowMolotov(target[i], attacker, speed, 0.05f * (float)i));
+            if (BoardManager.Instance is BoardManager3D)
+            {
+                for (int i = 0; i < target.Count; i++)
+                    attacker.StartCoroutine(ThrowMolotov(target[i], attacker, speed, 0.05f * (float)i));
 
-            yield return new WaitForSeconds(speed * 2f);
+                yield return new WaitForSeconds(speed * 2f);
+            }
 
             foreach (CardSlot slot in target)
                 yield return slot.SetSlotModification(BurningSlotBase.GetFireLevel(level, slot, attacker));

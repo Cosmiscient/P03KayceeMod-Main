@@ -1,9 +1,10 @@
 {
-    "name": "P03_Expansion_Pack_3",
-    "version_number": "0.1.0",
+    "name": "P03_Sigil_Library",
+    "version_number": "1.0.0",
     "website_url": "https://github.com/Cosmiscient/P03KayceeMod-Main",
-    "description": "The third official expansion pack to 'P03 in Kaycees Mod' brings blood, bones, and even more gems to the party.",
+    "description": "All of the sigils from 'P03 in Kaycees Mod', now available as a standalone mod!",
     "dependencies": [
-        "Infiniscryption-P03_In_Kaycees_Mod-5.0.20"
+        "API_dev-API-2.19.5",
+        "WhistleWind-New_Spell_Card_Toolkit-1.2.4"
     ]
 }
