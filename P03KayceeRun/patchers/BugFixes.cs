@@ -7,10 +7,12 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Sequences;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Regions;
+using Sirenix.Serialization.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
@@ -18,188 +20,35 @@ namespace Infiniscryption.P03KayceeRun.Patchers
     [HarmonyPatch]
     internal static class BugFixes
     {
-        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.AddTemporaryMod))]
-        [HarmonyPrefix]
-        [HarmonyPriority(Priority.VeryHigh)]
-        private static void ProperlyRemoveSingletonTempMods(PlayableCard __instance, CardModificationInfo mod)
-        {
-            if (!string.IsNullOrEmpty(mod.singletonId))
-            {
-                CardModificationInfo cardModificationInfo = __instance.temporaryMods.Find(x => String.Equals(x.singletonId, mod.singletonId));
-                if (cardModificationInfo != null)
-                {
-                    __instance.temporaryMods.Remove(cardModificationInfo);
-                    foreach (Ability ability in cardModificationInfo.abilities)
-                    {
-                        __instance.TriggerHandler.RemoveAbility(ability);
-                    }
-                }
-            }
-        }
+        // private static bool CardHasFourOrLessIconsOnIt(CardInfo card)
+        // {
+        //     List<Ability> newAbilities = new();
+        //     foreach (var ab in card.Abilities)
+        //     {
+        //         if (!newAbilities.Contains(ab))
+        //         {
+        //             newAbilities.Add(ab);
+        //             continue;
+        //         }
+        //         var info = AbilitiesUtil.GetInfo(ab);
+        //         if (!info.canStack)
+        //         {
+        //             newAbilities.Add(ab);
+        //         }
+        //     }
+        //     return newAbilities.Count <= 4;
+        // }
 
-        [HarmonyPatch(typeof(CardDisplayer3D), nameof(CardDisplayer3D.DisplayInfo))]
-        [HarmonyPrefix]
-        private static void AlwaysClearThePrefabPortrait(CardDisplayer3D __instance, PlayableCard playableCard)
-        {
-            if (playableCard != null
-                && (__instance.info?.HasAbility(Ability.Transformer)).GetValueOrDefault(false)
-                && (__instance.info.animatedPortrait != null || __instance.info.evolveParams?.evolution?.animatedPortrait != null))
-            {
-                if (__instance.instantiatedPortraitObj != null)
-                {
-                    GameObject.Destroy(__instance.instantiatedPortraitObj);
-                }
-                __instance.portraitPrefab = null;
-            }
-        }
+        // [HarmonyPatch(typeof(AddCardAbilitySequencer), nameof(AddCardAbilitySequencer.GetValidCardsFromDeck))]
+        // [HarmonyPrefix]
+        // internal static bool CountStackablesAsOne(ref List<CardInfo> __result)
+        // {
+        //     if (!P03AscensionSaveData.IsP03Run)
+        //         return true;
 
-        [HarmonyPatch(typeof(Card), nameof(Card.SetInfo))]
-        [HarmonyPrefix]
-        private static void RemoveApperanceBehavioursBeforeSettingInfo(Card __instance, CardInfo info)
-        {
-            if (__instance.Info != null && !__instance.Info.name.Equals(info.name))
-            {
-                P03Plugin.Log.LogDebug($"Switching card from {__instance.Info.name} to {info.name}");
-                foreach (CardAppearanceBehaviour.Appearance appearance in __instance.Info.appearanceBehaviour)
-                {
-                    Type type = CustomType.GetType("DiskCardGame", appearance.ToString());
-                    Component c = __instance.gameObject.GetComponent(type);
-                    if (c != null)
-                    {
-                        if (c is CardAppearanceBehaviour cab)
-                            cab.ResetAppearance();
-                        UnityEngine.Object.DestroyImmediate(c);
-                    }
-                }
-                if (__instance.Anim is DiskCardAnimationController dcac)
-                {
-                    if (dcac.holoPortraitParent != null)
-                    {
-                        List<Transform> childrenToDelete = new();
-                        foreach (Transform t in dcac.holoPortraitParent)
-                            childrenToDelete.Add(t);
-
-                        foreach (Transform t in childrenToDelete)
-                            UnityEngine.Object.DestroyImmediate(t.gameObject);
-
-                        dcac.holoPortraitParent.gameObject.SetActive(false);
-                    }
-                }
-                // You know what - for good measure - just stop live rendering at all
-                // If that's relevant
-                CardRenderCamera.Instance?.StopLiveRenderCard(__instance.StatsLayer);
-            }
-        }
-
-        [HarmonyPatch(typeof(LifeManager), nameof(LifeManager.ShowDamageSequence))]
-        [HarmonyPostfix]
-        private static IEnumerator ShowDamageSequenceSkipIfLifeLossConditionMet(IEnumerator sequence)
-        {
-            if (TurnManager.Instance.LifeLossConditionsMet())
-                yield break;
-
-            yield return sequence;
-        }
-
-        [HarmonyPatch(typeof(CardAbilityIcons), nameof(CardAbilityIcons.SetIconFlipped))]
-        [HarmonyPostfix]
-        private static void FlipLatchedAbility(ref CardAbilityIcons __instance, Ability ability, bool flipped)
-        {
-            if (__instance.latchIcon != null && __instance.latchIcon.Ability == ability)
-                __instance.latchIcon.SetFlippedX(flipped);
-        }
-
-        [HarmonyPatch(typeof(CombatPhaseManager), nameof(CombatPhaseManager.SlotAttackSlot))]
-        [HarmonyPrefix]
-        [HarmonyBefore("ATS")] // This is a bugfix to help with an issue in ATS
-        private static bool StopSequenceIfAttackerIsNull(CardSlot attackingSlot) => attackingSlot != null;
-
-        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.GetPassiveAttackBuffs))]
-        [HarmonyPostfix]
-        private static void GemifyBuffWithTempMods(PlayableCard __instance, ref int __result)
-        {
-            if (__instance.IsGemified() && !__instance.Info.Gemified)
-            {
-                if (__instance.OpponentCard)
-                {
-                    if ((OpponentGemsManager.Instance?.HasGem(GemType.Orange)).GetValueOrDefault())
-                        __result += 1;
-                }
-                else
-                {
-                    if ((ResourcesManager.Instance?.HasGem(GemType.Orange)).GetValueOrDefault())
-                        __result += 1;
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.GetPassiveHealthBuffs))]
-        [HarmonyPostfix]
-        private static void GemifyHealthBuffWithTempMods(PlayableCard __instance, ref int __result)
-        {
-            if (__instance.IsGemified() && !__instance.Info.Gemified)
-            {
-                if (__instance.OpponentCard)
-                {
-                    if ((OpponentGemsManager.Instance?.HasGem(GemType.Green)).GetValueOrDefault())
-                        __result += 2;
-                }
-                else
-                {
-                    if ((ResourcesManager.Instance?.HasGem(GemType.Green)).GetValueOrDefault())
-                        __result += 2;
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(RenderStatsLayer), nameof(RenderStatsLayer.RenderCard))]
-        [HarmonyPrefix]
-        private static void AllowGemifyToWorkWithTempMods(ref RenderStatsLayer __instance, CardRenderInfo info)
-        {
-            if (__instance is not DiskRenderStatsLayer drsl)
-                return;
-
-            PlayableCard pCard = __instance.PlayableCard;
-            if (pCard == null)
-                return;
-
-            if (pCard.IsGemified())
-            {
-                drsl.gemSquares.ForEach(o => o.SetActive(true));
-                if (pCard.OpponentCard)
-                {
-                    if ((OpponentGemsManager.Instance?.HasGem(GemType.Orange)).GetValueOrDefault())
-                        info.attackTextColor = GameColors.Instance.gold;
-                    if ((OpponentGemsManager.Instance?.HasGem(GemType.Green)).GetValueOrDefault())
-                        info.attackTextColor = GameColors.Instance.brightLimeGreen;
-                }
-                else
-                {
-                    if (ResourcesManager.Instance.HasGem(GemType.Orange))
-                        info.attackTextColor = GameColors.Instance.gold;
-                    if (ResourcesManager.Instance.HasGem(GemType.Green))
-                        info.attackTextColor = GameColors.Instance.brightLimeGreen;
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(BoardStateEvaluator), nameof(BoardStateEvaluator.EvaluateBoardState))]
-        [HarmonyPostfix]
-        private static void FixCellEvaluation(BoardState state, ref int __result)
-        {
-            if (!P03AscensionSaveData.IsP03Run)
-                return;
-
-            foreach (BoardState.SlotState slot in state.opponentSlots)
-            {
-                if (slot.card != null && slot.card.info.HasCellAbility())
-                {
-                    float num4 = (state.opponentSlots.Count - 1) / 2f;
-                    float num5 = Mathf.Abs(num4 - state.opponentSlots.IndexOf(slot));
-                    __result -= 2 * Mathf.RoundToInt(num4 - num5);
-                }
-            }
-        }
+        //     __result = Part3SaveData.Data.deck.Cards.Where(CardHasFourOrLessIconsOnIt).ToList();
+        //     return false;
+        // }
 
         [HarmonyPatch(typeof(EvolveParams), nameof(EvolveParams.GetDefaultEvolution))]
         [HarmonyPrefix]
@@ -690,6 +539,9 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         private static readonly Trait NonDoubleDeathable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "NoDoubleDeath");
 
+        private const string RESURRECTED_KEY = "HasBeenResurrectedByDoubleDeath";
+        private static bool CanBeDoubleDeathed(PlayableCard card) => !card.TemporaryMods.Any(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(RESURRECTED_KEY));
+
         [HarmonyPatch(typeof(DoubleDeath), nameof(DoubleDeath.RespondsToOtherCardDie))]
         [HarmonyPrefix]
         private static bool FixedDoubleDeathResponds(DoubleDeath __instance, PlayableCard card, CardSlot deathSlot, bool fromCombat, PlayableCard killer, ref bool __result)
@@ -697,7 +549,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (!P03AscensionSaveData.IsP03Run)
                 return true;
 
-            return __instance.Card.OnBoard && deathSlot.Card != null && deathSlot.Card.OpponentCard == __instance.Card.OpponentCard && deathSlot.Card != __instance.Card && !card.HasTrait(NonDoubleDeathable) && deathSlot.Card == card;
+            return __instance.Card.OnBoard && deathSlot.Card != null && deathSlot.Card.OpponentCard == __instance.Card.OpponentCard && deathSlot.Card != __instance.Card && CanBeDoubleDeathed(card) && deathSlot.Card == card;
         }
 
         [HarmonyPatch(typeof(DoubleDeath), nameof(DoubleDeath.OnOtherCardDie))]
@@ -709,10 +561,16 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             deathInfo.mods = deathSlot.Card.Info.mods?.Select(m => (CardModificationInfo)m.Clone()).ToList();
             deathInfo.mods ??= new();
             deathInfo.mods.AddRange(deathSlot.Card.TemporaryMods.Select(m => (CardModificationInfo)m.Clone()));
-            deathInfo.traits ??= new();
-            deathInfo.traits.Add(NonDoubleDeathable);
             __instance.currentlyResurrectingCards.Add(deathInfo);
-            yield return BoardManager.Instance.CreateCardInSlot(deathInfo, deathSlot, 0.1f, true);
+            yield return BoardManager.Instance.CreateCardInSlot(deathInfo, deathSlot, 0.1f, false);
+            if (deathSlot.Card != null)
+            {
+                deathSlot.Card.AddTemporaryMod(new() { singletonId = RESURRECTED_KEY });
+                if (deathSlot.Card.TriggerHandler.RespondsToTrigger(Trigger.ResolveOnBoard))
+                    yield return deathSlot.Card.TriggerHandler.OnTrigger(Trigger.ResolveOnBoard);
+
+                yield return Singleton<GlobalTriggerHandler>.Instance.TriggerCardsOnBoard(Trigger.OtherCardResolve, false, deathSlot.Card);
+            }
             yield return new WaitForSeconds(0.1f);
             if (deathSlot.Card != null)
             {
@@ -723,86 +581,17 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             yield break;
         }
 
-        // private static ConditionalWeakTable<GlobalTriggerHandler, MultiverseBattleSequencer.RefBoolean> _stackInvalid = new();
-        // internal static bool StackInvalid
-        // {
-        //     get
-        //     {
-        //         if (GlobalTriggerHandler.Instance == null)
-        //             return false;
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.AssignCardToSlot))]
+        [HarmonyPostfix]
+        private static IEnumerator EnsureAssignCardToSlotHappensOnlyWhenEverythingIsGood(IEnumerator sequence, PlayableCard card, CardSlot slot)
+        {
+            if (card.SafeIsUnityNull() || card.Dead)
+                yield break;
 
-        //         if (!_stackInvalid.TryGetValue(GlobalTriggerHandler.Instance, out var result))
-        //             return false;
+            if (slot.SafeIsUnityNull())
+                yield break;
 
-        //         return result.Value;
-        //     }
-        //     set
-        //     {
-        //         if (GlobalTriggerHandler.Instance == null)
-        //             return;
-
-        //         _stackInvalid.Remove(GlobalTriggerHandler.Instance);
-        //         _stackInvalid.Add(GlobalTriggerHandler.Instance, new() { Value = value });
-        //     }
-        // }
-
-        // private static float DefaultFixedDeltaTime = -1f;
-
-        // [HarmonyPatch(typeof(GlobalTriggerHandler), nameof(GlobalTriggerHandler.ResetStackSizeAndTriggerCount))]
-        // [HarmonyPostfix]
-        // private static void ResetInvalidStackIndicator()
-        // {
-        //     DefaultFixedDeltaTime = Time.fixedDeltaTime;
-        //     StackInvalid = false;
-        // }
-
-        // [HarmonyPatch(typeof(GlobalTriggerHandler), nameof(GlobalTriggerHandler.TriggerSequence))]
-        // [HarmonyPostfix]
-        // private static IEnumerator NotWhenStackIsInvalid(IEnumerator sequence, GlobalTriggerHandler __instance, TriggerReceiver receiver)
-        // {
-        //     P03Plugin.Log.LogInfo($"Stack Size: {__instance.StackSize}");
-        //     if (__instance.StackSize >= 100)
-        //     {
-        //         StackInvalid = true;
-        //     }
-        //     else if (__instance.StackSize >= 80 && !StackInvalid)
-        //     {
-        //         Time.timeScale = 5f;
-        //         Time.fixedDeltaTime = 5f * DefaultFixedDeltaTime;
-        //     }
-        //     else if (__instance.StackSize >= 60 && !StackInvalid)
-        //     {
-        //         Time.timeScale = 4f;
-        //         Time.fixedDeltaTime = 4f * DefaultFixedDeltaTime;
-        //     }
-        //     else if (__instance.StackSize >= 40 && !StackInvalid)
-        //     {
-        //         Time.timeScale = 3f;
-        //         Time.fixedDeltaTime = 3f * DefaultFixedDeltaTime;
-        //     }
-        //     else if (__instance.StackSize >= 20 && !StackInvalid)
-        //     {
-        //         Time.timeScale = 2f;
-        //         Time.fixedDeltaTime = 2f * DefaultFixedDeltaTime;
-        //     }
-        //     else if (!StackInvalid && DefaultFixedDeltaTime > 0f)
-        //     {
-        //         Time.timeScale = 1f;
-        //         Time.fixedDeltaTime = DefaultFixedDeltaTime;
-        //     }
-
-        //     if (StackInvalid)
-        //     {
-        //         receiver.Activating = false;
-        //         if (receiver.DestroyAfterActivation)
-        //             receiver.Destroy();
-        //     }
-        //     else
-        //     {
-        //         yield return sequence;
-        //     }
-        //     if (__instance.StackSize == 0)
-        //         StackInvalid = false;
-        // }
+            yield return sequence;
+        }
     }
 }

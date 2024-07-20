@@ -9,6 +9,8 @@ using Infiniscryption.P03KayceeRun.Cards.Multiverse;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03SigilLibrary.Sigils;
+using Infiniscryption.Spells.Patchers;
 using Infiniscryption.Spells.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
@@ -79,6 +81,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string GRIM_QUIL = "P03KCM_GRIM_QUIL";
 
         public const string PILE_OF_SCRAP = "P03KCM_PILE_OF_SCRAP";
+        public const string PILE_OF_SCRAP_EMPTY = "P03KCM_EMPTY_PILE_OF_SCRAP";
+
         public const string PAPERWORK_A = "P03KCM_PAPERWORK_A";
         public const string PAPERWORK_B = "P03KCM_PAPERWORK_B";
         public const string PAPERWORK_C = "P03KCM_PAPERWORK_C";
@@ -217,6 +221,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     EnergyConduitAppearnace.ID
                 };
             }
+
+            if (cardToModify.IsSpell())
+                cardToModify.SetSpellAppearanceP03();
         }
 
         private static void SpellCommand(StatIconManager.FullStatIcon info, bool revert)
@@ -424,6 +431,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     cards.CardByName("TechMoxTriple").AddMetaCategories(WizardRegion);
                     cards.CardByName("EnergyRoller").AddMetaCategories(CardMetaCategory.Rare);
                     cards.CardByName("Librarian").AddAppearances(LibrarianSizeTitle.ID);
+                    cards.CardByName("P03SIG_Salmon")?.SetWeaponMesh(DiskCardWeapon.Fish);
                     cards.CardByName("AboveCurve").SetWeaponMesh(
                         "p03kcm/prefabs/FingerGun",
                         localPosition: new Vector3(0f, -0.66f, 0f),
@@ -437,9 +445,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     );
                     cards.CardByName("PlasmaGunner").SetWeaponMesh(DiskCardWeapon.Revolver);
 
-                    cards.CardByName("CXformerWolf").AddMetaCategories(NewBeastTransformers);
-                    cards.CardByName("CXformerRaven").AddMetaCategories(NewBeastTransformers);
-                    cards.CardByName("CXformerAdder").AddMetaCategories(NewBeastTransformers);
+                    cards.CardByName("CXformerWolf").AddMetaCategories(NewBeastTransformers).SetCost(energyCost: 6);
+                    cards.CardByName("CXformerElk").AddMetaCategories(NewBeastTransformers).SetCost(energyCost: 6);
+                    cards.CardByName("CXformerRaven").AddMetaCategories(NewBeastTransformers).SetCost(energyCost: 6);
+                    cards.CardByName("CXformerAdder").AddMetaCategories(NewBeastTransformers).SetCost(energyCost: 4);
 
                     cards.CardByName("JuniorSage").AddAppearances(OnboardWizardCardModel.ID);
                     cards.CardByName("PracticeMage").AddAppearances(OnboardWizardCardModel.ID);
@@ -575,14 +584,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddTraits(QuestCard)
                 .temple = CardTemple.Tech;
 
-            CardManager.New(P03Plugin.CardPrefx, CODE_BLOCK, "Code Snippet", 1, 2)
-                .SetPortrait(GetTexture("portrait_code.png", typeof(CustomCards).Assembly))
-                .AddTraits(Programmer.CodeTrait)
-                .temple = CardTemple.Tech;
-
             CardManager.New(P03Plugin.CardPrefx, CODE_BUG, "Bug", 2, 1)
                 .SetPortrait(GetTexture("portrait_bug.png", typeof(CustomCards).Assembly))
-                .AddTraits(Programmer.CodeTrait)
                 .AddAbilities(Ability.Brittle)
                 .temple = CardTemple.Tech;
 
@@ -655,6 +658,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAbilities(Ability.Reach);
 
             CardManager.New(P03Plugin.CardPrefx, CustomCards.GOLLY_MOLEMAN, "Mole Man", 0, 6)
+                .SetCost(bloodCost: 1)
                 .SetAltPortrait(TextureHelper.GetImageAsTexture("portrait_golly_moleman.png", typeof(CustomCards).Assembly, FilterMode.Trilinear))
                 .AddAppearances(HighResAlternatePortrait.ID)
                 .SetCardTemple(CardTemple.Tech)
@@ -731,7 +735,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, CONTRABAND, "yarr.torrent", 0, 1)
-                .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_captivefile"))
+                .SetPortrait(GetTexture("portrait_yarr.png", typeof(CustomCards).Assembly))
                 .AddAbilities(Ability.PermaDeath)
                 .AddAppearances(QuestCardAppearance.ID)
                 .AddTraits(QuestCard)
@@ -865,7 +869,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             goobertCardBase.AddAppearances(GooDiscCardAppearance.ID);
             goobertCardBase.AddSpecialAbilities(GoobertCenterCardBehaviour.AbilityID);
             goobertCardBase.AddAbilities(TripleCardStrike.AbilityID);
-            goobertCardBase.AddTraits(Unrotateable, Trait.Uncuttable);
+            goobertCardBase.AddTraits(Unrotateable, Trait.Uncuttable, MirrorImage.Uncopyable);
             goobertCardBase.temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, SKELETON_LORD, "Skeleton Master", 0, 4)
@@ -893,6 +897,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 {
                     if (ab.Id == Ability.DoubleDeath)
                         ab.Info.rulebookName = "Double Death";
+
+                    if (ab.Id == Ability.ActivatedDealDamage)
+                        ab.Info.rulebookName = "Head Shot";
 
                     if (allP3Abs.Contains(ab.Id))
                     {

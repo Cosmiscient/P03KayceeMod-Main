@@ -9,7 +9,6 @@ using Infiniscryption.P03KayceeRun.Cards.Multiverse;
 using Infiniscryption.P03KayceeRun.Encounters;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
-using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Quests;
 using Infiniscryption.P03KayceeRun.Sequences;
 using InscryptionAPI.Card;
@@ -21,13 +20,13 @@ namespace Infiniscryption.P03KayceeRun
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency("cyantist.inscryption.api")]
     [BepInDependency("zorro.inscryption.infiniscryption.achievements")]
-    [BepInDependency("zorro.inscryption.infiniscryption.spells")]
+    [BepInDependency("zorro.inscryption.infiniscryption.p03sigillibrary")]
     public class P03Plugin : BaseUnityPlugin
     {
 
         public const string PluginGuid = "zorro.inscryption.infiniscryption.p03kayceerun";
         public const string PluginName = "Infiniscryption P03 in Kaycee's Mod";
-        public const string PluginVersion = "4.0";
+        public const string PluginVersion = "5.0";
         public const string CardPrefx = "P03KCM";
 
         internal static P03Plugin Instance;
@@ -89,7 +88,7 @@ namespace Infiniscryption.P03KayceeRun
 
             Initialized = true;
 
-            Logger.LogInfo($"Plugin {PluginName} is loaded!");
+            Logger.LogInfo($"Plugin {PluginName} is loaded and ready to go!");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

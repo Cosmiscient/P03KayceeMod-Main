@@ -4,6 +4,7 @@ using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+using Sirenix.Serialization.Utilities;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -85,8 +86,35 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             {
                 yield return sequence;
             }
-            BoardManager.Instance.AllSlotsCopy.ForEach(cs => cs.Card?.UpdateFaceUpOnBoardEffects());
+            BoardManager.Instance.AllSlotsCopy.Where(ShouldUpdate).ForEach(cs => cs.Card?.UpdateFaceUpOnBoardEffects());
             yield break;
+        }
+
+        private static bool ShouldUpdate(CardSlot slot)
+        {
+            try
+            {
+                if (slot == null)
+                    return false;
+
+                if (slot.Card == null)
+                    return false;
+
+                if (slot.Card.SafeIsUnityNull())
+                    return false;
+
+                if (slot.Card.Anim.SafeIsUnityNull())
+                    return false;
+
+                if (slot.Card.Dead)
+                    return false;
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

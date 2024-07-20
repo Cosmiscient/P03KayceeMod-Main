@@ -175,8 +175,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     CustomCoroutine.WaitOnConditionThenExecute(() => P03AnimationController.Instance.CurrentFace == P03AnimationController.Face.Choking, delegate
                     {
                         AchievementManager.Unlock(P03AchievementManagement.FIRST_WIN);
-                        if (AscensionChallengeManagement.SKULL_STORM_ACTIVE)
-                            AchievementManager.Unlock(P03AchievementManagement.SKULLSTORM);
                         AudioController.Instance.PlaySound3D("p03_head_off", MixerGroup.TableObjectsSFX, P03AnimationController.Instance.transform.position, 1f, 0f, null, null, null, null, false);
                     });
                     yield return new WaitForSeconds(12f);

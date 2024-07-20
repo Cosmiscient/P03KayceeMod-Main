@@ -7,6 +7,7 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Items;
 using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03KayceeRun.Sequences;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers.Extensions;
 using Pixelplacement;

@@ -9,6 +9,8 @@ using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Triggers;
 using UnityEngine;
+using InscryptionAPI.Slots;
+using Infiniscryption.P03SigilLibrary.Sigils;
 
 namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
 {
@@ -26,6 +28,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             info.powerLevel = 2;
             info.opponentUsable = true;
             info.passive = false;
+            info.hasColorOverride = true;
+            info.colorOverride = Color.black;
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_fully_loaded.png", typeof(FullyLoaded).Assembly));
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, CustomCards.MultiverseAbility };
 
@@ -33,7 +37,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
                 P03Plugin.PluginGuid,
                 info,
                 typeof(MultiverseFullyLoaded),
-                TextureHelper.GetImageAsTexture("ability_fully_loaded.png", typeof(FullyLoaded).Assembly)
+                TextureHelper.GetImageAsTexture("ability_fully_loaded.png", typeof(MultiverseFullyLoaded).Assembly)
             ).Id;
         }
 

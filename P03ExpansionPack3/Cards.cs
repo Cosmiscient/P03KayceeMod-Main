@@ -1,0 +1,302 @@
+using DiskCardGame;
+using InscryptionAPI.Card;
+using InscryptionAPI.Helpers;
+using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03ExpansionPack3.Sigils;
+using Infiniscryption.P03SigilLibrary.Sigils;
+using System.Collections.Generic;
+using Infiniscryption.P03KayceeRun.Cards.Stickers;
+
+namespace Infiniscryption.P03ExpansionPack3
+{
+    public static class Cards
+    {
+        public const string BLAST_CARD = "P03KCMXP3_BLAST";
+
+        static Cards()
+        {
+            // Unpacker
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Unpacker", "Unpacker", 2, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_unpacker.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 6)
+                .SetNeutralP03Card()
+                .SetRare()
+                .AddAbilities(ActivatedGainItem.AbilityID);
+
+            // Gunbot
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Gunbot", "Gunbot", 2, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gunbot.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 2)
+                .SetNeutralP03Card()
+                .AddAbilities(TargetRequired.AbilityID);
+
+            // Kraken
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Kraken", "KR4K3N", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_kraken.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 4)
+                .SetRegionalP03Card(CardTemple.Nature)
+                .SetRare()
+                .AddAbilities(KrakenTransformer.AbilityID);
+
+            // Brain Cell
+            CardManager.New(P03Pack3Plugin.CardPrefix, "BrainCell", "Brain Cell", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_brain_cell.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 1)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(CellGemDraw.AbilityID);
+
+            // Brain DRoid
+            CardManager.New(P03Pack3Plugin.CardPrefix, "BrainDroid", "Brain Droid", 1, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_brain_droid.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 1)
+                .SetNeutralP03Card();
+
+            // Butane Launcher
+            CardManager.New(P03Pack3Plugin.CardPrefix, "ButaneCaster", "Butane Caster", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_butane_caster.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(bonesCost: 4)
+                .SetNeutralP03Card()
+                .AddAbilities(ThrowFire.AbilityID);
+
+            // Stimulator
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Stimulator", "Stimulator", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_stimulator.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(bonesCost: 3)
+                .SetNeutralP03Card()
+                .SetRare()
+                .AddAbilities(ActivateEverything.AbilityID);
+
+            // Gamer
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Gamer", "GameKid", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gamer.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 5)
+                .SetNeutralP03Card()
+                .SetRare()
+                .AddAbilities(Ability.ActivatedDealDamage, ActivatedStrafeSelf.AbilityID);
+
+            // Green Energy Bot
+            CardManager.New(P03Pack3Plugin.CardPrefix, "GreenEnergyBot", "Green Energy Bot", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_battery_mage.png", typeof(Cards).Assembly))
+                .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_battery_mage.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Green)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(Ability.GainBattery, Ability.GemDependant);
+
+            // Mortar Droid
+            CardManager.New(P03Pack3Plugin.CardPrefix, "MortarDroid", "Mortar Droid", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_mortar_droid.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(bonesCost: 3)
+                .SetNeutralP03Card()
+                .SetStartingFuel(3)
+                .AddAbilities(ActivatedDrawBlast.AbilityID);
+
+            // Nitrous Dispenser
+            CardManager.New(P03Pack3Plugin.CardPrefix, "NitrousTanker", "Nitrous Tanker", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_nitrous_dispenser.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(bonesCost: 5)
+                .SetNeutralP03Card()
+                .SetStartingFuel(2)
+                .AddAbilities(ActivatedBuffTeam.AbilityID);
+
+            // Bone Mill
+            CardManager.New(P03Pack3Plugin.CardPrefix, "BoneMill", "Bone Mill", 0, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_bone_mill.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 2)
+                .SetNeutralP03Card()
+                .AddAbilities(ActivatedGainBattery.AbilityID);
+
+            // Badass
+            CardManager.New(P03Pack3Plugin.CardPrefix, "BadAss", "B4D A55", 2, 4)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_badass.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(bonesCost: 4)
+                .SetNeutralP03Card()
+                .SetStartingFuel(3)
+                .AddAbilities(FuelRequired.AbilityID);
+
+            // Mucus Launcher
+            CardManager.New(P03Pack3Plugin.CardPrefix, "MucusLauncher", "Mucus Launcher", 1, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_mucus_launcher.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 1)
+                .SetRegionalP03Card(CardTemple.Nature)
+                .AddAbilities(ThrowSlime.AbilityID);
+
+            // General Gunk
+            CardManager.New(P03Pack3Plugin.CardPrefix, "GeneralGunk", "General Gunk", 2, 4)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_general_gunk.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 2)
+                .SetRegionalP03Card(CardTemple.Nature)
+                .SetRare()
+                .AddAbilities(ThrowSlimeAll.AbilityID);
+
+            // Gachabomb
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Gachabomb", "Gachabomb", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gachabomb.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 4)
+                .SetRegionalP03Card(CardTemple.Undead)
+                .SetRare()
+                .AddAbilities(Explodonate.AbilityID, Lootbox.AbilityID);
+
+            // Submariner
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Submariner", "Submariner", 2, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_submariner.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(bonesCost: 5)
+                .SetNeutralP03Card()
+                .SetStartingFuel(2)
+                .AddAbilities(ActivatedSubmerge.AbilityID);
+
+            // Rot Latcher
+            CardManager.New(P03Pack3Plugin.CardPrefix, "RotLatcher", "Rot Latcher", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_rot_latcher.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(bonesCost: 2)
+                .SetRegionalP03Card(CardTemple.Undead)
+                .AddAbilities(LatchStinky.AbilityID);
+
+            // Time Latcher
+            CardManager.New(P03Pack3Plugin.CardPrefix, "TimeLatcher", "Time Latcher", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_time_latcher.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Blue)
+                .SetRegionalP03Card(CardTemple.Undead)
+                .AddAbilities(LatchAnnoying.AbilityID);
+
+            // Apedroid
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Apedroid", "Apedroid", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_apedroid.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 1)
+                .SetRegionalP03Card(CardTemple.Nature)
+                .AddAbilities(Fling.AbilityID);
+
+            // Synthesioid
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Synthesioid", "Synthesioid", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_synthesioid.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 2)
+                .SetNeutralP03Card()
+                .AddAbilities(SacrificeMorsel.AbilityID);
+
+            // RemoteDetonator
+            CardManager.New(P03Pack3Plugin.CardPrefix, "RemoteDetonator", "Remote Detonator", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_remote_detonator.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 1)
+                .SetNeutralP03Card()
+                .AddAbilities(SacrificeExplode.AbilityID);
+
+            // Scavenger
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Scavenger", "Scavenger", 1, 3)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_scavenger.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 3)
+                .SetNeutralP03Card()
+                .SetRare()
+                .AddAbilities(ScrapSalvage.AbilityID);
+
+            // Skin Droid
+            CardManager.New(P03Pack3Plugin.CardPrefix, "SkinDroid", "Skin Droid", 0, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_skin_droid.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 1)
+                .SetRegionalP03Card(CardTemple.Undead)
+                .AddSpecialAbilities(CopySacrificeIceCube.AbilityID)
+                .AddAbilities(Ability.IceCube);
+
+            // Skin Droid
+            CardManager.New(P03Pack3Plugin.CardPrefix, "EmergenceLatcher", "Emergence Latcher", 2, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_emergence_latcher.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 1)
+                .SetRegionalP03Card(CardTemple.Undead)
+                .AddAbilities(SacrificeLatch.AbilityID);
+
+            // Cottagecog
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Cottagecog", "Cottagecog", 0, 4)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_cottagecog.png", typeof(Cards).Assembly))
+                .AddDecal(
+                    TextureHelper.GetImageAsTexture("decal_cottagecog_sapphire.png", typeof(Cards).Assembly),
+                    TextureHelper.GetImageAsTexture("decal_cottagecog_ruby.png", typeof(Cards).Assembly)
+                )
+                .AddAppearances(ReplicaAppearanceBehavior.ID)
+                .SetExtendedProperty(ReplicaAppearanceBehavior.REPLICA_TYPE, "orange")
+                .SetGemsCost(GemType.Blue)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(GemOrangePrinter.AbilityID);
+
+            // Vessel Tentacle
+            CardManager.New(P03Pack3Plugin.CardPrefix, "VesselTentacle", "56455353454C", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_vessel_tentacle.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 3)
+                .SetNeutralP03Card()
+                .SetStatIcon(SideDeckPower.AbilityID);
+
+            // Baristabot
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Baristabot", "Baristabot", 0, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_baristabot.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Orange)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(GemBluePurist.AbilityID);
+
+            // Mystery MAchine
+            CardManager.New(P03Pack3Plugin.CardPrefix, "MysteryMachine", "Mystery Machine", 1, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_mystery_machine.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Blue, GemType.Green)
+                .SetNeutralP03Card()
+                .SetRare()
+                .AddAbilities(Ability.RandomAbility, RandomRareAbility.AbilityID);
+
+            // Sticker King
+            CardManager.New(P03Pack3Plugin.CardPrefix, "StickerKing", "Sticker King", 2, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_sticker_king.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 4)
+                .SetNeutralP03Card()
+                .SetRare()
+                .SetExtendedProperty("Stickers.Forced", "Stickers[StickerPositions:sticker_muscles,0.18,-0.35,0.00|sticker_revolver,0.47,-0.39,0.00|sticker_altcat,-0.09,0.00,0.00|sticker_winged_shoes,-0.18,0.13,0.00|sticker_battery,0.14,0.32,0.00|sticker_companion_cube,0.04,0.01,0.00|sticker_binary_ribbon,0.22,0.04,0.00|sticker_annoy_face,0.39,0.00,0.00|sticker_cowboy_hat,0.48,0.01,0.00][StickerRotations:sticker_muscles,0.00,180.00,100.86|sticker_revolver,0.00,180.00,133.56|sticker_battery,0.00,180.00,0][StickerScales:][StickerAbility:]")
+                .AddAbilities(GiveStickers.AbilityID);
+
+            // Custom event stuff for sticker king
+            CardManager.ModifyCardList += delegate (List<CardInfo> cards)
+            {
+                // You have to have at least three of the king's stickers to see him:
+                CardInfo king = cards.CardByName(P03Pack3Plugin.CardPrefix + "_StickerKing");
+                Stickers.CardStickerData data = king.GetStickerData();
+                data.FilterToUnlocked();
+                if (data.Positions.Count < 3)
+                    king.metaCategories.Clear();
+                return cards;
+            };
+
+            // Booger Barrel
+            CardManager.New(P03Pack3Plugin.CardPrefix, "BoogerBarrel", "Booger Barrel", 2, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_booger_barrel.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 2)
+                .SetRegionalP03Card(CardTemple.Tech)
+                .AddAbilities(SacrificeSlime.AbilityID);
+
+            // Artificer
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Artificer", "Artificer", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_artificer.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Orange, GemType.Blue)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(DrawThreeCommand.AbilityID);
+
+            // Gear Shifter
+            CardManager.New(P03Pack3Plugin.CardPrefix, "GearShifter", "Gear Shifter", 1, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gear_shifter.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Blue, GemType.Green)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(Ability.StrafeSwap);
+        }
+    }
+}

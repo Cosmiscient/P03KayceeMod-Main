@@ -1,6 +1,6 @@
 using System.Linq;
 using DiskCardGame;
-using Infiniscryption.Spells.Sigils;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -10,10 +10,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
     public static class ExpansionPackCards_2
     {
         internal const string EXP_2_PREFIX = "P03KCMXP2";
-
-        internal const string ZAP_CARD = "P03KCMXP2_ZAP";
-        internal const string CHARGE_CARD = "P03KCMXP2_CHARGE";
-        internal const string FORCED_UPGRADE_CARD = "P03KCMXP2_FORCED_UPGRADE";
 
         internal const string FLAME_CHARMER_CARD = "P03KCMXP2_FlameCharmer";
 
@@ -184,14 +180,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_pity_seeker.png", typeof(ExpansionPackCards_2).Assembly))
                 .AddAbilities(LatchNullConduit.AbilityID);
 
-            // Urch1n Cell
-            CardManager.New(EXP_2_PREFIX, "UrchinCell", "Urch1n Cell", 0, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_urchin_cell.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 2)
-                .SetCardTemple(CardTemple.Tech)
-                //.SetRegionalP03Card(CardTemple.Tech, CardTemple.Nature)
-                .AddAbilities(Ability.Sharp, CellDeSubmerge.AbilityID);
-
             // Urch1n Conduit
             CardManager.New(EXP_2_PREFIX, "UrchinConduit", "Urch1n Conduit", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_urchin_conduit.png", typeof(ExpansionPackCards_2).Assembly))
@@ -217,14 +205,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddMetaCategories(CardMetaCategory.Part3Random)
                 .AddAbilities(Stomp.AbilityID);
 
-            // Zap!
-            CardManager.New(EXP_2_PREFIX, "ZAP", "Zap!", 0, 0)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_zap.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 2)
-                .SetTargetedSpell()
-                .SetSpellAppearanceP03()
-                .AddAbilities(Zap.AbilityID);
-
             // Jimmy Jr
             CardManager.New(EXP_2_PREFIX, "JimmyJr", "Jimmy Jr.", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_jimmy_jr.png", typeof(ExpansionPackCards_2).Assembly))
@@ -246,18 +226,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 2)
                 .SetNeutralP03Card()
                 .SetStatIcon(GreenGemPower.AbilityID);
-
-            // Charge!
-            CardManager.New(EXP_2_PREFIX, "CHARGE", "Charge!", 0, 0)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_charge.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 0)
-                .SetInstaGlobalSpell()
-                .SetSpellAppearanceP03()
-                //.AddTraits(CustomCards.FastGlobalSpell)
-                // .AddAppearances(OnboardDynamicHoloPortrait.ID)
-                // .SetExtendedProperty(OnboardDynamicHoloPortrait.PREFAB_KEY, "prefabs/items/BatteryItem")
-                // .SetExtendedProperty(OnboardDynamicHoloPortrait.IN_HAND, true)
-                .AddAbilities(RefillBattery.AbilityID);
 
             // Weeper
             CardManager.New(EXP_2_PREFIX, "Weeper", "Weeper", 0, 2)
@@ -304,7 +272,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(EXP_2_PREFIX, "FlameCharmer", "Flamecharmer", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_flame_charmer.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
-                .AddAbilities(FireBomb.FlameStokerID, FriendliesMadeOfStone.AbilityID)
+                .AddAbilities(FlameStoker.AbilityID, FriendliesMadeOfStone.AbilityID)
                 .AddAppearances(RareDiscCardAppearance.ID)
                 .temple = CardTemple.Tech;
 
@@ -349,14 +317,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_orange_moxduster.png", typeof(ExpansionPackCards_2).Assembly))
                 .AddAbilities(Ability.GainGemOrange, MagicDust.AbilityID);
 
-            // Charge!
-            CardManager.New(EXP_2_PREFIX, "FORCED_UPGRADE", "Upgrade!", 0, 0)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_forced_upgrade.png", typeof(ExpansionPackCards_2).Assembly))
-                .SetCost(energyCost: 2)
-                .SetTargetedSpell()
-                .SetSpellAppearanceP03()
-                .AddAbilities(ForcedUpgrade.AbilityID);
-
             // Dr Zambot
             CardManager.New(EXP_2_PREFIX, "DrZambot", "Dr Zambot", 1, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_dr_zambot.png", typeof(ExpansionPackCards_2).Assembly))
@@ -385,6 +345,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_leapbot_neo.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 4)
                 .SetCardTemple(CardTemple.Tech)
+                .AddAppearances(RareDiscCardAppearance.ID)
                 .AddAbilities(Ability.Reach, Hopper.AbilityID);
 
             CardManager.BaseGameCards.First(c => c.name == "LeapBot").SetEvolve(lpneo, 1);

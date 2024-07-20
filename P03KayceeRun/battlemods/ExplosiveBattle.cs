@@ -23,7 +23,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 iconPath: "p03kcm/prefabs/unlit-bomb"
             );
             BattleModManager.SetGlobalActivationRule(ID,
-                () => AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOMB_CHALLENGE.challengeType)
+                () => AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOMB_CHALLENGE)
                       || P03Plugin.Instance.DebugCode.Contains("bomb")
                       || DefaultQuestDefinitions.BombBattles.IsDefaultActive());
         }

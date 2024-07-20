@@ -5,6 +5,7 @@ using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Cards;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Slots;
 using Pixelplacement;
 using UnityEngine;
 
@@ -44,7 +45,6 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         private const int VOLUME_SAMPLE_SIZE = 1024;
         //private readonly float[] clipSampleData = new float[VOLUME_SAMPLE_SIZE];
         private float currentUpdateTime = 0f;
-        private readonly float clipLoudness = 0f;
 
         private static readonly List<Texture> Gears = new() {
             TextureHelper.GetImageAsTexture("card_slot_spin1.png", typeof(P03FinalBossScreenArray).Assembly),

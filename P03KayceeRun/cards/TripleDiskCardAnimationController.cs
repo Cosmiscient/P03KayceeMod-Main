@@ -40,7 +40,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
         }
 
         private readonly List<TweenBase> activeTweens = new();
-        private readonly bool windupComplete = true;
 
         [HarmonyPatch(typeof(CardAnimationController), nameof(SetAnimationPaused))]
         [HarmonyPrefix]
@@ -159,6 +158,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     {
                         P03Plugin.Log.LogInfo("Redirecting attack to another slot");
                         yield return __instance.SlotAttackSlot(attackingSlot, gcs.PlayableCard.slot, waitAfter);
+                        yield break;
                     }
                 }
             }

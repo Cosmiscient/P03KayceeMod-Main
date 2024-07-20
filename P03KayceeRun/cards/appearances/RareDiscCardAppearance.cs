@@ -216,6 +216,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPrefix]
         private static void RBGifyCard(RenderStatsLayer __instance, Texture tex, bool emission)
         {
+            if (P03Plugin.Instance.DebugCode.Contains("export"))
+                File.WriteAllBytes($"cardexports/card_{__instance.gameObject.name}.png", ImageConversion.EncodeToPNG(tex as Texture2D));
+
             if (emission && __instance is DiskRenderStatsLayer drsl && tex is Texture2D texture && RGBIsActive)
             {
                 RareDiscCardAppearance rareApp = drsl.gameObject.transform.parent.parent.gameObject.GetComponent<RareDiscCardAppearance>();

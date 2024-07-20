@@ -16,6 +16,7 @@ using Sirenix.Serialization.Utilities;
 using Sirenix.Utilities;
 using UnityEngine;
 using Infiniscryption.P03KayceeRun.Faces;
+using InscryptionAPI.Slots;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
 {
@@ -32,6 +33,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
         public bool ScalesTippedToOpponent { get; private set; } = false;
         public bool GameIsOver { get; private set; } = false;
+        public bool TransitioningBellState { get; internal set; }
 
         public MultiverseGameState.Phase CurrentPhase { get; private set; } = MultiverseGameState.Phase.GameIsOver;
 
@@ -837,6 +839,20 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return tm.opponent.QueueNewCards(true, true);
         }
 
+        [HarmonyPatch(typeof(CombatBell), nameof(CombatBell.PressingAllowed))]
+        [HarmonyPostfix]
+        private static void DontPressBellWhenTransitioning(ref bool __result)
+        {
+            if (Instance == null)
+                return;
+
+            if (Instance.TransitioningBellState || Instance.MultiverseTravelLocked)
+            {
+                __result = false;
+                return;
+            }
+        }
+
         [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.SetupPhase))]
         [HarmonyPostfix]
         private static IEnumerator MultiverseSetupPhase(IEnumerator sequence, EncounterData encounterData, TurnManager __instance)
@@ -1003,10 +1019,11 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         [HarmonyPostfix]
         private static IEnumerator MultiverseTriggerHandler(IEnumerator sequence, Trigger trigger, bool triggerFacedown, object[] otherArgs)
         {
-            yield return sequence;
-
             if (MultiverseBattleSequencer.Instance == null)
+            {
+                yield return sequence;
                 yield break;
+            }
 
             List<TriggerReceiver> receivers = new();
             foreach (var universe in MultiverseBattleSequencer.Instance.MultiverseGames)
@@ -1028,6 +1045,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 if (GlobalTriggerHandler.ReceiverRespondsToTrigger(trigger, receiver, otherArgs))
                     yield return GlobalTriggerHandler.Instance.TriggerSequence(trigger, receiver, otherArgs);
             }
+
+            // Now run the original set of triggers
+            yield return sequence;
             yield break;
         }
 
@@ -1196,6 +1216,8 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 scrybes.leshy.SetEyesAnimated(false);
 
                 AchievementManager.Unlock(P03AchievementManagement.MULTIVERSE);
+                if (AscensionChallengeManagement.SKULL_STORM_ACTIVE)
+                    AchievementManager.Unlock(P03AchievementManagement.SKULLSTORM);
                 yield return new WaitForSeconds(1.5f);
                 PauseMenu.pausingDisabled = false;
                 EventManagement.FinishAscension(true);

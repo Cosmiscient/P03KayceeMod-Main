@@ -7,6 +7,7 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.CustomRules;
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03KayceeRun.Sequences;
 using Pixelplacement;
 using UnityEngine;
 
@@ -33,7 +34,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
             BattleModManager.SetGlobalActivationRule(ID,
                 () => AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.PAINTING_CHALLENGE)
-                      && TurnManager.Instance.opponent != null && TurnManager.Instance.opponent is Part3BossOpponent);
+                      && TurnManager.Instance.opponent != null && TurnManager.Instance.opponent is Part3BossOpponent && TurnManager.Instance.opponent is not DredgerBossOpponent);
         }
 
         private GameObject effects = null;
@@ -218,9 +219,10 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 Tween.LocalScale(painting, new(0.4f, 0.4f, 0.4f), .2f, .2f);
                 Tween.LocalRotation(painting, new Vector3(0f, 300f, 0f), .2f, .2f);
                 Tween.LocalPosition(marker, new Vector3(1f, .6f, -9f), .3f, 0f, Tween.EaseInOut, completeCallback: () => AudioController.Instance.PlaySound3D("metal_object_up#1", MixerGroup.TableObjectsSFX, marker.position, 1f));
-                Tween.LocalPosition(marker, new Vector3(-3.9726f, -0.6236f, -6.0578f), .3f, .3f, Tween.EaseInBack, completeCallback: () => TableVisualEffectsManager.Instance.ThumpTable(0.7f));
-                yield return new WaitForSeconds(1f);
+                yield return new WaitForSeconds(0.3f);
                 marker.SetParent(LifeManager.Instance.Scales3D.gameObject.transform, worldPositionStays: true);
+                Tween.LocalPosition(marker, new Vector3(0.1877f, 1.5764f, -0.2358f), .3f, 0.05f, Tween.EaseInBack, completeCallback: () => TableVisualEffectsManager.Instance.ThumpTable(0.7f));
+                yield return new WaitForSeconds(1f);
                 this.offsitePainting = marker.gameObject;
             }
 

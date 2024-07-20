@@ -13,8 +13,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
     [HarmonyPatch]
     public class OnboardWizardCardModel : CardAppearanceBehaviour
     {
-        private readonly bool portraitSpawned = false;
-
         public static Appearance ID { get; private set; }
 
         private GameObject GetPrefab()

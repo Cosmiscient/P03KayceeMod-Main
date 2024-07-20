@@ -10,7 +10,7 @@
     "dotnet.implementType.propertyGenerationBehavior": "preferAutoProperties",
     "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "fullSolution",
     "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "fullSolution",
-    "dotnet.server.useOmnisharp": true,
+    "dotnet.server.useOmnisharp": false,
     "csharp.suppressBuildAssetsNotification": false,
     "[python]": {
         "editor.formatOnType": true,

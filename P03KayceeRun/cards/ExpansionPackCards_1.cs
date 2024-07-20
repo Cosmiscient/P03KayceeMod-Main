@@ -1,5 +1,6 @@
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -32,14 +33,14 @@ namespace Infiniscryption.P03KayceeRun.Cards
             wolfBot.SetEvolve(wolfBeast, 1);
 
             // Viperbeast
-            CardInfo viperBeast = CardManager.New(EXP_1_PREFIX, "ViperBeast", "V1P3R", 3, 1)
+            CardInfo viperBeast = CardManager.New(EXP_1_PREFIX, "ViperBeast", "PYTH0N", 3, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_transformer_rattler.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 5)
                 .SetCardTemple(CardTemple.Tech)
                 .AddAbilities(Ability.Transformer);
 
             // Viperbot
-            CardInfo viperBot = CardManager.New(EXP_1_PREFIX, "ViperBot", "V1P3R", 1, 1)
+            CardInfo viperBot = CardManager.New(EXP_1_PREFIX, "ViperBot", "PYTH0N", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_viperbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 5)
@@ -148,18 +149,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .AddAppearances(HighResAlternatePortrait.ID)
                 .SetWeaponMesh(DiskCardWeapon.Fish)
                 .temple = CardTemple.Tech;
-
-            // Salmon and beastmaster
-            CardManager.New(EXP_1_PREFIX, "Salmon", "S4LM0N", 0, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_salmon.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_salmon.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetCost(energyCost: 1)
-                .AddMetaCategories(CardMetaCategory.Part3Random)
-                .SetCardTemple(CardTemple.Tech)
-                .SetWeaponMesh(DiskCardWeapon.Fish)
-                .SetEvolve("Angler_Fish_More", 1);
-
-            CardManager.BaseGameCards.CardByName("Angler_Fish_More").SetEvolve("Angler_Fish_Good", 1);
 
             CardInfo bm2 = CardManager.New(EXP_1_PREFIX, "BeastMaster2", "B3A5T GR4ND M4ST3R", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_beastmaster.png", typeof(ExpansionPackCards_1).Assembly))
@@ -315,7 +304,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             frankenBeast.metaCategories = new();
 
             // Clock man
-            CardManager.New(EXP_1_PREFIX, "Clockbot", "Mr:Clock", 0, 2)
+            CardManager.New(EXP_1_PREFIX, "Clockbot", "Mr:Clock", 0, 3)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_clockbot.png", typeof(ExpansionPackCards_1).Assembly))
                 .SetCost(energyCost: 3)
@@ -373,20 +362,6 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .SetRare()
                 .AddAbilities(EmeraldPower.AbilityID);
-
-            // I'm sorry gem rotator you don't work
-            // CardManager.New(EXP_1_PREFIX, "GemRotator", "Gem Cycler", 1, 2)
-            //     .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gemcycler.png", typeof(ExpansionPackCards_1).Assembly))
-            //     .SetCost(energyCost: 5)
-            //     //.SetRegionalP03Card(CardTemple.Wizard)
-            //     .AddAbilities(GemRotator.AbilityID);
-
-            // Seed
-            CardManager.New(EXP_1_PREFIX, "SEED", "Seed", 0, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_seed.png", typeof(ExpansionPackCards_1).Assembly))
-                .SetCost(energyCost: 1)
-                .SetCardTemple(CardTemple.Tech)
-                .AddSpecialAbilities(SeedBehaviour.AbilityID);
         }
     }
 }

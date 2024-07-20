@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Sequences;
 using Pixelplacement;
@@ -40,6 +41,10 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         }
 
         public class Part3RareCardChoicesNodeData : CardChoicesNodeData { }
+
+        public class BeastTransformerNodeFallbackChoicesNodeData : CardChoicesNodeData { }
+
+        public class SkeleclockNodeFallbackChoicesNodeData : CardChoicesNodeData { }
 
         private static readonly Dictionary<RunBasedHoloMap.Zone, CardMetaCategory> selectionCategories = new()
         {
@@ -116,12 +121,39 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 __result = new();
 
+                // Handle Mycologists
                 if (region == RunBasedHoloMap.Zone.Mycologist)
                 {
                     //int newRandomSeed = P03AscensionSaveData.RandomSeed;
                     for (int i = 0; i < 3; i++)
                         __result.Add(new() { CardInfo = GenerateMycoCard(randomSeed + (100 * i)) });
 
+                    return false;
+                }
+
+                if (data is SkeleclockNodeFallbackChoicesNodeData)
+                {
+                    var possibles = ScriptableObjectLoader<CardInfo>.AllData.FindAll(x => x.metaCategories.Contains(CustomCards.NeutralRegion)).ToList();
+                    for (int i = 0; i < 3; i++)
+                    {
+                        int idx = SeededRandom.Range(0, possibles.Count, randomSeed + (100 * i));
+                        var card = CardLoader.Clone(possibles[idx]);
+                        card.Mods.Add(new(1, 0) { abilities = new() { NewPermaDeath.AbilityID } });
+                        __result.Add(new() { CardInfo = card });
+                        possibles.RemoveAt(idx);
+                    }
+                    return false;
+                }
+
+                if (data is BeastTransformerNodeFallbackChoicesNodeData)
+                {
+                    var possibles = ScriptableObjectLoader<CardInfo>.AllData.FindAll(x => x.metaCategories.Contains(CustomCards.NewBeastTransformers)).ToList();
+                    for (int i = 0; i < 3; i++)
+                    {
+                        int idx = SeededRandom.Range(0, possibles.Count, randomSeed + (100 * i));
+                        __result.Add(new() { CardInfo = CardLoader.Clone(possibles[idx]) });
+                        possibles.RemoveAt(idx);
+                    }
                     return false;
                 }
 

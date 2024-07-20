@@ -10,7 +10,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <DefaultItemExcludes>$(DefaultItemExcludes);P03AssetBundle\**\*.*</DefaultItemExcludes>
-    <NoWarn></NoWarn>
+    <NoWarn>Publicizer001,Harmony003</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -44,6 +44,10 @@
       <HintPath>.\lib\Infiniscryption.Spells.dll</HintPath>
     </Reference>
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\P03SigilLibrary\P03SigilLibrary.csproj" />
+  </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
@@ -62,8 +66,8 @@
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="xcopy /Y $(ProjectDir)\lib\*.dll $(TargetDir)" />
-    <Exec Command="xcopy /Y $(ProjectDir)\lib\*.dll $(TargetDir)" />
     <!--
+    <Exec Command="xcopy /Y $(ProjectDir)\lib\*.dll $(TargetDir)" />
     <Exec Command="$(PkgILRepack)\tools\ILRepack /out:$(ProjectDir)\Compiled\Infiniscryption.P03KayceeRun.dll $(TargetPath) $(ProjectDir)../Core/Compiled/Infiniscryption.Core.dll /lib:$(TargetDir)" />
     -->
 	<!--

@@ -4,8 +4,10 @@ using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+
 using Infiniscryption.P03KayceeRun.Helpers;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using UnityEngine;
 
@@ -53,11 +55,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             if (__instance.modChoices == null)
             {
                 List<Ability> normalAbilities = AbilitiesUtil.GetLearnedAbilities(false, 1, 4, AbilityMetaCategory.Part3Modular);
-                List<Ability> allBustedAbilities = CardManager.AllCardsCopy
-                                                              .Where(c => TradeChipsSequencer.IsValidDraftCard(c)
-                                                                          && c.HasCardMetaCategory(CardMetaCategory.Rare))
-                                                              .SelectMany(c => c.abilities)
-                                                              .ToList();
+                List<Ability> allBustedAbilities = RandomRareAbility.RareAbilities;
                 allBustedAbilities.Add(Ability.TriStrike);
                 allBustedAbilities.Add(Ability.Evolve);
                 allBustedAbilities.Add(TreeStrafe.AbilityID);

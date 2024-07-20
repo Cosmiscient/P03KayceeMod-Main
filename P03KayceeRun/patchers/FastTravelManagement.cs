@@ -341,6 +341,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             private static void SetDroneFlying()
             {
                 P03Plugin.Log.LogInfo("Drone flying = true");
+                PauseMenu.pausingDisabled = true;
                 isDroneFlying = true;
             }
 
@@ -350,6 +351,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 P03Plugin.Log.LogInfo("Drone flying = false");
                 yield return sequence;
                 isDroneFlying = false;
+                PauseMenu.pausingDisabled = false;
             }
         }
 

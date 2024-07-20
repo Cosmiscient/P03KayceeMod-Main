@@ -1,4 +1,5 @@
 using DiskCardGame;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;

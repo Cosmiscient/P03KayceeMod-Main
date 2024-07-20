@@ -310,16 +310,71 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             public Dictionary<string, Vector3> Rotations { get; set; } = new();
             public Dictionary<string, Vector3> Scales { get; set; } = new();
             public Dictionary<string, Ability> Ability { get; set; } = new();
+            public string DataKey = string.Empty;
 
             public override string ToString()
             {
                 string retval = "Stickers";
+                retval += DataKey;
                 retval += $"[StickerPositions:{FormatVectorMap(Positions)}]";
                 retval += $"[StickerRotations:{FormatVectorMap(Rotations)}]";
                 retval += $"[StickerScales:{FormatVectorMap(Scales)}]";
 
                 string stickerAbilities = String.Join(",", Ability.Select(kvp => $"{kvp.Key}:{(int)kvp.Value}"));
                 retval += $"[StickerAbility:{stickerAbilities}]";
+                return retval;
+            }
+
+            private static bool IsValidKey(string key)
+            {
+                if (!StickerRewards.ContainsKey(key))
+                    return true;
+                ModdedAchievementManager.AchievementDefinition stickerAchievemnent = ModdedAchievementManager.AchievementById(Stickers.StickerRewards[key]);
+                return stickerAchievemnent.IsUnlocked;
+            }
+
+            public void FilterToUnlocked()
+            {
+                if (Stickers.DebugStickers)
+                    return;
+
+                List<string> invalidKeys = Positions.Keys
+                                           .Concat(Rotations.Keys)
+                                           .Concat(Scales.Keys)
+                                           .Concat(Ability.Keys)
+                                           .Distinct()
+                                           .Where(s => !IsValidKey(s))
+                                           .ToList();
+
+                foreach (var key in invalidKeys)
+                {
+                    Rotations.Remove(key);
+                    Positions.Remove(key);
+                    Scales.Remove(key);
+                    Ability.Remove(key);
+                }
+            }
+
+            public CardStickerData Merge(CardStickerData b)
+            {
+                foreach (var k in b.Positions)
+                    this.Positions[k.Key] = k.Value;
+                foreach (var k in b.Rotations)
+                    this.Rotations[k.Key] = k.Value;
+                foreach (var k in b.Scales)
+                    this.Scales[k.Key] = k.Value;
+                foreach (var k in b.Ability)
+                    this.Ability[k.Key] = k.Value;
+                return this;
+            }
+
+            public static CardStickerData ToSingle(List<CardStickerData> allData)
+            {
+                if (allData.Count == 0)
+                    return new();
+                CardStickerData retval = allData[0];
+                for (int i = 1; i < allData.Count; i++)
+                    retval.Merge(allData[i]);
                 return retval;
             }
         }
@@ -359,21 +414,23 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             return retval;
         }
 
-        private static string FormatVectorMap(Dictionary<string, Vector3> value) => String.Join("|", value.Select(kvp => $"{kvp.Key},{kvp.Value.x},{kvp.Value.y},{kvp.Value.z}"));
+        private static string FormatVectorMap(Dictionary<string, Vector3> value) => String.Join("|", value.Select(kvp => $"{kvp.Key},{kvp.Value.x:0.00},{kvp.Value.y:0.00},{kvp.Value.z:0.00}"));
 
         internal static bool IsStickerApplied(string stickerName) => Part3SaveData.Data.deck.Cards.Any(ci => ci.GetStickerData().Positions.ContainsKey(stickerName));
 
-        private static CardModificationInfo GetStickerMod(this PlayableCard card)
+        private static List<CardModificationInfo> GetStickerMod(this PlayableCard card)
         {
+            List<CardModificationInfo> retval = new();
             foreach (CardModificationInfo cardMod in card.TemporaryMods)
             {
                 if (string.IsNullOrEmpty(cardMod.singletonId))
                     continue;
 
                 if (cardMod.singletonId.StartsWith("Stickers"))
-                    return cardMod;
+                    retval.Add(cardMod);
             }
-            return card.Info.GetStickerMod();
+            retval.Add(card.Info.GetStickerMod());
+            return retval;
         }
 
         private static CardModificationInfo GetStickerMod(this CardInfo info, bool force = false)
@@ -386,13 +443,16 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 if (cardMod.singletonId.StartsWith("Stickers"))
                     return cardMod;
             }
+
             if (!force)
                 return null;
+
             CardModificationInfo stickerMod = new()
             {
                 singletonId = "Stickers"
             };
             Part3SaveData.Data.deck.ModifyCard(info, stickerMod);
+
             return stickerMod;
         }
 
@@ -452,18 +512,24 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             return retval;
         }
 
-        internal static CardStickerData GetStickerData(this Card card)
+        public static CardStickerData GetStickerData(this Card card)
         {
             if (card is PlayableCard pCard)
             {
-                CardModificationInfo stickerMod = pCard.GetStickerMod();
-                return new CardStickerData()
-                {
-                    Positions = stickerMod?.GetStickerVectors("Positions") ?? new(),
-                    Rotations = stickerMod?.GetStickerVectors("Rotations") ?? new(),
-                    Scales = stickerMod?.GetStickerVectors("Scales") ?? new(),
-                    Ability = stickerMod?.GetStickerAbility() ?? new()
-                };
+                CardStickerData retval = card.Info.GetStickerData();
+                List<CardModificationInfo> stickerMod = pCard.GetStickerMod();
+                List<CardStickerData> allData = stickerMod.Select(
+                    m => new CardStickerData()
+                    {
+                        Positions = m?.GetStickerVectors("Positions") ?? new(),
+                        Rotations = m?.GetStickerVectors("Rotations") ?? new(),
+                        Scales = m?.GetStickerVectors("Scales") ?? new(),
+                        Ability = m?.GetStickerAbility() ?? new()
+                    }
+                ).ToList();
+                retval.Merge(CardStickerData.ToSingle(allData));
+                retval.FilterToUnlocked();
+                return retval;
             }
             else
             {
@@ -471,16 +537,32 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             }
         }
 
-        internal static CardStickerData GetStickerData(this CardInfo info)
+        public static CardStickerData GetStickerData(this CardInfo info)
         {
             CardModificationInfo stickerMod = info.GetStickerMod();
-            return new CardStickerData()
+            CardStickerData modData = new()
             {
                 Positions = stickerMod?.GetStickerVectors("Positions") ?? new(),
                 Rotations = stickerMod?.GetStickerVectors("Rotations") ?? new(),
                 Scales = stickerMod?.GetStickerVectors("Scales") ?? new(),
                 Ability = stickerMod?.GetStickerAbility() ?? new()
             };
+
+            string hardCodedStickerSet = info.GetExtendedProperty("Stickers.Forced");
+            if (!string.IsNullOrEmpty(hardCodedStickerSet))
+            {
+                CardModificationInfo fakeMod = new() { singletonId = hardCodedStickerSet };
+                CardStickerData hardCodedData = new()
+                {
+                    Positions = fakeMod?.GetStickerVectors("Positions") ?? new(),
+                    Rotations = fakeMod?.GetStickerVectors("Rotations") ?? new(),
+                    Scales = fakeMod?.GetStickerVectors("Scales") ?? new(),
+                    Ability = fakeMod?.GetStickerAbility() ?? new()
+                };
+                modData.Merge(hardCodedData);
+            }
+            modData.FilterToUnlocked();
+            return modData;
         }
 
         internal static CardInfo SetStickerData(this CardInfo info, CardStickerData data)

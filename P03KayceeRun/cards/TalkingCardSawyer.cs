@@ -89,19 +89,23 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             talkingCard.AnimatedPortrait.GetComponentInChildren<CharacterFace>().voiceSoundId = _faceInfo.voiceId;
 
-            talkingCard.RemoveAppearances(CardAppearanceBehaviour.Appearance.AnimatedPortrait);
-            talkingCard.AddAppearances(CardAppearanceBehaviour.Appearance.DynamicPortrait);
+            // A quick check to see if the API has been updated yet
+            if (talkingCard.appearanceBehaviour.Contains(CardAppearanceBehaviour.Appearance.AnimatedPortrait))
+            {
+                talkingCard.RemoveAppearances(CardAppearanceBehaviour.Appearance.AnimatedPortrait);
+                talkingCard.AddAppearances(CardAppearanceBehaviour.Appearance.DynamicPortrait);
 
-            foreach (var rend in talkingCard.AnimatedPortrait.GetComponentsInChildren<SpriteRenderer>())
-                rend.color = new(0f, 0.755f, 1f);
+                foreach (var rend in talkingCard.AnimatedPortrait.GetComponentsInChildren<SpriteRenderer>())
+                    rend.color = new(0f, 0.755f, 1f);
 
-            RecursiveSetLayer(talkingCard.AnimatedPortrait, "CardOffscreenEmission");
+                RecursiveSetLayer(talkingCard.AnimatedPortrait, "CardOffscreenEmission");
 
-            talkingCard.AnimatedPortrait.transform.localScale = new(1f, 1f, 1f);
-            talkingCard.AnimatedPortrait.transform.Find("Anim/Body").localPosition = new(0f, 0.2f, 0f);
+                talkingCard.AnimatedPortrait.transform.localScale = new(1f, 1f, 1f);
+                talkingCard.AnimatedPortrait.transform.Find("Anim/Body").localPosition = new(0f, 0.2f, 0f);
 
-            // Add the dialogue text
-            GameObject.Instantiate(CardLoader.GetCardByName("Angler_Talking").AnimatedPortrait.transform.Find("DialogueText").gameObject, talkingCard.AnimatedPortrait.transform);
+                // Add the dialogue text
+                GameObject.Instantiate(CardLoader.GetCardByName("Angler_Talking").AnimatedPortrait.transform.Find("DialogueText").gameObject, talkingCard.AnimatedPortrait.transform);
+            }
         }
     }
 }

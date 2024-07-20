@@ -34,6 +34,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             info.opponentUsable = true;
             info.flipYIfOpponent = true;
             info.passive = false;
+            info.hasColorOverride = true;
+            info.colorOverride = Color.black;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, CustomCards.MultiverseAbility };
 
             AbilityID = AbilityManager.Add(

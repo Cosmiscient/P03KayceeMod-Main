@@ -10,6 +10,7 @@ using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 using Infiniscryption.P03KayceeRun.Encounters;
+using Infiniscryption.P03SigilLibrary.Sigils;
 
 namespace Infiniscryption.P03KayceeRun.Quests
 {
@@ -187,7 +188,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
             ILoveBones = QuestManager.Add(P03Plugin.PluginGuid, "I Love Bones")
                                      .OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Faceless, CompositeFigurine.FigurineType.Gravedigger));
             ILoveBones.SetRegionCondition(RunBasedHoloMap.Zone.Undead)
-                      .AddDialogueState("I LOVE BONES!!", "P03ILoveBones")
+                      .AddState("I LOVE BONES!!", "P03ILoveBones")
                       .SetDynamicStatus(() =>
                       {
                           return Part3SaveData.Data.deck.Cards.Where(
@@ -299,16 +300,22 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
             // Pyromania
             Pyromania = QuestManager.Add(P03Plugin.PluginGuid, "Pyromania").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Pyromaniac, CompositeFigurine.FigurineType.Enchantress));
-            Pyromania.SetGenerateCondition(() => Part3SaveData.Data.deck.Cards.Where(c => c.Abilities.Any(a => AbilitiesUtil.GetInfo(a).metaCategories.Contains(FireBomb.FlamingAbility))).Count() >= 2)
+            Pyromania.SetGenerateCondition(() => Part3SaveData.Data.deck.Cards.Where(c => c.Abilities.Any(a => AbilitiesUtil.GetInfo(a).metaCategories.Contains(BurningSlotBase.FlamingAbility))).Count() >= 2)
                      .AddDialogueState("BURN BABY BURN", "P03PyroQuestStart")
                      .AddDefaultActiveState("BURN BABY BURN", "P03PyroQuestInProgress")
                      .WaitForQuestCounter(BURNED_CARDS)
                      .AddDialogueState("SO SATISFYING...", "P03PyroQuestComplete")
                      .AddGainCardReward(ExpansionPackCards_2.FLAME_CHARMER_CARD);
 
+            BurningSlotBase.FireDamageTrigger += delegate (int damage, PlayableCard card)
+            {
+                if (card.Health == 1)
+                    DefaultQuestDefinitions.Pyromania.IncrementQuestCounter(onlyIfActive: true);
+            };
+
             // Conveyors
             Conveyors = QuestManager.Add(P03Plugin.PluginGuid, "Conveyors").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Steambot, CompositeFigurine.FigurineType.Robot));
-            Conveyors.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.ALL_CONVEYOR.challengeType))
+            Conveyors.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.ALL_CONVEYOR))
                      .AddDialogueState("CONVEYOR FIELD TRIALS", "P03ConveyorQuestStart")
                      .AddDialogueState("START FIELD TRIALS?", "P03ConveyorQuestStarting")
                      .AddDefaultActiveState("FIELD TRIALS IN PROGRESS", "P03ConveyorQuestActive")
@@ -319,7 +326,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
             // Bombs
             BombBattles = QuestManager.Add(P03Plugin.PluginGuid, "BombBattles").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.MrsBomb, CompositeFigurine.FigurineType.Robot));
-            BombBattles.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOMB_CHALLENGE.challengeType))
+            BombBattles.SetGenerateCondition(() => EventManagement.CompletedZones.Count < 3 && !AscensionSaveData.Data.ChallengeIsActive(AscensionChallengeManagement.BOMB_CHALLENGE))
                      .AddDialogueState("BOOM BOOM BOOM", "P03BombQuestStart")
                      .AddDialogueState("LET'S BLOW IT UP", "P03BombQuestStarting")
                      .AddDefaultActiveState("KEEP UP THE BOOM", "P03BombQuestActive")

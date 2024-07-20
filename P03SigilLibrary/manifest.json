@@ -1,0 +1,10 @@
+{
+    "name": "P03_Sigilarium",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/Cosmiscient/P03KayceeMod-Main",
+    "description": "All of the sigils from 'P03 in Kaycees Mod', now available standalone!",
+    "dependencies": [
+        "API_dev-API-2.19.5",
+        "WhistleWind-New_Spell_Card_Toolkit-1.2.4"
+    ]
+}

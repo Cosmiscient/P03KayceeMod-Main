@@ -1,3 +1,62 @@
+# 5.0.21
+- Refactor: The entire mod has been re-organized. The majority of sigils are now part of the P03 Sigil Library mod, allowing other mods to reuse sigils without having to use this mod.
+- Refactor: The slot modification code now exists in the API instead of in this mod.
+- Balance Change: Mr:Clock now has 3 health instead of 2.
+
+# 5.0.20
+- Enhancement: Added a new behavior for when the Skeleclock, Gemify, and Beast Transformer nodes don't have any valid cards to upgrade in your deck. The Beast Transformer node will allow you to select a random Beast card to add to your deck. The Gemify node will allow you to add a Mox Sigil to your cards. And the Skeleclock node will let you choose a card to add to your deck that has been skeleclocked.
+- Enhancement: A new upgrade node is now technically available. This node allows you to adjust the card cost of cards in your deck between energy, bones, blood, and gems. **However** this node only appears if there are already cards in the card pool with bones, blood, and gems cost. Since this does not happen in this mod, you won't see this unless you install other mods that add cards with other costs. Think of this as a "preview" feature in advance of additional work to come.
+- Bug fix: Fixed a case where the Steel Trap sigil was still giving out Wolf Pelts.
+- Bug fix: Gemfication properly copies to transforming cards.
+- Hopeful bug fix: Added some additional validation checks when fast traveling to hopefully prevent random crashes when using the waypoint machine.
+- Minor bug fix: Transforming cards will keep their original names when transforming.
+- Minor bug fix: Changed the order that abilities trigger during the final challenge boss.
+- Non functional change: The Steel Trap sigil will now give out "Junk" instead of "Empty Vessels"
+- Non functional change: V1P3R is now called PYTH0N
+- Non functional change: Updated bounty hunter art
+- Non functional change: Updated the portrait for "yarr.torrent"
+
+# 5.0.19
+- Balance Change: Gamblobot's ability now costs 2 energy instead of 3.
+- Bug Fix: Cards attacking the Experiment should no longer also attack the player.
+- Bug Fix: The "I Love Bones" quest no longer automatically completes.
+- Non functional change: Gamblobot has a new portait based off of the IRL Inscryption card.
+- Non functional change: Plasma Jimmy's ability is now called "Head Shot" based off of the IRL Inscryption card.
+- Non functional change: The fourth map no longer creates an empty secret room.
+- Non functional change: Finally updated the internal plugin version number from 4.0 to 5.0
+
+# 5.0.18
+- G0lly's mole man now costs 1 blood instead of being free.
+- Fixed a defect where the Scarlet Skull achievment was not unlocking after beating the final challenge boss.
+- Fixed a defect with how delayed callbacks in the final challenge boss are processed to avoid rare collection modified errors.
+
+# 5.0.17
+- Slightly improved the random seed manager, specifically as it relates to the final challenge boss.
+- The L33pBot model that appears on the player's deck when the Leaping Side Deck challenge is active is now animated.
+- The Eccentric Painter challenge no longer activates during the fight with the Dredger.
+- The Dredger's dialogue during battle now advances on input.
+
+# 5.0.16
+- I found and fixed the actual issue with the Challenges screen that I talked about in patch 5.0.14. The screen should work as expected now.
+- Fixed a rarely occurring defect where the game could enter into an infinite loop on startup trying to load the save file.
+
+# 5.0.15
+- Leapbot Neo is now visually presented as a rare card.
+- Fixed a defect where sometimes the Double Death sigil doesn't trigger.
+- Fixed a visual bug with how the effects of the Eccentric Painter and Great Transcendence challenges interact.
+- Improved some save file handling code to hopefully prevent some of the challenge level issues.
+
+# 5.0.14
+- Multiple bug reports have come in for the Challenge setup screen; I can't recreate those to properly test, but it's blocking enough people that I'm going to try this fix anyway. Here goes nothing.
+
+# 5.0.13
+- Added some foundational code in preparation for future expansion.
+- Added some additional error handling to the "rotate board clockwise" effect. This should prevent the rare error that has been reported here.
+- Updated the name of the deck editor bug fix patch so that it's clear it's not an issue if it fails to load.
+- You can no longer pause the game while fast traveling (this is to prevent an exploit that would allow you to reset nodes in a region).
+- All Page Two challenges (conveyor battles, bomb battles, and traditional lives) have been removed.
+- Balance Change: Chippy no longer can shred spells or cards with the Unkillable sigil.
+
 # 5.0.12
 - More bug fixes!
   - Fixed a bug where a card with both Frozen Away and Full of Oil would softlock the game when it died.

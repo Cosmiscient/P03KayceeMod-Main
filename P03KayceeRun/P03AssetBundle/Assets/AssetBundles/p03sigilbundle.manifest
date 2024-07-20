@@ -1,0 +1,38 @@
+ManifestFileVersion: 0
+CRC: 1816562950
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 3756f06b6c5e4b174b1408a18ab542e8
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: afd12bf211ec48792818822e52781931
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Prefabs/Molotov.prefab
+- Assets/Effects/Fire_Ball.prefab
+- Assets/Effects/Fire_Parent.prefab
+Dependencies:
+- C:/GIT/P03KayceeMod-Main/P03KayceeRun/P03AssetBundle/Assets/AssetBundles/p03assetbundle

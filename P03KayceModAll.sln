@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P03KayceeRun", "P03KayceeRun\P03KayceeRun.csproj", "{56360B08-2AFA-4EEC-B1E6-1F8CB4A4D877}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P03ExpansionPack3Plugin", "P03ExpansionPack3\P03ExpansionPack3Plugin.csproj", "{5C4F64F0-DE3A-41ED-981D-C3861CA7929A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P03SigilLibrary", "P03SigilLibrary\P03SigilLibrary.csproj", "{C7B8F61D-8D27-42C1-B7B0-16C4E461B294}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,13 @@ Global
 		{56360B08-2AFA-4EEC-B1E6-1F8CB4A4D877}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56360B08-2AFA-4EEC-B1E6-1F8CB4A4D877}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56360B08-2AFA-4EEC-B1E6-1F8CB4A4D877}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C4F64F0-DE3A-41ED-981D-C3861CA7929A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C4F64F0-DE3A-41ED-981D-C3861CA7929A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C4F64F0-DE3A-41ED-981D-C3861CA7929A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C4F64F0-DE3A-41ED-981D-C3861CA7929A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7B8F61D-8D27-42C1-B7B0-16C4E461B294}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7B8F61D-8D27-42C1-B7B0-16C4E461B294}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7B8F61D-8D27-42C1-B7B0-16C4E461B294}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7B8F61D-8D27-42C1-B7B0-16C4E461B294}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

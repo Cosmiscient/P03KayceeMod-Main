@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Triggers;
 using Sirenix.Utilities;

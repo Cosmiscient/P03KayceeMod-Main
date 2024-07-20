@@ -7,6 +7,7 @@ using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Quests;
 using Infiniscryption.P03KayceeRun.Sequences;
+using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Saves;
 using UnityEngine;
@@ -69,6 +70,32 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             get => ModdedSaveManager.SaveData.GetValueAsBoolean(P03Plugin.PluginGuid, "SawMapInfo");
             set => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "SawMapInfo", value);
+        }
+
+        internal static bool AllFourResourcesInPool
+        {
+            get
+            {
+                bool bones = false;
+                bool blood = false;
+                bool gems = false;
+                bool energy = false;
+                foreach (var card in CardLoader.AllData.Where(TradeChipsSequencer.IsValidDraftCard))
+                {
+                    if (card.BonesCost > 0)
+                        bones = true;
+                    if (card.BloodCost > 0)
+                        blood = true;
+                    if (card.GemsCost.Count > 0)
+                        gems = true;
+                    if (card.EnergyCost > 0)
+                        energy = true;
+
+                    if (bones && blood && gems && energy)
+                        return true;
+                }
+                return false;
+            }
         }
 
         public static Part3SaveData.WorldPosition MycologistReturnPosition
@@ -191,7 +218,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             { UnlockAscensionItemNodeData.UnlockItemsAscension, 0.5f },
             { HoloMapNode.NodeDataType.CreateTransformer, -1f },
             { HoloMapNode.NodeDataType.OverclockCard, -1f },
-            { AscensionRecycleCardNodeData.AscensionRecycleCard, -2f }
+            { AscensionRecycleCardNodeData.AscensionRecycleCard, -2f },
+            { SwapCardCostNodeData.SwapCardCost, -2f }
         };
 
         public static int EncounterDifficulty

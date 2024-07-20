@@ -46,15 +46,13 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             if (targetSlot.Card != null)
             {
-                yield return TextDisplayer.Instance.PlayDialogueEvent("DredgerScrapDropUrchin", TextDisplayer.MessageAdvanceMode.Auto);
-                yield return new WaitForSeconds(0.2f);
+                yield return TextDisplayer.Instance.PlayDialogueEvent("DredgerScrapDropUrchin", TextDisplayer.MessageAdvanceMode.Input);
                 targetSlot.Card.ExitBoard(0.4f, Vector3.zero);
                 yield return new WaitForSeconds(0.4f);
             }
             else
             {
-                yield return TextDisplayer.Instance.PlayDialogueEvent("DredgerScrapDrop", TextDisplayer.MessageAdvanceMode.Auto);
-                yield return new WaitForSeconds(0.3f);
+                yield return TextDisplayer.Instance.PlayDialogueEvent("DredgerScrapDrop", TextDisplayer.MessageAdvanceMode.Input);
             }
             yield return BoardManager.Instance.CreateCardInSlot(CardLoader.GetCardByName(CustomCards.PILE_OF_SCRAP), targetSlot);
         }
