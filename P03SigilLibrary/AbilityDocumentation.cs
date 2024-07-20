@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using DiskCardGame;
 using HarmonyLib;
+using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
 
@@ -12,6 +13,8 @@ namespace Infiniscryption.P03SigilLibrary
 {
     public static class AbilityDocumentation
     {
+        public const string ROOT_PATH = "https://github.com/Cosmiscient/P03KayceeMod-Main/blob/main/P03SigilLibrary/assets/";
+
         public class AbilityDocInfo
         {
             public AbilityInfo info { get; set; }
@@ -52,7 +55,8 @@ namespace Infiniscryption.P03SigilLibrary
             markdown += "|---|---|---|---|\n";
             foreach (var info in AllAbilities.OrderBy(adi => adi.info.rulebookName))
             {
-                markdown += $"|![Icon](data:image/png;base64,{info.imageB64})";
+                var fab = AbilityManager.AllAbilities.AbilityByID(info.info.ability);
+                markdown += $"|[[{ROOT_PATH}{fab.Texture.name}.png]]";
                 markdown += $"|{info.info.rulebookName}";
                 markdown += $"|{P03SigilLibraryPlugin.PluginGuid}.{info.info.rulebookName}";
                 markdown += $"|{info.info.rulebookDescription}";

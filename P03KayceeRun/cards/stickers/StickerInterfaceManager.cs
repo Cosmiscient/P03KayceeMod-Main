@@ -1,7 +1,10 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.Achievements;
+using InscryptionAPI.Card;
 using Pixelplacement;
 using Pixelplacement.TweenSystem;
 using TMPro;
@@ -16,6 +19,8 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
         internal static readonly Vector3 CARD_HOME_INDEX = new(2.23f, .02f, 0f);
         internal static readonly Vector3 STICKER_HOME_POSITION = new(-2.23f, 0.01f, -1.5f);
+
+        internal static List<CardInfo> EditableCards => Part3SaveData.Data.deck.Cards.Where(c => string.IsNullOrEmpty(c.GetExtendedProperty("Stickers.Forced"))).ToList();
 
         internal const int INTERFACE_STENCIL_NUMBER = 5;
 
@@ -58,7 +63,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
 
             card.transform.localPosition = CARD_HOME_INDEX + new Vector3(0f, 0f, 2f);
             LastDisplayedCard = card.GetComponentInChildren<SelectableCard>();
-            LastDisplayedCard.Initialize(Part3SaveData.Data.deck.Cards[DisplayedCardIndex]);
+            LastDisplayedCard.Initialize(EditableCards[DisplayedCardIndex]);
             LastDisplayedCard.SetEnabled(false);
             Tween.LocalPosition(
                 card.transform,
@@ -72,7 +77,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             if (!StickerInterfaceActive)
                 return;
 
-            if (DisplayedCardIndex == Part3SaveData.Data.deck.Cards.Count - 1)
+            if (DisplayedCardIndex == EditableCards.Count - 1)
                 DisplayedCardIndex = 0;
             else
                 DisplayedCardIndex += 1;
@@ -85,7 +90,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
                 return;
 
             if (DisplayedCardIndex == 0)
-                DisplayedCardIndex = Part3SaveData.Data.deck.Cards.Count - 1;
+                DisplayedCardIndex = EditableCards.Count - 1;
             else
                 DisplayedCardIndex -= 1;
             DisplayCurrentCard();

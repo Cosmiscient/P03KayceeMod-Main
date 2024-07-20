@@ -4,6 +4,8 @@ using InscryptionAPI.Helpers;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03ExpansionPack3.Sigils;
 using Infiniscryption.P03SigilLibrary.Sigils;
+using System.Collections.Generic;
+using Infiniscryption.P03KayceeRun.Cards.Stickers;
 
 namespace Infiniscryption.P03ExpansionPack3
 {
@@ -47,14 +49,6 @@ namespace Infiniscryption.P03ExpansionPack3
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(CellGemDraw.AbilityID);
 
-            // Sticker King
-            CardManager.New(P03Pack3Plugin.CardPrefix, "StickerKing", "Sticker King", 2, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_sticker_king.png", typeof(Cards).Assembly))
-                //.SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
-                .SetCost(energyCost: 4)
-                .SetNeutralP03Card()
-                .AddAbilities(GiveStickers.AbilityID);
-
             // Brain DRoid
             CardManager.New(P03Pack3Plugin.CardPrefix, "BrainDroid", "Brain Droid", 1, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_brain_droid.png", typeof(Cards).Assembly))
@@ -92,7 +86,7 @@ namespace Infiniscryption.P03ExpansionPack3
             CardManager.New(P03Pack3Plugin.CardPrefix, "GreenEnergyBot", "Green Energy Bot", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_battery_mage.png", typeof(Cards).Assembly))
                 .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_battery_mage.png", typeof(Cards).Assembly))
-                .SetCost(gemsCost: new() { GemType.Green })
+                .SetGemsCost(GemType.Green)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(Ability.GainBattery, Ability.GemDependant);
 
@@ -178,7 +172,7 @@ namespace Infiniscryption.P03ExpansionPack3
             CardManager.New(P03Pack3Plugin.CardPrefix, "TimeLatcher", "Time Latcher", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_time_latcher.png", typeof(Cards).Assembly))
                 //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
-                .SetCost(gemsCost: new() { GemType.Blue })
+                .SetGemsCost(GemType.Blue)
                 .SetRegionalP03Card(CardTemple.Undead)
                 .AddAbilities(LatchAnnoying.AbilityID);
 
@@ -236,7 +230,7 @@ namespace Infiniscryption.P03ExpansionPack3
                 )
                 .AddAppearances(ReplicaAppearanceBehavior.ID)
                 .SetExtendedProperty(ReplicaAppearanceBehavior.REPLICA_TYPE, "orange")
-                .SetCost(gemsCost: new() { GemType.Blue })
+                .SetGemsCost(GemType.Blue)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(GemOrangePrinter.AbilityID);
 
@@ -250,17 +244,59 @@ namespace Infiniscryption.P03ExpansionPack3
             // Baristabot
             CardManager.New(P03Pack3Plugin.CardPrefix, "Baristabot", "Baristabot", 0, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_baristabot.png", typeof(Cards).Assembly))
-                .SetCost(gemsCost: new() { GemType.Orange })
+                .SetGemsCost(GemType.Orange)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(GemBluePurist.AbilityID);
 
             // Mystery MAchine
             CardManager.New(P03Pack3Plugin.CardPrefix, "MysteryMachine", "Mystery Machine", 1, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_mystery_machine.png", typeof(Cards).Assembly))
-                .SetCost(gemsCost: new() { GemType.Blue, GemType.Green })
+                .SetGemsCost(GemType.Blue, GemType.Green)
                 .SetNeutralP03Card()
                 .SetRare()
                 .AddAbilities(Ability.RandomAbility, RandomRareAbility.AbilityID);
+
+            // Sticker King
+            CardManager.New(P03Pack3Plugin.CardPrefix, "StickerKing", "Sticker King", 2, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_sticker_king.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 4)
+                .SetNeutralP03Card()
+                .SetRare()
+                .SetExtendedProperty("Stickers.Forced", "Stickers[StickerPositions:sticker_muscles,0.18,-0.35,0.00|sticker_revolver,0.47,-0.39,0.00|sticker_altcat,-0.09,0.00,0.00|sticker_winged_shoes,-0.18,0.13,0.00|sticker_battery,0.14,0.32,0.00|sticker_companion_cube,0.04,0.01,0.00|sticker_binary_ribbon,0.22,0.04,0.00|sticker_annoy_face,0.39,0.00,0.00|sticker_cowboy_hat,0.48,0.01,0.00][StickerRotations:sticker_muscles,0.00,180.00,100.86|sticker_revolver,0.00,180.00,133.56|sticker_battery,0.00,180.00,0][StickerScales:][StickerAbility:]")
+                .AddAbilities(GiveStickers.AbilityID);
+
+            // Custom event stuff for sticker king
+            CardManager.ModifyCardList += delegate (List<CardInfo> cards)
+            {
+                // You have to have at least three of the king's stickers to see him:
+                CardInfo king = cards.CardByName(P03Pack3Plugin.CardPrefix + "_StickerKing");
+                Stickers.CardStickerData data = king.GetStickerData();
+                data.FilterToUnlocked();
+                if (data.Positions.Count < 3)
+                    king.metaCategories.Clear();
+                return cards;
+            };
+
+            // Booger Barrel
+            CardManager.New(P03Pack3Plugin.CardPrefix, "BoogerBarrel", "Booger Barrel", 2, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_booger_barrel.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 2)
+                .SetRegionalP03Card(CardTemple.Tech)
+                .AddAbilities(SacrificeSlime.AbilityID);
+
+            // Artificer
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Artificer", "Artificer", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_artificer.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Orange, GemType.Blue)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(DrawThreeCommand.AbilityID);
+
+            // Gear Shifter
+            CardManager.New(P03Pack3Plugin.CardPrefix, "GearShifter", "Gear Shifter", 1, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gear_shifter.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Blue, GemType.Green)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(Ability.StrafeSwap);
         }
     }
 }

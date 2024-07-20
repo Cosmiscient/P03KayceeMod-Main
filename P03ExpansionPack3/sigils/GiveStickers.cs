@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Cards.Stickers;
@@ -46,7 +47,13 @@ namespace Infiniscryption.P03ExpansionPack3.Sigils
                 return KnownValidAbilities[a];
 
             var info = AbilityManager.AllAbilities.AbilityByID(a);
-            bool isValid = info.AbilityBehavior.GetMethod(nameof(AbilityBehaviour.OnResolveOnBoard)).DeclaringType != typeof(TriggerReceiver);
+            if (info.Info.passive)
+            {
+                KnownValidAbilities[a] = true;
+                return true;
+            }
+            bool isValid = info.AbilityBehavior.GetMethod(nameof(AbilityBehaviour.OnResolveOnBoard)).DeclaringType == typeof(TriggerReceiver);
+            isValid = isValid && info.AbilityBehavior.GetMethod(nameof(AbilityBehaviour.OnPlayFromHand)).DeclaringType == typeof(TriggerReceiver);
             KnownValidAbilities[a] = isValid;
             return isValid;
         }
@@ -65,6 +72,9 @@ namespace Infiniscryption.P03ExpansionPack3.Sigils
 
         private IEnumerator StickerUpCard(PlayableCard otherCard)
         {
+            if (otherCard.temporaryMods.Any(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.ToLowerInvariant().StartsWith("sticker")))
+                yield break;
+
             CardModificationInfo mod = new(ChooseAbility(otherCard));
             string stickerName = AbilitiesUtil.GetInfo(mod.abilities[0]).GetExtendedProperty(Stickers.STICKER_PROPERTY_KEY);
 

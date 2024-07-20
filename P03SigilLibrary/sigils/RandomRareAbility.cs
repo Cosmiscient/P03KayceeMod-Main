@@ -37,14 +37,16 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
         private static bool IsValidCard(CardInfo card) => card.HasCardMetaCategory(CardMetaCategory.Rare) && card.HasAnyOfCardMetaCategories(CardMetaCategory.ChoiceNode, CardMetaCategory.TraderOffer) && card.temple == SaveManager.SaveFile.GetSceneAsCardTemple();
 
-        private static bool IsModular(Ability ab)
+        private static bool IsModularOrSacrifice(Ability ab)
         {
-            var info = AbilitiesUtil.GetInfo(ab);
+            var info = AbilityManager.AllAbilities.AbilityByID(ab);
+            var matches = ab == Ability.RandomAbility;
             if (SaveManager.SaveFile.IsPart1)
-                return info.metaCategories.Contains(AbilityMetaCategory.Part1Modular);
+                matches = matches || info.Info.metaCategories.Contains(AbilityMetaCategory.Part1Modular);
             else if (SaveManager.SaveFile.IsPart3)
-                return info.metaCategories.Contains(AbilityMetaCategory.Part3Modular);
-            else return ab == Ability.RandomAbility;
+                matches = matches || info.Info.metaCategories.Contains(AbilityMetaCategory.Part3Modular);
+            matches = matches || info.AbilityBehavior.GetInterfaces().Contains(typeof(IAbsorbSacrifices));
+            return matches;
         }
 
         public static List<Ability> RareAbilities
@@ -60,7 +62,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 allBustedAbilities.Remove(Ability.IceCube);
                 allBustedAbilities.Remove(Ability.TailOnHit);
                 allBustedAbilities.Remove(Ability.Transformer);
-                allBustedAbilities.RemoveAll(IsModular);
+                allBustedAbilities.RemoveAll(IsModularOrSacrifice);
                 return allBustedAbilities.Distinct().ToList();
             }
         }
