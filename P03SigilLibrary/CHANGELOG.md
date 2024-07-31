@@ -1,5 +1,6 @@
 # 1.0.5
 - Fixed a defect where "active when powered" sigils were not properly changing colors when powered.
+- Added some new sigils
 
 # 1.0.4
 - Fixed a defect with the fuel manager and Paper Cards

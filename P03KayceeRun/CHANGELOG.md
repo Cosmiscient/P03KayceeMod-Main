@@ -1,7 +1,9 @@
 # 5.0.23
 - Bugfix: Fixed a defect where if quest NPC tried to remove an item from your backpack, it would fail if your backpack was full.
+- Bugfix: Fixed a defect related to non-combat damage in the secret final boss.
 - Minor Bugfix: Updated the coloration of GEMS in dialogue.
 - Balance Change: RH1N0 has an updated activated sigil. Instead of costing a flat 4 energy to activate for a +1 power boost, it now costs (Attack + 2) Energy to activate. 
+- Balance Change: Energy Conduit now grants a reserve of energy equal to the player's max energy, rather than a flat 3 energy.
 
 # 5.0.22
 - Fixed a defect with Tapeworm introduced by the refactor to the sigilarium.

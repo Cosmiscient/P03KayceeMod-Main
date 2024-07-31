@@ -603,9 +603,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 if (GameIsOver)
                     yield break;
 
-                var universe = MultiverseGames[i];
-                P03Plugin.Log.LogInfo($"Universe {i}: scales tipped {universe.OpponentDamage - universe.PlayerDamage} towards opponent");
-                if ((universe.OpponentDamage - universe.PlayerDamage) >= 5)
+                var playerDamage = i == CurrentMultiverseId ? LifeManager.Instance.PlayerDamage : MultiverseGames[i].PlayerDamage;
+                var opponentDamage = i == CurrentMultiverseId ? LifeManager.Instance.OpponentDamage : MultiverseGames[i].OpponentDamage;
+                if ((opponentDamage - playerDamage) >= 5)
                 {
                     if (NumberOfPlayerWins < 3)
                     {
@@ -629,8 +629,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 if (GameIsOver)
                     yield break;
 
-                var universe = MultiverseGames[i];
-                if ((universe.PlayerDamage - universe.OpponentDamage) >= 5)
+                var playerDamage = i == CurrentMultiverseId ? LifeManager.Instance.PlayerDamage : MultiverseGames[i].PlayerDamage;
+                var opponentDamage = i == CurrentMultiverseId ? LifeManager.Instance.OpponentDamage : MultiverseGames[i].OpponentDamage;
+                if ((playerDamage - opponentDamage) >= 5)
                 {
                     if (NumberOfPlayerLosses == 0)
                     {
@@ -690,6 +691,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     __instance.TurnNumber += 1;
                     yield return __instance.PlayerTurn();
                     yield return mbs.SetPhase(MultiverseGameState.Phase.AfterPlayer);
+
+                    if (mbs.GameIsOver)
+                        break;
+
                     yield return mbs.CheckForGameLosses();
 
                     if (mbs.GameIsOver)
@@ -697,6 +702,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
                     yield return __instance.OpponentTurn();
                     yield return mbs.SetPhase(MultiverseGameState.Phase.AfterOpponent);
+
+                    if (mbs.GameIsOver)
+                        break;
+
                     yield return mbs.CheckForGameLosses();
                 }
                 // if (__instance.ScalesTippedToOpponent())
@@ -962,6 +971,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             bool readyForCombat = false;
             while (!readyForCombat)
             {
+                bool lifeLossBreak = false;
                 while (!__instance.playerInitiatedCombat)
                 {
                     if (mbs.MultiverseTravelLocked)
@@ -969,7 +979,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
                     if (__instance.LifeLossConditionsMet() && GlobalTriggerHandler.Instance.StackSize == 0)
                     {
-                        yield break;
+                        P03Plugin.Log.LogInfo("Breaking player's main turn because of life loss");
+                        lifeLossBreak = true;
+                        break;
                     }
                     if (mbs.ActiveMultiverse.PlayerNeedsUpkeepStep)
                     {
@@ -983,16 +995,33 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     }
                     yield return new WaitForEndOfFrame();
                 }
-                mbs.ActiveMultiverse.PlayerRungBell = true;
-                int nextIdx = mbs.FindNextMainPhase();
-                if (nextIdx == -1)
+
+                P03Plugin.Log.LogInfo($"Player main turn interrupted. lifeLossBreak {lifeLossBreak}");
+                if (lifeLossBreak)
                 {
-                    readyForCombat = true;
+                    P03Plugin.Log.LogInfo("Checking for game loss");
+                    yield return mbs.CheckForGameLosses();
+                    readyForCombat = false;
+                    mbs.CurrentPhase = MultiverseGameState.Phase.PlayerUpkeepAndMain;
+                    ViewManager.Instance.SwitchToView(View.Default);
+
+                    if (mbs.GameIsOver)
+                        yield break;
                 }
                 else
                 {
-                    yield return mbs.TravelToUniverse(nextIdx);
-                    __instance.playerInitiatedCombat = false;
+                    P03Plugin.Log.LogInfo("Player rung bell");
+                    mbs.ActiveMultiverse.PlayerRungBell = true;
+                    int nextIdx = mbs.FindNextMainPhase();
+                    if (nextIdx == -1)
+                    {
+                        readyForCombat = true;
+                    }
+                    else
+                    {
+                        yield return mbs.TravelToUniverse(nextIdx);
+                        __instance.playerInitiatedCombat = false;
+                    }
                 }
             }
 
