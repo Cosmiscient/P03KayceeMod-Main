@@ -60,16 +60,41 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             card.RenderCard();
         }
 
+        private static Renderer GetDefaultDecalRenderer(CardDisplayer3D displayer)
+        {
+            if (displayer == null)
+                return null;
+
+            if (displayer.decalRenderers == null)
+                return null;
+
+            if (displayer.decalRenderers.Count == 0)
+                return null;
+
+            return displayer.decalRenderers[0];
+        }
+
+        private static Transform GetDecalParent(CardDisplayer3D displayer)
+        {
+            return GetDefaultDecalRenderer(displayer)?.gameObject.transform.parent;
+        }
 
         [HarmonyPatch(typeof(CardDisplayer3D), nameof(CardDisplayer3D.DisplayInfo))]
         [HarmonyPrefix]
         private static void AddFuelDecal(ref CardDisplayer3D __instance)
         {
-            if (__instance.gameObject.transform.Find("Decal_Fuel") == null)
+            var decalParent = GetDecalParent(__instance);
+            if (decalParent == null)
+                return;
+
+            if (decalParent.Find("Decal_Fuel") == null)
             {
                 GameObject portrait = __instance.portraitRenderer.gameObject;
-                GameObject decalFull = __instance.decalRenderers[1].gameObject;
-                GameObject decalGood = UnityEngine.Object.Instantiate(decalFull, decalFull.transform.parent);
+                GameObject decalFull = GetDefaultDecalRenderer(__instance)?.gameObject;
+                if (decalFull == null)
+                    return;
+
+                GameObject decalGood = UnityEngine.Object.Instantiate(decalFull, decalParent);
                 decalGood.name = "Decal_Fuel";
                 decalGood.transform.localPosition = portrait.transform.localPosition + new Vector3(-.1f, 0f, -0.0001f);
                 decalGood.transform.localScale = new(1.2f, 1f, 0f);
@@ -80,9 +105,14 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         [HarmonyPostfix]
         private static void DecalsForFuel(CardDisplayer3D __instance, CardRenderInfo renderInfo, PlayableCard playableCard)
         {
-            int fuelToDisplay = playableCard == null ? renderInfo.baseInfo.GetStartingFuel() : playableCard.GetCurrentFuel() ?? -1;
+            var decalParent = GetDecalParent(__instance);
+            var fuelDecalObj = decalParent?.Find("Decal_Fuel");
+            if (fuelDecalObj == null)
+                return;
+
+            int fuelToDisplay = playableCard == null ? (renderInfo?.baseInfo?.GetStartingFuel() ?? -1) : (playableCard.GetCurrentFuel() ?? -1);
             bool displayFuel = playableCard == null ? fuelToDisplay > 0 : playableCard.HasFuel();
-            var fuelDecal = __instance.gameObject.transform.Find("Decal_Fuel").GetComponent<Renderer>();
+            var fuelDecal = fuelDecalObj.GetComponent<Renderer>();
             if (displayFuel)
             {
                 fuelDecal.enabled = true;

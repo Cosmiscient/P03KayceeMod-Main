@@ -14,7 +14,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
             TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("portrait_conduitenergy.png", typeof(EnergyConduitAppearnace).Assembly), TextureHelper.SpriteType.CardPortrait),
             TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("portrait_conduitenergy_1.png", typeof(EnergyConduitAppearnace).Assembly), TextureHelper.SpriteType.CardPortrait),
             TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("portrait_conduitenergy_2.png", typeof(EnergyConduitAppearnace).Assembly), TextureHelper.SpriteType.CardPortrait),
-            TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("portrait_conduitenergy_3.png", typeof(EnergyConduitAppearnace).Assembly), TextureHelper.SpriteType.CardPortrait)
+            TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("portrait_conduitenergy_3.png", typeof(EnergyConduitAppearnace).Assembly), TextureHelper.SpriteType.CardPortrait),
+            TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("portrait_conduitenergy_4.png", typeof(EnergyConduitAppearnace).Assembly), TextureHelper.SpriteType.CardPortrait),
+            TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("portrait_conduitenergy_5.png", typeof(EnergyConduitAppearnace).Assembly), TextureHelper.SpriteType.CardPortrait),
+            TextureHelper.ConvertTexture(TextureHelper.GetImageAsTexture("portrait_conduitenergy_6.png", typeof(EnergyConduitAppearnace).Assembly), TextureHelper.SpriteType.CardPortrait)
         };
 
         // This is a bit of a hack to deal with an infinite loop that can happen with this appearance

@@ -56,7 +56,6 @@ namespace Infiniscryption.P03SigilLibrary
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_salmon.png", typeof(Cards).Assembly))
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_salmon.png", typeof(Cards).Assembly))
                 .SetCost(energyCost: 1)
-                .AddMetaCategories(CardMetaCategory.Part3Random)
                 .SetCardTemple(CardTemple.Tech)
                 .SetEvolve("Angler_Fish_More", 1);
 

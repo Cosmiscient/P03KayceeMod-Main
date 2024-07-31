@@ -51,14 +51,13 @@ namespace Infiniscryption.P03SigilLibrary
 
         internal static void GenerateDocumentation()
         {
-            string markdown = "|Icon|Name|JSON Loader Syntax|Rulebook Description|\n";
+            string markdown = "|Icon|Name|Rulebook Description|\n";
             markdown += "|---|---|---|---|\n";
             foreach (var info in AllAbilities.OrderBy(adi => adi.info.rulebookName))
             {
                 var fab = AbilityManager.AllAbilities.AbilityByID(info.info.ability);
                 markdown += $"|[[{ROOT_PATH}{fab.Texture.name}.png]]";
                 markdown += $"|{info.info.rulebookName}";
-                markdown += $"|{P03SigilLibraryPlugin.PluginGuid}.{info.info.rulebookName}";
                 markdown += $"|{info.info.rulebookDescription}";
                 markdown += $"|\n";
             }

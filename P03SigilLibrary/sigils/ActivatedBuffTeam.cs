@@ -22,7 +22,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Supercharge";
-            info.rulebookDescription = "Activate: Friendly cards gain 1 power until the end of the turn. This ability can only be activated once per turn.";
+            info.rulebookDescription = "Friendly cards gain 1 power until the end of the turn. This ability can only be activated once per turn.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = true;

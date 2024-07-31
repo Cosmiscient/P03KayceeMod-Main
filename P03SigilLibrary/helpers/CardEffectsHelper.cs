@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using Pixelplacement;
 using UnityEngine;
@@ -11,7 +12,37 @@ namespace Infiniscryption.P03SigilLibrary.Helpers
 {
     public static class CardEffectsHelper
     {
-        public static IEnumerator CardChooseSlotSequence(this AbilityBehaviour behaviour, Func<CardSlot, IEnumerator> slotSelectedCallback, List<CardSlot> validSlots, Func<CardSlot, int> aiSlotEvaluator = null)
+        public static int NonPassiveAttack(this PlayableCard card)
+        {
+            return card.Info.Attack + (card.TemporaryMods?.Where(m => !m.IsContinousEffectMod()).Select(m => m.attackAdjustment).Sum() ?? 0);
+        }
+
+        public static CardModificationInfo GetOrCreateSingletonTempMod(this PlayableCard card, string singletonId)
+        {
+            return card.TemporaryMods.FirstOrDefault(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(singletonId)) ?? new() { singletonId = singletonId };
+        }
+
+        public static bool IsContinousEffectMod(this CardModificationInfo mod)
+        {
+            if (string.IsNullOrEmpty(mod.singletonId))
+                return false;
+
+            if (AbilityIconBehaviours.DynamicAbilityCardModIds.Contains(mod.singletonId))
+                return true;
+
+            if (mod.singletonId.StartsWith("CardWith"))
+                return true;
+
+            if (mod.singletonId.StartsWith("ConduitGainAbility"))
+                return true;
+
+            if (mod.singletonId.StartsWith("VARIABLE_STAT"))
+                return true;
+
+            return false;
+        }
+
+        public static IEnumerator CardChooseSlotSequence(this AbilityBehaviour behaviour, Func<CardSlot, IEnumerator> slotSelectedCallback, List<CardSlot> validSlots, Func<CardSlot, int> aiSlotEvaluator = null, string dialogue = null)
         {
             PlayableCard card = behaviour.Card;
             Vector3 originalPosition = card.transform.position;
@@ -21,8 +52,13 @@ namespace Infiniscryption.P03SigilLibrary.Helpers
                 ViewManager.Instance.SwitchToView(View.Board, false, true);
                 yield return new WaitForSeconds(0.25f);
 
-                Vector3 a = card.Slot.IsPlayerSlot ? Vector3.forward * .5f : Vector3.back * 0.5f;
-                Tween.Position(card.transform, card.transform.position + (a * 2f) + (Vector3.up * 0.25f), 0.15f, 0f, Tween.EaseOut, Tween.LoopType.None, null, null, true);
+                Vector3 a = card.Slot.IsPlayerSlot ? Vector3.forward * .2f : Vector3.back * 0.2f;
+                Tween.Position(card.transform, card.transform.position + (a * 2f) + (Vector3.up * 0.15f), 0.15f, 0f, Tween.EaseOut, Tween.LoopType.None, null, null, true);
+            }
+
+            if (!string.IsNullOrEmpty(dialogue))
+            {
+                yield return TextDisplayer.Instance.ShowUntilInput(dialogue);
             }
 
             CardSlot selectedSlot = null;

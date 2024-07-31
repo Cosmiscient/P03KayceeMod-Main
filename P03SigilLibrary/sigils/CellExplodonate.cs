@@ -40,7 +40,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
         public override bool RespondsToPreDeathAnimation(bool wasSacrifice) => ShouldExplode && base.RespondsToPreDeathAnimation(wasSacrifice);
 
-        private bool ShouldExplode => !Card.Dead && Card.Slot != null && ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
+        private bool ShouldExplode => Card.OnBoard && ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
 
         public override bool RespondsToResolveOnBoard() => ShouldExplode;
 

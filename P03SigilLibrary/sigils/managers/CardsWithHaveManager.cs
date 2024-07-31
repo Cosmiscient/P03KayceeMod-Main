@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using InscryptionAPI.Card;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
 {
@@ -10,17 +12,50 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
     {
         public const string RuleKey = "CardWith";
 
-        public struct Rule
+        public class Rule
         {
             public Ability requiredAbility;
-            public Ability gainedAbility;
+            public Trait requiredTrait;
+            public Ability[] gainedAbilities;
             public string modId;
 
-            public Rule(Ability required, Ability gained)
+            private Func<PlayableCard, bool> customCondition = null;
+
+            public bool CardIsEligible(PlayableCard card)
+            {
+                if (card == null)
+                    return false;
+
+                if (customCondition != null)
+                    return customCondition(card);
+
+                bool abilityEligible = requiredAbility == Ability.None || card.HasAbility(requiredAbility);
+                bool traitEligible = requiredTrait == Trait.None || card.HasTrait(requiredTrait);
+                return abilityEligible && traitEligible;
+            }
+
+            internal Rule(Func<PlayableCard, bool> cond, string uniqueKey)
+            {
+                customCondition = cond;
+                modId = $"{RuleKey}{uniqueKey}";
+            }
+
+            public Rule(Ability required, Trait reqTrait, Ability gained, List<Ability> additionalGained)
             {
                 requiredAbility = required;
-                gainedAbility = gained;
-                modId = required == Ability.None ? $"{RuleKey}Gains{gained}" : $"{RuleKey}{required}Gains{gained}";
+                requiredTrait = reqTrait;
+                gainedAbilities = new Ability[additionalGained == null ? 1 : additionalGained.Count + 1];
+                gainedAbilities[0] = gained;
+
+                if (additionalGained != null)
+                    for (int i = 0; i < additionalGained.Count; i++)
+                        gainedAbilities[i + 1] = additionalGained[i];
+
+                modId = RuleKey +
+                        (required == Ability.None ? string.Empty : required.ToString()) +
+                        (requiredTrait == Trait.None ? string.Empty : requiredTrait.ToString()) +
+                        "Gains" + string.Join("", gainedAbilities);
+
                 AbilityIconBehaviours.DynamicAbilityCardModIds.Add(modId);
             }
         }
@@ -34,13 +69,14 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             {
                 foreach (Rule rule in rules)
                 {
-                    if (rule.requiredAbility == Ability.None || slot.Card.HasAbility(rule.requiredAbility))
+                    if (rule.CardIsEligible(slot.Card))
                     {
                         if (!slot.Card.TemporaryMods.Any(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(rule.modId)))
                         {
-                            CardModificationInfo info = new(rule.gainedAbility)
+                            CardModificationInfo info = new()
                             {
-                                singletonId = rule.modId
+                                singletonId = rule.modId,
+                                abilities = new(rule.gainedAbilities)
                             };
                             slot.Card.AddTemporaryMod(info);
                         }
@@ -52,7 +88,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 List<CardModificationInfo> modsToRemove = slot.Card.temporaryMods.Where(m =>
                     !string.IsNullOrEmpty(m.singletonId) &&
                     m.singletonId.StartsWith(RuleKey) &&
-                    !rules.Any(r => r.modId.Equals(m.singletonId) && (r.requiredAbility == Ability.None || slot.Card.HasAbility(r.requiredAbility)))
+                    !rules.Any(r => r.modId.Equals(m.singletonId) && r.CardIsEligible(slot.Card))
                 ).ToList();
                 foreach (CardModificationInfo mod in modsToRemove)
                 {
@@ -75,13 +111,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                         if ((abilityComb.AppliesToFriendly && !slot.Card.OpponentCard) ||
                             (abilityComb.AppliesToOpposing && slot.Card.OpponentCard))
                         {
-                            PlayerRules.Add(new(abilityComb.RequiredAbility, abilityComb.GainedAbility));
+                            PlayerRules.Add(abilityComb.Rule);
                         }
 
                         if ((abilityComb.AppliesToFriendly && slot.Card.OpponentCard) ||
                             (abilityComb.AppliesToOpposing && !slot.Card.OpponentCard))
                         {
-                            OpponentRules.Add(new(abilityComb.RequiredAbility, abilityComb.GainedAbility));
+                            OpponentRules.Add(abilityComb.Rule);
                         }
                     }
                 }

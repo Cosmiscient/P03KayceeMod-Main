@@ -27,7 +27,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Fossil Fuel";
-            info.rulebookDescription = "Activate: Provides an additional energy cell.";
+            info.rulebookDescription = "Provides an additional energy cell.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;

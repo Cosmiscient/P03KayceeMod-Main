@@ -20,7 +20,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Bonus Energy Conduit";
-            info.rulebookDescription = "If [creature] is part of a completed circuit, it provides three additional energy.";
+            info.rulebookDescription = "If [creature] is part of a completed circuit, it provides a reserve of energy equal to the player's current maximum energy.";
             info.canStack = false;
             info.powerLevel = 3;
             info.opponentUsable = false;
@@ -36,14 +36,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             ).Id;
         }
 
-        public const int MAX_ENERGY = 3;
-        public int RemainingEnergy { get; private set; } = MAX_ENERGY;
+        public int RemainingEnergy { get; private set; } = ResourcesManager.Instance.PlayerMaxEnergy;
 
         public override bool RespondsToUpkeep(bool playerUpkeep) => playerUpkeep;
 
         public override IEnumerator OnUpkeep(bool playerUpkeep)
         {
-            RemainingEnergy = MAX_ENERGY;
+            RemainingEnergy = ResourcesManager.Instance.PlayerMaxEnergy;
             Card.RenderCard();
             yield break;
         }

@@ -195,7 +195,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetCost(energyCost: 5)
                 .SetRegionalP03Card(CardTemple.Nature)
                 .SetRare()
-                .AddAbilities(ActivatedGainPower.AbilityID);
+                .AddAbilities(ActivatedGainPowerCharge.AbilityID);
 
             // 3leph4nt
             CardManager.New(EXP_2_PREFIX, "Elephant", "3leph4nt", 1, 3)
@@ -356,7 +356,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_encapsulator.png", typeof(ExpansionPackCards_2).Assembly))
                 .SetCost(energyCost: 2)
                 .SetNeutralP03Card()
-                .AddAbilities(ActivatedStoreCharge.AbilityID);
+                .AddAbilities(ActivatedDrawCharge.AbilityID);
 
             // Sir Blast
             CardManager.New(EXP_2_PREFIX, "SirBlast", "Sir Blast", 2, 3)

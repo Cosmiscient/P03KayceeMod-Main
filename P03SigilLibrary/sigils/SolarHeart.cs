@@ -52,7 +52,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             SlotModID = SlotModificationManager.New(
                 P03SigilLibraryPlugin.PluginGuid,
                 "SolarHeart",
-                typeof(SolarHeartSlot)
+                typeof(SolarHeartSlot),
+                TextureHelper.GetImageAsTexture("cardslot_powered.png", typeof(SolarHeart).Assembly)
             );
         }
 

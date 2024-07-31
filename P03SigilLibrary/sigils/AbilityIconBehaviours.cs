@@ -25,6 +25,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         public const string GREEN_CELL_INVERSE = "FromEmeraldInverse";
         public const string BLUE_CELL_INVERSE = "FromSapphireInverse";
         public const string GEM_CELL_INVERSE = "FromGemInverse";
+        public const string ACTIVE_WHEN_FUELED = "ActiveWhenFueled";
 
         private readonly static List<CardAppearanceBehaviour.Appearance> GemReRenderAppearances = new();
         public static void AddGemReRenderAppearance(CardAppearanceBehaviour.Appearance id)
@@ -34,17 +35,17 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
         public static bool IsGemReRender(this AbilityInfo info)
         {
-            return info.GetExtendedPropertyAsBool(ORANGE_CELL).GetValueOrDefault(false)
-                || info.GetExtendedPropertyAsBool(GREEN_CELL).GetValueOrDefault(false)
-                || info.GetExtendedPropertyAsBool(BLUE_CELL).GetValueOrDefault(false)
-                || info.GetExtendedPropertyAsBool(GEM_CELL).GetValueOrDefault(false)
-                || info.GetExtendedPropertyAsBool(ORANGE_CELL_INVERSE).GetValueOrDefault(false)
-                || info.GetExtendedPropertyAsBool(GREEN_CELL_INVERSE).GetValueOrDefault(false)
-                || info.GetExtendedPropertyAsBool(BLUE_CELL_INVERSE).GetValueOrDefault(false)
-                || info.GetExtendedPropertyAsBool(GEM_CELL_INVERSE).GetValueOrDefault(false);
+            return (info.GetExtendedPropertyAsBool(ORANGE_CELL) ?? false)
+                || (info.GetExtendedPropertyAsBool(GREEN_CELL) ?? false)
+                || (info.GetExtendedPropertyAsBool(BLUE_CELL) ?? false)
+                || (info.GetExtendedPropertyAsBool(GEM_CELL) ?? false)
+                || (info.GetExtendedPropertyAsBool(ORANGE_CELL_INVERSE) ?? false)
+                || (info.GetExtendedPropertyAsBool(GREEN_CELL_INVERSE) ?? false)
+                || (info.GetExtendedPropertyAsBool(BLUE_CELL_INVERSE) ?? false)
+                || (info.GetExtendedPropertyAsBool(GEM_CELL_INVERSE) ?? false);
         }
 
-        internal static readonly List<string> DynamicAbilityCardModIds = new();
+        internal static readonly HashSet<string> DynamicAbilityCardModIds = new();
 
         [HarmonyPatch(typeof(CardAbilityIcons), nameof(CardAbilityIcons.SetColorOfDefaultIcons))]
         [HarmonyPostfix]
@@ -64,11 +65,15 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                             {
                                 abilityIconInteractable.SetColor(Color.white);
                             }
-                            if (info.GetExtendedPropertyAsBool(CELL_INVERSE).GetValueOrDefault(false))
+                            else if (info.GetExtendedPropertyAsBool(CELL_INVERSE) ?? false)
                             {
                                 abilityIconInteractable.SetColor(inConduitCircuit ? info.colorOverride : color);
                             }
-                            if (info.hasColorOverride)
+                            else if (info.conduitCell)
+                            {
+                                abilityIconInteractable.SetColor(!inConduitCircuit ? info.colorOverride : color);
+                            }
+                            else if (info.hasColorOverride)
                             {
                                 abilityIconInteractable.SetColor(info.colorOverride);
                             }
@@ -93,29 +98,33 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                         foreach (AbilityIconInteractable abilityIconInteractable in group.GetComponentsInChildren<AbilityIconInteractable>())
                         {
                             AbilityInfo info = AbilitiesUtil.GetInfo(abilityIconInteractable.Ability);
-                            if (info.GetExtendedPropertyAsBool(GREEN_CELL).GetValueOrDefault(false))
+                            if (info.GetExtendedPropertyAsBool(GREEN_CELL) ?? false)
                             {
                                 abilityIconInteractable.SetColor(!playableCard.EligibleForGemBonus(GemType.Green) ? info.colorOverride : renderInfo.defaultAbilityColor);
                             }
-                            if (info.GetExtendedPropertyAsBool(ORANGE_CELL).GetValueOrDefault(false))
+                            else if (info.GetExtendedPropertyAsBool(ORANGE_CELL) ?? false)
                             {
                                 abilityIconInteractable.SetColor(!playableCard.EligibleForGemBonus(GemType.Orange) ? info.colorOverride : renderInfo.defaultAbilityColor);
                             }
-                            if (info.GetExtendedPropertyAsBool(BLUE_CELL).GetValueOrDefault(false))
+                            else if (info.GetExtendedPropertyAsBool(BLUE_CELL) ?? false)
                             {
                                 abilityIconInteractable.SetColor(!playableCard.EligibleForGemBonus(GemType.Blue) ? info.colorOverride : renderInfo.defaultAbilityColor);
                             }
-                            if (info.GetExtendedPropertyAsBool(GREEN_CELL_INVERSE).GetValueOrDefault(false))
+                            else if (info.GetExtendedPropertyAsBool(GREEN_CELL_INVERSE) ?? false)
                             {
                                 abilityIconInteractable.SetColor(playableCard.EligibleForGemBonus(GemType.Green) ? info.colorOverride : renderInfo.defaultAbilityColor);
                             }
-                            if (info.GetExtendedPropertyAsBool(ORANGE_CELL_INVERSE).GetValueOrDefault(false))
+                            else if (info.GetExtendedPropertyAsBool(ORANGE_CELL_INVERSE) ?? false)
                             {
                                 abilityIconInteractable.SetColor(playableCard.EligibleForGemBonus(GemType.Orange) ? info.colorOverride : renderInfo.defaultAbilityColor);
                             }
-                            if (info.GetExtendedPropertyAsBool(BLUE_CELL_INVERSE).GetValueOrDefault(false))
+                            else if (info.GetExtendedPropertyAsBool(BLUE_CELL_INVERSE) ?? false)
                             {
                                 abilityIconInteractable.SetColor(playableCard.EligibleForGemBonus(GemType.Blue) ? info.colorOverride : renderInfo.defaultAbilityColor);
+                            }
+                            else if (info.GetExtendedPropertyAsBool(ACTIVE_WHEN_FUELED) ?? false)
+                            {
+                                abilityIconInteractable.SetColor(playableCard.GetCurrentFuel() <= 0 ? info.colorOverride : renderInfo.defaultAbilityColor);
                             }
                         }
                     }

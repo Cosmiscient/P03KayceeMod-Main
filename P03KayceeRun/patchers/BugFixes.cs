@@ -593,5 +593,26 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             yield return sequence;
         }
+
+        [HarmonyPatch(typeof(DropRubyOnDeath), nameof(DropRubyOnDeath.OnOtherCardDie))]
+        [HarmonyPostfix]
+        private static IEnumerator DRopRubyVesselInAct3(IEnumerator sequence, DropRubyOnDeath __instance)
+        {
+            if (!P03AscensionSaveData.IsP03Run)
+            {
+                yield return sequence;
+                yield break;
+            }
+            if (__instance.Card.Info.temple != CardTemple.Tech)
+            {
+                yield return sequence;
+                yield break;
+            }
+            yield return __instance.PreSuccessfulTriggerSequence();
+            yield return new WaitForSeconds(0.1f);
+            yield return BoardManager.Instance.CreateCardInSlot(CardLoader.GetCardByName("EmptyVessel_OrangeGem"), __instance.Card.Slot, 0.1f, true);
+            yield return __instance.LearnAbility(0.5f);
+            yield break;
+        }
     }
 }

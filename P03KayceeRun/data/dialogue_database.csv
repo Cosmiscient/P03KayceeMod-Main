@@ -314,7 +314,7 @@ P03DonationComplete,NPC,,"Oh dear friend, your generosity knows no bounds."
 ,,,[c:G]Botopia[c:] will be forever grateful.
 P03DonationReward,NPC,,"Excuse me, but are you the [c:G]gracious soul[c:] who donated to save broken bots?"
 ,,,"Thanks to you, my family is finally able to recharge their cells at night."
-,,,"I can't offer much to repay you, but I do have these [c:O]g[c:][c:B]e[c:][c:G]m[c:]s"
+,,,"I can't offer much to repay you, but I do have these [c:g1]g[c:][c:g2]e[c:][c:g3]m[c:][c:g1]s[c:]"
 ,,,"I have no use for them, but I understand they will make some of your cards stronger."
 P03MycologistWut,Thinking,,Something's happening…
 MycologistWellIntro,MycologistTalkingMain,,The robot has tried to keep us away...
@@ -790,7 +790,7 @@ BountyHunterIntroVictorious7,BountyHunter,,"Cower in fear before the vessel name
 BountyHunterKilled7,BountyHunter,,"The spirit is willing but the steel is weak."
 ,,,"I will not make the same mistake next time."
 P03StackSize,Default,,"That's quite enough of that."
-P03BuiltInGems,Default,,"Now it has [c:O]g[c:][c:B]e[c:][c:G]m[c:]s built right in"
+P03BuiltInGems,Default,,"Now it has [c:g1]g[c:][c:g2]e[c:][c:g3]m[c:][c:g1]s[c:] built right in"
 P03CannotGemify,Angry,,"What? All of your cards are already gemified?"
 ,Default,,"That's almost impressive."
 ,Default,,"I guess I'll let you pick a mox sigil to add instead."

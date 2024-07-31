@@ -6,6 +6,7 @@ using Infiniscryption.P03ExpansionPack3.Sigils;
 using Infiniscryption.P03SigilLibrary.Sigils;
 using System.Collections.Generic;
 using Infiniscryption.P03KayceeRun.Cards.Stickers;
+using Infiniscryption.P03KayceeRun.Patchers;
 
 namespace Infiniscryption.P03ExpansionPack3
 {
@@ -94,10 +95,18 @@ namespace Infiniscryption.P03ExpansionPack3
             CardManager.New(P03Pack3Plugin.CardPrefix, "MortarDroid", "Mortar Droid", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_mortar_droid.png", typeof(Cards).Assembly))
                 //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
-                .SetCost(bonesCost: 3)
+                .SetCost(bonesCost: 5)
                 .SetNeutralP03Card()
                 .SetStartingFuel(3)
-                .AddAbilities(ActivatedDrawBlast.AbilityID);
+                .AddAbilities(MissileStrike.AbilityID, FireBombWhenFueled.AbilityID);
+
+            // Tow Truck
+            CardManager.New(P03Pack3Plugin.CardPrefix, "TowTruck", "Tow Truck", 0, 3)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_tow_truck.png", typeof(Cards).Assembly))
+                .SetCost(bonesCost: 5)
+                .SetNeutralP03Card()
+                .SetStartingFuel(2)
+                .AddAbilities(ActivatedTemporaryControl.AbilityID);
 
             // Nitrous Dispenser
             CardManager.New(P03Pack3Plugin.CardPrefix, "NitrousTanker", "Nitrous Tanker", 0, 1)
@@ -251,7 +260,7 @@ namespace Infiniscryption.P03ExpansionPack3
             // Mystery MAchine
             CardManager.New(P03Pack3Plugin.CardPrefix, "MysteryMachine", "Mystery Machine", 1, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_mystery_machine.png", typeof(Cards).Assembly))
-                .SetGemsCost(GemType.Blue, GemType.Green)
+                .SetCost(energyCost: 4)
                 .SetNeutralP03Card()
                 .SetRare()
                 .AddAbilities(Ability.RandomAbility, RandomRareAbility.AbilityID);
@@ -297,6 +306,125 @@ namespace Infiniscryption.P03ExpansionPack3
                 .SetGemsCost(GemType.Blue, GemType.Green)
                 .SetRegionalP03Card(CardTemple.Wizard)
                 .AddAbilities(Ability.StrafeSwap);
+
+            // Shrinker
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Shrinker", "Shrinker", 2, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_shrinker.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Green, GemType.Orange)
+                .SetNeutralP03Card()
+                .AddAbilities(Ability.SwapStats);
+
+            // Magnus God
+            CardManager.New(P03Pack3Plugin.CardPrefix, "MagnusGod", "Magnus God", 1, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_magnus_god.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Orange, GemType.Blue, GemType.Green)
+                .SetNeutralP03Card()
+                .SetRare()
+                .AddAbilities(Ability.TriStrike, Ability.Flying);
+
+            // Open Sorcerer
+            CardManager.New(P03Pack3Plugin.CardPrefix, "OpenSorcerer", "Open Sorcerer", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_open_sorcerer.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Blue, GemType.Green)
+                .SetRegionalP03Card(CardTemple.Wizard)
+                .AddAbilities(ActivatedCopySigils.AbilityID);
+
+            // Solar Ignitron
+            CardManager.New(P03Pack3Plugin.CardPrefix, "SolarIgnitron", "Solar Ignitron", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_solar_ignitron.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Orange)
+                .SetRegionalP03Card(CardTemple.Undead)
+                .AddAbilities(FriendlyGemRevignite.AbilityID);
+
+            // Shield Projector
+            CardManager.New(P03Pack3Plugin.CardPrefix, "ShieldProjector", "Shield Projector", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_shield_projector.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Green)
+                .SetNeutralP03Card()
+                .AddAbilities(ActivatedDrawDefend.AbilityID);
+
+            // Blood Vessel
+            CardManager.New(P03Pack3Plugin.CardPrefix, "BloodVessel", "Blood Vessel", 0, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_blood_vessel.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 1)
+                .SetNeutralP03Card()
+                .AddAbilities(FriendliesFullOfBlood.AbilityID);
+
+            // Dredger Vessel
+            CardManager.New(P03Pack3Plugin.CardPrefix, "DredgerVessel", "Dredger Vessel", 0, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_dredger_vessel.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 1)
+                .SetNeutralP03Card()
+                .AddAbilities(Ability.BoneDigger);
+
+            // Fuel Attendant
+            CardManager.New(P03Pack3Plugin.CardPrefix, "FuelAttendant", "Fuel Attendant", 0, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_fuel_attendant.png", typeof(Cards).Assembly))
+                .SetCost(bonesCost: 2)
+                .SetNeutralP03Card()
+                .AddAbilities(MoveBesideAndFuel.AbilityID, FriendliesStinkyWhenFueled.AbilityID);
+
+            // Hot Rod
+            CardManager.New(P03Pack3Plugin.CardPrefix, "HotRod", "Hot Rod", 2, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_hot_rod.png", typeof(Cards).Assembly))
+                .SetCost(bonesCost: 7)
+                .SetNeutralP03Card()
+                .SetStartingFuel(0)
+                .AddAbilities(FuelSiphon.AbilityID, Ability.Strafe, FuelShield.AbilityID);
+
+            // Fuel Attendant
+            CardManager.New(P03Pack3Plugin.CardPrefix, "BoneCracker", "Bone Cracker", 2, 2)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_bone_cracker.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 1)
+                .SetNeutralP03Card()
+                .AddAbilities(SacrificeQuadrupleBones.AbilityID);
+
+            // Big Monster
+            CardManager.New(P03Pack3Plugin.CardPrefix, "BigEffingThing", "Dobhar-Chu", 5, 10)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_big_blood_card.png", typeof(Cards).Assembly))
+                .SetCost(bloodCost: 5)
+                .SetNeutralP03Card()
+                .AddAbilities(Ability.AllStrike);
+
+            // Ramshackle
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Ramshackle", "Ramshackle", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_ramshackle.png", typeof(Cards).Assembly))
+                .SetGemsCost(GemType.Green, GemType.Orange)
+                .SetNeutralP03Card()
+                .AddAbilities(Ability.DropRubyOnDeath, EmeraldShard.AbilityID);
+
+            // N-GINN
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Engine", "N-GINN", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_engine.png", typeof(Cards).Assembly))
+                .SetCost(bonesCost: 2)
+                .SetNeutralP03Card()
+                .SetStartingFuel(4)
+                .AddAbilities(ActivatedStrafe.AbilityID);
+
+            // Iterator
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Iterator", "Iterator", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_iterator.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 3)
+                .SetNeutralP03Card()
+                .AddAbilities(DrawCopyAltCost.AbilityID);
+
+            // Neutral Tentacle
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Technicle", "544543484E49434C45", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_empty_tentacle.png", typeof(Cards).Assembly))
+                .AddAbilities(Ability.Submerge);
+
+            AbilityManager.ModifyAbilityList += delegate (List<AbilityManager.FullAbility> abilities)
+            {
+                if (!P03AscensionSaveData.IsP03Run)
+                    return abilities;
+
+                // Some additional bone support
+                abilities.AbilityByID(Ability.BoneDigger).Info.AddMetaCategories(AbilityMetaCategory.Part3Modular);
+                abilities.AbilityByID(Ability.QuadrupleBones).Info.AddMetaCategories(AbilityMetaCategory.Part3Modular);
+                abilities.AbilityByID(Ability.OpponentBones).Info.AddMetaCategories(AbilityMetaCategory.Part3Modular);
+
+                return abilities;
+            };
         }
     }
 }

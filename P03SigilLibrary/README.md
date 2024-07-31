@@ -4,6 +4,8 @@ All of the custom sigils you love from [P03 in Kaycee's Mod](https://thunderstor
 
 Full documentation of everything in this mod can be found at the [Botopia Developer's Hub](https://github.com/Cosmiscient/P03KayceeMod-Main/wiki/Sigils)
 
+**Join our Discord!! [https://discord.gg/cvmjmSs7CS](https://discord.gg/cvmjmSs7CS)**
+
 ## Requirements
 
 - [BepInEx](https://inscryption.thunderstore.io/package/BepInEx/BepInExPack_Inscryption/)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,15 +38,38 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
         private static bool IsValidCard(CardInfo card) => card.HasCardMetaCategory(CardMetaCategory.Rare) && card.HasAnyOfCardMetaCategories(CardMetaCategory.ChoiceNode, CardMetaCategory.TraderOffer) && card.temple == SaveManager.SaveFile.GetSceneAsCardTemple();
 
+        private static bool HasMetacategory(AbilityInfo info, AbilityMetaCategory cat)
+        {
+            if (info == null)
+                return false;
+            if (info.metaCategories == null)
+                return false;
+            return info.metaCategories.Contains(cat);
+        }
+
+        private static bool HasInterface(AbilityManager.FullAbility info, Type iType)
+        {
+            if (info == null)
+                return false;
+            if (info.AbilityBehavior == null)
+                return false;
+            var ifaces = info.AbilityBehavior.GetInterfaces();
+            if (ifaces == null)
+                return false;
+            return ifaces.Contains(iType);
+        }
+
         private static bool IsModularOrSacrifice(Ability ab)
         {
             var info = AbilityManager.AllAbilities.AbilityByID(ab);
             var matches = ab == Ability.RandomAbility;
+            if (info == null || info.Info == null)
+                return matches;
             if (SaveManager.SaveFile.IsPart1)
-                matches = matches || info.Info.metaCategories.Contains(AbilityMetaCategory.Part1Modular);
+                matches = matches || HasMetacategory(info.Info, AbilityMetaCategory.Part1Modular);
             else if (SaveManager.SaveFile.IsPart3)
-                matches = matches || info.Info.metaCategories.Contains(AbilityMetaCategory.Part3Modular);
-            matches = matches || info.AbilityBehavior.GetInterfaces().Contains(typeof(IAbsorbSacrifices));
+                matches = matches || HasMetacategory(info.Info, AbilityMetaCategory.Part3Modular);
+            matches = matches || HasInterface(info, typeof(IAbsorbSacrifices));
             return matches;
         }
 

@@ -222,6 +222,8 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
     public class QuestRewardLoseItem : QuestRewardItem
     {
+        protected override bool CanGrantReward() => true;
+
         protected override IEnumerator GrantRewardSequence()
         {
             if (!string.IsNullOrEmpty(ItemName))
