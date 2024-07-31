@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 1456498934
+CRC: 3015456525
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 921ea242675895030f0f11114319f704
+    Hash: bde618fe589653d4a239b8e561336a95
   TypeTreeHash:
     serializedVersion: 2
     Hash: 10caaafd0ad3fcdc9870467d863128a4
@@ -78,7 +78,6 @@ Assets:
 - Assets/Models/syringe_gun_low.fbx
 - Assets/Effects/UFO_Particles.png
 - Assets/Prefabs/Unlit-Bomb.prefab
-- Assets/Prefabs/Missile.prefab
 - Assets/Prefabs/LaserRifle.prefab
 - Assets/Prefabs/Frame.prefab
 - Assets/Models/missile_model.dae

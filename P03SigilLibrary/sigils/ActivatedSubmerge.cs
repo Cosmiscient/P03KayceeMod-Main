@@ -25,7 +25,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Submerge";
-            info.rulebookDescription = "Activate: Submerge during the opponent's turn. While submerged, opposing creatures attack its owner directly.";
+            info.rulebookDescription = "Submerge during the opponent's turn. While submerged, opposing creatures attack its owner directly.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = true;

@@ -75,6 +75,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string MYCO_CONSTRUCT_BASE = "P03KCM_MYCO_CONSTRUCT_BASE";
         public const string TRAINING_DUMMY = "P03KCM_TRAINING_DUMMY";
 
+        public const string VESSEL_LEAP = "P03KCM_VESSEL_LEAP";
+        public const string VESSEL_BLOOD = "P03KCM_VESSEL_BLOOD";
+        public const string VESSEL_BONES = "P03KCM_VESSEL_BONES";
+        public const string VESSEL_CONDUIT = "P03KCM_VESSEL_CONDUIT";
+
+        public const string TURBO_VESSEL_LEAP = "P03KCM_TURBO_VESSEL_LEAP";
+        public const string TURBO_VESSEL_BLOOD = "P03KCM_TURBO_VESSEL_BLOOD";
+        public const string TURBO_VESSEL_BONES = "P03KCM_TURBO_VESSEL_BONES";
+        public const string TURBO_VESSEL_CONDUIT = "P03KCM_TURBO_VESSEL_CONDUIT";
+
         public const string TURBO_MINECART = "P03KCM_TURBO_MINECART";
 
         public const string MAG_BRUSH = "P03KCM_MAG_BRUSH";
@@ -95,6 +105,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public const string TURBO_VESSEL_REDGEM = "P03KCM_TURBO_VESSEL_REDGEM";
         public const string TURBO_VESSEL_GREENGEM = "P03KCM_TURBO_VESSEL_GREENGEM";
         public const string TURBO_LEAPBOT = "P03KCM_TURBO_LEAPBOT";
+        public const string SIDEDECK_LEAPBOT = "P03KCM_SIDE_LEAPBOT";
 
         private static readonly List<CardMetaCategory> GBC_RARE_PLAYABLES = new() { CardMetaCategory.GBCPack, CardMetaCategory.GBCPlayable, CardMetaCategory.Rare, CardMetaCategory.ChoiceNode };
 
@@ -432,6 +443,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     cards.CardByName("EnergyRoller").AddMetaCategories(CardMetaCategory.Rare);
                     cards.CardByName("Librarian").AddAppearances(LibrarianSizeTitle.ID);
                     cards.CardByName("P03SIG_Salmon")?.SetWeaponMesh(DiskCardWeapon.Fish);
+                    cards.CardByName("EmptyVessel_GreenGem").AddTraits(Unsackable);
+                    cards.CardByName("EmptyVessel_OrangeGem").AddTraits(Unsackable);
+                    cards.CardByName("EmptyVessel_BlueGem").AddTraits(Unsackable);
                     cards.CardByName("AboveCurve").SetWeaponMesh(
                         "p03kcm/prefabs/FingerGun",
                         localPosition: new Vector3(0f, -0.66f, 0f),
@@ -611,36 +625,126 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     .SetSpecialAbilities(DummyBreak.ID)
                     .SetCardTemple(CardTemple.Tech);
 
+            CardManager.New(P03Plugin.CardPrefx, VESSEL_BLOOD, "Blood Vessel", 0, 2)
+                    .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_emptyvessel"))
+                    .SetCost(energyCost: 1)
+                    .SetFlippedPortrait()
+                    .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_bloodvessel.png", typeof(CustomCards).Assembly))
+                    .SetStrafeFlipsPortrait(true)
+                    .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, VESSEL_LEAP, "Spring Vessel", 0, 2)
+                    .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_emptyvessel"))
+                    .SetCost(energyCost: 1)
+                    .AddTraits(Unsackable)
+                    .SetFlippedPortrait()
+                    .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_reachvessel.png", typeof(CustomCards).Assembly))
+                    .SetStrafeFlipsPortrait(true)
+                    .AddAbilities(Ability.Reach)
+                    .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, VESSEL_CONDUIT, "Conduit Vessel", 0, 2)
+                    .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_emptyvessel"))
+                    .SetCost(energyCost: 1)
+                    .SetFlippedPortrait()
+                    .AddTraits(Unsackable)
+                    .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_conduitvessel.png", typeof(CustomCards).Assembly))
+                    .SetStrafeFlipsPortrait(true)
+                    .AddAbilities(Ability.ConduitNull)
+                    .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, VESSEL_BONES, "Dredging Vessel", 0, 2)
+                    .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_emptyvessel"))
+                    .SetCost(energyCost: 1)
+                    .SetFlippedPortrait()
+                    .AddTraits(Unsackable)
+                    .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_bonediggervessel.png", typeof(CustomCards).Assembly))
+                    .SetStrafeFlipsPortrait(true)
+                    .AddAbilities(Ability.BoneDigger)
+                    .temple = CardTemple.Tech;
+
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL, "Turbo Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.ConduitNull)
+                    .AddTraits(Unsackable)
                     .SetFlippedPortrait()
                     .SetStrafeFlipsPortrait(true)
                     .temple = CardTemple.Tech;
 
-            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_BLUEGEM, "Turbo Vessel", 0, 2)
+            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_BLUEGEM, "Turbo Sapphire Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
+                    .AddTraits(Unsackable)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemBlue)
                     .SetStrafeFlipsPortrait(true)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
-            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_REDGEM, "Turbo Vessel", 0, 2)
+            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_REDGEM, "Turbo Ruby Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
+                    .AddTraits(Unsackable)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemOrange)
                     .SetStrafeFlipsPortrait(true)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
-            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_GREENGEM, "Turbo Vessel", 0, 2)
+            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_GREENGEM, "Turbo Emerald Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
+                    .AddTraits(Unsackable)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemGreen)
                     .SetFlippedPortrait()
                     .SetStrafeFlipsPortrait(true)
+                    .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_BLOOD, "Turbo Blood Vessel", 0, 2)
+                    .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
+                    .SetCost(energyCost: 1)
+                    .SetFlippedPortrait()
+                    .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_bloodvessel.png", typeof(CustomCards).Assembly))
+                    .SetStrafeFlipsPortrait(true)
+                    .AddAbilities(DoubleSprint.AbilityID)
+                    .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_LEAP, "Turbo Spring Vessel", 0, 2)
+                    .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
+                    .SetCost(energyCost: 1)
+                    .AddTraits(Unsackable)
+                    .SetFlippedPortrait()
+                    .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_reachvessel.png", typeof(CustomCards).Assembly))
+                    .SetStrafeFlipsPortrait(true)
+                    .AddAbilities(DoubleSprint.AbilityID, Ability.Reach)
+                    .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_CONDUIT, "Turbo Conduit Vessel", 0, 2)
+                    .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
+                    .SetCost(energyCost: 1)
+                    .SetFlippedPortrait()
+                    .AddTraits(Unsackable)
+                    .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_conduitvessel.png", typeof(CustomCards).Assembly))
+                    .SetStrafeFlipsPortrait(true)
+                    .AddAbilities(DoubleSprint.AbilityID, Ability.ConduitNull)
+                    .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_BONES, "Turbo Dredging Vessel", 0, 2)
+                    .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
+                    .SetCost(energyCost: 1)
+                    .SetFlippedPortrait()
+                    .AddTraits(Unsackable)
+                    .AddPart3Decal(TextureHelper.GetImageAsTexture("decal_bonediggervessel.png", typeof(CustomCards).Assembly))
+                    .SetStrafeFlipsPortrait(true)
+                    .AddAbilities(DoubleSprint.AbilityID, Ability.BoneDigger)
+                    .temple = CardTemple.Tech;
+
+            CardManager.New(P03Plugin.CardPrefx, SIDEDECK_LEAPBOT, "L33pb0t", 0, 2)
+                    .SetPortrait(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_leapbot"))
+                    .SetCost(energyCost: 1)
+                    .AddAbilities(Ability.Reach)
+                    .SetStrafeFlipsPortrait(true)
+                    .AddTraits(Unsackable)
+                    .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
             CardManager.New(P03Plugin.CardPrefx, TURBO_LEAPBOT, "Turbo L33pb0t", 0, 2)
@@ -648,6 +752,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     .SetCost(energyCost: 1)
                     .AddAbilities(Ability.Reach, DoubleSprint.AbilityID)
                     .SetStrafeFlipsPortrait(true)
+                    .AddTraits(Unsackable)
                     .SetFlippedPortrait()
                     .temple = CardTemple.Tech;
 
@@ -1244,7 +1349,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         [HarmonyPostfix]
         private static void ApplyUnsackable(CardInfo __instance, ref bool __result)
         {
-            __result = __result && !__instance.traits.Contains(Unsackable);
+            __result = __result && !__instance.HasTrait(Unsackable);
         }
     }
 }

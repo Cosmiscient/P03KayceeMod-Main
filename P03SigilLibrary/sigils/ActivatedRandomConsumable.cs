@@ -25,7 +25,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Dispenser";
-            info.rulebookDescription = "Activate: Gain a random item.";
+            info.rulebookDescription = "Gain a random item.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;

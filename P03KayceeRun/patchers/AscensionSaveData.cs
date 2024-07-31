@@ -536,7 +536,12 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     __instance.currency = 25;
                 }
 
-                __instance.sideDeckAbilities.Add(Ability.ConduitNull);
+                // SIDEDECK::
+                //__instance.sideDeckAbilities.Add(Ability.ConduitNull);
+                __instance.deckGemsDistribution = new int[SideDeckManagement.STANDARD_CARDNAMES.Count];
+                __instance.deckGemsDistribution[0] = 3;
+                __instance.deckGemsDistribution[1] = 3;
+                __instance.deckGemsDistribution[2] = 4;
 
                 if (P03Plugin.Instance.TurboMode)
                     __instance.currency = 250;

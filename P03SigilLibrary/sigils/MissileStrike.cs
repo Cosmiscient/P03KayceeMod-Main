@@ -178,7 +178,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
             internal bool HasPendingStrike(PlayableCard card) => PendingAttacks.Any(t => t.Attacker == card);
 
-            internal void QueueMissileStrike(PlayableCard attacker, int value, CardSlot target)
+            internal IEnumerator QueueMissileStrike(PlayableCard attacker, int value, CardSlot target)
             {
                 GameObject aimIcon = Instantiate(ResourceBank.Get<GameObject>("Prefabs/Cards/SpecificCardModels/SniperTargetIcon"), target.transform);
                 aimIcon.transform.localPosition = new Vector3(0f, 0.15f, 0f);
@@ -194,6 +194,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                         Tween.ShaderColor(material, "_RimColor", GameColors.Instance.glowRed, 2f, 0f, loop: Tween.LoopType.PingPong);
                     }
                 }
+
+                yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
+                    attacker.TriggerHandler,
+                    t => t.RespondsToStrikeQueued(target),
+                    t => t.OnStrikeQueued(target)
+                );
 
                 PendingAttacks.Add(new() { Attacker = attacker, AttackValue = value, Slot = target, Target = aimIcon, PlayerUpkeep = TurnManager.Instance.IsPlayerTurn, QueuedTurnNumber = TurnManager.Instance.TurnNumber });
             }
@@ -275,6 +281,11 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
                     foreach (CardSlot slot in slotsToAttack)
                     {
+                        yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
+                            atkDefn.Attacker.TriggerHandler,
+                            t => t.RespondsToPreStrikeHit(slot),
+                            t => t.OnPreStrikeHit(slot)
+                        );
                         if (slot == null)
                         {
                             yield return OverkillSimulator(atkDefn.AttackValue, atkDefn.Attacker, atkDefn.Slot);
@@ -302,7 +313,19 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                             yield return CustomTriggerFinder.TriggerAll<IOnPostSingularSlotAttackSlot>(false, x => x.RespondsToPostSingularSlotAttackSlot(atkDefn.Attacker.Slot, slot), x => x.OnPostSingularSlotAttackSlot(atkDefn.Attacker.Slot, slot));
 
                         yield return CustomTriggerFinder.TriggerAll<IOnPostSlotAttackSequence>(false, x => x.RespondsToPostSlotAttackSequence(slot), x => x.OnPostSlotAttackSequence(slot));
+
+                        yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
+                            atkDefn.Attacker.TriggerHandler,
+                            t => t.RespondsToPostStrikeHit(slot),
+                            t => t.OnPostStrikeHit(slot)
+                        );
                     }
+
+                    yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
+                        atkDefn.Attacker.TriggerHandler,
+                        t => t.RespondsToPostAllStrike(),
+                        t => t.OnPostAllStrike()
+                    );
 
                     if (setCardSlot)
                     {
@@ -362,7 +385,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             AudioController.Instance.PlaySound3D("missile_launch", MixerGroup.TableObjectsSFX, source.position);
             yield return new WaitForSeconds(0.5f);
 
-            MissileStrikeManager.Instance.QueueMissileStrike(attacker, amount, target);
+            yield return MissileStrikeManager.Instance.QueueMissileStrike(attacker, amount, target);
             yield break;
         }
 

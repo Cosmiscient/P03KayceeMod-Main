@@ -4,6 +4,7 @@
     "website_url": "https://github.com/Cosmiscient/P03KayceeMod-Main",
     "description": "The third official expansion pack to 'P03 in Kaycees Mod' brings blood, bones, and even more gems to the party.",
     "dependencies": [
-        "Infiniscryption-P03_In_Kaycees_Mod-5.0.20"
+        "API_dev-API-2.20.0",
+        "Infiniscryption-P03_In_Kaycees_Mod-5.0.21"
     ]
 }

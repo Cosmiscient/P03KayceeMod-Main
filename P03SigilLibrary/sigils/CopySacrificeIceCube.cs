@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using Infiniscryption.P03SigilLibrary.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using UnityEngine;
@@ -30,7 +32,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 foreach (CardModificationInfo mod in sacrifice.Info.mods)
                     clonedSacrifice.mods.Add(mod.Clone() as CardModificationInfo);
             }
-            foreach (var mod in sacrifice.TemporaryMods)
+            foreach (var mod in sacrifice.TemporaryMods.Where(m => !m.IsContinousEffectMod()))
                 clonedSacrifice.mods.Add(mod.Clone() as CardModificationInfo);
 
             if (!this.PlayableCard.HasAbility(Ability.IceCube))

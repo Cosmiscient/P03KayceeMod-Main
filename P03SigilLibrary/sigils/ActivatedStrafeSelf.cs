@@ -26,7 +26,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "D-Pad";
-            info.rulebookDescription = "Activate: Move to an adjacent empty lane.";
+            info.rulebookDescription = "Move to an adjacent empty lane.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;

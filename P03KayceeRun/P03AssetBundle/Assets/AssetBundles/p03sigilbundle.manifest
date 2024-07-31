@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 1816562950
+CRC: 2648637927
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 3756f06b6c5e4b174b1408a18ab542e8
+    Hash: bd54d9496e1752c08f777eba9e0880af
   TypeTreeHash:
     serializedVersion: 2
     Hash: afd12bf211ec48792818822e52781931
@@ -34,5 +34,6 @@ Assets:
 - Assets/Prefabs/Molotov.prefab
 - Assets/Effects/Fire_Ball.prefab
 - Assets/Effects/Fire_Parent.prefab
+- Assets/Prefabs/Missile.prefab
 Dependencies:
 - C:/GIT/P03KayceeMod-Main/P03KayceeRun/P03AssetBundle/Assets/AssetBundles/p03assetbundle

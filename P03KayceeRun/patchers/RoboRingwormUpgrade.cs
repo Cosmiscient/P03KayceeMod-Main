@@ -132,7 +132,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 TextDisplayer.Instance.Clear();
                 ViewManager.Instance.SwitchToView(View.Default, false, false);
                 yield return new WaitForSeconds(0.5f);
-                GameObject fireObj = Object.Instantiate(AssetBundleManager.Prefabs["Fire_Parent"], abilityMachine.diskDrive.transform);
+
+                var firePrefab = ResourceBank.Get<GameObject>("p03kcm/prefabs/Fire_Parent");
+                GameObject fireObj = Object.Instantiate(firePrefab, abilityMachine.diskDrive.transform);
                 fireObj.transform.localPosition = new(-1.3f, 0.46f, 2.17f);
                 fireObj.transform.SetParent(abilityMachine.diskDrive.anim.transform, true);
                 for (int i = 1; i <= 4; i++)

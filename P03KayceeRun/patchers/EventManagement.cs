@@ -72,6 +72,57 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             set => ModdedSaveManager.SaveData.SetValue(P03Plugin.PluginGuid, "SawMapInfo", value);
         }
 
+        private static bool? __bloodCardsInPool = null;
+        private static bool? __bonesCardsInPool = null;
+
+        [HarmonyPatch(typeof(MenuController), nameof(MenuController.TransitionToAscensionMenu))]
+        [HarmonyPrefix]
+        private static void EnsureOverrideDisplayerResets()
+        {
+            __bloodCardsInPool = null;
+            __bonesCardsInPool = null;
+        }
+
+        internal static bool BloodCardsInPool
+        {
+            get
+            {
+                if (__bloodCardsInPool.HasValue)
+                    return __bloodCardsInPool.Value;
+
+                foreach (var card in CardLoader.AllData.Where(TradeChipsSequencer.IsValidDraftCard))
+                {
+                    if (card.BloodCost > 0)
+                    {
+                        __bloodCardsInPool = true;
+                        return true;
+                    }
+                }
+                __bloodCardsInPool = false;
+                return false;
+            }
+        }
+
+        internal static bool BonesCardsInPool
+        {
+            get
+            {
+                if (__bonesCardsInPool.HasValue)
+                    return __bonesCardsInPool.Value;
+
+                foreach (var card in CardLoader.AllData.Where(TradeChipsSequencer.IsValidDraftCard))
+                {
+                    if (card.BonesCost > 0)
+                    {
+                        __bonesCardsInPool = true;
+                        return true;
+                    }
+                }
+                __bonesCardsInPool = false;
+                return false;
+            }
+        }
+
         internal static bool AllFourResourcesInPool
         {
             get
