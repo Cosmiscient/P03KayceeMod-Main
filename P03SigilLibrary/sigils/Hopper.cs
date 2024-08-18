@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
+using Infiniscryption.P03SigilLibrary.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.Helpers.Extensions;
 using Pixelplacement;
 using UnityEngine;
 
@@ -37,7 +39,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
         public override IEnumerator OnTurnEnd(bool playerTurnEnd)
         {
-            if (!BoardManager.Instance.PlayerSlotsCopy.Any(x => x.Card == null))
+            List<CardSlot> validslots = BoardManager.Instance.GetSlotsCopy(this.Card.IsPlayerCard()).FindAll(x => x.Card == null || x.Card == Card);
+            if (validslots.Count == 0)
             {
                 ViewManager.Instance.SwitchToView(View.Board, false, false);
                 yield return new WaitForSeconds(0.25f);
@@ -45,32 +48,11 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             }
             else
             {
-                ViewManager.Instance.SwitchToView(View.Board, false, true);
-                yield return new WaitForSeconds(0.25f);
-
-                Vector3 a = Card.Slot.IsPlayerSlot ? Vector3.forward : Vector3.back;
-                a *= 0.5f;
-                Tween.Position(Card.transform, Card.transform.position + (a * 2f) + (Vector3.up * 0.25f), 0.15f, 0f, Tween.EaseOut, Tween.LoopType.None, null, null, true);
-
-                List<CardSlot> allslots = BoardManager.Instance.PlayerSlotsCopy;
-                List<CardSlot> validslots = BoardManager.Instance.PlayerSlotsCopy.FindAll(x => x.Card == null || x.Card == Card);
-
-                CardSlot selectedSlot = null;
-                yield return BoardManager.Instance.ChooseTarget(
-                    allslots,
+                yield return this.CardChooseSlotSequence(
+                    s => BoardManager.Instance.AssignCardToSlot(Card, s, 0.1f, null, false),
                     validslots,
-                    s => selectedSlot = s,
-                    s => Card.Anim.StrongNegationEffect(),
-                    null,
-                    () => false,
-                    CursorType.Target
+                    cursor: CursorType.Place
                 );
-
-                if (selectedSlot != null)
-                    yield return BoardManager.Instance.AssignCardToSlot(Card, selectedSlot, 0.1f, null, false);
-
-                ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
-
             }
             yield break;
         }

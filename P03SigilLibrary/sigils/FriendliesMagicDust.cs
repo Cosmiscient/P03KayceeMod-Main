@@ -19,7 +19,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Dust Giver";
-            info.rulebookDescription = "As long as [creature] is alive, all friendly cards have Magic Dust";
+            info.rulebookDescription = "As long as [creature] is alive, all friendly cards have Magic Dust.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = true;

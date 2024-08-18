@@ -17,7 +17,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             StatIconInfo info = StatIconManager.New(P03SigilLibraryPlugin.PluginGuid,
                 "Energy Power",
-                "The value represented with this sigil will be equal to the number of times the player has spent energy this turn",
+                "The value represented with this sigil will be equal to the number of times the player has spent energy this turn.",
                 typeof(BatteryPower));
             info.appliesToAttack = true;
             info.appliesToHealth = false;

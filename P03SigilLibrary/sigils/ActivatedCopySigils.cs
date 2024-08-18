@@ -57,7 +57,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Copy and Paste";
-            info.rulebookDescription = "The controller of [creature] chooses two cards they control. The second card's sigils are replaced with the sigil's of the first.";
+            info.rulebookDescription = "The controller of [creature] chooses two cards they control. The second card's sigils are replaced with the sigils of the first.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;
@@ -123,7 +123,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 OnSelectCopyFromSlot,
                 this.CopyFromSlots,
                 EvaluateCopyFromSlot,
-                "Choose a card to copy sigils from"
+                "Choose a card to copy sigils from",
+                cursor: CursorType.Pickup
             );
 
             yield return new WaitForSeconds(0.2f);
@@ -132,7 +133,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 OnSelectCopyToSlot,
                 this.CopyToSlots,
                 EvaluateCopyToSlot,
-                "Choose a card to paste sigils onto"
+                "Choose a card to paste sigils onto",
+                cursor: CursorType.Place
             );
 
             yield return base.LearnAbility(0.2f);

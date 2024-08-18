@@ -1,0 +1,14 @@
+﻿dialogueid,lineface,wavy,line
+KrakenTransformerQuestIntro,Default,Y,Glug glug glug
+,Default,N,We seem to have a [c:bR]tentacle[c:] problem
+,,,If you want to help out, talk to me again.
+KrakenTransformerQuestStart,Default,Y,Glug glug glug
+,,N,Thank you for your help
+,,,There are [c:bR]3[c:] tentacles that need to be destroyed.
+,,,Once you've done that, come talk to me again.
+KrakenTransformerQuestInProgress,Default,Y,Glug glug glug
+,,N,You have killed [c:bR][v:0][c:] tentacles.
+,,,See me once you've killed them all.
+KrakenTransformerQuestComplete,Default,Y,Glug glug glug
+,,N,The scourge of the tentacles has been erased
+,,,Please take this as a token of my gratitude.

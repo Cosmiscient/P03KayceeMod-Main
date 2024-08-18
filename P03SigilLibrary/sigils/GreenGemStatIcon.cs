@@ -17,7 +17,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             StatIconInfo info = StatIconManager.New(P03SigilLibraryPlugin.PluginGuid,
                 "Emerald Power",
-                "The value represented with this sigil will be equal to the number of emerald gems its owner controls",
+                "The value represented with this sigil will be equal to the number of emerald gems its owner controls.",
                 typeof(GreenGemPower));
             info.appliesToAttack = true;
             info.appliesToHealth = false;

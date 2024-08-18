@@ -18,7 +18,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Catch Fire";
-            info.rulebookDescription = "When [creature] targets a slot, the target gains Nano Armor.";
+            info.rulebookDescription = "When [creature] targets a slot, the target is set on fire.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;

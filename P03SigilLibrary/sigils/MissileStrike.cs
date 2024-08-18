@@ -195,11 +195,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                     }
                 }
 
-                yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
-                    attacker.TriggerHandler,
-                    t => t.RespondsToStrikeQueued(target),
-                    t => t.OnStrikeQueued(target)
-                );
+                if (attacker != null)
+                    yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
+                        attacker.TriggerHandler,
+                        t => t.RespondsToStrikeQueued(target),
+                        t => t.OnStrikeQueued(target)
+                    );
 
                 PendingAttacks.Add(new() { Attacker = attacker, AttackValue = value, Slot = target, Target = aimIcon, PlayerUpkeep = TurnManager.Instance.IsPlayerTurn, QueuedTurnNumber = TurnManager.Instance.TurnNumber });
             }
@@ -281,11 +282,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
                     foreach (CardSlot slot in slotsToAttack)
                     {
-                        yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
-                            atkDefn.Attacker.TriggerHandler,
-                            t => t.RespondsToPreStrikeHit(slot),
-                            t => t.OnPreStrikeHit(slot)
-                        );
+                        if (atkDefn.Attacker != null)
+                            yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
+                                atkDefn.Attacker.TriggerHandler,
+                                t => t.RespondsToPreStrikeHit(slot),
+                                t => t.OnPreStrikeHit(slot)
+                            );
                         if (slot == null)
                         {
                             yield return OverkillSimulator(atkDefn.AttackValue, atkDefn.Attacker, atkDefn.Slot);
@@ -314,18 +316,20 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
                         yield return CustomTriggerFinder.TriggerAll<IOnPostSlotAttackSequence>(false, x => x.RespondsToPostSlotAttackSequence(slot), x => x.OnPostSlotAttackSequence(slot));
 
-                        yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
-                            atkDefn.Attacker.TriggerHandler,
-                            t => t.RespondsToPostStrikeHit(slot),
-                            t => t.OnPostStrikeHit(slot)
-                        );
+                        if (atkDefn.Attacker != null)
+                            yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
+                                atkDefn.Attacker.TriggerHandler,
+                                t => t.RespondsToPostStrikeHit(slot),
+                                t => t.OnPostStrikeHit(slot)
+                            );
                     }
 
-                    yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
-                        atkDefn.Attacker.TriggerHandler,
-                        t => t.RespondsToPostAllStrike(),
-                        t => t.OnPostAllStrike()
-                    );
+                    if (atkDefn.Attacker != null)
+                        yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
+                            atkDefn.Attacker.TriggerHandler,
+                            t => t.RespondsToPostAllStrike(),
+                            t => t.OnPostAllStrike()
+                        );
 
                     if (setCardSlot)
                     {

@@ -7,12 +7,16 @@ using Infiniscryption.P03SigilLibrary.Sigils;
 using System.Collections.Generic;
 using Infiniscryption.P03KayceeRun.Cards.Stickers;
 using Infiniscryption.P03KayceeRun.Patchers;
+using UnityEngine;
+using InscryptionAPI.Guid;
 
 namespace Infiniscryption.P03ExpansionPack3
 {
     public static class Cards
     {
         public const string BLAST_CARD = "P03KCMXP3_BLAST";
+
+        public static readonly Trait GunbotSwapTrait = GuidManager.GetEnumValue<Trait>(P03Pack3Plugin.PluginGuid, "GunbotSwap");
 
         static Cards()
         {
@@ -57,12 +61,27 @@ namespace Infiniscryption.P03ExpansionPack3
                 .SetCost(bloodCost: 1)
                 .SetNeutralP03Card();
 
+            // Danny
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Danny", "D.A.N.N.Y.", 0, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_danny.png", typeof(Cards).Assembly))
+                //.SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
+                .SetCost(energyCost: 4)
+                .SetNeutralP03Card()
+                .AddAbilities(SummonGunbots.AbilityID)
+                .AddSpecialAbilities(SwapWithGunbot.ID);
+
             // Butane Launcher
             CardManager.New(P03Pack3Plugin.CardPrefix, "ButaneCaster", "Butane Caster", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_butane_caster.png", typeof(Cards).Assembly))
                 //.SetPixelPortrait(TextureHelper.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
                 .SetCost(bonesCost: 4)
                 .SetNeutralP03Card()
+                .SetWeaponMesh(
+                    "p03kcm/prefabs/flamethrower",
+                    localPosition: new Vector3(0f, 0f, 0f),
+                    localRotation: new Vector3(0f, 90f, 0f),
+                    localScale: new Vector3(0.75f, 0.75f, 0.75f)
+                )
                 .AddAbilities(ThrowFire.AbilityID);
 
             // Stimulator
@@ -81,6 +100,12 @@ namespace Infiniscryption.P03ExpansionPack3
                 .SetCost(energyCost: 5)
                 .SetNeutralP03Card()
                 .SetRare()
+                .SetWeaponMesh(
+                    "p03kcm/prefabs/XCom_laserRifle_obj",
+                    localPosition: new Vector3(0f, -0.66f, 0f),
+                    localRotation: new Vector3(0f, 0f, 0f),
+                    localScale: new Vector3(0.03f, 0.03f, 0.03f)
+                )
                 .AddAbilities(Ability.ActivatedDealDamage, ActivatedStrafeSelf.AbilityID);
 
             // Green Energy Bot
@@ -98,6 +123,12 @@ namespace Infiniscryption.P03ExpansionPack3
                 .SetCost(bonesCost: 5)
                 .SetNeutralP03Card()
                 .SetStartingFuel(3)
+                .SetWeaponMesh(
+                    "p03kcm/prefabs/flamethrower",
+                    localPosition: new Vector3(0f, 0f, 0f),
+                    localRotation: new Vector3(0f, 90f, 0f),
+                    localScale: new Vector3(0.75f, 0.75f, 0.75f)
+                )
                 .AddAbilities(MissileStrike.AbilityID, FireBombWhenFueled.AbilityID);
 
             // Tow Truck
@@ -106,6 +137,15 @@ namespace Infiniscryption.P03ExpansionPack3
                 .SetCost(bonesCost: 5)
                 .SetNeutralP03Card()
                 .SetStartingFuel(2)
+                .SetWeaponMesh(
+                    "p03kcm/prefabs/Item_Hook",
+                    localPosition: new Vector3(0f, -0.6f, 0.7f),
+                    localRotation: new Vector3(330f, 0f, 180f),
+                    localScale: new Vector3(0.007f, 0.013f, 0.007f),
+                    disableMuzzleFlash: true,
+                    audioId: "metal_object_hit#3"
+                )
+                .SetExtendedProperty("WeaponTowHook", true)
                 .AddAbilities(ActivatedTemporaryControl.AbilityID);
 
             // Nitrous Dispenser
@@ -186,7 +226,7 @@ namespace Infiniscryption.P03ExpansionPack3
                 .AddAbilities(LatchAnnoying.AbilityID);
 
             // Apedroid
-            CardManager.New(P03Pack3Plugin.CardPrefix, "Apedroid", "Apedroid", 1, 1)
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Apedroid", "Cat-A-Pult", 1, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_apedroid.png", typeof(Cards).Assembly))
                 //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
                 .SetCost(bloodCost: 1)
@@ -310,6 +350,7 @@ namespace Infiniscryption.P03ExpansionPack3
             // Shrinker
             CardManager.New(P03Pack3Plugin.CardPrefix, "Shrinker", "Shrinker", 2, 2)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_shrinker.png", typeof(Cards).Assembly))
+                .SetAltPortrait(TextureHelper.GetImageAsTexture("portrait_shrinker_swap.png", typeof(Cards).Assembly))
                 .SetGemsCost(GemType.Green, GemType.Orange)
                 .SetNeutralP03Card()
                 .AddAbilities(Ability.SwapStats);
@@ -407,6 +448,13 @@ namespace Infiniscryption.P03ExpansionPack3
                 .SetCost(energyCost: 3)
                 .SetNeutralP03Card()
                 .AddAbilities(DrawCopyAltCost.AbilityID);
+
+            // Gas Generator
+            CardManager.New(P03Pack3Plugin.CardPrefix, "GasGenerator", "Gas Generator", 0, 3)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_gas_generator.png", typeof(Cards).Assembly))
+                .SetCost(bonesCost: 2)
+                .SetRegionalP03Card(CardTemple.Tech)
+                .AddAbilities(ConduitNeighborWhenFueled.AbilityID);
 
             // Neutral Tentacle
             CardManager.New(P03Pack3Plugin.CardPrefix, "Technicle", "544543484E49434C45", 0, 1)

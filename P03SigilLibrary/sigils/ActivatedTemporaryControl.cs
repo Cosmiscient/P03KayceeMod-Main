@@ -64,10 +64,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             yield return base.PreSuccessfulTriggerSequence();
 
+            bool useWeaponAnim = this.Card.Info.GetExtendedPropertyAsBool("WeaponTowHook") ?? false;
             yield return this.CardChooseSlotSequence(
                 OnSelectSlot,
                 this.ValidOpposingSlots,
-                EvaluateSlot
+                EvaluateSlot,
+                aimWeapon: useWeaponAnim,
+                cursor: CursorType.FishHook
             );
 
             yield return base.LearnAbility(0.2f);

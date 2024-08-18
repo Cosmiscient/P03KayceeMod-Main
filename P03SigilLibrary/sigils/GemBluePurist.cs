@@ -22,7 +22,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info2 = ScriptableObject.CreateInstance<AbilityInfo>();
             info2.rulebookName = "Purist With Blue";
-            info2.rulebookDescription = "If the owner of [creature] controls a Blue Mox, cards opposing [creature] have their sigils removed";
+            info2.rulebookDescription = "If the owner of [creature] controls a Blue Mox, cards opposing [creature] have their sigils removed.";
             info2.canStack = false;
             info2.powerLevel = 1;
             info2.opponentUsable = true;

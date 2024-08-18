@@ -1,3 +1,15 @@
+# 1.0.9
+- Updated the fuel gauge for disk cards.
+
+# 1.0.8
+- Fixed an issue where missile launches softlocked if they were spawned by non-card entities.
+
+# 1.0.7
+- Fixed an issue where the Bonus Energy Conduit ability would not work if the circuit was completed by an adjacent card.
+
+# 1.0.6
+- Increased the power level of Static Electricity. It now powers every card on the board, not just neighbors.
+
 # 1.0.5
 - Fixed a defect where "active when powered" sigils were not properly changing colors when powered.
 - Added some new sigils

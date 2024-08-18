@@ -18,7 +18,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Overcharge";
-            info.rulebookDescription = $"Pay {ENERGY_COST} Energy to increase the Power of this card by 1";
+            info.rulebookDescription = $"Pay {ENERGY_COST} Energy to increase the Power of this card by 1.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;

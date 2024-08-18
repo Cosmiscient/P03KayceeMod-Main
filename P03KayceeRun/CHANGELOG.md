@@ -1,3 +1,7 @@
+# 5.0.24
+- Bugfix: Resolved an issue with how opponent cards were displayed in the secret final boss.
+- Balance Change: Elektron now powers every card on the board, not just adjacent cards.
+
 # 5.0.23
 - Bugfix: Fixed a defect where if quest NPC tried to remove an item from your backpack, it would fail if your backpack was full.
 - Bugfix: Fixed a defect related to non-combat damage in the secret final boss.

@@ -30,6 +30,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
                 difficulty: 2,
                 iconPath: "p03kcm/prefabs/rocket-bomb"
             );
+            BattleModManager.SetGlobalActivationRule(ID, () => P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("missile"));
         }
 
         public override bool RespondsToUpkeep(bool playerUpkeep) => !playerUpkeep;

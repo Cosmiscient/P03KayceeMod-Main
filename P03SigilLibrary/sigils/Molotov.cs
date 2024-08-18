@@ -22,7 +22,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Flammable";
-            info.rulebookDescription = "When [creature] dies, it detonates and sets adjacent spaces on fire for three turns";
+            info.rulebookDescription = "When [creature] dies, it detonates and sets adjacent spaces on fire for three turns.";
             info.canStack = false;
             info.powerLevel = 0;
             info.opponentUsable = false;

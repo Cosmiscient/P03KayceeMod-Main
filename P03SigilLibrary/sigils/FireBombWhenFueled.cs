@@ -26,7 +26,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Fire Strike When Fueled";
-            info.rulebookDescription = "When [creature] attacks, if it fueled, it consumes one fuel to set the target space on fire for three turns.";
+            info.rulebookDescription = "When [creature] attacks, if it is fueled, it consumes one fuel to set the target space on fire for three turns.";
             info.canStack = false;
             info.powerLevel = 3;
             info.opponentUsable = true;

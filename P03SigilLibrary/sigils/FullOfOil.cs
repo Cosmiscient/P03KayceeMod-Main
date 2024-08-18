@@ -21,7 +21,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Full of Oil";
-            info.rulebookDescription = "When [creature] dies, it adds 3 health to the creature on either side and across from it.";
+            info.rulebookDescription = "When [creature] dies, it adds 3 health to each card on either side and across from it.";
             info.canStack = false;
             info.powerLevel = 2;
             info.opponentUsable = true;

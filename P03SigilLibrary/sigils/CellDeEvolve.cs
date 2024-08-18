@@ -17,7 +17,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Transforms When Unpowered";
-            info.rulebookDescription = "If [creature] is NOT within a circuit at the beginning of the turn, it will transform back its original form.";
+            info.rulebookDescription = "If [creature] is NOT within a circuit at the beginning of the turn, it will transform back into its original form.";
             info.canStack = false;
             info.powerLevel = 0;
             info.opponentUsable = true;

@@ -16,7 +16,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Brittle Without Orange";
-            info.rulebookDescription = "After attacking, [creature] will perish if its owner does not control an Orange Mox";
+            info.rulebookDescription = "After attacking, [creature] will perish if its owner does not control an Orange Mox.";
             info.canStack = true;
             info.powerLevel = -1;
             info.opponentUsable = true;

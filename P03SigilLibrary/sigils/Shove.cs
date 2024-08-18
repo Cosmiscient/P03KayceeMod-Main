@@ -22,7 +22,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Bulldoze";
-            info.rulebookDescription = "Pay 1 Energy to cause this card to move in the direction inscribed in the sigil. Creatures that are in the way will be pushed in the same direction..";
+            info.rulebookDescription = "Pay 1 Energy to cause this card to move in the direction inscribed in the sigil. Creatures that are in the way will be pushed in the same direction.";
             info.canStack = false;
             info.powerLevel = 2;
             info.opponentUsable = false;

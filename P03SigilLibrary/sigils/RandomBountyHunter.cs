@@ -42,7 +42,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Bounty Hunter";
-            info.rulebookDescription = "When drawn, [creature] will turn into a random bounty hunter";
+            info.rulebookDescription = "When drawn, [creature] will turn into a random bounty hunter.";
             info.canStack = false;
             info.powerLevel = 3;
             info.opponentUsable = false;

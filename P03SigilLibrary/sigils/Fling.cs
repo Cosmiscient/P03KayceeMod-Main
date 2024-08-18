@@ -62,7 +62,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             yield return this.CardChooseSlotSequence(
                 (slot) => OnSelectionSequence(slot),
-                ValidTargets
+                ValidTargets,
+                aimWeapon: true
             );
         }
     }
