@@ -56,6 +56,9 @@ namespace Infiniscryption.P03ExpansionPack3
                 }
             }
 
+            DialogueManagement.AddSequenceDialogue(DataHelper.GetResourceString("dialogue_database", "csv", typeof(P03Pack3Plugin).Assembly));
+            Pack3Quests.CreatePack3Quests();
+
             Initialized = true;
 
             Logger.LogInfo($"Plugin {PluginName} is loaded!");

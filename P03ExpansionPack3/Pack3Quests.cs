@@ -8,14 +8,16 @@ using Infiniscryption.PackManagement;
 
 namespace Infiniscryption.P03ExpansionPack3
 {
+    [HarmonyPatch]
     internal static class Pack3Quests
     {
         internal static QuestDefinition KrakenLord { get; private set; }
 
-        internal static bool Pack3QuestsActive() => PackManager.GetActivePacks<PackInfo>().Any(pi => pi.ModPrefix.Equals(P03Pack3Plugin.CardPrefix));
+        internal static bool Pack3QuestsActive() => PackManager.GetActivePacks<PackInfo>().Any(pi => pi != null && !string.IsNullOrEmpty(pi.ModPrefix) && pi.ModPrefix.Equals(P03Pack3Plugin.CardPrefix));
 
-        static Pack3Quests()
+        internal static void CreatePack3Quests()
         {
+            P03Pack3Plugin.Log.LogInfo("Creating the Kraken Quest!");
             KrakenLord = QuestManager.Add(P03Pack3Plugin.PluginGuid, "KrakenQuest")
                 .SetGenerateCondition(Pack3QuestsActive);
 
@@ -50,7 +52,7 @@ namespace Infiniscryption.P03ExpansionPack3
                 int minLevel = turnTwo.Min(c => c.PowerLevel);
                 turnTwo.Remove(turnTwo.First(c => c.PowerLevel == minLevel));
             }
-            turnTwo.Add(CardLoader.GetCardByName(P03Pack3Plugin.CardPrefix + "_Kraken"));
+            turnTwo.Add(CardLoader.GetCardByName(P03Pack3Plugin.CardPrefix + "_Technicle"));
 
             __result = turnPlan;
             return false;

@@ -18,6 +18,11 @@ namespace Infiniscryption.P03KayceeRun.Helpers
         public static string GetResourceString(string key, string type)
         {
             Assembly target = Assembly.GetExecutingAssembly();
+            return GetResourceString(key, type, target);
+        }
+
+        public static string GetResourceString(string key, string type, Assembly target)
+        {
             string resourceName = FindResourceName(key, type, target);
 
             if (string.IsNullOrEmpty(resourceName))

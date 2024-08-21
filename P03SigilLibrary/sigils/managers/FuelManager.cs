@@ -69,26 +69,6 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             }
         }
 
-        // internal void GenerateGaugeSegment(Transform parent, Color c, float offsetMultiplier, float scale = 0.15f, float width = 0.055f)
-        // {
-        //     string name = $"FuelSegment_{offsetMultiplier * 10f}";
-        //     if (parent.Find(name) == null)
-        //     {
-        //         var redCylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        //         redCylinder.name = name;
-        //         redCylinder.layer = LayerMask.NameToLayer("SpecificLighting");
-        //         redCylinder.transform.SetParent(parent);
-        //         redCylinder.transform.localPosition = new Vector3(0.02f + 0.35f * offsetMultiplier, -0.6275f, 0.0028f);
-        //         redCylinder.transform.localEulerAngles = new(0f, 0f, 90f);
-        //         redCylinder.transform.localScale = new(width, scale, width);
-
-        //         var renderer = redCylinder.GetComponent<Renderer>();
-        //         renderer.material.color = c;
-        //         renderer.material.EnableKeyword("_EMISSION");
-        //         renderer.material.SetColor("_Color", c);
-        //     }
-        // }
-
         internal void Render3DFuelGauge(Card card)
         {
             DiskRenderStatsLayer stats = card.StatsLayer as DiskRenderStatsLayer;
@@ -108,28 +88,18 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 fuelGauge.transform.localEulerAngles = new(0f, 359.68f, 270f);
                 fuelGauge.transform.localPosition = new(1.63f, 0f, 0f);
                 fuelGauge.transform.localScale = new(1f, 1f, 0.43f);
+                gauge = fuelGauge.transform;
             }
 
-            // Make each of the four cylinders
-            // GenerateGaugeSegment(railsParent, new(0.8f, .2f, .2f), 0f);
-            // GenerateGaugeSegment(railsParent, new(0.86f, .48f, .17f), 1f);
-            // GenerateGaugeSegment(railsParent, new(0.91f, .71f, .08f), 2f);
-            // GenerateGaugeSegment(railsParent, new(0.18f, .78f, .22f), 3f);
-            // GenerateGaugeSegment(railsParent, new(0.5f, .5f, .3f), 1.5f, scale: 0.55f, width: 0.04f);
+            PlayableCard playableCard = card as PlayableCard;
+            int fuelToDisplay = playableCard == null ? card.Info.GetStartingFuel() : (playableCard.GetCurrentFuel() ?? -1);
 
-            // PlayableCard playableCard = card as PlayableCard;
-            // int fuelToDisplay = playableCard == null ? card.Info.GetStartingFuel() : (playableCard.GetCurrentFuel() ?? -1);
-
-            // for (int i = 0; i < 4; i++)
-            // {
-            //     string name = $"FuelSegment_{(float)(i * 10)}";
-            //     GameObject obj = railsParent.Find(name).gameObject;
-            //     Material mat = obj.GetComponent<Renderer>().material;
-            //     if (fuelToDisplay > i)
-            //         mat.SetColor("_EmissionColor", GreenFuel);
-            //     else
-            //         mat.SetColor("_EmissionColor", RedFuel);
-            // }
+            for (int i = 0; i <= 4; i++)
+            {
+                string name = $"fueltank_{i}";
+                GameObject obj = gauge.Find(name).gameObject;
+                obj.SetActive(fuelToDisplay == i);
+            }
         }
 
         internal void RenderCurrentFuel(Card card)

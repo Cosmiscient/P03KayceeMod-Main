@@ -226,8 +226,8 @@ namespace Infiniscryption.P03ExpansionPack3
                 .AddAbilities(LatchAnnoying.AbilityID);
 
             // Apedroid
-            CardManager.New(P03Pack3Plugin.CardPrefix, "Apedroid", "Cat-A-Pult", 1, 1)
-                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_apedroid.png", typeof(Cards).Assembly))
+            CardManager.New(P03Pack3Plugin.CardPrefix, "Catapult", "Cat-A-Pult", 1, 1)
+                .SetPortrait(TextureHelper.GetImageAsTexture("portrait_catapult.png", typeof(Cards).Assembly))
                 //.SetPixelPortrait(TextureHelpeer.GetImageAsTexture("pixelportrait_viper.png", typeof(Cards).Assembly))
                 .SetCost(bloodCost: 1)
                 .SetRegionalP03Card(CardTemple.Nature)
@@ -459,6 +459,7 @@ namespace Infiniscryption.P03ExpansionPack3
             // Neutral Tentacle
             CardManager.New(P03Pack3Plugin.CardPrefix, "Technicle", "544543484E49434C45", 0, 1)
                 .SetPortrait(TextureHelper.GetImageAsTexture("portrait_empty_tentacle.png", typeof(Cards).Assembly))
+                .AddSpecialAbilities(TrackKrakenDeaths.ID)
                 .AddAbilities(Ability.Submerge);
 
             AbilityManager.ModifyAbilityList += delegate (List<AbilityManager.FullAbility> abilities)
