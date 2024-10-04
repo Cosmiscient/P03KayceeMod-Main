@@ -74,7 +74,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 // But if it does not have an evolve mod, we need to add a default de-evolve mod.
                 if (!info.Mods.Any(m => m.fromEvolve))
                 {
-                    cardModificationInfo.nameReplacement = String.Format(Localization.Translate("{0} 2.0"), cardInfo.DisplayedNameLocalized);
+                    cardModificationInfo.nameReplacement = info.GetNextEvolutionName();
                     cardModificationInfo.attackAdjustment = 1;
                     cardModificationInfo.healthAdjustment = 1;
                 }
@@ -107,7 +107,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 // But if it does not have an evolve mod, we need to add a default evolve mod.
                 if (!info.Mods.Any(m => m.fromEvolve))
                 {
-                    cardModificationInfo.nameReplacement = string.Format(Localization.Translate("Beta {0}"), cardInfo.DisplayedNameLocalized);
+                    cardModificationInfo.nameReplacement = info.GetNextDevolutionName();
                     cardModificationInfo.attackAdjustment = -1;
                 }
 
@@ -174,18 +174,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         if (cardInfo.name.ToLowerInvariant().Contains("ringworm"))
                             prevEvolveMod.healthAdjustment += 1;
 
-                        if (prevEvolveMod.nameReplacement.EndsWith(".0"))
-                        {
-                            int prevVersion = int.Parse(prevEvolveMod.nameReplacement
-                                                        .Split(' ')
-                                                        .Last()
-                                                        .Replace(".0", ""));
-                            prevEvolveMod.nameReplacement = prevEvolveMod.nameReplacement.Replace($"{prevVersion}.0", $"{prevVersion + 1}.0");
-                        }
-                        else
-                        {
-                            prevEvolveMod.nameReplacement += " 2.0";
-                        }
+                        prevEvolveMod.nameReplacement = info.GetNextEvolutionName();
                     }
                 }
                 else
@@ -207,7 +196,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                             attackAdjustment = cardInfo.HasAbility(Ability.BuffNeighbours) ? 0 : 1,
                             abilities = cardInfo.HasAbility(Ability.BuffNeighbours) ? new() { Ability.BuffNeighbours } : new(),
                             fromEvolve = true,
-                            nameReplacement = cardInfo.DisplayedNameEnglish + " 2.0",
+                            nameReplacement = info.GetNextEvolutionName(),
                             nonCopyable = false
                         };
                         cardInfo.mods.Add(evolveMod);

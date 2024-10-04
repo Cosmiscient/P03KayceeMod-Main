@@ -23,7 +23,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.passive = false;
             info.hasColorOverride = true;
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.CellDrawRandomCardOnDeath).Info.colorOverride;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
 
             AbilityID = AbilityManager.Add(

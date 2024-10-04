@@ -21,7 +21,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(BatteryPower));
             info.appliesToAttack = true;
             info.appliesToHealth = false;
-            info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook);
+            info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook);
             info.SetIcon(TextureHelper.GetImageAsTexture("battery_stat_icon.png", typeof(BatteryPower).Assembly));
             AbilityID = info.iconType;
         }

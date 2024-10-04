@@ -3,6 +3,7 @@ using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
 {
@@ -17,13 +18,15 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             StatIconInfo info = StatIconManager.New(P03SigilLibraryPlugin.PluginGuid,
                 "Emerald Power",
-                "The value represented with this sigil will be equal to the number of emerald gems its owner controls.",
+                "The value represented with this sigil will be equal to the number of green gems its owner controls.",
                 typeof(GreenGemPower));
             info.appliesToAttack = true;
             info.appliesToHealth = false;
-            info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook);
+            info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook);
             info.SetIcon(TextureHelper.GetImageAsTexture("green_gen_stat_icon.png", typeof(GreenGemPower).Assembly));
             AbilityID = info.iconType;
+
+            info.SetAbilityRedirect("green gems", Ability.GainGemGreen, GameColors.Instance.limeGreen);
         }
 
         private bool CardProvidesGreenGem(CardSlot slot)

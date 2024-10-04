@@ -6,6 +6,7 @@ using BepInEx.Logging;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03SigilLibrary.Helpers;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 using InscryptionAPI.Guid;
@@ -45,6 +46,7 @@ namespace Infiniscryption.P03SigilLibrary
             harmony.Patch(targetMethod, prefix: new HarmonyMethod(patchMethod));
 
             harmony.PatchAll();
+            CustomTriggerPatches.SpecialPatchDamageTrigger(harmony);
 
             foreach (Type t in typeof(P03SigilLibraryPlugin).Assembly.GetTypes())
             {

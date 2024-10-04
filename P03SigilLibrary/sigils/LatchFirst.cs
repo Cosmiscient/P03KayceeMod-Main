@@ -33,7 +33,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 1;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,

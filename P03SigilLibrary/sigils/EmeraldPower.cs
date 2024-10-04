@@ -25,7 +25,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.hasColorOverride = true;
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.GainGemGreen).Info.colorOverride;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             EmeraldPower.AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,

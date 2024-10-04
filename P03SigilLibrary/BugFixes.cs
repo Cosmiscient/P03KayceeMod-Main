@@ -21,7 +21,7 @@ namespace Infiniscryption.P03SigilLibrary
         private static bool AccountForMultipleActs(int randomSeed, ref ConsumableItemData __result)
         {
             AbilityMetaCategory cat = SaveManager.SaveFile.IsPart1 ? AbilityMetaCategory.Part1Rulebook
-                                      : SaveManager.SaveFile.IsPart3 ? AbilityMetaCategory.Part3Rulebook
+                                      : SaveManager.SaveFile.IsPart3 ? AbilityMetaCategory.Part1Rulebook
                                       : SaveManager.SaveFile.IsGrimora ? AbilityMetaCategory.GrimoraRulebook
                                       : AbilityMetaCategory.MagnificusRulebook;
 

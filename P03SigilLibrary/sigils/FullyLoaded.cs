@@ -5,6 +5,7 @@ using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using InscryptionAPI.Slots;
 using InscryptionAPI.Triggers;
 using UnityEngine;
@@ -36,7 +37,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.opponentUsable = true;
             info.passive = false;
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_fully_loaded.png", typeof(FullyLoaded).Assembly));
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -45,12 +46,20 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 TextureHelper.GetImageAsTexture("ability_fully_loaded.png", typeof(FullyLoaded).Assembly)
             ).Id;
 
+            info.SetSlotRedirect("attack bonus", SlotModID, GameColors.Instance.limeGreen);
+
             SlotModID = SlotModificationManager.New(
                 P03SigilLibraryPlugin.PluginGuid,
                 "FullyLoaded",
                 typeof(FullyLoadedSlot),
                 TextureHelper.GetImageAsTexture("cardslot_fully_loaded.png", typeof(FullyLoaded).Assembly),
                 TextureHelper.GetImageAsTexture("pixel_slot_fully_loaded.png", typeof(FullyLoaded).Assembly)
+            ).SetRulebook(
+                "Fully Loaded",
+                "The card in this slot has its power increased by one.",
+                TextureHelper.GetImageAsTexture("cardslot_fully_loaded.png", typeof(FullyLoaded).Assembly),
+                    SlotModificationManager.ModificationMetaCategory.Part1Rulebook,
+                    SlotModificationManager.ModificationMetaCategory.Part3Rulebook
             );
         }
 

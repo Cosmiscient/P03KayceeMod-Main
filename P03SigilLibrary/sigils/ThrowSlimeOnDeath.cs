@@ -4,6 +4,7 @@ using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
+using InscryptionAPI.RuleBook;
 using InscryptionAPI.Slots;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 1;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -31,6 +32,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(ThrowSlimeOnDeath),
                 TextureHelper.GetImageAsTexture("ability_slime_on_death.png", typeof(ThrowSlimeOnDeath).Assembly)
             ).Id;
+
+            info.SetSlotRedirect("slimes", SlimedSlot.ID, GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToPreDeathAnimation(bool wasSacrifice) => this.Card.OnBoard;

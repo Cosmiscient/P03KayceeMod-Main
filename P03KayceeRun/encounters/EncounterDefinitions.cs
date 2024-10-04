@@ -643,8 +643,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 1
             neutralMinecarts.turns.AddTurn(
-                Enemy("MineCart", replacement: $"{P03Plugin.CardPrefx}_MineCart_Overdrive", difficulty: 1),
-                Enemy(null, replacement: "MineCart", difficulty: 2)
+                Enemy("MineCart", replacement: $"{P03Plugin.CardPrefx}_MineCart_Overdrive", difficulty: 1)
             );
 
             // TURN 2
@@ -1416,7 +1415,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 3
             techAttackConduits.turns.AddTurn(
-                Enemy("Automaton", replacement: "Insectodrone", difficulty: 4),
+                Enemy(null, replacement: "Automaton", difficulty: 3),
                 Enemy(null, replacement: "Shieldbot", difficulty: 6)
             );
 
@@ -1554,7 +1553,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
 
             // TURN 2
             techSplinterCells.turns.AddTurn(
-                Enemy("Automaton", replacement: "CellBuff", difficulty: 4)
+
             );
 
             // TURN 3

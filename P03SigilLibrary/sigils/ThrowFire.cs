@@ -7,6 +7,7 @@ using Infiniscryption.P03SigilLibrary.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
+using InscryptionAPI.RuleBook;
 using InscryptionAPI.Slots;
 using Pixelplacement;
 using UnityEngine;
@@ -27,7 +28,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 2;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -35,6 +36,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(ThrowFire),
                 TextureHelper.GetImageAsTexture("ability_throw_fire.png", typeof(ThrowFire).Assembly)
             ).Id;
+
+            info.SetSlotRedirect("on fire", BurningSlotBase.GetFireLevel(2), GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToTurnEnd(bool playerTurnEnd) => Card != null && Card.OpponentCard != playerTurnEnd;

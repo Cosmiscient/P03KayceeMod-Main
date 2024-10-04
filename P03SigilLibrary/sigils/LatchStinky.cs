@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -23,7 +24,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 1;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -31,6 +32,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(LatchStinky),
                 TextureHelper.GetImageAsTexture("ability_latch_stinky.png", typeof(LatchStinky).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("Stinky", Ability.DebuffEnemy, GameColors.Instance.limeGreen);
         }
     }
 }

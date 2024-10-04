@@ -21,7 +21,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 2;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_drawtwozap.png", typeof(DrawTwoZap).Assembly));
 
             AbilityID = AbilityManager.Add(

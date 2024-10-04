@@ -26,7 +26,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.passive = false;
             info.hasColorOverride = true;
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.CellDrawRandomCardOnDeath).Info.colorOverride;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_explodonate.png", typeof(Explodonate).Assembly));
 
             AbilityID = AbilityManager.Add(

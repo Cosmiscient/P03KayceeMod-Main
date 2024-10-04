@@ -21,7 +21,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(SideDeckPower));
             info.appliesToAttack = true;
             info.appliesToHealth = false;
-            info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook);
+            info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook);
             info.SetIcon(TextureHelper.GetImageAsTexture("vessel_stat_icon.png", typeof(SideDeckPower).Assembly));
             AbilityID = info.iconType;
         }

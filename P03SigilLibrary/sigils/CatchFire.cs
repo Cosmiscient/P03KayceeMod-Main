@@ -5,6 +5,7 @@ using Infiniscryption.P03KayceeRun.Cards;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -23,7 +24,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 1;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -31,6 +32,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(CatchFire),
                 TextureHelper.GetImageAsTexture("ability_gain_fire.png", typeof(CatchFire).Assembly)
             ).Id;
+
+            info.SetSlotRedirect("on fire", BurningSlotBase.GetFireLevel(2), GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToSlotTargetedForAttack(CardSlot slot, PlayableCard attacker) => slot.Card != null && slot.IsOpponentSlot() == Card.OpponentCard;

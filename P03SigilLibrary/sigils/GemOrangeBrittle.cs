@@ -3,6 +3,7 @@ using DiskCardGame;
 using Infiniscryption.P03SigilLibrary.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -24,7 +25,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.passive = false;
             info.hasColorOverride = true;
             info.colorOverride = GameColors.Instance.lightPurple;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -32,6 +33,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(GemOrangeBrittle),
                 TextureHelper.GetImageAsTexture("ability_orangegembrittle.png", typeof(GemOrangeBrittle).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("Orange Mox", Ability.GainGemOrange, GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToSlotTargetedForAttack(CardSlot slot, PlayableCard attacker) => base.RespondsToSlotTargetedForAttack(slot, attacker) && !Card.EligibleForGemBonus(GemType.Orange);

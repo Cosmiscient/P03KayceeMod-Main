@@ -1,5 +1,11 @@
+# 1.1.0
+- Significant rulebook overhaul to take advantage of new API capabilities.
+- Fire Strike is now a bounty hunter sigil.
+- Fire effects now change color based on act (blue for P03, red for Leshy, green everywhere else)
+
 # 1.0.9
 - Updated the fuel gauge for disk cards.
+- Fixed a number of issues with sigil descriptions being incorrect, poorly written, typos, etc.
 
 # 1.0.8
 - Fixed an issue where missile launches softlocked if they were spawned by non-card entities.

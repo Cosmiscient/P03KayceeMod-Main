@@ -1,3 +1,6 @@
+# 5.0.25
+- Reduced the rate at which G0lly's friend cards gain strength.
+
 # 5.0.24
 - Bugfix: Resolved an issue with how opponent cards were displayed in the secret final boss.
 - Balance Change: Elektron now powers every card on the board, not just adjacent cards.

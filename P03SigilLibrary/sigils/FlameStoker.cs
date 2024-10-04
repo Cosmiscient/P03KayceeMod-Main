@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -20,7 +21,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             fsInfo.powerLevel = 1;
             fsInfo.opponentUsable = true;
             fsInfo.passive = true;
-            fsInfo.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, BurningSlotBase.FlamingAbility };
+            fsInfo.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, BurningSlotBase.FlamingAbility };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -28,6 +29,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(FireBomb),
                 TextureHelper.GetImageAsTexture("ability_flame_stoker.png", typeof(FireBomb).Assembly)
             ).Id;
+
+            fsInfo.SetSlotRedirect("fires", BurningSlotBase.GetFireLevel(2), GameColors.Instance.limeGreen);
         }
     }
 }

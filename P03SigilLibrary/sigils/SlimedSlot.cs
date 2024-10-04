@@ -17,6 +17,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(SlimedSlot),
                 TextureHelper.GetImageAsTexture("cardslot_slimed.png", typeof(SlimedSlot).Assembly),
                 TextureHelper.GetImageAsTexture("pixel_slot_slimed.png", typeof(SlimedSlot).Assembly)
+            ).SetRulebook(
+                "Slimed Slot",
+                "The card in this slot will have its attack reduced by one.",
+                TextureHelper.GetImageAsTexture("cardslot_slimed.png", typeof(SlimedSlot).Assembly),
+                    SlotModificationManager.ModificationMetaCategory.Part1Rulebook,
+                    SlotModificationManager.ModificationMetaCategory.Part3Rulebook
             );
         }
 

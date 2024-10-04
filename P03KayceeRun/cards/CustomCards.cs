@@ -1013,7 +1013,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                     if (allP3Abs.Contains(ab.Id))
                     {
-                        ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook);
+                        ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook);
                     }
 
                     if (ab.Id is Ability.Strafe or Ability.StrafeSwap or Ability.StrafePush)
@@ -1161,7 +1161,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.SetExtendedProperty("PortraitColor", "gold");
             info.SetExtendedProperty("Holofy", true);
             info.SetCardTemple(CardTemple.Tech);
-            info.hideAttackAndHealth = true;
+            if (!info.HasAbility(GiveStats.AbilityID) && !info.HasAbility(GiveStatsSigils.AbilityID))
+                info.hideAttackAndHealth = true;
             return info;
         }
 

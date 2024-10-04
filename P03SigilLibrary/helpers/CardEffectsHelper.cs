@@ -42,7 +42,7 @@ namespace Infiniscryption.P03SigilLibrary.Helpers
             return false;
         }
 
-        public static IEnumerator CardChooseSlotSequence(this AbilityBehaviour behaviour, Func<CardSlot, IEnumerator> slotSelectedCallback, List<CardSlot> validSlots, Func<CardSlot, int> aiSlotEvaluator = null, string dialogue = null, bool aimWeapon = false, CursorType cursor = CursorType.Target)
+        public static IEnumerator CardChooseSlotSequence(this AbilityBehaviour behaviour, Func<CardSlot, IEnumerator> slotSelectedCallback, List<CardSlot> validSlots, Func<CardSlot, int> aiSlotEvaluator = null, string dialogue = null, bool aimWeapon = false, CursorType cursor = CursorType.Target, bool tweenOut = true, bool tweenIn = true)
         {
             PlayableCard card = behaviour.Card;
             Vector3 originalPosition = card.transform.position;
@@ -55,7 +55,7 @@ namespace Infiniscryption.P03SigilLibrary.Helpers
                 dcac.AimWeaponAnim(behaviour.Card.OpposingSlot().transform.position);
                 dcac.ShowWeaponAnim();
             }
-            else if (BoardManager.Instance is BoardManager3D)
+            else if (BoardManager.Instance is BoardManager3D && tweenOut)
             {
                 ViewManager.Instance.SwitchToView(View.Board, false, true);
                 yield return new WaitForSeconds(0.25f);
@@ -111,7 +111,7 @@ namespace Infiniscryption.P03SigilLibrary.Helpers
             {
                 dcac.HideWeaponAnim();
             }
-            else if (BoardManager.Instance is BoardManager3D)
+            else if (BoardManager.Instance is BoardManager3D && tweenIn)
             {
                 Tween.Position(card.transform, originalPosition, 0.15f, 0f, Tween.EaseOut, Tween.LoopType.None, null, null, true);
                 yield return new WaitForSeconds(0.15f);

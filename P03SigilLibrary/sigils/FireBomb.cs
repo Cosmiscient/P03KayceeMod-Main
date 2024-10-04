@@ -11,6 +11,7 @@ using InscryptionAPI.Slots;
 using UnityEngine;
 using GBC;
 using Infiniscryption.P03SigilLibrary.Helpers;
+using InscryptionAPI.RuleBook;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
 {
@@ -25,10 +26,10 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.rulebookName = "Fire Strike";
             info.rulebookDescription = "When [creature] attacks, it sets the target space on fire for three turns.";
             info.canStack = false;
-            info.powerLevel = 3;
+            info.powerLevel = 4;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular, BurningSlotBase.FlamingAbility };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular, BurningSlotBase.FlamingAbility, AbilityMetaCategory.BountyHunter };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_fire_bomb.png", typeof(FireBomb).Assembly));
 
             AbilityID = AbilityManager.Add(
@@ -37,6 +38,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(FireBomb),
                 TextureHelper.GetImageAsTexture("ability_fire_bomb.png", typeof(FireBomb).Assembly)
             ).Id;
+
+            info.SetSlotRedirect("on fire", BurningSlotBase.GetFireLevel(2), GameColors.Instance.limeGreen);
         }
 
         public bool RespondsToPostSingularSlotAttackSlot(CardSlot attackingSlot, CardSlot targetSlot) => attackingSlot == Card.Slot;

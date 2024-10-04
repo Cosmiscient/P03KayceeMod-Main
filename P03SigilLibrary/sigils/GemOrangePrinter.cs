@@ -5,6 +5,7 @@ using HarmonyLib;
 using Infiniscryption.P03SigilLibrary.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -26,7 +27,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.passive = false;
             info.hasColorOverride = true;
             info.colorOverride = GameColors.Instance.lightPurple;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -34,6 +35,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(GemOrangePrinter),
                 TextureHelper.GetImageAsTexture("ability_orangegemprinter.png", typeof(GemOrangePrinter).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("Orange Mox", Ability.GainGemOrange, GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToUpkeep(bool playerUpkeep) => playerUpkeep == this.Card.IsPlayerCard() && this.Card.EligibleForGemBonus(GemType.Orange);

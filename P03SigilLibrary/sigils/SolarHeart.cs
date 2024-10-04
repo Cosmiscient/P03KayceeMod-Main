@@ -40,7 +40,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.opponentUsable = true;
             info.passive = false;
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_solar_heart.png", typeof(SolarHeart).Assembly));
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -54,6 +54,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 "SolarHeart",
                 typeof(SolarHeartSlot),
                 TextureHelper.GetImageAsTexture("cardslot_powered.png", typeof(SolarHeart).Assembly)
+            ).SetRulebook(
+                "Solar Powered",
+                "This card slot stays powered at all times, even if it is not in a completed circuit.",
+                TextureHelper.GetImageAsTexture("cardslot_powered.png", typeof(SolarHeart).Assembly),
+                    SlotModificationManager.ModificationMetaCategory.Part1Rulebook,
+                    SlotModificationManager.ModificationMetaCategory.Part3Rulebook
             );
         }
 

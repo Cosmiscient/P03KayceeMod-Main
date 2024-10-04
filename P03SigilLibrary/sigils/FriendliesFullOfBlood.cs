@@ -31,6 +31,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                     return __rule;
 
                 __rule = new(ShouldBeGivenBloodAbility, "UnsaccableGainsBlood");
+                __rule.gainedAbilities = new Ability[] { FullOfBlood.AbilityID };
                 return __rule;
             }
         }
@@ -44,7 +45,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 1;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,

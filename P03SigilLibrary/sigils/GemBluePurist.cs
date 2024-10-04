@@ -6,6 +6,7 @@ using HarmonyLib;
 using Infiniscryption.P03SigilLibrary.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -30,7 +31,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info2.SetExtendedProperty(AbilityIconBehaviours.BLUE_CELL, true);
             info2.hasColorOverride = true;
             info2.colorOverride = GameColors.Instance.lightPurple;
-            info2.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info2.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -38,6 +39,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(GemBluePurist),
                 TextureHelper.GetImageAsTexture("ability_bluegempurist.png", typeof(GemBluePurist).Assembly)
             ).Id;
+
+            info2.SetAbilityRedirect("Blue Mox", Ability.GainGemBlue, GameColors.Instance.limeGreen);
         }
 
         [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.HasAbility))]

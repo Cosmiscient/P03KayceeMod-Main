@@ -108,9 +108,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             if (P03AscensionSaveData.IsP03Run)
             {
                 int zoneCount = EventManagement.CompletedZones.Count;
-                statPoints = statPoints - 3 + EventManagement.CompletedZones.Count;
-                if (zoneCount == 0 && statPoints > 3)
-                    statPoints--;
+                statPoints = Mathf.RoundToInt((float)Mathf.Min(3, TurnManager.Instance.TurnNumber + 1) * 1.25f) - 1 + zoneCount;
             }
         }
 

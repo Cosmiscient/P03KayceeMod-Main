@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -24,7 +25,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.opponentUsable = true;
             info.passive = false;
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_latch_swapper.png", typeof(LatchSwapper).Assembly));
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -32,6 +33,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(LatchSwapper),
                 TextureHelper.GetImageAsTexture("ability_latch_swapper.png", typeof(LatchSwapper).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("Swapper", Ability.SwapStats, GameColors.Instance.limeGreen);
         }
 
         private PlayableCard lastTarget = null;

@@ -5,6 +5,7 @@ using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
+using InscryptionAPI.RuleBook;
 using InscryptionAPI.Triggers;
 using UnityEngine;
 
@@ -27,7 +28,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.SetExtendedProperty(AbilityIconBehaviours.ACTIVE_WHEN_FUELED, true);
             info.colorOverride = GameColors.Instance.darkLimeGreen;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -35,6 +36,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(FuelShield),
                 TextureHelper.GetImageAsTexture("ability_shield_when_fueled.png", typeof(FuelShield).Assembly)
             ).Id;
+
+            info.SetUniqueRedirect("fuel", "fuelManagerPage", GameColors.Instance.limeGreen);
         }
 
         public bool RespondsToModifyDamageTaken(PlayableCard target, int damage, PlayableCard attacker, int originalDamage) => target == this.Card && this.Card.GetCurrentFuel() > 0;

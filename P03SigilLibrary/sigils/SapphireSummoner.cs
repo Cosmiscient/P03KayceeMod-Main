@@ -4,6 +4,7 @@ using System.Linq;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -24,7 +25,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.hasColorOverride = true;
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.GainGemBlue).Info.colorOverride;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -32,6 +33,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(SapphireEnergy),
                 TextureHelper.GetImageAsTexture("ability_sapphire_charge.png", typeof(SapphireEnergy).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("Blue Mox", Ability.GainGemBlue, GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToResolveOnBoard() => BoardManager.Instance.GetSlots(!Card.OpponentCard).Any(s => s.Card != null && (s.Card.HasAbility(Ability.GainGemBlue) || s.Card.HasAbility(Ability.GainGemTriple)));

@@ -11,6 +11,7 @@
 
 */compiled/
 
+.venv
 P03PyWiki/cardexports/
 
 *.local.json

@@ -26,7 +26,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = -1;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_deadbyte.png", typeof(DeadByte).Assembly));
 
             DeadByte.AbilityID = AbilityManager.Add(

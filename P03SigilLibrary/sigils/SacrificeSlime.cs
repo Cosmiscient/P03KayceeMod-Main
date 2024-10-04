@@ -8,6 +8,7 @@ using InscryptionAPI.Card;
 using InscryptionAPI.Guid;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
+using InscryptionAPI.RuleBook;
 using Pixelplacement;
 using UnityEngine;
 
@@ -28,7 +29,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 1;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             SacrificeSlime.AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -36,6 +37,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(SacrificeSlime),
                 TextureHelper.GetImageAsTexture("ability_sacrifice_slime.png", typeof(SacrificeSlime).Assembly)
             ).Id;
+
+            info.SetSlotRedirect("slime", SlimedSlot.ID, GameColors.Instance.limeGreen);
         }
 
         public bool RespondsToCardSacrificedAsCost(PlayableCard sacrifice) => !sacrifice.HasAbility(Ability.ExplodeOnDeath);

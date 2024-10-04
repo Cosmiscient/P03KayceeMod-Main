@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -24,7 +25,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 1;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -32,6 +33,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(FriendliesMagicDust),
                 TextureHelper.GetImageAsTexture("ability_all_magicdust.png", typeof(FriendliesMagicDust).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("Magic Dust", MagicDust.AbilityID, GameColors.Instance.limeGreen);
         }
     }
 }

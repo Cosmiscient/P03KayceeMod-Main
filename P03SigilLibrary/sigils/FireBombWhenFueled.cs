@@ -11,6 +11,7 @@ using InscryptionAPI.Slots;
 using UnityEngine;
 using GBC;
 using Infiniscryption.P03SigilLibrary.Helpers;
+using InscryptionAPI.RuleBook;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
 {
@@ -33,7 +34,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.passive = false;
             info.SetExtendedProperty(AbilityIconBehaviours.ACTIVE_WHEN_FUELED, true);
             info.colorOverride = GameColors.Instance.darkLimeGreen;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular, BurningSlotBase.FlamingAbility };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular, BurningSlotBase.FlamingAbility };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -41,6 +42,9 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(FireBombWhenFueled),
                 TextureHelper.GetImageAsTexture("ability_flame_when_fueled.png", typeof(FireBombWhenFueled).Assembly)
             ).Id;
+
+            info.SetSlotRedirect("on fire", BurningSlotBase.GetFireLevel(2), GameColors.Instance.limeGreen);
+            info.SetUniqueRedirect("fueled", "fuelManagerPage", GameColors.Instance.limeGreen);
         }
 
         public bool RespondsToPostSingularSlotAttackSlot(CardSlot attackingSlot, CardSlot targetSlot) => ((ignoreFuelCheck && pretendHaveFuel) || this.Card.GetCurrentFuel() > 0) && attackingSlot == Card.Slot;

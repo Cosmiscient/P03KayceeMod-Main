@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -89,6 +90,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 fuelGauge.transform.localPosition = new(1.63f, 0f, 0f);
                 fuelGauge.transform.localScale = new(1f, 1f, 0.43f);
                 gauge = fuelGauge.transform;
+
+                var mainBody = gauge.Find("default").gameObject;
+
+                mainBody.AddComponent<BoxCollider>();
+                var aii = mainBody.AddComponent<GenericAltInputInteractable>();
+                aii.cursorType = CursorType.Inspect;
+                aii.AlternateSelectEnded = aii => FuelRulebookManager.OpenToFuelRulebookPage(card as PlayableCard);
             }
 
             PlayableCard playableCard = card as PlayableCard;
@@ -134,6 +142,9 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         [HarmonyPostfix]
         private static void Render3DFuel(Card __instance)
         {
+            if (__instance.StatsLayer is not DiskRenderStatsLayer)
+                return;
+
             PlayableCard playableCard = __instance as PlayableCard;
             int fuelToDisplay = playableCard == null ? __instance.Info.GetStartingFuel() : (playableCard.GetCurrentFuel() ?? -1);
             bool displayFuel = playableCard == null ? fuelToDisplay > 0 : playableCard.HasFuel();
@@ -161,8 +172,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
                 GameObject decalGood = UnityEngine.Object.Instantiate(decalFull, decalParent);
                 decalGood.name = "Decal_Fuel";
-                decalGood.transform.localPosition = portrait.transform.localPosition + new Vector3(-.1f, 0f, -0.0001f);
-                decalGood.transform.localScale = new(1.2f, 1f, 0f);
+                decalGood.transform.localPosition = portrait.transform.localPosition + new Vector3(0f, 0f, -0.0001f);
+                decalGood.transform.localScale = new(1f, 1f, 1f);
             }
         }
 
@@ -172,6 +183,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             if (__instance is DiskScreenCardDisplayer)
                 return;
+
             var decalParent = GetDecalParent(__instance);
             var fuelDecalObj = decalParent?.Find("Decal_Fuel");
             if (fuelDecalObj == null)

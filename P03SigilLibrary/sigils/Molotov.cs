@@ -5,6 +5,7 @@ using HarmonyLib;
 using Infiniscryption.P03SigilLibrary.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using InscryptionAPI.Slots;
 using Pixelplacement;
 using Sirenix.Serialization.Utilities;
@@ -28,7 +29,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.opponentUsable = false;
             info.flipYIfOpponent = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular, BurningSlotBase.FlamingAbility };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular, BurningSlotBase.FlamingAbility };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_molotov.png", typeof(Molotov).Assembly));
 
             AbilityID = AbilityManager.Add(
@@ -37,6 +38,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(Molotov),
                 TextureHelper.GetImageAsTexture("ability_molotov.png", typeof(Molotov).Assembly)
             ).Id;
+
+            info.SetSlotRedirect("on fire", BurningSlotBase.GetFireLevel(2), GameColors.Instance.limeGreen);
         }
 
         public static IEnumerator ThrowMolotov(CardSlot target, PlayableCard attacker, float speed = 0.35f, float delay = 0f)

@@ -4,6 +4,7 @@ using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -22,7 +23,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 1;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, BurningSlotBase.FlamingAbility };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, BurningSlotBase.FlamingAbility };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -30,6 +31,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(MolotovAll),
                 TextureHelper.GetImageAsTexture("ability_blast_all.png", typeof(MolotovAll).Assembly)
             ).Id;
+
+            info.SetSlotRedirect("on fire", BurningSlotBase.GetFireLevel(3), GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToResolveOnBoard() => true;

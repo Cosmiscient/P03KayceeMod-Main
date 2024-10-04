@@ -6,6 +6,7 @@ using HarmonyLib;
 using Infiniscryption.Spells.Patchers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -27,7 +28,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.passive = false;
             info.SetExtendedProperty(AbilityIconBehaviours.ACTIVE_WHEN_FUELED, true);
             info.colorOverride = GameColors.Instance.darkLimeGreen;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -35,6 +36,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(MoveBesideAndFuel),
                 TextureHelper.GetImageAsTexture("ability_movebeside_refuel.png", typeof(MoveBesideAndFuel).Assembly)
             ).Id;
+
+            info.SetUniqueRedirect("fuel", "fuelManagerPage", GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToOtherCardResolve(PlayableCard otherCard)

@@ -5,6 +5,7 @@ using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -24,7 +25,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 2;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -32,6 +33,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(ConduitNeighborWhenFueled),
                 TextureHelper.GetImageAsTexture("ability_staticelectricity_when_fueled.png", typeof(ConduitNeighborWhenFueled).Assembly)
             ).Id;
+
+            info.SetUniqueRedirect("fuel", "fuelManagerPage", GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToUpkeep(bool playerUpkeep) => playerUpkeep == this.Card.IsPlayerCard();

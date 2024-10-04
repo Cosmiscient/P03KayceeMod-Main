@@ -4,6 +4,7 @@ using System.Linq;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using InscryptionAPI.Slots;
 using UnityEngine;
 
@@ -32,7 +33,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 1;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -48,6 +49,16 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(BlueGemSlot),
                 TextureHelper.GetImageAsTexture("cardslot_blue_gem.png", typeof(MagicDust).Assembly),
                 TextureHelper.GetImageAsTexture("pixel_slot_blue_gem.png", typeof(MagicDust).Assembly)
+            ).SetRulebook(
+                "Blue Mox Slot",
+                "The card in this slot will provide a Blue Mox.",
+                TextureHelper.GetImageAsTexture("cardslot_blue_gem.png", typeof(MagicDust).Assembly),
+                    SlotModificationManager.ModificationMetaCategory.Part1Rulebook,
+                    SlotModificationManager.ModificationMetaCategory.Part3Rulebook
+            ).SetAbilityRedirect(
+                "Blue Mox",
+                Ability.GainGemBlue,
+                GameColors.Instance.limeGreen
             );
 
             SlotIDs[Ability.GainGemOrange] =
@@ -57,6 +68,16 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(OrangeGemSlot),
                 TextureHelper.GetImageAsTexture("cardslot_orange_gem.png", typeof(MagicDust).Assembly),
                 TextureHelper.GetImageAsTexture("pixel_slot_orange_gem.png", typeof(MagicDust).Assembly)
+            ).SetRulebook(
+                "Orange Mox Slot",
+                "The card in this slot will provide an Orange Mox.",
+                TextureHelper.GetImageAsTexture("cardslot_orange_gem.png", typeof(MagicDust).Assembly),
+                    SlotModificationManager.ModificationMetaCategory.Part1Rulebook,
+                    SlotModificationManager.ModificationMetaCategory.Part3Rulebook
+            ).SetAbilityRedirect(
+                "Orange Mox",
+                Ability.GainGemOrange,
+                GameColors.Instance.limeGreen
             );
 
             SlotIDs[Ability.GainGemGreen] =
@@ -66,6 +87,16 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(GreenGemSlot),
                 TextureHelper.GetImageAsTexture("cardslot_green_gem.png", typeof(MagicDust).Assembly),
                 TextureHelper.GetImageAsTexture("pixel_slot_green_gem.png", typeof(MagicDust).Assembly)
+            ).SetRulebook(
+                "Green Mox Slot",
+                "The card in this slot will provide a Green Mox.",
+                TextureHelper.GetImageAsTexture("cardslot_green_gem.png", typeof(MagicDust).Assembly),
+                    SlotModificationManager.ModificationMetaCategory.Part1Rulebook,
+                    SlotModificationManager.ModificationMetaCategory.Part3Rulebook
+            ).SetAbilityRedirect(
+                "Green Mox",
+                Ability.GainGemGreen,
+                GameColors.Instance.limeGreen
             );
 
             SlotIDs[Ability.GainGemTriple] =
@@ -75,6 +106,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(TripleGemSlot),
                 TextureHelper.GetImageAsTexture("cardslot_triple_gem.png", typeof(MagicDust).Assembly),
                 TextureHelper.GetImageAsTexture("pixel_slot_all_gem.png", typeof(MagicDust).Assembly)
+            ).SetRulebook(
+                "Great Mox Slot",
+                "The card in this slot will provide all three moxen.",
+                TextureHelper.GetImageAsTexture("cardslot_triple_gem.png", typeof(MagicDust).Assembly),
+                    SlotModificationManager.ModificationMetaCategory.Part1Rulebook,
+                    SlotModificationManager.ModificationMetaCategory.Part3Rulebook
             );
         }
 
