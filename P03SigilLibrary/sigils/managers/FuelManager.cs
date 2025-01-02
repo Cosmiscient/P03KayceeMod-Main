@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using DiskCardGame;
+using GBC;
 using HarmonyLib;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.RuleBook;
@@ -26,6 +27,15 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 return _scratchedTexture;
             }
         }
+
+        private static List<Sprite> PixelFuelSprites = new()
+        {
+            TextureHelper.GetImageAsSprite("pixel_fuel_0.png", typeof(FuelManager).Assembly, TextureHelper.SpriteType.PixelPortrait),
+            TextureHelper.GetImageAsSprite("pixel_fuel_1.png", typeof(FuelManager).Assembly, TextureHelper.SpriteType.PixelPortrait),
+            TextureHelper.GetImageAsSprite("pixel_fuel_2.png", typeof(FuelManager).Assembly, TextureHelper.SpriteType.PixelPortrait),
+            TextureHelper.GetImageAsSprite("pixel_fuel_3.png", typeof(FuelManager).Assembly, TextureHelper.SpriteType.PixelPortrait),
+            TextureHelper.GetImageAsSprite("pixel_fuel_4.png", typeof(FuelManager).Assembly, TextureHelper.SpriteType.PixelPortrait),
+        };
 
         private static List<Texture2D> FuelTextures = new()
         {
@@ -142,7 +152,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         [HarmonyPostfix]
         private static void Render3DFuel(Card __instance)
         {
-            if (__instance.StatsLayer is not DiskRenderStatsLayer)
+            if (__instance is PixelSelectableCard || __instance.StatsLayer is not DiskRenderStatsLayer)
                 return;
 
             PlayableCard playableCard = __instance as PlayableCard;
@@ -150,6 +160,26 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             bool displayFuel = playableCard == null ? fuelToDisplay > 0 : playableCard.HasFuel();
             if (displayFuel)
                 FuelManager.Instance.Render3DFuelGauge(__instance);
+        }
+
+        [HarmonyPatch(typeof(CardAnimationController), nameof(CardAnimationController.SetFaceDown))]
+        [HarmonyPostfix]
+        private static void ManageFlippedFuelGauge(CardAnimationController __instance, bool faceDown)
+        {
+            if (__instance is not DiskCardAnimationController dcac)
+                return;
+
+            if (dcac.Card == null)
+                return;
+
+            var railsParent = dcac.Card.StatsLayer.gameObject.transform.Find("Rails");
+
+            Transform gauge = railsParent.Find("FuelGauge");
+
+            if (gauge != null)
+            {
+                CustomCoroutine.WaitThenExecute(0.22f, () => gauge.gameObject.SetActive(!faceDown));
+            }
         }
 
         [HarmonyPatch(typeof(CardDisplayer3D), nameof(CardDisplayer3D.DisplayInfo))]
@@ -201,6 +231,46 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             {
                 fuelDecal.enabled = false;
             }
+        }
+
+        [HarmonyPatch(typeof(PixelCardDisplayer), nameof(PixelCardDisplayer.DisplayInfo))]
+        [HarmonyPostfix]
+        private static void PixelFuelDisplayer(PixelCardDisplayer __instance, CardRenderInfo renderInfo, PlayableCard playableCard)
+        {
+            if (__instance.cardElements == null)
+                return;
+
+            P03SigilLibraryPlugin.Log.LogInfo("Starting");
+
+            int fuelToDisplay = playableCard == null ? (renderInfo?.baseInfo?.GetStartingFuel() ?? -1) : (playableCard?.GetCurrentFuel() ?? -1);
+            bool displayFuel = playableCard == null ? fuelToDisplay > 0 : playableCard?.HasFuel() ?? false;
+
+            P03SigilLibraryPlugin.Log.LogInfo($"Should display fuel? {displayFuel}");
+
+            Transform fuelSprite = __instance.cardElements.transform.Find("FuelPortrait");
+            if (fuelSprite == null)
+            {
+                P03SigilLibraryPlugin.Log.LogInfo("Fuel sprite is missing!");
+                GameObject fuelSpriteObject = GameObject.Instantiate(__instance.cardElements.transform.Find("Portrait").gameObject, __instance.cardElements.transform);
+                fuelSpriteObject.name = "FuelPortrait";
+                fuelSprite = fuelSpriteObject.transform;
+            }
+
+            if (!displayFuel)
+            {
+                P03SigilLibraryPlugin.Log.LogInfo("Disable the fuel sprite!");
+                fuelSprite.gameObject.SetActive(false);
+                return;
+            }
+
+            fuelSprite.gameObject.SetActive(true);
+            P03SigilLibraryPlugin.Log.LogInfo("Get the renderer");
+            SpriteRenderer renderer = fuelSprite.gameObject.GetComponent<SpriteRenderer>();
+            P03SigilLibraryPlugin.Log.LogInfo("Set the sprite");
+            renderer.sprite = PixelFuelSprites[fuelToDisplay];
+            renderer.enabled = true;
+            P03SigilLibraryPlugin.Log.LogInfo("Set the sort orderer");
+            renderer.sortingOrder = 20;
         }
     }
 }

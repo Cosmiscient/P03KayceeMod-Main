@@ -59,23 +59,43 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             yield break;
         }
 
-        public override bool RespondsToResolveOnBoard() => this.Card.OpponentCard && this.Card.Info.BloodCost > 0;
+        public override bool RespondsToResolveOnBoard() => true;
 
         public override IEnumerator OnResolveOnBoard()
         {
-            // Pick two cards without detonator
-            List<PlayableCard> sacrificeTargets = BoardManager.Instance.OpponentSlotsCopy
-                                                              .Where(s => s.Card != null && !s.Card.HasAbility(Ability.ExplodeOnDeath) && !s.Card == this.Card)
-                                                              .OrderBy(s => -(3 * s.Card.Attack + s.Card.Health))
-                                                              .Select(s => s.Card)
-                                                              .Take(this.Card.Info.BloodCost)
-                                                              .ToList();
-
-            foreach (var c in sacrificeTargets)
+            if (this.Card.OpponentCard)
             {
-                this.Card.AddTemporaryMod(new(c.Attack, c.Health));
-                yield return c.Die(true);
+                // Pick two cards without detonator
+                List<PlayableCard> sacrificeTargets = BoardManager.Instance.OpponentSlotsCopy
+                                                                .Where(s => s.Card != null && !s.Card.HasAbility(Ability.ExplodeOnDeath) && s.Card != this.Card)
+                                                                .OrderBy(s => -(3 * s.Card.Attack + s.Card.Health))
+                                                                .Select(s => s.Card)
+                                                                .ToList();
+
+                for (int i = 0; i < this.Card.BloodCost(); i++)
+                {
+                    if (i >= sacrificeTargets.Count)
+                        break;
+
+                    this.Card.AddTemporaryMod(new(sacrificeTargets[i].Attack, sacrificeTargets[i].Health));
+                    yield return sacrificeTargets[i].Die(true);
+                }
             }
+
+            if (this.Card.Health <= 0)
+                yield return this.Card.Die(false);
+        }
+
+        [HarmonyPatch(typeof(BoardStateEvaluator), nameof(BoardStateEvaluator.EvaluateCard))]
+        [HarmonyPostfix]
+        private static void EvaluateAIForSacrificing(BoardState.CardState card, BoardState board, ref int __result)
+        {
+            if (!card.HasAbility(AbilityID))
+                return;
+
+            // The higher the card slot, the higher the evaluation.
+            // This means, all things being equal, it will prefer being on the right-hand side of the board
+            __result += board.opponentSlots.IndexOf(card.slot);
         }
     }
 }

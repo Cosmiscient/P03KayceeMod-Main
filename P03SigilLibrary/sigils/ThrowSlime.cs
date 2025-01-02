@@ -23,7 +23,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Slimeball";
-            info.rulebookDescription = "At the end of its turn, [creature] chooses a card slot become slimed. Cards in a slimed slot lose one power.";
+            info.rulebookDescription = "At the end of its turn, [creature] will choose one slot to become slimed. Cards in a slimed slot lose one power.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = true;
@@ -47,6 +47,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             // Protect yourself first!
             if (slot == this.Card.OpposingSlot() && slot.GetSlotModification() == SlotModificationManager.ModificationType.NoModification)
                 return -100;
+
+            // Never slime yourself
+            if (slot.IsOpponentSlot() == this.Card.OpponentCard)
+                return 10000;
+
+            if (slot.GetSlotModification() == FullyLoaded.SlotModID)
+                return -50;
 
             int baseScore = slot.GetSlotModification() == SlimedSlot.ID ? 100 : 0;
 

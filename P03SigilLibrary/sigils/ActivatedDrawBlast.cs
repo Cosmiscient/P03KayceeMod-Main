@@ -22,7 +22,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Cannon Fire";
-            info.rulebookDescription = "Spend one fuel: Create a Blast! card in hand. Blast! is defined as a spell that costs 2 energy and sets the target on fire.";
+            info.rulebookDescription = "Spend one fuel: Create a Blast! card in hand. Blast! is defined as a spell that costs 2 energy and sets the target on fire. This ability can only be activated once per turn.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;

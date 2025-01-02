@@ -124,6 +124,8 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             if (RulePaintingManager.Instance == null)
                 MakeCanvasRuleDisplayer();
 
+            ViewManager.Instance.SwitchToView(View.Default);
+
             // Setup the battle rule at random
             List<Effect> validEffects = new(CompositeBattleRule.AVAILABLE_EFFECTS);
             List<Trigger> validTriggers = new(CompositeBattleRule.AVAILABLE_TRIGGERS);

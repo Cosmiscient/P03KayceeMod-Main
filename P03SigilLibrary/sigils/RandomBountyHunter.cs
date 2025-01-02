@@ -34,6 +34,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             CardModificationInfo mod = BountyHunterGenerator.GenerateMod(Math.Min(TurnManager.Instance.TurnNumber, 3), 20);
             if (mod.energyCostAdjustment > 6) // Lucky you!
                 mod.energyCostAdjustment = 6;
+            mod.AddNegateAbilities(AbilityID);
             Card.AddTemporaryMod(mod);
             Card.RenderCard();
         }

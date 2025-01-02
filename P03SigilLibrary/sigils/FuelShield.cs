@@ -28,6 +28,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.SetExtendedProperty(AbilityIconBehaviours.ACTIVE_WHEN_FUELED, true);
             info.colorOverride = GameColors.Instance.darkLimeGreen;
             info.passive = false;
+            info.SetDefaultFuel(1);
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(

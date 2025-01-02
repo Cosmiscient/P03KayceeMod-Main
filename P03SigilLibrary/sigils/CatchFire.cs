@@ -36,7 +36,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.SetSlotRedirect("on fire", BurningSlotBase.GetFireLevel(2), GameColors.Instance.limeGreen);
         }
 
-        public override bool RespondsToSlotTargetedForAttack(CardSlot slot, PlayableCard attacker) => slot.Card != null && slot.IsOpponentSlot() == Card.OpponentCard;
+        public override bool RespondsToSlotTargetedForAttack(CardSlot slot, PlayableCard attacker) => true;
 
         public override IEnumerator OnSlotTargetedForAttack(CardSlot slot, PlayableCard attacker)
         {

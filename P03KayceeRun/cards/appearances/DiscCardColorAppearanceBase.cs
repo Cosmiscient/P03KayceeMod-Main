@@ -82,34 +82,42 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ID = CardAppearanceBehaviourManager.Add(P03Plugin.PluginGuid, "ColoredDiscAppearance", typeof(DiscCardColorAppearance)).Id;
 
             // I'm going to manually load this texture; it seems to have some issues
-            DiskTextures[GameColors.Instance.darkGold] = new Texture2D(2, 2, TextureFormat.DXT1, false);
+            DiskTextures[GameColors.Instance.darkGold] = new Texture2D(2, 2, TextureFormat.RGBA32, false);
             byte[] imgBytes = TextureHelper.GetResourceBytes("FloppyDisc_AlbedoTransparency_Gold_2048.png", typeof(DiscCardColorAppearance).Assembly);
             bool isLoaded = DiskTextures[GameColors.Instance.darkGold].LoadImage(imgBytes);
             DiskTextures[GameColors.Instance.darkGold].filterMode = FilterMode.Point;
             DiskTextures[GameColors.Instance.darkGold].name = "GoldDiskTexture";
 
-            DiskTextures[GameColors.Instance.darkRed] = new Texture2D(2, 2, TextureFormat.DXT1, false);
+            DiskTextures[GameColors.Instance.darkRed] = new Texture2D(2, 2, TextureFormat.RGBA32, false);
             imgBytes = TextureHelper.GetResourceBytes("FloppyDisc_AlbedoTransparency_Red_2048.png", typeof(DiscCardColorAppearance).Assembly);
             isLoaded = DiskTextures[GameColors.Instance.darkRed].LoadImage(imgBytes);
             DiskTextures[GameColors.Instance.darkRed].filterMode = FilterMode.Point;
             DiskTextures[GameColors.Instance.darkRed].name = "RedDiskTexture";
 
-            DiskTextures[GameColors.Instance.blue] = new Texture2D(2, 2, TextureFormat.DXT1, false);
+            DiskTextures[GameColors.Instance.blue] = new Texture2D(2, 2, TextureFormat.RGBA32, false);
             imgBytes = TextureHelper.GetResourceBytes("FloppyDisc_AlbedoTransparency_2048.png", typeof(DiscCardColorAppearance).Assembly);
             isLoaded = DiskTextures[GameColors.Instance.blue].LoadImage(imgBytes);
             DiskTextures[GameColors.Instance.blue].filterMode = FilterMode.Point;
             DiskTextures[GameColors.Instance.blue].name = "BlueDiskTexture";
 
-            DiskTextures[Color.black] = new Texture2D(2, 2, TextureFormat.DXT1, false);
+            DiskTextures[Color.black] = new Texture2D(2, 2, TextureFormat.RGBA32, false);
             imgBytes = TextureHelper.GetResourceBytes("FloppyDisc_AlbedoTransparency_Black_2048.png", typeof(DiscCardColorAppearance).Assembly);
             isLoaded = DiskTextures[Color.black].LoadImage(imgBytes);
             DiskTextures[Color.black].filterMode = FilterMode.Point;
             DiskTextures[Color.black].name = "BlackDiskTexture";
 
-            WhiteTextTexture = new Texture2D(2, 2, TextureFormat.DXT1, false);
+            WhiteTextTexture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
             imgBytes = TextureHelper.GetResourceBytes("heavyweight-white.png", typeof(DiscCardColorAppearance).Assembly);
             isLoaded = WhiteTextTexture.LoadImage(imgBytes);
             WhiteTextTexture.filterMode = FilterMode.Bilinear;
+        }
+
+        internal static void ClearTextures()
+        {
+            foreach (var texture in DiskTextures.Values)
+            {
+                GameObject.Destroy(texture);
+            }
         }
 
         private static float ColorDistance(Color a, Color b)

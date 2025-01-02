@@ -98,6 +98,7 @@ namespace Infiniscryption.P03KayceeRun
         {
             AudioHelper.FlushAudioClipCache();
             AssetBundleManager.CleanUp();
+            DiscCardColorAppearance.ClearTextures();
         }
 
         public void OnSceneLoaded(Scene scene, LoadSceneMode mode)

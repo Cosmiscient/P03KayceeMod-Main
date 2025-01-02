@@ -39,6 +39,23 @@ namespace Infiniscryption.P03SigilLibrary
             return false;
         }
 
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.AssignCardToSlot))]
+        [HarmonyPostfix]
+        private static void UpdateGemsManager() => ResourcesManager.Instance.ForceGemsUpdate();
+
+        [HarmonyPatch(typeof(GlobalTriggerHandler), nameof(GlobalTriggerHandler.TriggerSequence))]
+        [HarmonyPostfix]
+        private static void UpdateGemsManagerAfterEveryTrigger() => ResourcesManager.Instance.ForceGemsUpdate();
+
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.ResolveCardOnBoard))]
+        [HarmonyPostfix]
+        private static IEnumerator UpdateGemsManagerAfterEveryResolve(IEnumerator sequence)
+        {
+            yield return sequence;
+            yield return new WaitForEndOfFrame();
+            ResourcesManager.Instance.ForceGemsUpdate();
+        }
+
         [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.AddTemporaryMod))]
         [HarmonyPrefix]
         [HarmonyPriority(Priority.VeryHigh)]

@@ -107,14 +107,19 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         [HarmonyPrefix]
         private static bool ConduitNeighborAsConduit(ConduitCircuitManager __instance, ref List<PlayableCard> __result, CardSlot slot)
         {
+            List<PlayableCard> list = new();
+            if (slot == null)
+            {
+                __result = list;
+                return false;
+            }
             List<CardSlot> slots = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
             int num = slots.IndexOf(slot);
-            List<PlayableCard> list = new();
             bool circuitOnLeft = false;
             bool circuitOnRight = false;
             for (int i = 0; i < slots.Count; i++)
             {
-                if (slots[i].Card != null && slots[i].Card.HasConduitAbility())
+                if (slots[i]?.Card?.HasConduitAbility() ?? false)
                 {
                     if (i < num)
                     {

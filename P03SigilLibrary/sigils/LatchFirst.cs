@@ -17,7 +17,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             get
             {
-                List<Ability> possibles = this.Card.AllAbilities().Where(a => a != AbilityID).ToList();
+                List<Ability> possibles = this.Card.AbilityIcons.GetDistinctShownAbilities(this.Card.Info, this.Card.TemporaryMods, this.Card.Status.hiddenAbilities);
                 if (possibles.Count == 0)
                     return Ability.Sharp;
                 return possibles[0];

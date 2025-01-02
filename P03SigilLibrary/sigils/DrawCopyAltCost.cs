@@ -100,15 +100,18 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             CardInfo card = CardLoader.Clone(this.Card.Info);
 
             // ENERGY > BONES > BLOOD > GEMS > ENERGY
-            CardModificationInfo existingMod = card.Mods.FirstOrDefault(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.StartsWith(MOD_SINGLETON_ID_PREFIX));
+            CardModificationInfo existingMod = card.Mods?.FirstOrDefault(m => m != null && !string.IsNullOrEmpty(m.singletonId) && m.singletonId.StartsWith(MOD_SINGLETON_ID_PREFIX));
             if (existingMod != null)
                 card.mods.Remove(existingMod);
 
-            if ((existingMod == null && card.EnergyCost > 0) || existingMod.singletonId.Equals(MOD_SINGLETON_ID_ENERGY))
+            // Don't bring over non-copyable mods
+            card.mods.RemoveAll(m => m.nonCopyable);
+
+            if ((existingMod == null && card.EnergyCost > 0) || (existingMod != null && existingMod.singletonId.Equals(MOD_SINGLETON_ID_ENERGY)))
                 card.mods.Add(GetBonesCostMod(card));
-            else if ((existingMod == null && card.BonesCost > 0) || existingMod.singletonId.Equals(MOD_SINGLETON_ID_BONES))
+            else if ((existingMod == null && card.BonesCost > 0) || (existingMod != null && existingMod.singletonId.Equals(MOD_SINGLETON_ID_BONES)))
                 card.mods.Add(GetBloodCostMod(card));
-            else if ((existingMod == null && card.BloodCost > 0) || existingMod.singletonId.Equals(MOD_SINGLETON_ID_BLOOD))
+            else if ((existingMod == null && card.BloodCost > 0) || (existingMod != null && existingMod.singletonId.Equals(MOD_SINGLETON_ID_BLOOD)))
                 card.mods.Add(GetGemsCostMod(card));
             else
                 card.mods.Add(GetEnergyCostMod(card));

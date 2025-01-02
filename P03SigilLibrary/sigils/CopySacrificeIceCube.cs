@@ -33,7 +33,9 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                     clonedSacrifice.mods.Add(mod.Clone() as CardModificationInfo);
             }
             foreach (var mod in sacrifice.TemporaryMods.Where(m => !m.IsContinousEffectMod()))
+            {
                 clonedSacrifice.mods.Add(mod.Clone() as CardModificationInfo);
+            }
 
             if (!this.PlayableCard.HasAbility(Ability.IceCube))
                 this.PlayableCard.AddTemporaryMod(new(Ability.IceCube));

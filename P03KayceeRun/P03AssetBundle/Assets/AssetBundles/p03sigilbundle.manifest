@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 1110203511
+CRC: 1025664352
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 4744e5be11cda74421422270425bef8d
+    Hash: 7fd8de620ecf6262df8a40e2eaa377cf
   TypeTreeHash:
     serializedVersion: 2
     Hash: afd12bf211ec48792818822e52781931
@@ -37,6 +37,7 @@ Assets:
 - Assets/Models/Item_Hook.obj
 - Assets/Effects/Fire_Ball.prefab
 - Assets/Effects/Fire_Parent_Green.prefab
+- Assets/Models/bottle.fbx
 - Assets/Effects/Fire_Ball_Green.prefab
 - Assets/Effects/Fire_Ball_Red.prefab
 - Assets/Effects/Fire_Parent.prefab

@@ -66,7 +66,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             target.Card?.Anim.PlayHitAnimation();
 
             // The fireball should play and then delete itself, but we'll destroy it after some time anyway
-            GameObject fireball = Instantiate(AssetBundleManager.Prefabs["Fire_Ball"], target.transform);
+            string prefab = "Fire_Ball";
+            if (SaveManager.SaveFile.IsPart1)
+                prefab += "_Red";
+            else if (!SaveManager.SaveFile.IsPart3)
+                prefab += "_Green";
+
+            GameObject fireball = Instantiate(AssetBundleManager.Prefabs[prefab], target.transform);
             CustomCoroutine.WaitThenExecute(3f, delegate ()
             {
                 if (!fireball.SafeIsUnityNull())

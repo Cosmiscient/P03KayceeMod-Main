@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
 {
-    public class ActivatedBuffTeam : FuelActivatedAbilityBehaviour, IPassiveAttackBuff
+    public class ActivatedBuffTeam : FuelActivatedAbilityBehaviour, IPassiveAttackBuff, IOnBellRung
     {
         public static Ability AbilityID { get; private set; }
         public override Ability Ability => AbilityID;
@@ -29,6 +29,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.opponentUsable = true;
             info.passive = false;
             info.activated = true;
+            info.SetDefaultFuel(1);
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
@@ -41,13 +42,6 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.SetUniqueRedirect("fuel", "fuelManagerPage", GameColors.Instance.limeGreen);
         }
 
-        public override bool RespondsToOtherCardResolve(PlayableCard otherCard) => otherCard == this.Card && this.Card.OpponentCard;
-
-        public override IEnumerator OnOtherCardResolve(PlayableCard otherCard)
-        {
-            yield return OnActivatedAbility();
-        }
-
         public override IEnumerator ActivateAfterSpendFuel()
         {
             yield return LearnAbility(0.1f);
@@ -55,7 +49,15 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
         public int GetPassiveAttackBuff(PlayableCard target)
         {
-            return this.hasActivatedThisTurn && target.IsPlayerCard() == this.Card.IsPlayerCard() ? 1 : 0;
+            return this.HasActivatedThisTurn && (target.OpponentCard == this.Card.OpponentCard) ? 1 : 0;
+        }
+
+        public bool RespondsToBellRung(bool playerCombatPhase) => this.Card.OpponentCard && !playerCombatPhase;
+
+        public IEnumerator OnBellRung(bool playerCombatPhase)
+        {
+            if (this.Card.OpponentCard && !playerCombatPhase)
+                yield return this.OnActivatedAbility();
         }
     }
 }

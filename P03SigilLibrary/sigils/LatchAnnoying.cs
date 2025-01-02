@@ -30,7 +30,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 P03SigilLibraryPlugin.PluginGuid,
                 info,
                 typeof(LatchAnnoying),
-                TextureHelper.GetImageAsTexture("ability_latch_stinky.png", typeof(LatchAnnoying).Assembly)
+                TextureHelper.GetImageAsTexture("ability_latch_alarm.png", typeof(LatchAnnoying).Assembly)
             ).Id;
 
             info.SetAbilityRedirect("Annoying", Ability.BuffEnemy, GameColors.Instance.limeGreen);

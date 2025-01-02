@@ -40,7 +40,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
 
 
-        public bool RespondsToCardSacrificedAsCost(PlayableCard sacrifice) => !sacrifice.HasAbility(Ability.ExplodeOnDeath);
+        public bool RespondsToCardSacrificedAsCost(PlayableCard sacrifice) => !sacrifice.HasAbility(Ability.QuadrupleBones);
 
         public IEnumerator OnCardSacrificedAsCost(PlayableCard sacrifice)
         {

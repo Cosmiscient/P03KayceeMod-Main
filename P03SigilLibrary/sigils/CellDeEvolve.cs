@@ -36,5 +36,19 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         }
 
         public override bool RespondsToUpkeep(bool playerUpkeep) => base.RespondsToUpkeep(playerUpkeep) && !ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
+
+        public override CardInfo GetTransformCardInfo()
+        {
+            // Handle the temporary mods
+            foreach (var mod in Card.TemporaryMods)
+            {
+                if (mod.HasAbility(AbilityID))
+                {
+                    mod.abilities.Remove(AbilityID);
+                    mod.abilities.Add(CellEvolve.AbilityID);
+                }
+            }
+            return base.GetTransformCardInfo();
+        }
     }
 }

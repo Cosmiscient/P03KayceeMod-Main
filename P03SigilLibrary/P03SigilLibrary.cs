@@ -10,6 +10,7 @@ using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 using InscryptionAPI.Guid;
+using InscryptionAPI.RuleBook;
 using UnityEngine.SceneManagement;
 
 namespace Infiniscryption.P03SigilLibrary
@@ -61,6 +62,8 @@ namespace Infiniscryption.P03SigilLibrary
                 }
             }
 
+            SceneManager.sceneLoaded += OnSceneLoaded;
+
             Initialized = true;
 
             AbilityDocumentation.GenerateDocumentation();
@@ -109,6 +112,7 @@ namespace Infiniscryption.P03SigilLibrary
             // Need to *guarantee* that all of our card mod patches take hold
             CardManager.SyncCardList();
             AbilityManager.SyncAbilityList();
+            RuleBookManager.SyncRuleBookList();
         }
     }
 }

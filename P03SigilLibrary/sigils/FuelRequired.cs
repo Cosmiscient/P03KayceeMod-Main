@@ -26,6 +26,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 0;
             info.opponentUsable = true;
             info.passive = false;
+            info.SetDefaultFuel(3);
             info.SetExtendedProperty(AbilityIconBehaviours.ACTIVE_WHEN_FUELED, true);
             info.colorOverride = GameColors.Instance.darkLimeGreen;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };

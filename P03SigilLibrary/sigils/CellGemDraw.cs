@@ -16,7 +16,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         static CellGemDraw()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
-            info.rulebookName = "Mental Gymnastics When Powered";
+            info.rulebookName = "Mental Gemnastics When Powered";
             info.rulebookDescription = "When [creature] is played, if it is within a circuit, its owner draw cards equal to the number of Mox Cards on their side of the game board.";
             info.canStack = false;
             info.powerLevel = 1;

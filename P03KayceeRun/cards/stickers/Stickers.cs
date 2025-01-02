@@ -825,12 +825,12 @@ namespace Infiniscryption.P03KayceeRun.Cards.Stickers
             if (__instance is not DiskCardAnimationController dcac)
                 return;
 
-            if (dcac.PlayableCard == null)
+            if (dcac.Card == null)
                 return;
 
             CustomCoroutine.WaitThenExecute(0.22f, delegate ()
             {
-                foreach (var proj in dcac.PlayableCard.GetComponentsInChildren<Projector>())
+                foreach (var proj in dcac.Card.GetComponentsInChildren<Projector>())
                     proj.enabled = !faceDown;
             });
         }

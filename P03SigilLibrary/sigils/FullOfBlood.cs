@@ -26,7 +26,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;
-            info.flipYIfOpponent = true;
+            info.flipYIfOpponent = false;
             info.passive = true;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 

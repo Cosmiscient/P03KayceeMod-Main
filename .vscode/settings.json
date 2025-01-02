@@ -7,7 +7,6 @@
             "source.fixAll": "always"
         }
     },
-    "dotnet.implementType.propertyGenerationBehavior": "preferAutoProperties",
     "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "fullSolution",
     "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "fullSolution",
     "dotnet.server.useOmnisharp": false,
@@ -19,4 +18,5 @@
         "editor.defaultFormatter": "ms-python.black-formatter"
     },
     "omnisharp.organizeImportsOnFormat": true,
+    "dotnet.typeMembers.propertyGenerationBehavior": "preferAutoProperties",
 }

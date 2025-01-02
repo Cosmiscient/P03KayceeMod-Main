@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using Pixelplacement;
 using UnityEngine;
@@ -120,6 +121,9 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 };
                 baseCard.mods.Add(cardMod);
             }
+
+            if (selectedCardInfo.GetStartingFuel() > 0)
+                baseCard.SetStartingFuel(selectedCardInfo.GetStartingFuel());
 
             return baseCard;
         }

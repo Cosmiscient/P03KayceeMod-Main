@@ -680,6 +680,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_BLUEGEM, "Turbo Sapphire Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
+                    .AddDecal(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_emptyvessel_gem_blue"))
                     .AddTraits(Unsackable)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemBlue)
                     .SetStrafeFlipsPortrait(true)
@@ -689,6 +690,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_REDGEM, "Turbo Ruby Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
+                    .AddDecal(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_emptyvessel_gem_orange"))
                     .AddTraits(Unsackable)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemOrange)
                     .SetStrafeFlipsPortrait(true)
@@ -698,6 +700,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_GREENGEM, "Turbo Emerald Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
+                    .AddDecal(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_emptyvessel_gem_green"))
                     .AddTraits(Unsackable)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemGreen)
                     .SetFlippedPortrait()
@@ -1016,7 +1019,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook);
                     }
 
-                    if (ab.Id is Ability.Strafe or Ability.StrafeSwap or Ability.StrafePush)
+                    if (ab.Id is Ability.Strafe or Ability.StrafeSwap or Ability.StrafePush or Ability.BuffNeighbours)
                     {
                         ab.Info.canStack = true;
                     }

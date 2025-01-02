@@ -16,7 +16,6 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         public static event Action<Card> PermadeathTrigger;
 
         public static readonly Ability[] NOT_COPYABLE_ABILITIES = new Ability[] {
-            Ability.QuadrupleBones,
             Ability.Evolve,
             Ability.IceCube,
             Ability.TailOnHit,

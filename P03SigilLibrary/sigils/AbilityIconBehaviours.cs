@@ -124,7 +124,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                             }
                             else if (info.GetExtendedPropertyAsBool(ACTIVE_WHEN_FUELED) ?? false)
                             {
-                                abilityIconInteractable.SetColor(playableCard.GetCurrentFuel() <= 0 ? info.colorOverride : renderInfo.defaultAbilityColor);
+                                abilityIconInteractable.SetColor((playableCard.GetCurrentFuel() ?? 0) <= 0 ? info.colorOverride : renderInfo.defaultAbilityColor);
                             }
                         }
                     }

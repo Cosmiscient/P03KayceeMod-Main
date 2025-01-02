@@ -30,7 +30,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 if (__rule != null)
                     return __rule;
 
-                __rule = new(ShouldBeGivenFuelAbility, "FueledGainsStinky");
+                __rule = new(ShouldBeGivenFuelAbility, "FueledGainsStinky", Ability.DebuffEnemy);
                 return __rule;
             }
         }

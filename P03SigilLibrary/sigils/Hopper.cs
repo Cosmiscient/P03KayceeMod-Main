@@ -141,7 +141,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             else
             {
                 yield return this.CardChooseSlotSequence(
-                    s => BoardManager.Instance.AssignCardToSlot(Card, s, 0.1f, null, false),
+                    s => BoardManager.Instance.AssignCardToSlot(Card, s, 0.1f, null, true),
                     validslots,
                     aiSlotEvaluator: s => this.EvaluateOpponentMoveToSlot(s),
                     cursor: CursorType.Place,

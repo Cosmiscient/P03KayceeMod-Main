@@ -52,7 +52,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Launch Missile";
-            info.rulebookDescription = "Skip your attack this turn to launch a missile that lands on the next turn, splashing damage to adjacent spaces. Use carefully - ammo is limited.";
+            info.rulebookDescription = "[creature] can skip its attack this turn to launch a missile that lands on the next turn, splashing damage to adjacent spaces. Use carefully - ammo is limited.";
             info.canStack = false;
             info.powerLevel = 3;
             info.activated = true;
@@ -358,18 +358,17 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         private static void CleanupStrikes() => MissileStrikeManager.Instance.CleanUp();
 
         [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.GetOpposingSlots))]
-        [HarmonyPrefix]
-        private static bool NoAttacksForLaunches(PlayableCard __instance, ref List<CardSlot> __result)
+        [HarmonyPostfix]
+        [HarmonyPriority(HarmonyLib.Priority.Last)]
+        private static void NoAttacksForLaunches(PlayableCard __instance, ref List<CardSlot> __result)
         {
             if (__instance.HasAbility(AbilityID))
             {
                 if (__instance.GetComponent<MissileStrike>()._firedThisTurn)
                 {
                     __result = new();
-                    return false;
                 }
             }
-            return true;
         }
 
         public static IEnumerator LaunchMissile(CardSlot target, Transform source, int amount, PlayableCard attacker, Vector3? initialOffset = null, float? scale = null)

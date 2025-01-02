@@ -38,12 +38,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Tow Hook";
-            info.rulebookDescription = "Spend one fuel: tow an opposing creature to your side of the board until end of turn. Creatures being towed cannot be hammered.";
+            info.rulebookDescription = "Spend one fuel: tow an opposing creature to your side of the board until end of turn. Creatures being towed cannot be hammered. This ability can only be activated once per turn.";
             info.canStack = false;
             info.powerLevel = 2;
             info.opponentUsable = true;
             info.passive = false;
             info.activated = true;
+            info.SetDefaultFuel(1);
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
@@ -56,7 +57,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.SetUniqueRedirect("fuel", "fuelManagerPage", GameColors.Instance.limeGreen);
         }
 
-        private int EvaluateSlot(CardSlot slot) => slot.Card?.PowerLevel ?? 0;
+        private int EvaluateSlot(CardSlot slot) => -slot.Card?.PowerLevel ?? 0;
 
         private IEnumerator OnSelectSlot(CardSlot slot)
         {

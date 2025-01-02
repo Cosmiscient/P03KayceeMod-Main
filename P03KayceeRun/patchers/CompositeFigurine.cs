@@ -72,6 +72,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         public static CompositeFigurine.FigurineType PikeMage { get; private set; }
         public static CompositeFigurine.FigurineType Kaycee { get; private set; }
         public static CompositeFigurine.FigurineType TrainingDummy { get; private set; }
+        public static CompositeFigurine.FigurineType Inspector { get; private set; }
         public static CompositeFigurine.FigurineType None { get; private set; }
 
         private static readonly List<FullFigurineData> newFigurines = new();
@@ -163,6 +164,21 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
             PikeMage = Add(P03Plugin.PluginGuid, "Spear", spearData);
             P03Plugin.Log.LogInfo("Created pikemage figure");
+
+            // Add Inspector
+            FullFigurineData inspectorData = new();
+            inspectorData.Head = new() { CopyFrom = CompositeFigurine.FigurineType.Robot };
+            inspectorData.Arms = new() { CopyFrom = CompositeFigurine.FigurineType.Robot };
+            var inspectorBodyParent = new GameObject("InspectorBody");
+            inspectorBodyParent.transform.localPosition = Vector3.zero;
+            var inspectorBody = GameObject.Instantiate(RunBasedHoloMap.GetGameObject("NeutralWestTechGate/Scenery/HoloMapNPC/Body"), inspectorBodyParent.transform);
+            inspectorBody.transform.localPosition = new(0.0093f, 0.345f, 0.1066f);
+            inspectorBody.transform.localScale = new(0.44f, 0.695f, 0.59f);
+            MaterialHelper.HolofyAllRenderers(inspectorBody, GameColors.Instance.blue, brightness: 1);
+            GameObject.DontDestroyOnLoad(inspectorBodyParent);
+            inspectorData.Body = new() { prefab = inspectorBodyParent };
+            Inspector = Add(P03Plugin.PluginGuid, "Inspector", inspectorData);
+            P03Plugin.Log.LogInfo("Created Inspector figure");
 
             // Add Kaycee
             FullFigurineData kayceeData = new();

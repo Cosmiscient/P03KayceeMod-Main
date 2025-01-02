@@ -27,7 +27,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             info.powerLevel = original.powerLevel;
             info.activated = original.activated;
             info.opponentUsable = original.opponentUsable;
-            info.passive = original.passive;
+            info.passive = false;
             info.hasColorOverride = true;
             info.colorOverride = Color.black;
             info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, CustomCards.MultiverseAbility };
@@ -40,6 +40,14 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             ).Id;
         }
 
+        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.AddTemporaryMod))]
+        [HarmonyPostfix]
+        private static void ForceResourceUpdateOnTempMod() => ResourcesManager.Instance.ForceGemsUpdate();
+
+        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.RemoveTemporaryMod))]
+        [HarmonyPostfix]
+        private static void ForceResourceUpdateOnRemoveTempMod() => ResourcesManager.Instance.ForceGemsUpdate();
+
         [HarmonyPatch(typeof(OpponentGemsManager), nameof(OpponentGemsManager.ForceGemsUpdate))]
         [HarmonyPostfix]
         private static void MultiverseOpponentGems(OpponentGemsManager __instance)
@@ -47,7 +55,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             if (MultiverseBattleSequencer.Instance == null)
                 return;
 
-            if (MultiverseBattleSequencer.Instance == null)
+            if (MultiverseBattleSequencer.Instance.MultiverseGames == null)
                 return;
 
             if (MultiverseBattleSequencer.Instance.MultiverseGames.Any(m => m.HasAbility(AbilityID, true)))
@@ -67,6 +75,9 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             OpponentGemsManager.Instance.ForceGemsUpdate();
 
             if (MultiverseBattleSequencer.Instance == null)
+                return;
+
+            if (MultiverseBattleSequencer.Instance.MultiverseGames == null)
                 return;
 
             if (MultiverseBattleSequencer.Instance.MultiverseGames.Any(m => m.HasAbility(AbilityID, true)))

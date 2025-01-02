@@ -48,6 +48,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             {
                 yield return this.PreSuccessfulTriggerSequence();
                 yield return new WaitForSeconds(0.2f);
+
+                // Just do this first
+                this.Card.Anim.StrongNegationEffect();
+                this.Card.Status.hiddenAbilities.Add(this.Ability);
+                this.Card.RenderCard();
+                this.SetTailLost(true);
+
                 if (toRightValid)
                 {
                     yield return BoardManager.Instance.AssignCardToSlot(this.Card, toRight, 0.1f, null, true);
@@ -56,10 +63,6 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 {
                     yield return BoardManager.Instance.AssignCardToSlot(this.Card, toLeft, 0.1f, null, true);
                 }
-                this.Card.Anim.StrongNegationEffect();
-                this.Card.Status.hiddenAbilities.Add(this.Ability);
-                this.Card.RenderCard();
-                this.SetTailLost(true);
                 yield return new WaitForSeconds(0.2f);
                 CardInfo info = CardLoader.GetCardByName(this.Card.Info.temple == CardTemple.Tech ? "EmptyVessel_GreenGem" : "MoxEmerald");
                 PlayableCard tail = CardSpawner.SpawnPlayableCard(info);

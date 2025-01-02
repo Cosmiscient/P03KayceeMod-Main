@@ -14,7 +14,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
         public static SpecialTriggeredAbility AbilityID => SpecialTriggeredAbilityManager.Add(P03SigilLibraryPlugin.PluginGuid, "ReplicatingFirewallBehavior", typeof(ReplicatingFirewallBehavior)).Id;
 
-        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => true;
+        public override bool RespondsToDie(bool wasSacrifice, PlayableCard killer) => !wasSacrifice;
 
         private CardSlot FindEmptySlot(CardSlot startingSlot)
         {

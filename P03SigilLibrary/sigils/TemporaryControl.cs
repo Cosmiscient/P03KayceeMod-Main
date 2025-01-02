@@ -63,6 +63,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 targetCard.UpdateFaceUpOnBoardEffects();
             }
             yield return new WaitForEndOfFrame();
+            ResourcesManager.Instance.ForceGemsUpdate();
         }
 
         public static IEnumerator GainTemporaryControl(PlayableCard card)

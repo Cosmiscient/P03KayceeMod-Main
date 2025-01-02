@@ -1238,8 +1238,8 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             // If there are cards of every cost in the pool, add two cost change nodes
             if (EventManagement.AllFourResourcesInPool)
             {
-                P03Plugin.Log.LogDebug($"Adding 2 cost swap nodes");
-                for (int i = 0; i < 2; i++)
+                P03Plugin.Log.LogDebug($"Adding 1 cost swap nodes");
+                for (int i = 0; i < 1; i++)
                 {
                     HoloMapBlueprint tbp2 = retval.GetRandomPointOfInterest();
                     if (tbp2 != null)

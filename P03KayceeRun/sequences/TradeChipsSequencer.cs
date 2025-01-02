@@ -6,6 +6,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Patchers;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using Pixelplacement;
 using Sirenix.Serialization.Utilities;
 using UnityEngine;
@@ -406,6 +407,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                     }
                 }
             }
+
+            if (token.GetStartingFuel() > 0)
+                foreach (CardInfo info in result)
+                    info.SetStartingFuel(token.GetStartingFuel());
 
             currentChipPrice = 0;
             if (token.Abilities.Count > 0)

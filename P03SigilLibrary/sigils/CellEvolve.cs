@@ -53,6 +53,16 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 tInfo.evolveParams = new() { evolution = Card.Info.Clone() as CardInfo, turnsToEvolve = 1 };
 
             }
+
+            // Handle the temporary mods
+            foreach (var mod in Card.TemporaryMods)
+            {
+                if (mod.HasAbility(AbilityID))
+                {
+                    mod.abilities.Remove(AbilityID);
+                    mod.abilities.Add(CellDeEvolve.AbilityID);
+                }
+            }
             return tInfo;
         }
     }

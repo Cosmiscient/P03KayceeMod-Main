@@ -30,8 +30,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 if (__rule != null)
                     return __rule;
 
-                __rule = new(ShouldBeGivenBloodAbility, "UnsaccableGainsBlood");
-                __rule.gainedAbilities = new Ability[] { FullOfBlood.AbilityID };
+                __rule = new(ShouldBeGivenBloodAbility, "UnsaccableGainsBlood", FullOfBlood.AbilityID);
                 return __rule;
             }
         }

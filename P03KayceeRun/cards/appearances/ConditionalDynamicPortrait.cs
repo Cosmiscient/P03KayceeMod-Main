@@ -42,6 +42,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
                     P03Plugin.Log.LogDebug($"Bounty hunter name override {Card.renderInfo.nameOverride}");
                 }
             }
+            else
+            {
+                if (Card.Info.Mods.Any(mod => mod.bountyHunterInfo != null))
+                {
+                    Card.RenderInfo.prefabPortrait = AnimatedPortrait;
+                    Card.RenderInfo.hidePortrait = true;
+                    Card.RenderInfo.nameOverride = Card.Info.Mods.First(mod => mod.bountyHunterInfo != null).nameReplacement;
+                    P03Plugin.Log.LogDebug($"Bounty hunter name override {Card.renderInfo.nameOverride}");
+                }
+            }
         }
 
         public override void ResetAppearance()
