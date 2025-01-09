@@ -1,6 +1,6 @@
 {
     "name": "P03_Sigilarium",
-    "version_number": "1.1.13",
+    "version_number": "1.1.15",
     "website_url": "https://github.com/Cosmiscient/P03KayceeMod-Main",
     "description": "All of the sigils from 'P03 in Kaycees Mod', now available standalone!",
     "dependencies": [

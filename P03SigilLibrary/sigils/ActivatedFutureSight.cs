@@ -224,7 +224,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             card.transform.eulerAngles = new(30f, 22f, 8f);
 
             if (card.TriggerHandler.RespondsToTrigger(Trigger.Drawn))
-                yield return Card.TriggerHandler.OnTrigger(Trigger.Drawn);
+                yield return card.TriggerHandler.OnTrigger(Trigger.Drawn);
 
             if (!card.CanPlay())
             {

@@ -52,13 +52,16 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
         [HarmonyPostfix]
         private static void MultiverseOpponentGems(OpponentGemsManager __instance)
         {
+            if (__instance == null)
+                return;
+
             if (MultiverseBattleSequencer.Instance == null)
                 return;
 
             if (MultiverseBattleSequencer.Instance.MultiverseGames == null)
                 return;
 
-            if (MultiverseBattleSequencer.Instance.MultiverseGames.Any(m => m.HasAbility(AbilityID, true)))
+            if (MultiverseBattleSequencer.Instance.MultiverseGames.Any(m => m?.HasAbility(AbilityID, true) ?? false))
             {
                 __instance.AddGems(
                     GemType.Green,

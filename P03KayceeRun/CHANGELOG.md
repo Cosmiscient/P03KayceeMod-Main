@@ -1,3 +1,6 @@
+# 5.0.37
+- Fixed a defect with the \[redacted\] boss caused by a change in the Sigilarium to how gems were processed.
+
 # 5.0.36
 - Reverted a controversial change to the Swapper sigil. It should now behave more like it did in the original game, while still having the infinite spiral behavior kept in check.
 - Fixed an edge case defect with the portrait on the Activated Hunter card.

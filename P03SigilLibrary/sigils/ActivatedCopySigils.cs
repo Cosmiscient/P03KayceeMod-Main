@@ -94,6 +94,16 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             yield break;
         }
 
+        private List<Ability> GetAbilitiesFromCard(PlayableCard card)
+        {
+            List<Ability> retval = new(card.Info.Abilities);
+            foreach (var tMod in card.TemporaryMods)
+                retval.AddRange(tMod.abilities);
+            foreach (var tMod in card.TemporaryMods)
+                retval.RemoveAll(a => tMod.negateAbilities.Contains(a));
+            return retval;
+        }
+
         private IEnumerator OnSelectCopyToSlot(CardSlot slot)
         {
             // We need all abilities from all mods that are NOT continuous effect mods
@@ -106,7 +116,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 targetAbilities.AddRange(mod.abilities);
 
             CardModificationInfo newAbilityMod = slot.Card.GetOrCreateSingletonTempMod(SINGLETON_ID);
-            newAbilityMod.abilities = new(SelectedCopyFromSlot.Card.AllAbilities());
+            newAbilityMod.abilities = GetAbilitiesFromCard(SelectedCopyFromSlot.Card);
             newAbilityMod.negateAbilities = targetAbilities.Where(a => !newAbilityMod.abilities.Contains(a)).ToList();
 
             slot.Card.Anim.StrongNegationEffect();

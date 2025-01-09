@@ -1,3 +1,10 @@
+# 1.1.15
+- Fixed a defect with the Future Sight sigil interacting with sigils that respond to be drawn.
+- Fixed a defect with the Copy and Paste sigil incorrectly copying sigils that should have been replaced.
+
+# 1.1.14
+- Fixed a defect with the Emergence Latch ability that prevented it from triggering on cards with the Detonator ability.
+
 # 1.1.13
 - The "Bounty Hunter" sigil now negates its own ability after the effect takes place. This prevents it from trying to trigger multiple times when redrawn or cloned in hand.
 
