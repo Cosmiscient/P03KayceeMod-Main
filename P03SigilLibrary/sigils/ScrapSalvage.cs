@@ -21,7 +21,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Scrap Salvage";
-            info.rulebookDescription = "When [creature] is played, create a Charge! for each energy cost sacrificed, create a Zap! for each gem cost sacrificed, create an Upgrade! for each blood cost sacrificed, and create a Defend! for each bone cost sacrificed.";
+            info.rulebookDescription = "When [creature] is played, add the total cost of all cards sacrificed to play it, then create a Charge! for each energy, create a Zap! for each gem, create an Upgrade! for each blood, and create a Defend! for each bone.";
             info.canStack = false;
             info.powerLevel = 3;
             info.opponentUsable = false;

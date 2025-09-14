@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,7 +62,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             if (slot == null || slot.Card == null || slot.Card.Dead)
                 yield break;
 
-            foreach (var receiver in slot.Card.TriggerHandler.triggeredAbilities.Select(p => p.Item2))
+            foreach (var receiver in slot.Card.TriggerHandler.triggeredAbilities.Select(p => p.Item2).ToList())
             {
                 if (receiver is not ActivateEverything)
                 {
@@ -79,7 +80,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             if (slot == null || slot.Card == null || slot.Card.Dead)
                 yield break;
 
-            foreach (var pair in slot.Card.TriggerHandler.triggeredAbilities)
+            foreach (var pair in new List<Tuple<Ability, AbilityBehaviour>>(slot.Card.TriggerHandler.triggeredAbilities))
             {
                 if (pair.Item2 is FuelActivatedAbilityBehaviour fab)
                 {

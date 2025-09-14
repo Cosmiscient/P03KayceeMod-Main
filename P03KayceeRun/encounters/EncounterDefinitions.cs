@@ -15,9 +15,11 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         /// <summary>
         /// The maximum difficulty level that an an encounter can go to
         /// </summary>
-        public const int MAX_DIFFICULTY = 6;
+        public const int MAX_DIFFICULTY = 10;
 
         public static int DefaultConduitRepeatBehavior(int difficulty) => difficulty <= 1 ? 5 : difficulty <= 4 ? 4 : 3;
+
+        public static int EasyConduitRepeatBehavior(int difficulty) => difficulty <= 1 ? 8 : difficulty <= 4 ? 6 : 5;
 
         /// <summary>
         /// Creates a series of card blueprints that satisfy the given behavior
@@ -29,7 +31,7 @@ namespace Infiniscryption.P03KayceeRun.Encounters
         /// <param name="overclock">At this difficulty level or higher, the card is overclocked.</param>
         public static List<EncounterBlueprintData.CardBlueprint> Enemy(string cardName, string replacement = null, int difficulty = 0, int random = 0, int overclock = 0, Ability? overclockAbility = null)
         {
-            P03Plugin.Log.LogDebug($"Generating enemy defn: {cardName} becomes {replacement} at {difficulty} and gets overclocked at {overclock}");
+            //P03Plugin.Log.LogDebug($"Generating enemy defn: {cardName} becomes {replacement} at {difficulty} and gets overclocked at {overclock}");
             List<EncounterBlueprintData.CardBlueprint> retval = new();
 
             EncounterBlueprintData.CardBlueprint baseBp = new()
@@ -1599,65 +1601,66 @@ namespace Infiniscryption.P03KayceeRun.Encounters
             EncounterBlueprintData techProtectConduits = EncounterManager.New("P03KCMXP1_Tech_ProtectConduits", addToPool: true);
             techProtectConduits.SetDifficulty(0, 6).SetP03Encounter(CardTemple.Tech);
             techProtectConduits.turns = new();
-            techProtectConduits.AddTerrainRepeatRule(DefaultConduitRepeatBehavior);
+            //techProtectConduits.AddTerrainRepeatRule(EasyConduitRepeatBehavior);
 
             techProtectConduits.AddEnemyTerrain(new() {
-                Enemy("ConduitTower"),
-                null,
-                null,
-                null,
+                Enemy("HealerConduit"),
+                Enemy("Thickbot"),
+                Enemy("P03KCMXP1_ConduitProtector"),
+                Enemy("LeapBot", replacement: "Thickbot", difficulty: 2),
                 Enemy("HealerConduit"),
             });
             techProtectConduits.AddEnemyTerrainQueue(new() {
                 Enemy(null, replacement: "ConduitTower", difficulty: 1),
-                null,
-                null,
-                null,
-                Enemy(null, replacement: "HealerConduit", difficulty: 1),
+                Enemy("Thickbot"),
+                Enemy(null, replacement: "P03KCMXP1_EmeraldTitan", difficulty: 5),
+                Enemy("Thickbot"),
+                Enemy(null, replacement: "ConduitTower", difficulty: 1),
             });
 
-            // TURN 1
-            techProtectConduits.turns.AddTurn(
-                Enemy("P03KCMXP1_ConduitProtector")
-            );
+            // // TURN 1
+            // techProtectConduits.turns.AddTurn(
+            //     Enemy("P03KCMXP1_ConduitProtector")
+            // );
 
-            // TURN 2
-            techProtectConduits.turns.AddTurn(
-                Enemy("LeapBot")
-            );
+            // // TURN 2
+            // techProtectConduits.turns.AddTurn(
+            //     Enemy("LeapBot"),
+            //     Enemy("LeapBot")
+            // );
 
-            // TURN 3
-            techProtectConduits.turns.AddTurn(
-                Enemy("Thickbot")
-            );
+            // // TURN 3
+            // techProtectConduits.turns.AddTurn(
+            //     Enemy("Thickbot")
+            // );
 
-            // TURN 4
-            techProtectConduits.turns.AddTurn(
-                Enemy("SwapBot"),
-                Enemy(null, replacement: "P03KCMXP1_ConduitProtector", difficulty: 5)
-            );
+            // // TURN 4
+            // techProtectConduits.turns.AddTurn(
+            //     Enemy("SwapBot"),
+            //     Enemy(null, replacement: "P03KCMXP1_ConduitProtector", difficulty: 5)
+            // );
 
-            // TURN 5
-            techProtectConduits.turns.AddTurn(
-                Enemy("SwapBot"),
-                Enemy(null, replacement: "P03KCMXP1_EmeraldTitan", difficulty: 6)
-            );
+            // // TURN 5
+            // techProtectConduits.turns.AddTurn(
+            //     Enemy("SwapBot"),
+            //     Enemy(null, replacement: "P03KCMXP1_EmeraldTitan", difficulty: 6)
+            // );
 
-            // TURN 6
-            techProtectConduits.turns.AddTurn(
-                Enemy("Thickbot")
-            );
+            // // TURN 6
+            // techProtectConduits.turns.AddTurn(
+            //     Enemy("Thickbot")
+            // );
 
-            // TURN 7
-            techProtectConduits.turns.AddTurn(
-                Enemy(null, replacement: "P03KCMXP1_ConduitProtector", difficulty: 2),
-                Enemy("Thickbot")
-            );
+            // // TURN 7
+            // techProtectConduits.turns.AddTurn(
+            //     Enemy(null, replacement: "P03KCMXP1_ConduitProtector", difficulty: 2),
+            //     Enemy("Thickbot")
+            // );
 
-            // TURN 8
-            techProtectConduits.turns.AddTurn(
-                Enemy(null, replacement: "P03KCMXP1_EmeraldTitan", difficulty: 6)
-            );
+            // // TURN 8
+            // techProtectConduits.turns.AddTurn(
+            //     Enemy(null, replacement: "P03KCMXP1_EmeraldTitan", difficulty: 6)
+            // );
 
 
             // Encounter: Tech_StinkyConduits

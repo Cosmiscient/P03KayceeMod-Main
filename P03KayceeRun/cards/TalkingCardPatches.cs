@@ -6,6 +6,8 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.TalkingCards.Create;
+using Sirenix.Serialization.Utilities;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
@@ -18,8 +20,24 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             if (P03AscensionSaveData.IsP03Run)
             {
-                __instance.CardCameraParent ??= CardRenderCamera.Instance.GetLiveRenderCamera(__instance.Card.StatsLayer)?.transform;
-                __instance.Text ??= __instance.gameObject.GetComponent<SequentialText>() ?? __instance.gameObject.GetComponent<SequentialText>() ?? __instance.CardCameraParent?.GetComponentInChildren<SequentialText>();
+                if (__instance.CardCameraParent.SafeIsUnityNull())
+                {
+                    __instance.CardCameraParent = CardRenderCamera.Instance.GetLiveRenderCamera(__instance.Card.StatsLayer)?.transform;
+                }
+                if (__instance.Text.SafeIsUnityNull())
+                {
+                    var text = __instance.gameObject.GetComponent<SequentialText>();
+                    if (text.SafeIsUnityNull() && !__instance.CardCameraParent.SafeIsUnityNull())
+                        text = __instance.CardCameraParent?.GetComponentInChildren<SequentialText>();
+                    __instance.Text = text;
+                }
+                if (__instance.Face.SafeIsUnityNull())
+                {
+                    var face = __instance.gameObject.GetComponent<CharacterFace>();
+                    if (face.SafeIsUnityNull() && !__instance.CardCameraParent.SafeIsUnityNull())
+                        face = __instance.CardCameraParent?.GetComponentInChildren<CharacterFace>();
+                    __instance.Face = face;
+                }
             }
         }
 
@@ -29,10 +47,56 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             if (P03AscensionSaveData.IsP03Run)
             {
-                __instance.CardCameraParent ??= CardRenderCamera.Instance.GetLiveRenderCamera(__instance.Card.StatsLayer)?.transform;
-                __instance.Text ??= __instance.gameObject.GetComponent<SequentialText>() ?? __instance.gameObject.GetComponent<SequentialText>() ?? __instance.CardCameraParent?.GetComponentInChildren<SequentialText>();
+                if (__instance.CardCameraParent.SafeIsUnityNull())
+                {
+                    __instance.CardCameraParent = CardRenderCamera.Instance.GetLiveRenderCamera(__instance.Card.StatsLayer)?.transform;
+                }
+                if (__instance.Text.SafeIsUnityNull())
+                {
+                    var text = __instance.gameObject.GetComponent<SequentialText>();
+                    if (text.SafeIsUnityNull() && !__instance.CardCameraParent.SafeIsUnityNull())
+                        text = __instance.CardCameraParent?.GetComponentInChildren<SequentialText>();
+                    __instance.Text = text;
+                }
+                if (__instance.Face.SafeIsUnityNull())
+                {
+                    var face = __instance.gameObject.GetComponent<CharacterFace>();
+                    if (face.SafeIsUnityNull() && !__instance.CardCameraParent.SafeIsUnityNull())
+                        face = __instance.CardCameraParent?.GetComponentInChildren<CharacterFace>();
+                    __instance.Face = face;
+                }
             }
 
+            yield return sequence;
+        }
+
+        [HarmonyPatch(typeof(TalkingCard), nameof(TalkingCard.PlayLine))]
+        [HarmonyPostfix]
+        private static IEnumerator EnsureTextNotNullEachLine(IEnumerator sequence, TalkingCard __instance, DialogueEvent.Line line)
+        {
+            if (P03AscensionSaveData.IsP03Run)
+            {
+                if (__instance.CardCameraParent.SafeIsUnityNull())
+                {
+                    __instance.CardCameraParent = CardRenderCamera.Instance.GetLiveRenderCamera(__instance.Card.StatsLayer)?.transform;
+                }
+                if (__instance.Text.SafeIsUnityNull())
+                {
+                    var text = __instance.gameObject.GetComponent<SequentialText>();
+                    if (text.SafeIsUnityNull() && !__instance.CardCameraParent.SafeIsUnityNull())
+                        text = __instance.CardCameraParent?.GetComponentInChildren<SequentialText>();
+                    __instance.Text = text;
+                }
+                if (__instance.Face.SafeIsUnityNull())
+                {
+                    var face = __instance.gameObject.GetComponent<CharacterFace>();
+                    if (face.SafeIsUnityNull() && !__instance.CardCameraParent.SafeIsUnityNull())
+                        face = __instance.CardCameraParent?.GetComponentInChildren<CharacterFace>();
+                    __instance.Face = face;
+                }
+            }
+
+            P03Plugin.Log.LogInfo(line.text);
             yield return sequence;
         }
 
@@ -69,6 +133,16 @@ namespace Infiniscryption.P03KayceeRun.Cards
         {
             __result = !TurnManager.Instance.TalkingCardsDrawnThisGame.Any(i => i.name.Equals(__instance.Card.Info.name, System.StringComparison.InvariantCultureIgnoreCase));
             return false;
+        }
+
+        [HarmonyPatch(typeof(DiskTalkingCard), nameof(DiskTalkingCard.ManagedUpdate))]
+        [HarmonyPostfix]
+        private static void MakeSureWeReset(DiskTalkingCard __instance)
+        {
+            if (__instance.clearDialogueTimer < 0f && __instance.Text == null)
+            {
+                __instance.SetAbilityIconsShown(true);
+            }
         }
 
         [HarmonyPatch(typeof(SelectableCardArray), nameof(SelectableCardArray.SelectCardFrom))]

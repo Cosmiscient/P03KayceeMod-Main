@@ -241,20 +241,25 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
 
         public IEnumerator OnBattleModCleanup()
         {
-            if (RulePaintingManager.Instance != null)
-            {
-                RulePaintingManager.Instance.SetPaintingsShown(false);
-            }
+            //yield return new WaitUntil(() => InputButtons.GetButton(Button.EndTurn));
+            RulePaintingManager.Instance?.SetPaintingsShown(false);
+            //yield return new WaitUntil(() => InputButtons.GetButton(Button.EndTurn));
 
             if (this.offsitePainting != null)
             {
-                Tween.LocalPosition(this.offsitePainting.transform, Vector3.up * 4f, .35f, 0f, Tween.EaseInBack);
+                Tween.LocalPosition(this.offsitePainting.transform, Vector3.up * 8f, .4f, 0f, Tween.EaseInBack);
             }
+
+            yield return new WaitForSeconds(0.42f);
+            //yield return new WaitUntil(() => InputButtons.GetButton(Button.EndTurn));
+
+            // Make sure all cameras are cleaned up. We can kind of do this the hard way
+            var allRuleDisplayers = this.gameObject.GetComponentsInChildren<CompositeRuleDisplayer>();
+            foreach (var disp in allRuleDisplayers)
+                GameObject.Destroy(disp.gameObject.transform.parent.gameObject);
 
             if (this.effects != null || this.offsitePainting != null)
             {
-                yield return new WaitForSeconds(0.4f);
-
                 if (this.effects != null)
                     GameObject.Destroy(this.effects);
 

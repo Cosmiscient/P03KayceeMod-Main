@@ -83,7 +83,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             if (MultiverseBattleSequencer.Instance.MultiverseGames == null)
                 return;
 
-            if (MultiverseBattleSequencer.Instance.MultiverseGames.Any(m => m.HasAbility(AbilityID, true)))
+            if (MultiverseBattleSequencer.Instance.MultiverseGames.Any(m => m?.HasAbility(AbilityID, true) ?? false))
             {
                 __instance.gems.Add(GemType.Green);
                 __instance.gems.Add(GemType.Orange);

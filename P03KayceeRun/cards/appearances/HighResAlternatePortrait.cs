@@ -1,11 +1,15 @@
 using DiskCardGame;
+using Infiniscryption.P03KayceeRun.Patchers;
 using InscryptionAPI.Card;
+using InscryptionAPI.Helpers;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
     public class HighResAlternatePortrait : CardAppearanceBehaviour
     {
+        private static Sprite TributeSprite = TextureHelper.GetImageAsTexture("portrait_poodle_photo.png", typeof(CustomCards).Assembly, FilterMode.Trilinear).ConvertTexture(TextureHelper.SpriteType.CardPortrait, FilterMode.Trilinear);
+
         public static Appearance ID { get; private set; }
 
         public class DynamicPortrait : DynamicCardPortrait
@@ -13,7 +17,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
             public override void ApplyCardInfo(CardInfo card)
             {
                 SpriteRenderer renderer = gameObject.GetComponentInChildren<SpriteRenderer>();
-                renderer.sprite = card.alternatePortrait;
+                if (card.name.EndsWith("Poodle"))
+                    renderer.sprite = TributeSprite;
+                else
+                    renderer.sprite = card.alternatePortrait;
             }
         }
 

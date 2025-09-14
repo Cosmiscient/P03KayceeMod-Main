@@ -1,3 +1,22 @@
+# 5.0.42
+- Surprise!
+- Rebuilt the mod against the latest version of the API.
+
+# 5.0.41
+- Fixed another defect with the \[redacted\] boss. This is related to the bug fixed in 5.0.37 and should hopefully completely resolve that issue.
+
+# 5.0.40
+- Fixed a defect where the final phase of the P03 Boss Fight would have no cards played at the highest difficulty.
+- Fixed a defect where the Eccentric Painter paintings would sometimes overlap.
+- Fixed a defect where sometimes talking cards would de-sync from their portraits.
+- Balance Change: Adjusted the Protect Conduits encounter.
+
+# 5.0.39
+- Fixed a defect in some custom card rendering.
+
+# 5.0.38
+- Fixed a defect where the Double Death sigil would cause continuous effects to duplicate.
+
 # 5.0.37
 - Fixed a defect with the \[redacted\] boss caused by a change in the Sigilarium to how gems were processed.
 

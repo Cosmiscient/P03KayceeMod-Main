@@ -1,12 +1,16 @@
 using System.Linq;
 using DiskCardGame;
+using HarmonyLib;
+using Infiniscryption.P03KayceeRun.Patchers;
 using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using Sirenix.Utilities;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
+    [HarmonyPatch]
     public static class ExpansionPackCards_2
     {
         internal const string EXP_2_PREFIX = "P03KCMXP2";
@@ -448,6 +452,22 @@ namespace Infiniscryption.P03KayceeRun.Cards
                 .SetRegionalP03Card(CardTemple.Tech)
                 .SetRare()
                 .AddAbilities(ConduitAbsorb.AbilityID);
+        }
+
+        private static bool TributeActive => (TurnManager.Instance?.Opponent?.OpponentType ?? Opponent.Type.Default) == Opponent.Type.TelegrapherBoss && (P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("rocket") || SeededRandom.Value(P03AscensionSaveData.RandomSeed) < 0.45f);
+
+        [HarmonyPatch(typeof(Card), nameof(Card.ApplyAppearanceBehaviours))]
+        [HarmonyPostfix]
+        private static void Tribute(Card __instance)
+        {
+            if (__instance.Info.name.EndsWith("Poodle") && TributeActive)
+            {
+                HighResAlternatePortrait portrait = __instance.gameObject.GetComponent<HighResAlternatePortrait>();
+                if (portrait == null)
+                {
+                    __instance.gameObject.AddComponent<HighResAlternatePortrait>().ApplyAppearance();
+                }
+            }
         }
     }
 }

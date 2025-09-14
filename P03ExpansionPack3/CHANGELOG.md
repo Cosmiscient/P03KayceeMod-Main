@@ -1,3 +1,7 @@
+# 1.0.1
+- Surprise!
+- Rebuilt the mod against the latest version of the API.
+
 # 1.0.0
 - I arbitrarily decided it's time to call this the full 1.0 release of this mod.
 - Bugfix: Iterator is now marked as rare.

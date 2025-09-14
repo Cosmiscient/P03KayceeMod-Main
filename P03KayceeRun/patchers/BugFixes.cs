@@ -8,6 +8,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Sequences;
+using Infiniscryption.P03SigilLibrary.Helpers;
 using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
@@ -697,7 +698,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             CardInfo deathInfo = (CardInfo)deathSlot.Card.Info.Clone();
             deathInfo.mods = deathSlot.Card.Info.mods?.Select(CloneAsNotCopyable).ToList();
             deathInfo.mods ??= new();
-            deathInfo.mods.AddRange(deathSlot.Card.TemporaryMods.Select(m => (CardModificationInfo)m.Clone()));
+            deathInfo.mods.AddRange(deathSlot.Card.TemporaryMods.Where(m => !m.IsContinousEffectMod()).Select(m => (CardModificationInfo)m.Clone()));
             __instance.currentlyResurrectingCards.Add(deathInfo);
             yield return BoardManager.Instance.CreateCardInSlot(deathInfo, deathSlot, 0.1f, false);
             if (deathSlot.Card != null)
@@ -708,6 +709,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 yield return GlobalTriggerHandler.Instance.TriggerCardsOnBoard(Trigger.OtherCardResolve, false, deathSlot.Card);
             }
+            yield return new WaitForEndOfFrame();
             yield return new WaitForSeconds(0.1f);
             if (deathSlot.Card != null)
             {

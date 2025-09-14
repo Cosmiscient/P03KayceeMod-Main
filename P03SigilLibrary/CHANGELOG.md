@@ -1,3 +1,11 @@
+# 1.1.17
+- Surprise!
+- Rebuilt the mod against the latest version of the API.
+
+# 1.1.16
+- Fixed a defect where using the Button Pusher sigil with the Submerge sigil would cause a softlock.
+- The Forced Upgrade sigil will now copy modifications from the target card when the target has a pre-defined evolution.
+
 # 1.1.15
 - Fixed a defect with the Future Sight sigil interacting with sigils that respond to be drawn.
 - Fixed a defect with the Copy and Paste sigil incorrectly copying sigils that should have been replaced.
