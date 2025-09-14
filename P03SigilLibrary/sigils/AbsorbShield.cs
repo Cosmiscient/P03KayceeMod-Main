@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -21,7 +22,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 2;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_shield_vampire.png", typeof(AbsorbShield).Assembly));
 
             AbilityID = AbilityManager.Add(
@@ -30,6 +31,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(AbsorbShield),
                 TextureHelper.GetImageAsTexture("ability_shield_vampire.png", typeof(AbsorbShield).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("shields", Ability.DeathShield, GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToResolveOnBoard() => true;

@@ -16,12 +16,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Nerf This!";
-            info.rulebookDescription = "When [creature] is drawn, it gains a randomly selected negative ability";
+            info.rulebookDescription = "When [creature] is drawn, it gains a randomly selected negative ability.";
             info.canStack = false;
             info.powerLevel = -1;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,

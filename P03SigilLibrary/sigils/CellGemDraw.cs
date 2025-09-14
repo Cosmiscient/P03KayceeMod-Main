@@ -16,13 +16,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         static CellGemDraw()
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
-            info.rulebookName = "Mental Gymnastics When Powered";
+            info.rulebookName = "Mental Gemnastics When Powered";
             info.rulebookDescription = "When [creature] is played, if it is within a circuit, its owner draw cards equal to the number of Mox Cards on their side of the game board.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,

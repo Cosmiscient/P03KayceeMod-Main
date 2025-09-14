@@ -7,8 +7,8 @@ using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Cards
 {
-	public class ConduitSpawnCrypto : ConduitSpawn
-	{
+    public class ConduitSpawnCrypto : ConduitSpawn
+    {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
 
@@ -21,7 +21,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.powerLevel = 3;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             ConduitSpawnCrypto.AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
@@ -31,9 +31,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             ).Id;
         }
 
-		public override string GetSpawnCardId()
-		{
-			return CustomCards.GOLLYCOIN;
-		}
-	}
+        public override string GetSpawnCardId()
+        {
+            return CustomCards.GOLLYCOIN;
+        }
+    }
 }

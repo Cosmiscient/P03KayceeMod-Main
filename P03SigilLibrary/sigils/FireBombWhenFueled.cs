@@ -11,6 +11,7 @@ using InscryptionAPI.Slots;
 using UnityEngine;
 using GBC;
 using Infiniscryption.P03SigilLibrary.Helpers;
+using InscryptionAPI.RuleBook;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
 {
@@ -26,14 +27,15 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Fire Strike When Fueled";
-            info.rulebookDescription = "When [creature] attacks, if it fueled, it consumes one fuel to set the target space on fire for three turns.";
+            info.rulebookDescription = "When [creature] attacks, if it is fueled, it consumes one fuel to set the target space on fire for three turns.";
             info.canStack = false;
             info.powerLevel = 3;
             info.opponentUsable = true;
             info.passive = false;
             info.SetExtendedProperty(AbilityIconBehaviours.ACTIVE_WHEN_FUELED, true);
             info.colorOverride = GameColors.Instance.darkLimeGreen;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular, BurningSlotBase.FlamingAbility };
+            info.SetDefaultFuel(3);
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular, BurningSlotBase.FlamingAbility };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -41,6 +43,9 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(FireBombWhenFueled),
                 TextureHelper.GetImageAsTexture("ability_flame_when_fueled.png", typeof(FireBombWhenFueled).Assembly)
             ).Id;
+
+            info.SetSlotRedirect("on fire", BurningSlotBase.GetFireLevel(2), GameColors.Instance.limeGreen);
+            info.SetUniqueRedirect("fueled", "fuelManagerPage", GameColors.Instance.limeGreen);
         }
 
         public bool RespondsToPostSingularSlotAttackSlot(CardSlot attackingSlot, CardSlot targetSlot) => ((ignoreFuelCheck && pretendHaveFuel) || this.Card.GetCurrentFuel() > 0) && attackingSlot == Card.Slot;

@@ -457,7 +457,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
                         DUMMY_DECAL_2,
                         GetTexture("portrait_triplemox_color_decal_2.png", typeof(CustomCards).Assembly)
                     );
-                    cards.CardByName("PlasmaGunner").SetWeaponMesh(DiskCardWeapon.Revolver);
+                    cards.CardByName("PlasmaGunner").SetWeaponMesh(
+                        "p03kcm/prefabs/XCom_laserRifle_obj",
+                        localPosition: new Vector3(0f, -0.66f, 0f),
+                        localRotation: new Vector3(0f, 0f, 0f),
+                        localScale: new Vector3(0.03f, 0.03f, 0.03f)
+                    );
 
                     cards.CardByName("CXformerWolf").AddMetaCategories(NewBeastTransformers).SetCost(energyCost: 6);
                     cards.CardByName("CXformerElk").AddMetaCategories(NewBeastTransformers).SetCost(energyCost: 6);
@@ -675,6 +680,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_BLUEGEM, "Turbo Sapphire Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
+                    .AddDecal(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_emptyvessel_gem_blue"))
                     .AddTraits(Unsackable)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemBlue)
                     .SetStrafeFlipsPortrait(true)
@@ -684,6 +690,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_REDGEM, "Turbo Ruby Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
+                    .AddDecal(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_emptyvessel_gem_orange"))
                     .AddTraits(Unsackable)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemOrange)
                     .SetStrafeFlipsPortrait(true)
@@ -693,6 +700,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             CardManager.New(P03Plugin.CardPrefx, TURBO_VESSEL_GREENGEM, "Turbo Emerald Vessel", 0, 2)
                     .SetPortrait(GetTexture("portrait_turbovessel.png", typeof(CustomCards).Assembly))
                     .SetCost(energyCost: 1)
+                    .AddDecal(Resources.Load<Texture2D>("art/cards/part 3 portraits/portrait_emptyvessel_gem_green"))
                     .AddTraits(Unsackable)
                     .AddAbilities(DoubleSprint.AbilityID, Ability.GainGemGreen)
                     .SetFlippedPortrait()
@@ -1008,10 +1016,10 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
                     if (allP3Abs.Contains(ab.Id))
                     {
-                        ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook);
+                        ab.Info.AddMetaCategories(AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook);
                     }
 
-                    if (ab.Id is Ability.Strafe or Ability.StrafeSwap or Ability.StrafePush)
+                    if (ab.Id is Ability.Strafe or Ability.StrafeSwap or Ability.StrafePush or Ability.BuffNeighbours)
                     {
                         ab.Info.canStack = true;
                     }
@@ -1156,7 +1164,8 @@ namespace Infiniscryption.P03KayceeRun.Cards
             info.SetExtendedProperty("PortraitColor", "gold");
             info.SetExtendedProperty("Holofy", true);
             info.SetCardTemple(CardTemple.Tech);
-            info.hideAttackAndHealth = true;
+            if (!info.HasAbility(GiveStats.AbilityID) && !info.HasAbility(GiveStatsSigils.AbilityID))
+                info.hideAttackAndHealth = true;
             return info;
         }
 
@@ -1270,7 +1279,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
             return info;
         }
 
-        public static CardInfo SetWeaponMesh(this CardInfo info, string weaponPrefab, Vector3? localPosition = null, Vector3? localRotation = null, Vector3? localScale = null)
+        public static CardInfo SetWeaponMesh(this CardInfo info, string weaponPrefab, Vector3? localPosition = null, Vector3? localRotation = null, Vector3? localScale = null, bool? disableMuzzleFlash = null, string audioId = null)
         {
             info.AddAppearances(DiskWeaponAppearance.ID);
             info.SetExtendedProperty(DiskWeaponAppearance.WEAPON_KEY, weaponPrefab);
@@ -1283,6 +1292,12 @@ namespace Infiniscryption.P03KayceeRun.Cards
 
             if (localScale.HasValue)
                 info.SetExtendedProperty(DiskWeaponAppearance.WEAPON_SCALE, $"{localScale.Value.x},{localScale.Value.y},{localScale.Value.z}");
+
+            if (disableMuzzleFlash ?? false)
+                info.SetExtendedProperty(DiskWeaponAppearance.DISABLE_MUZZLE_FLASH, true);
+
+            if (!string.IsNullOrEmpty(audioId))
+                info.SetExtendedProperty(DiskWeaponAppearance.AUDIO_ID, audioId);
 
             return info;
         }

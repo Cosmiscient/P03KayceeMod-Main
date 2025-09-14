@@ -10,7 +10,7 @@ using static Infiniscryption.P03KayceeRun.Encounters.EncounterHelper;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
 {
-    internal static class MultiverseEncounters
+    public static class MultiverseEncounters
     {
         // These blueprints are special; they're for bosses and aren't in the normal pool
         internal static List<EncounterBlueprintData> MultiverseBossPhaseOne;
@@ -22,7 +22,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         // P03 1 plays a deck of multiversal gems
         // P03 2 plays a deck of defensive, multiversal conduits
 
-        internal static void ContinueOn(this EncounterBlueprintData data, params string[] turns)
+        public static void ContinueOn(this EncounterBlueprintData data, params string[] turns)
         {
             for (int i = 0; i < 10; i++)
             {

@@ -34,10 +34,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 return abilityEligible && traitEligible;
             }
 
-            internal Rule(Func<PlayableCard, bool> cond, string uniqueKey)
+            internal Rule(Func<PlayableCard, bool> cond, string uniqueKey, Ability gained)
             {
                 customCondition = cond;
                 modId = $"{RuleKey}{uniqueKey}";
+                gainedAbilities = new Ability[] { gained };
+
+                AbilityIconBehaviours.DynamicAbilityCardModIds.Add(modId);
             }
 
             public Rule(Ability required, Trait reqTrait, Ability gained, List<Ability> additionalGained)

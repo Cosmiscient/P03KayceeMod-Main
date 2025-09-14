@@ -15,11 +15,10 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         public static Ability AbilityID { get; private set; }
         public override Ability Ability => AbilityID;
 
-        public override int EnergyCost => 1;
-
-        public override bool CanActivate()
+        public override bool CanActivate() => false;
+        public override IEnumerator Activate()
         {
-            return Card.Slot.GetAdjacentSlots(true).Where(s => s.Card == null).Count() > 0;
+            yield break;
         }
 
         static ActivatedStrafeSelf()
@@ -32,7 +31,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.opponentUsable = false;
             info.passive = false;
             info.activated = true;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -42,40 +41,38 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             ).Id;
         }
 
-        public override IEnumerator Activate()
+        public override bool RespondsToDrawn() => true;
+        public override bool RespondsToOtherCardResolve(PlayableCard otherCard) => otherCard == this.Card;
+
+        public override IEnumerator OnOtherCardResolve(PlayableCard otherCard)
         {
-            var validSlots = Card.Slot.GetAdjacentSlots(true).Where(s => s.Card == null).ToList();
-            if (validSlots.Count == 1)
+            yield return OnDrawn();
+        }
+
+        public override IEnumerator OnDrawn()
+        {
+            if (PlayerHand.Instance is PlayerHand3D p3d)
             {
-                yield return BoardManager.Instance.AssignCardToSlot(Card, validSlots[0], 0.1f, null, false);
-                yield return new WaitForSeconds(0.15f);
-                yield break;
+                p3d.MoveCardAboveHand(this.Card);
+                yield return this.Card.FlipInHand(this.AddMod);
             }
+            else
+            {
+                this.AddMod();
+            }
+            yield return this.LearnAbility(0.5f);
 
-            ViewManager.Instance.SwitchToView(View.Board, false, true);
-            yield return new WaitForSeconds(0.25f);
+        }
 
-            Vector3 a = Card.Slot.IsPlayerSlot ? Vector3.forward : Vector3.back;
-            a *= 0.5f;
-            Tween.Position(Card.transform, Card.transform.position + (a * 2f) + (Vector3.up * 0.25f), 0.15f, 0f, Tween.EaseOut, Tween.LoopType.None, null, null, true);
-
-            List<CardSlot> allslots = BoardManager.Instance.PlayerSlotsCopy;
-
-            CardSlot selectedSlot = null;
-            yield return BoardManager.Instance.ChooseTarget(
-                allslots,
-                validSlots,
-                s => selectedSlot = s,
-                s => Card.Anim.StrongNegationEffect(),
-                null,
-                () => false,
-                CursorType.Target
-            );
-
-            if (selectedSlot != null)
-                yield return BoardManager.Instance.AssignCardToSlot(Card, selectedSlot, 0.1f, null, false);
-
-            ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
+        private void AddMod()
+        {
+            base.Card.Status.hiddenAbilities.Add(this.Ability);
+            CardModificationInfo mod = new();
+            mod.abilities.Add(ActivatedStrafeSelfLeft.AbilityID);
+            mod.abilities.Add(ActivatedStrafeSelfRight.AbilityID);
+            mod.negateAbilities.Add(AbilityID);
+            this.Card.AddTemporaryMod(mod);
         }
     }
 }
+

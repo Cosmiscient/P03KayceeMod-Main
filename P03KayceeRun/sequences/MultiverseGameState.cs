@@ -468,7 +468,19 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             // Set the bones state
             P03Plugin.Log.LogInfo("Restoring multiverse state: Resetting bones");
-            ResourcesManager.Instance.PlayerBones = BonesState;
+            if (ResourcesManager.Instance.PlayerBones != BonesState)
+            {
+                if (BonesState == 0)
+                {
+                    ResourcesManager.Instance.PlayerBones = 1;
+                    yield return ResourcesManager.Instance.SpendBones(1);
+                }
+                else
+                {
+                    ResourcesManager.Instance.PlayerBones = BonesState - 1;
+                    yield return ResourcesManager.Instance.AddBones(1);
+                }
+            }
 
             // Combat Phase state
             P03Plugin.Log.LogInfo("Restoring multiverse state: Resetting damage dealt this phase");
@@ -599,7 +611,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             card.Status = new PlayableCardStatus(slotState.card.status);
             card.OnStatsChanged();
             ResourcesManager.Instance.ForceGemsUpdate();
-            ConduitGainAbility.ActiveAbilities = BoardManager.Instance.AllSlotsCopy.Where(s => s.Card != null).SelectMany(s => s.Card.GetComponents<ConduitGainAbility>()).ToList();
+            ConduitGainAbility.ActiveAbilities = new HashSet<ConduitGainAbility>(BoardManager.Instance.AllSlotsCopy.Where(s => s.Card != null).SelectMany(s => s.Card.GetComponents<ConduitGainAbility>()));
             yield break;
         }
 

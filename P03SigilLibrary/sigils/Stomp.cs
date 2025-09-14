@@ -28,11 +28,11 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.rulebookName = "Overwhelming Entrance";
             info.rulebookDescription = "When [creature] is played, all opposing creatures are tossed into new slots. Non-conduit terrain is not affected.";
             info.canStack = false;
-            info.powerLevel = 2;
+            info.powerLevel = 3;
             info.activated = true;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -40,6 +40,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(Stomp),
                 TextureHelper.GetImageAsTexture("ability_stomp.png", typeof(Stomp).Assembly)
             ).Id;
+        }
+
+        public override bool RespondsToUpkeep(bool playerUpkeep) => !playerUpkeep && this.Card.OpponentCard;
+
+        public override IEnumerator OnUpkeep(bool playerUpkeep)
+        {
+            yield return Activate();
         }
 
         [HarmonyPatch(typeof(ActivatedAbilityBehaviour), nameof(ActivatedAbilityBehaviour.RespondsToResolveOnBoard))]

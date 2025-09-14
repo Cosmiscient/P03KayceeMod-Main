@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,6 +6,7 @@ using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
+using InscryptionAPI.Triggers;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -13,6 +15,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
     {
         public static Ability AbilityID { get; private set; }
         public override Ability Ability => AbilityID;
+
+        bool useWeaponAnim => this.Card.Info.GetExtendedPropertyAsBool("WeaponButtonPusher") ?? false;
 
         static ActivateEverything()
         {
@@ -23,7 +27,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 2;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -35,6 +39,71 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
         public override bool RespondsToResolveOnBoard() => true;
 
+        private IEnumerator PreTriggerAnimate(CardSlot targetSlot)
+        {
+            if (useWeaponAnim && Card.Anim is DiskCardAnimationController dcac)
+            {
+                dcac.AimWeaponAnim(targetSlot.transform.position);
+                dcac.ShowWeaponAnim();
+                yield return new WaitForSeconds(0.2f);
+            }
+            Card.Anim.StrongNegationEffect();
+            targetSlot.Card.Anim.StrongNegationEffect();
+            yield return new WaitForSeconds(0.25f);
+            if (useWeaponAnim && Card.Anim is DiskCardAnimationController dcac2)
+            {
+                dcac2.HideWeaponAnim();
+            }
+
+        }
+
+        private IEnumerator TriggerHelper(CardSlot slot, Trigger trigger, params object[] otherArgs)
+        {
+            if (slot == null || slot.Card == null || slot.Card.Dead)
+                yield break;
+
+            foreach (var receiver in slot.Card.TriggerHandler.triggeredAbilities.Select(p => p.Item2).ToList())
+            {
+                if (receiver is not ActivateEverything)
+                {
+                    if (GlobalTriggerHandler.ReceiverRespondsToTrigger(trigger, receiver, otherArgs))
+                    {
+                        yield return PreTriggerAnimate(slot);
+                        yield return GlobalTriggerHandler.Instance.TriggerSequence(trigger, receiver, otherArgs);
+                    }
+                }
+            }
+        }
+
+        private IEnumerator ActivatedTriggerHelper(CardSlot slot)
+        {
+            if (slot == null || slot.Card == null || slot.Card.Dead)
+                yield break;
+
+            foreach (var pair in new List<Tuple<Ability, AbilityBehaviour>>(slot.Card.TriggerHandler.triggeredAbilities))
+            {
+                if (pair.Item2 is FuelActivatedAbilityBehaviour fab)
+                {
+                    bool didActivatePrevious = fab.HasActivatedThisTurn;
+                    fab.HasActivatedThisTurn = false;
+                    if (fab.CanActivate())
+                    {
+                        yield return PreTriggerAnimate(slot);
+                        yield return fab.ActivateAfterSpendFuel();
+                    }
+                    fab.HasActivatedThisTurn = didActivatePrevious;
+                }
+                else if (pair.Item2 is ActivatedAbilityBehaviour ab)
+                {
+                    if (ab.CanActivate())
+                    {
+                        yield return PreTriggerAnimate(slot);
+                        yield return ab.Activate();
+                    }
+                }
+            }
+        }
+
         public override IEnumerator OnResolveOnBoard()
         {
             var slots = BoardManager.Instance.GetSlotsCopy(Card.IsPlayerCard())
@@ -43,35 +112,19 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
             // Resolve on board
             foreach (var slot in slots)
-                if (slot.Card != null && !slot.Card.Dead)
-                    yield return slot.Card.TriggerHandler.OnTrigger(Trigger.ResolveOnBoard);
+                yield return TriggerHelper(slot, Trigger.ResolveOnBoard);
 
             // ACtivated abilities
             foreach (var slot in slots)
-            {
-                if (slot.Card != null && !slot.Card.Dead)
-                {
-                    // Get all abilities and hunt for activated abilities
-                    foreach (var ability in slot.Card.AllAbilities())
-                    {
-                        var info = AbilitiesUtil.GetInfo(ability);
-                        if (info.activated)
-                        {
-                            yield return slot.Card.TriggerHandler.OnTrigger(Trigger.ActivatedAbility, ability);
-                        }
-                    }
-                }
-            }
+                yield return ActivatedTriggerHelper(slot);
 
             // Pre death animation
             foreach (var slot in slots)
-                if (slot.Card != null && !slot.Card.Dead)
-                    yield return slot.Card.TriggerHandler.OnTrigger(Trigger.PreDeathAnimation, false);
+                yield return TriggerHelper(slot, Trigger.PreDeathAnimation, false);
 
             // Die
             foreach (var slot in slots)
-                if (slot.Card != null && !slot.Card.Dead)
-                    yield return slot.Card.TriggerHandler.OnTrigger(Trigger.Die, false, null);
+                yield return TriggerHelper(slot, Trigger.Die, false, null);
         }
     }
 }

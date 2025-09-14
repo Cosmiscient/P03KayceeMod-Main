@@ -5,6 +5,7 @@ using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Sirenix.Serialization.Utilities;
+using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Patchers
 {
@@ -20,19 +21,35 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 : BoardManager.Instance.opponentSlots[slot.Index + 1];
         }
 
-        private static CardSlot GetDestinationForSlot(CardSlot slot, List<CardSlot> playerSlots, List<CardSlot> opponentSlots)
+        private static CardSlot GetDestinationForSlot(CardSlot slot, List<CardSlot> playerSlots, List<CardSlot> opponentSlots, bool nullOnly = false)
         {
-            int index = slot.Index;
             CardSlot currentInvestigatedSlot = GetClockwiseSlot(slot);
-            List<CardSlot> currentSlots = playerSlots.Contains(slot) ? playerSlots : opponentSlots;
             while (currentInvestigatedSlot != slot)
             {
-                if (currentInvestigatedSlot.Card == null || !currentInvestigatedSlot.Card.Info.HasTrait(CustomCards.Unrotateable))
+                if (currentInvestigatedSlot.Card == null || (!nullOnly && !currentInvestigatedSlot.Card.Info.HasTrait(CustomCards.Unrotateable)))
                     return currentInvestigatedSlot;
 
                 currentInvestigatedSlot = GetClockwiseSlot(currentInvestigatedSlot);
             }
             return slot;
+        }
+
+        private static IEnumerator ManageAssignment(PlayableCard card, CardSlot slot)
+        {
+            card.SetIsOpponentCard(!slot.IsPlayerSlot);
+            // We no longer trigger right away
+            yield return BoardManager.Instance.AssignCardToSlot(card, slot, 0.1f, null, false);
+            ResourcesManager.Instance.ForceGemsUpdate();
+            if (card.FaceDown)
+            {
+                bool flag = slot.Index == 0 && !slot.IsPlayerSlot;
+                bool flag2 = slot.Index == BoardManager.Instance.GetSlots(false).Count - 1 && slot.IsPlayerSlot;
+                if (flag || flag2)
+                {
+                    card.SetFaceDown(false, false);
+                    card.UpdateFaceUpOnBoardEffects();
+                }
+            }
         }
 
         [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.MoveAllCardsClockwise))]
@@ -45,48 +62,62 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 yield break;
             }
 
-            if (BoardManager.Instance.AllSlots.Any((CardSlot x) => x.Card != null && x.Card.Info.HasTrait(CustomCards.Unrotateable)))
-            {
-                Dictionary<PlayableCard, CardSlot> cardDestinations = new();
-                List<CardSlot> playerSlots = BoardManager.Instance.GetSlots(true);
-                List<CardSlot> opponentSlots = BoardManager.Instance.GetSlots(false);
-                foreach (CardSlot slot in BoardManager.Instance.AllSlots)
-                {
-                    if (slot.Card != null && !slot.Card.Info.HasTrait(CustomCards.Unrotateable))
-                        cardDestinations.Add(slot.Card, GetDestinationForSlot(slot, playerSlots, opponentSlots));
-                }
+            Dictionary<PlayableCard, CardSlot> cardDestinations = new();
+            Dictionary<PlayableCard, CardSlot> originalLocations = new();
+            List<CardSlot> playerSlots = BoardManager.Instance.GetSlots(true);
+            List<CardSlot> opponentSlots = BoardManager.Instance.GetSlots(false);
 
-                foreach (CardSlot cardSlot in BoardManager.Instance.AllSlots)
-                {
-                    if (cardSlot.Card != null && !cardSlot.Card.Info.HasTrait(CustomCards.Unrotateable))
-                    {
-                        cardSlot.Card.Slot = null;
-                        cardSlot.Card = null;
-                    }
-                }
-                foreach (KeyValuePair<PlayableCard, CardSlot> assignment in cardDestinations)
-                {
-                    PlayableCard card = assignment.Key;
-                    assignment.Key.SetIsOpponentCard(!assignment.Value.IsPlayerSlot);
-                    yield return BoardManager.Instance.AssignCardToSlot(card, assignment.Value, 0.1f, null, true);
-                    if (card.FaceDown)
-                    {
-                        bool flag = assignment.Value.Index == 0 && !assignment.Value.IsPlayerSlot;
-                        bool flag2 = assignment.Value.Index == BoardManager.Instance.GetSlots(false).Count - 1 && assignment.Value.IsPlayerSlot;
-                        if (flag || flag2)
-                        {
-                            card.SetFaceDown(false, false);
-                            card.UpdateFaceUpOnBoardEffects();
-                        }
-                    }
-                }
-                Singleton<ResourcesManager>.Instance.ForceGemsUpdate();
-            }
-            else
+
+            foreach (CardSlot slot in BoardManager.Instance.AllSlots)
             {
-                yield return sequence;
+                if (slot.Card != null && !slot.Card.Info.HasTrait(CustomCards.Unrotateable))
+                {
+                    cardDestinations.Add(slot.Card, GetDestinationForSlot(slot, playerSlots, opponentSlots));
+                    originalLocations.Add(slot.Card, slot);
+                }
             }
-            BoardManager.Instance.AllSlotsCopy.Where(ShouldUpdate).ForEach(cs => cs.Card?.UpdateFaceUpOnBoardEffects());
+
+            foreach (CardSlot cardSlot in BoardManager.Instance.AllSlots)
+            {
+                if (cardSlot.Card != null && !cardSlot.Card.Info.HasTrait(CustomCards.Unrotateable))
+                {
+                    cardSlot.Card.Slot = null;
+                    cardSlot.Card = null;
+                }
+            }
+            foreach (KeyValuePair<PlayableCard, CardSlot> assignment in cardDestinations)
+            {
+                yield return ManageAssignment(assignment.Key, assignment.Value);
+            }
+            foreach (KeyValuePair<PlayableCard, CardSlot> orig in originalLocations)
+            {
+                // Let's see if this card *doesn't have a slot now*
+                if (!orig.Key.SafeIsUnityNull() && !orig.Key.Dead && (orig.Key.Slot == null || orig.Key.Slot.Card != orig.Key))
+                {
+                    // Crap we gotta find a new home for this card
+                    var newSlot = GetDestinationForSlot(orig.Value, playerSlots, opponentSlots, nullOnly: true);
+                    if (newSlot == orig.Value) // Crap there's no place for this card...
+                    {
+                        orig.Key.ExitBoard(0, Vector3.down * 10);
+                    }
+                    else
+                    {
+                        yield return ManageAssignment(orig.Key, newSlot);
+                    }
+                }
+            }
+
+            foreach (var slot in BoardManager.Instance.PlayerSlotsCopy.Reverse<CardSlot>().Concat(BoardManager.Instance.OpponentSlotsCopy))
+            {
+                if (ShouldUpdate(slot))
+                {
+                    slot.Card.UpdateFaceUpOnBoardEffects();
+                    yield return GlobalTriggerHandler.Instance.TriggerCardsOnBoard(Trigger.OtherCardAssignedToSlot, false, slot.Card);
+                }
+            }
+
+            ResourcesManager.Instance.ForceGemsUpdate();
+
             yield break;
         }
 

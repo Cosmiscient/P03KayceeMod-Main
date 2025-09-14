@@ -31,7 +31,7 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             info.hasColorOverride = true;
             info.colorOverride = Color.black;
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_fully_loaded.png", typeof(FullyLoaded).Assembly));
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, CustomCards.MultiverseAbility };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, CustomCards.MultiverseAbility };
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,

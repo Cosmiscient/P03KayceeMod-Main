@@ -14,7 +14,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
     [HarmonyPatch]
     public class RareDiscCardAppearance : DiscCardColorAppearance
     {
-        private static bool RGBIsActive => SaveManager.SaveFile.unlockedAchievements.Contains(P03AchievementManagement.SKULLSTORM) || P03Plugin.Instance.DebugCode.Contains("rgb");
+        private static bool RGBIsActive => (SaveManager.SaveFile.unlockedAchievements.Contains(P03AchievementManagement.SKULLSTORM) || P03Plugin.Instance.DebugCode.Contains("rgb")) && !P03Plugin.Instance.DebugCode.Contains("norgb");
 
         internal bool IsRGBEligible
         {

@@ -3,6 +3,7 @@ using System.Linq;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -25,7 +26,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.conduit = true;
             info.passive = false;
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_latch_conduit.png", typeof(LatchNullConduit).Assembly));
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -33,6 +34,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(LatchNullConduit),
                 TextureHelper.GetImageAsTexture("ability_latch_nullconduit.png", typeof(LatchNullConduit).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("Null Conduit", Ability.ConduitNull, GameColors.Instance.limeGreen);
         }
     }
 }

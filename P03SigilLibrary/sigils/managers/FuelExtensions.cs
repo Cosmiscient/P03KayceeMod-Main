@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Runtime.CompilerServices;
 using DiskCardGame;
 using InscryptionAPI.Card;
@@ -13,7 +14,14 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
         public static int GetStartingFuel(this CardInfo info)
         {
-            return info.GetExtendedPropertyAsInt(STARTING_FUEL) ?? 0;
+            if (info == null)
+                return 0;
+            var fuel = info.GetExtendedPropertyAsInt(STARTING_FUEL);
+            if (fuel.HasValue)
+                return fuel.Value;
+            if (info.Abilities == null)
+                return 0;
+            return info.Abilities.Select(a => AbilityManager.AllAbilityInfos.AbilityByID(a).GetExtendedPropertyAsInt(STARTING_FUEL) ?? 0).DefaultIfEmpty(0).Max();
         }
 
         public static CardInfo SetStartingFuel(this CardInfo info, int fuel)
@@ -21,8 +29,15 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             return info.SetExtendedProperty(STARTING_FUEL, Mathf.Min(fuel, MAX_FUEL));
         }
 
+        public static AbilityInfo SetDefaultFuel(this AbilityInfo info, int fuel)
+        {
+            return info.SetExtendedProperty(STARTING_FUEL, fuel);
+        }
+
         public static int? GetCurrentFuel(this Card card)
         {
+            if (card == null)
+                return null;
             if (FuelStatus.TryGetValue(card, out FuelManager.Status status))
                 return status.CurrentFuel;
             return null;
@@ -39,7 +54,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             {
                 if (status.CurrentFuel < MAX_FUEL)
                 {
-                    status.CurrentFuel = Mathf.Max(fuel + status.CurrentFuel, MAX_FUEL);
+                    status.CurrentFuel = Mathf.Min(fuel + status.CurrentFuel, MAX_FUEL);
                     FuelManager.Instance.RenderCurrentFuel(card);
                     return true;
                 }

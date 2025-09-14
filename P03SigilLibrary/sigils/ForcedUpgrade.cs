@@ -22,7 +22,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 1;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -46,12 +46,22 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             return cleansed;
         }
 
+        private CardInfo GetEvolutionBase(CardInfo target)
+        {
+            if (target.evolveParams != null)
+            {
+                CardInfo retval = CardLoader.Clone(target.evolveParams.evolution);
+                foreach (var mod in target.Mods)
+                    retval.Mods.Add((CardModificationInfo)mod.Clone());
+                return retval;
+            }
+            return EvolveParams.GetDefaultEvolution(target);
+        }
+
         private CardInfo GetEvolution(PlayableCard target)
         {
             CardInfo cleansedTargetInfo = Cleanse(target.Info);
-            CardInfo baseInfo = cleansedTargetInfo.evolveParams != null
-                        ? CardLoader.Clone(cleansedTargetInfo.evolveParams.evolution)
-                        : EvolveParams.GetDefaultEvolution(cleansedTargetInfo);
+            CardInfo baseInfo = GetEvolutionBase(cleansedTargetInfo);
 
             if (baseInfo.HasAbility(Ability.Transformer))
                 baseInfo.mods.Add(new() { negateAbilities = new() { Ability.Transformer } });

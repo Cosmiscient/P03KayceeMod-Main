@@ -42,12 +42,20 @@ namespace Infiniscryption.P03SigilLibrary.Helpers
             return false;
         }
 
-        public static IEnumerator CardChooseSlotSequence(this AbilityBehaviour behaviour, Func<CardSlot, IEnumerator> slotSelectedCallback, List<CardSlot> validSlots, Func<CardSlot, int> aiSlotEvaluator = null, string dialogue = null)
+        public static IEnumerator CardChooseSlotSequence(this AbilityBehaviour behaviour, Func<CardSlot, IEnumerator> slotSelectedCallback, List<CardSlot> validSlots, Func<CardSlot, int> aiSlotEvaluator = null, string dialogue = null, bool aimWeapon = false, CursorType cursor = CursorType.Target, bool tweenOut = true, bool tweenIn = true)
         {
             PlayableCard card = behaviour.Card;
             Vector3 originalPosition = card.transform.position;
 
-            if (BoardManager.Instance is BoardManager3D)
+            bool shouldAimWeapon = aimWeapon && BoardManager.Instance is BoardManager3D && behaviour.Card.StatsLayer is DiskRenderStatsLayer;
+            DiskCardAnimationController dcac = behaviour.Card.Anim as DiskCardAnimationController;
+
+            if (shouldAimWeapon)
+            {
+                dcac.AimWeaponAnim(behaviour.Card.OpposingSlot().transform.position);
+                dcac.ShowWeaponAnim();
+            }
+            else if (BoardManager.Instance is BoardManager3D && tweenOut)
             {
                 ViewManager.Instance.SwitchToView(View.Board, false, true);
                 yield return new WaitForSeconds(0.25f);
@@ -69,9 +77,9 @@ namespace Infiniscryption.P03SigilLibrary.Helpers
                     validSlots,
                     s => selectedSlot = s,
                     s => card?.Anim.StrongNegationEffect(),
-                    null,
+                    !shouldAimWeapon ? null : s => dcac.AimWeaponAnim(s.transform.position),
                     () => false,
-                    CursorType.Target
+                    cursor
                 );
             }
             else
@@ -89,10 +97,21 @@ namespace Infiniscryption.P03SigilLibrary.Helpers
 
             if (selectedSlot != null)
             {
+                if (shouldAimWeapon)
+                {
+                    dcac.AimWeaponAnim(selectedSlot.transform.position);
+                    bool impactReached = false;
+                    dcac.PlayAttackAnimation(false, selectedSlot, () => impactReached = true);
+                    yield return new WaitUntil(() => impactReached);
+                }
                 yield return slotSelectedCallback(selectedSlot);
             }
 
-            if (BoardManager.Instance is BoardManager3D)
+            if (shouldAimWeapon)
+            {
+                dcac.HideWeaponAnim();
+            }
+            else if (BoardManager.Instance is BoardManager3D && tweenIn)
             {
                 Tween.Position(card.transform, originalPosition, 0.15f, 0f, Tween.EaseOut, Tween.LoopType.None, null, null, true);
                 yield return new WaitForSeconds(0.15f);

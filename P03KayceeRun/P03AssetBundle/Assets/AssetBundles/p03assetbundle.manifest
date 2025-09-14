@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 3015456525
+CRC: 4250873524
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: bde618fe589653d4a239b8e561336a95
+    Hash: 9a86f52f68427699c8ecf5b097b303bf
   TypeTreeHash:
     serializedVersion: 2
     Hash: 10caaafd0ad3fcdc9870467d863128a4
@@ -59,7 +59,7 @@ Assets:
 - Assets/Effects/Fire_Flamethrower.prefab
 - Assets/Effects/Fire_Glow.mat
 - Assets/Shaders/StickerStencilApply.shader
-- Assets/Models/bottle.fbx
+- Assets/Models/XCom_laserRifle_obj.obj
 - Assets/Textures/UFO_Fire.mat
 - Assets/Prefabs/mantrap.prefab
 - Assets/Effects/Fire_Material.mat

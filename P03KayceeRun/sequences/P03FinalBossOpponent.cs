@@ -940,6 +940,10 @@ namespace Infiniscryption.P03KayceeRun.Sequences
 
             yield return TextDisplayer.Instance.PlayDialogueEvent("P03Drafting", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
 
+            ScreenArray.EndLoadingFaces();
+
+            List<PlayableCard> possibles = PlayerHand.Instance.CardsInHand.Where(ValidCard).ToList();
+
             if (PlayerHand.Instance.CardsInHand.Count == 0)
             {
                 ScreenArray.EndLoadingFaces(P03AnimationController.Face.Angry);
@@ -947,14 +951,12 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 yield break;
             }
 
-            if (PlayerHand.Instance.CardsInHand.Where(ValidCard).Count() == 0)
+            if (possibles.Count == 0)
             {
                 ScreenArray.EndLoadingFaces(P03AnimationController.Face.Angry);
                 yield return TextDisplayer.Instance.PlayDialogueEvent("P03NoDraftableCardsInHand", TextDisplayer.MessageAdvanceMode.Input, TextDisplayer.EventIntersectMode.Wait, null, null);
                 yield break;
             }
-
-            ScreenArray.EndLoadingFaces();
 
             InteractionCursor.Instance.InteractionDisabled = true;
 
@@ -970,7 +972,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
                 PlayerHand.Instance.OnCardInspected(card);
                 yield return new WaitForSeconds(delay);
             }
-            List<PlayableCard> possibles = PlayerHand.Instance.CardsInHand.Where(ValidCard).ToList();
+
             PlayableCard cardToSteal = possibles[SeededRandom.Range(0, possibles.Count, seed++)];
             PlayerHand.Instance.OnCardInspected(cardToSteal);
             yield return new WaitForSeconds(0.75f);
@@ -1074,6 +1076,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             }
 
             TurnManager.Instance.Opponent.Blueprint = EncounterHelper.P03FinalBoss;
+            P03Plugin.Log.LogInfo("Creating final boss blueprint. Difficulty is " + EventManagement.EncounterDifficulty.ToString());
 
             List<List<CardInfo>> plan = EncounterBuilder.BuildOpponentTurnPlan(TurnManager.Instance.Opponent.Blueprint, EventManagement.EncounterDifficulty, removeLockedCards);
             TurnManager.Instance.Opponent.ReplaceAndAppendTurnPlan(plan);

@@ -17,7 +17,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             get
             {
-                List<Ability> possibles = this.Card.AllAbilities().Where(a => a != AbilityID).ToList();
+                List<Ability> possibles = this.Card.AbilityIcons.GetDistinctShownAbilities(this.Card.Info, this.Card.TemporaryMods, this.Card.Status.hiddenAbilities);
                 if (possibles.Count == 0)
                     return Ability.Sharp;
                 return possibles[0];
@@ -33,7 +33,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 1;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,

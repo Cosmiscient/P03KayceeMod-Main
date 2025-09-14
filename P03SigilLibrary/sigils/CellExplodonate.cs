@@ -19,7 +19,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Explodonate When Powered";
-            info.rulebookDescription = "If [creature] is within a circuit, it detonates itself and all five adjacent spaces.";
+            info.rulebookDescription = "If [creature] is within a circuit, it detonates itself and deals 10 damage to all five adjacent spaces.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = true;
@@ -27,7 +27,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.passive = false;
             info.hasColorOverride = true;
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.CellDrawRandomCardOnDeath).Info.colorOverride;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_cellexplodeondeath.png", typeof(CellExplodonate).Assembly));
 
             AbilityID = AbilityManager.Add(

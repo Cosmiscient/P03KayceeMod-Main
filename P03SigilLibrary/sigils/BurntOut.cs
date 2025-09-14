@@ -5,6 +5,7 @@ using HarmonyLib;
 using Infiniscryption.P03SigilLibrary.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using InscryptionAPI.Slots;
 using UnityEngine;
 
@@ -25,7 +26,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = -1;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, BurningSlotBase.FlamingAbility };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, BurningSlotBase.FlamingAbility };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_burnt_out.png", typeof(Molotov).Assembly));
 
             AbilityID = AbilityManager.Add(
@@ -34,6 +35,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(BurntOut),
                 TextureHelper.GetImageAsTexture("ability_burnt_out.png", typeof(Molotov).Assembly)
             ).Id;
+
+            info.SetSlotRedirect("on fire", BurningSlotBase.GetFireLevel(2), GameColors.Instance.limeGreen);
         }
 
         private CardSlot oldSlot = null;

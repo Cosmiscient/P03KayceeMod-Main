@@ -268,18 +268,36 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             //         yield return ibmc.OnBattleModCleanup();
             // }
 
-            // TODO: Go back to the custom trigger finder when it gets fixed
-            yield return CustomTriggerFinder.TriggerAll(
-                false,
-                delegate (IBattleModCleanup t)
+            // // TODO: Go back to the custom trigger finder when it gets fixed
+            // yield return CustomTriggerFinder.TriggerAll(
+            //     false,
+            //     delegate (IBattleModCleanup t)
+            //     {
+            //         P03Plugin.Log.LogInfo($"About to clean up {t}");
+            //         return true;
+            //     },
+            //     t => t.OnBattleModCleanup()
+            // );
+
+            // yield return new WaitUntil(() => InputButtons.GetButton(Button.EndTurn));
+
+            // Fuck it, do it this way:
+            foreach (BattleModDefinition defn in AllBattleMods)
+            {
+                Component triggerComponent = BoardManager.Instance.gameObject.GetComponent(defn.Behavior);
+                if (!triggerComponent.SafeIsUnityNull())
                 {
-                    P03Plugin.Log.LogInfo($"About to clean up {t}");
-                    return true;
-                },
-                t => t.OnBattleModCleanup()
-            );
+                    if (triggerComponent is IBattleModCleanup ibmc)
+                    {
+                        P03Plugin.Log.LogInfo($"About to clean up {triggerComponent}");
+                        yield return ibmc.OnBattleModCleanup();
+                    }
+                }
+            }
 
             yield return new WaitForEndOfFrame();
+
+            P03Plugin.Log.LogInfo($"About to destroy battle mods");
 
             foreach (BattleModDefinition defn in AllBattleMods)
             {
@@ -294,18 +312,18 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
             yield return sequence;
         }
 
-        [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
-        [HarmonyPostfix]
-        [HarmonyPriority(Priority.VeryLow)]
-        private static void DeleteBattleModReceivers()
-        {
-            foreach (BattleModDefinition defn in AllBattleMods)
-            {
-                Component triggerComponent = BoardManager.Instance.gameObject.GetComponent(defn.Behavior);
-                if (!triggerComponent.SafeIsUnityNull())
-                    UnityEngine.Object.Destroy(triggerComponent);
-            }
-        }
+        // [HarmonyPatch(typeof(TurnManager), nameof(TurnManager.CleanupPhase))]
+        // [HarmonyPostfix]
+        // [HarmonyPriority(Priority.VeryLow)]
+        // private static void DeleteBattleModReceivers()
+        // {
+        //     foreach (BattleModDefinition defn in AllBattleMods)
+        //     {
+        //         Component triggerComponent = BoardManager.Instance.gameObject.GetComponent(defn.Behavior);
+        //         if (!triggerComponent.SafeIsUnityNull())
+        //             UnityEngine.Object.Destroy(triggerComponent);
+        //     }
+        // }
 
         [HarmonyPatch(typeof(BoardStateSimulator), nameof(BoardStateSimulator.SimulateCombatPhase))]
         [HarmonyPrefix]

@@ -5,6 +5,7 @@ using HarmonyLib;
 using Infiniscryption.P03SigilLibrary.Helpers;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using InscryptionAPI.Slots;
 using Pixelplacement;
 using Sirenix.Serialization.Utilities;
@@ -22,13 +23,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Flammable";
-            info.rulebookDescription = "When [creature] dies, it detonates and sets adjacent spaces on fire for three turns";
+            info.rulebookDescription = "When [creature] dies, it detonates and sets adjacent spaces on fire for three turns.";
             info.canStack = false;
             info.powerLevel = 0;
             info.opponentUsable = false;
             info.flipYIfOpponent = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular, BurningSlotBase.FlamingAbility };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular, BurningSlotBase.FlamingAbility };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_molotov.png", typeof(Molotov).Assembly));
 
             AbilityID = AbilityManager.Add(
@@ -37,6 +38,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(Molotov),
                 TextureHelper.GetImageAsTexture("ability_molotov.png", typeof(Molotov).Assembly)
             ).Id;
+
+            info.SetSlotRedirect("on fire", BurningSlotBase.GetFireLevel(2), GameColors.Instance.limeGreen);
         }
 
         public static IEnumerator ThrowMolotov(CardSlot target, PlayableCard attacker, float speed = 0.35f, float delay = 0f)
@@ -63,7 +66,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             target.Card?.Anim.PlayHitAnimation();
 
             // The fireball should play and then delete itself, but we'll destroy it after some time anyway
-            GameObject fireball = Instantiate(AssetBundleManager.Prefabs["Fire_Ball"], target.transform);
+            string prefab = "Fire_Ball";
+            if (SaveManager.SaveFile.IsPart1)
+                prefab += "_Red";
+            else if (!SaveManager.SaveFile.IsPart3)
+                prefab += "_Green";
+
+            GameObject fireball = Instantiate(AssetBundleManager.Prefabs[prefab], target.transform);
             CustomCoroutine.WaitThenExecute(3f, delegate ()
             {
                 if (!fireball.SafeIsUnityNull())

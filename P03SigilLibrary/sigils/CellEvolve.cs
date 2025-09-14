@@ -25,7 +25,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.passive = false;
             info.hasColorOverride = true;
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.CellDrawRandomCardOnDeath).Info.colorOverride;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_cell_evolve.png", typeof(CellEvolve).Assembly));
 
             AbilityID = AbilityManager.Add(
@@ -52,6 +52,16 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 tInfo.mods.Add(mod);
                 tInfo.evolveParams = new() { evolution = Card.Info.Clone() as CardInfo, turnsToEvolve = 1 };
 
+            }
+
+            // Handle the temporary mods
+            foreach (var mod in Card.TemporaryMods)
+            {
+                if (mod.HasAbility(AbilityID))
+                {
+                    mod.abilities.Remove(AbilityID);
+                    mod.abilities.Add(CellDeEvolve.AbilityID);
+                }
             }
             return tInfo;
         }

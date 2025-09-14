@@ -2,7 +2,7 @@ using System.Collections;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Patchers;
-using Steamworks;
+using Infiniscryption.SteamUserName;
 using UnityEngine;
 
 namespace Infiniscryption.P03KayceeRun.Sequences
@@ -27,7 +27,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
         {
             try
             {
-                return SteamFriends.GetPersonaName().Trim();
+                return SteamUserNamePlugin.CachedSteamUsername;
             }
             catch
             {
@@ -51,7 +51,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             UIManager.Instance.Effects.GetEffect<ScreenColorEffect>().SetAlpha(1f);
             UIManager.Instance.Effects.GetEffect<ScreenColorEffect>().SetIntensity(0f, 0.4f);
 
-            if (!StoryEventsData.EventCompleted(EventManagement.SAW_P03_INTRODUCTION))
+            if (!StoryEventsData.EventCompleted(EventManagement.SAW_P03_INTRODUCTION) || P03Plugin.Instance.DebugCode.ToLowerInvariant().Contains("intro"))
             {
 
                 AudioSource audio = AudioController.Instance.PlaySound2D("part3_intro", MixerGroup.None, 1f, 0f, null, null, null, null, false);

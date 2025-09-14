@@ -29,4 +29,10 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         public bool RespondsToPostAllStrike();
         public IEnumerator OnPostAllStrike();
     }
+
+    public interface IOnDealDamageWithAttackAnimation
+    {
+        public bool RespondsToDealDamageWithAttackAnimation(CardSlot targetSlot, int amount);
+        public IEnumerator OnDealDamageWithAttackAnimation(CardSlot targetSlot, int amount);
+    }
 }

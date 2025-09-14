@@ -26,7 +26,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.opponentUsable = false;
             info.conduit = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -46,6 +46,14 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             Card.RenderCard();
             yield break;
         }
+
+        public override IEnumerator OnResolveOnBoard()
+        {
+            this.Card.RenderCard();
+            yield break;
+        }
+
+        public override bool RespondsToResolveOnBoard() => true;
 
         public IEnumerator TryRestoreEnergy()
         {
@@ -81,6 +89,10 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                     return true;
                 }
             }
+            // Might as well check adjacent slots
+            foreach (var adj in BoardManager.Instance.GetAdjacentSlots(this.Card.Slot))
+                if (adj.Card?.HasConduitAbility() ?? false)
+                    return true;
             return false;
         }
 

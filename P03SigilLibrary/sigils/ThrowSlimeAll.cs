@@ -4,6 +4,7 @@ using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
+using InscryptionAPI.RuleBook;
 using InscryptionAPI.Slots;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 1;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -31,6 +32,9 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(ThrowSlimeAll),
                 TextureHelper.GetImageAsTexture("ability_slime_all.png", typeof(ThrowSlimeAll).Assembly)
             ).Id;
+
+            info.SetSlotRedirect("slimed", SlimedSlot.ID, GameColors.Instance.limeGreen);
+            info.SetSlotRedirect("slimes", SlimedSlot.ID, GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToResolveOnBoard() => true;

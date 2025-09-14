@@ -21,7 +21,7 @@ namespace Infiniscryption.P03SigilLibrary
         private static bool AccountForMultipleActs(int randomSeed, ref ConsumableItemData __result)
         {
             AbilityMetaCategory cat = SaveManager.SaveFile.IsPart1 ? AbilityMetaCategory.Part1Rulebook
-                                      : SaveManager.SaveFile.IsPart3 ? AbilityMetaCategory.Part3Rulebook
+                                      : SaveManager.SaveFile.IsPart3 ? AbilityMetaCategory.Part1Rulebook
                                       : SaveManager.SaveFile.IsGrimora ? AbilityMetaCategory.GrimoraRulebook
                                       : AbilityMetaCategory.MagnificusRulebook;
 
@@ -37,6 +37,23 @@ namespace Infiniscryption.P03SigilLibrary
 
             __result = unlockedConsumables[SeededRandom.Range(0, unlockedConsumables.Count, randomSeed)];
             return false;
+        }
+
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.AssignCardToSlot))]
+        [HarmonyPostfix]
+        private static void UpdateGemsManager() => ResourcesManager.Instance.ForceGemsUpdate();
+
+        [HarmonyPatch(typeof(GlobalTriggerHandler), nameof(GlobalTriggerHandler.TriggerSequence))]
+        [HarmonyPostfix]
+        private static void UpdateGemsManagerAfterEveryTrigger() => ResourcesManager.Instance.ForceGemsUpdate();
+
+        [HarmonyPatch(typeof(BoardManager), nameof(BoardManager.ResolveCardOnBoard))]
+        [HarmonyPostfix]
+        private static IEnumerator UpdateGemsManagerAfterEveryResolve(IEnumerator sequence)
+        {
+            yield return sequence;
+            yield return new WaitForEndOfFrame();
+            ResourcesManager.Instance.ForceGemsUpdate();
         }
 
         [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.AddTemporaryMod))]

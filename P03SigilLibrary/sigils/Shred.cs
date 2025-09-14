@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
+using HarmonyLib;
 using Infiniscryption.Spells.Patchers;
 using Infiniscryption.Spells.Sigils;
 using InscryptionAPI.Card;
@@ -12,10 +13,13 @@ using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
 {
+    [HarmonyPatch]
     public class Shred : ActivatedAbilityBehaviour, IPassiveAttackBuff
     {
         public override Ability Ability => AbilityID;
         public static Ability AbilityID { get; private set; }
+
+        private bool isShredding = false;
 
         private int ActivationsThisTurn = 0;
 
@@ -29,7 +33,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.opponentUsable = false;
             info.activated = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -61,6 +65,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             if (!shredded.Dead)
             {
+                isShredding = true;
                 shredded.Dead = true;
                 shredded.slot = Card.slot;
                 if (shredded.Info != null && shredded.Info.name.ToLower().Contains("squirrel"))
@@ -75,6 +80,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                     yield return shredded.TriggerHandler.OnTrigger(Trigger.Die, true, Card);
 
                 yield return GlobalTriggerHandler.Instance.TriggerAll(Trigger.OtherCardDie, false, shredded, Card.Slot, false, Card);
+
+                if (shredded.HasAbility(Ability.QuadrupleBones))
+                    yield return ResourcesManager.Instance.AddBones(4, base.Card.Slot);
+                else
+                    yield return ResourcesManager.Instance.AddBones(1, base.Card.Slot);
+
+                isShredding = false;
                 Destroy(shredded.gameObject);
             }
         }
@@ -82,6 +94,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         private static List<PlayableCard> ShreddableCards => PlayerHand.Instance.CardsInHand.Where(
             c => !c.Info.HasTrait(Trait.Uncuttable) &&
                  !c.HasAbility(Ability.MadeOfStone) &&
+                 !c.HasAbility(CellUndying.AbilityID) &&
                  !c.HasAbility(Ability.DrawCopyOnDeath) &&
                  !c.Info.IsSpell()
         ).ToList();
@@ -146,5 +159,21 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         }
 
         public int GetPassiveAttackBuff(PlayableCard target) => target == Card ? ActivationsThisTurn : 0;
+
+        [HarmonyPatch(typeof(Latch), nameof(Latch.CardHasLatchMod))]
+        [HarmonyPrefix]
+        private static bool HackToFixLatcherSoftlock(PlayableCard card, ref bool __result)
+        {
+            if (card.HasAbility(AbilityID))
+            {
+                var shredder = card.GetComponent<Shred>();
+                if (shredder.isShredding)
+                {
+                    __result = true;
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }

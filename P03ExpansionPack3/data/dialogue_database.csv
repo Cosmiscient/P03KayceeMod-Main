@@ -1,0 +1,26 @@
+﻿dialogueid,lineface,wavy,line
+KrakenTransformerQuestIntro,NPC,Y,Glug glug glug
+,NPC,N,We seem to have a [c:bR]tentacle[c:] problem
+,,,"If you want to help out, talk to me again."
+KrakenTransformerQuestStart,NPC,Y,Glug glug glug
+,,N,Thank you for your help
+,,,There are [c:bR]3[c:] tentacles that need to be destroyed.
+,,,"Once you've done that, come talk to me again."
+KrakenTransformerQuestInProgress,NPC,Y,Glug glug glug
+,,N,You have killed [c:bR][v:0][c:] tentacles.
+,,,See me once you've killed them all.
+KrakenTransformerQuestComplete,NPC,Y,Glug glug glug
+,,N,The scourge of the tentacles has been erased
+,,,Please take this as a token of my gratitude.
+UfoQuestStart,NPC,Y,[c:bR]WARNING! WARNING![c:]
+,,N,[c:bR]Unidentified flying objects[c:] have been spotted in the area
+,,,You should leave [c:bR]immediately[c:] before they return.
+UfoQuestBattleStart,NPC,Y,[c:bR]WARNING! WARNING![c:]
+,,N,The [c:bR]UFOs[c:] are arriving!
+UfoQuestBattleVictory,NPC,Y,[c:bR]CONGRATULATIONS![c:]
+,,N,The [c:bR]UFOs[c:] have been defeated!
+,,N,And they event left one behind!
+UfoQuestBattleLoss,NPC,Y,[c:bR]DISASTER! DISASTER![c:]
+,,N,The [c:bR]UFOs[c:] were victorious!
+,,N,We may never recover from this failure!
+DummyEntry,NPC,Y,huh

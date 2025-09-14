@@ -9,17 +9,17 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
     {
         public abstract int FuelCost { get; }
 
-        protected bool hasActivatedThisTurn { get; private set; } = false;
+        public bool HasActivatedThisTurn { get; internal set; } = false;
 
         public override bool CanActivate()
         {
-            return base.CanActivate() && !hasActivatedThisTurn;
+            return base.CanActivate() && !HasActivatedThisTurn;
         }
 
         public override bool RespondsToUpkeep(bool playerUpkeep)
         {
             if (playerUpkeep != this.Card.OpponentCard)
-                hasActivatedThisTurn = false;
+                HasActivatedThisTurn = false;
 
             return true;
         }
@@ -39,7 +39,10 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         public sealed override IEnumerator Activate()
         {
             if (this.Card.TrySpendFuel(this.FuelCost))
+            {
                 yield return ActivateAfterSpendFuel();
+                HasActivatedThisTurn = true;
+            }
         }
 
         [HarmonyPatch(typeof(ActivatedAbilityBehaviour), nameof(ActivatedAbilityBehaviour.CanAfford))]

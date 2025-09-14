@@ -5,6 +5,7 @@ using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
+using InscryptionAPI.RuleBook;
 using Pixelplacement;
 using UnityEngine;
 
@@ -30,7 +31,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.opponentUsable = false;
             info.passive = false;
             info.activated = true;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -38,6 +39,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(ActivatedDrawDefend),
                 TextureHelper.GetImageAsTexture("ability_activated_draw_defend.png", typeof(ActivatedDrawDefend).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("shield", Ability.DeathShield, GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToUpkeep(bool playerUpkeep) => playerUpkeep == this.Card.IsPlayerCard();

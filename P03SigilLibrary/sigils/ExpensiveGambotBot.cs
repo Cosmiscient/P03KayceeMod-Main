@@ -25,7 +25,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.activated = original.activated;
             info.opponentUsable = original.opponentUsable;
             info.passive = original.passive;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             ExpensiveActivatedRandomPowerEnergy.AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,

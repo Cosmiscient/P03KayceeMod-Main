@@ -21,14 +21,14 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Full of Oil";
-            info.rulebookDescription = "When [creature] dies, it adds 3 health to the creature on either side and across from it.";
+            info.rulebookDescription = "When [creature] dies, it adds 3 health to each card on either side and across from it.";
             info.canStack = false;
             info.powerLevel = 2;
             info.opponentUsable = true;
             info.flipYIfOpponent = true;
             info.passive = false;
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_fullofoil.png", typeof(FullyLoaded).Assembly));
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,

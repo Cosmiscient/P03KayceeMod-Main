@@ -152,6 +152,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
 
             // Donation
             Donation = QuestManager.Add(P03Plugin.PluginGuid, "Donation")
+                                   .QuestCannotContinueAcrossMap()
                                    .OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.Fishhead, CompositeFigurine.FigurineType.SettlerWoman));
             Donation.AddDialogueState("SPARE SOME CASH?", "P03DonationIntro")
                     .AddNamedState("CheckingForAvailableCash", "SPARE SOME CASH?", "P03DonationNotEnough")
@@ -293,7 +294,7 @@ namespace Infiniscryption.P03KayceeRun.Quests
                         .AddGainCardReward(CustomCards.BOUNTY_HUNTER_SPAWNER);
 
             // Generator Quest
-            BrokenGenerator = QuestManager.Add(P03Plugin.PluginGuid, "Broken Generator").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.InspectorSolo, CompositeFigurine.FigurineType.Wildling, CompositeFigurine.FigurineType.SettlerMan, CompositeFigurine.FigurineType.Robot));
+            BrokenGenerator = QuestManager.Add(P03Plugin.PluginGuid, "Broken Generator").OverrideNPCDescriptor(new(P03ModularNPCFace.FaceSet.InspectorSolo, CompositeFigurine.FigurineType.Robot, CompositeFigurine.FigurineType.Robot, CompositeFigurineManager.Inspector));
             QuestState defaultState = BrokenGenerator.AddState("HELP!", "P03DamageRaceIntro");
             defaultState.AddDialogueState("OH NO...", "P03DamageRaceFailed", QuestState.QuestStateStatus.Failure);
             defaultState.AddDialogueState("PHEW!", "P03DamageRaceSuccess").AddDynamicMonetaryReward(low: true);

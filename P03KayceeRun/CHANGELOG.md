@@ -1,3 +1,77 @@
+# 5.0.42
+- Surprise!
+- Rebuilt the mod against the latest version of the API.
+
+# 5.0.41
+- Fixed another defect with the \[redacted\] boss. This is related to the bug fixed in 5.0.37 and should hopefully completely resolve that issue.
+
+# 5.0.40
+- Fixed a defect where the final phase of the P03 Boss Fight would have no cards played at the highest difficulty.
+- Fixed a defect where the Eccentric Painter paintings would sometimes overlap.
+- Fixed a defect where sometimes talking cards would de-sync from their portraits.
+- Balance Change: Adjusted the Protect Conduits encounter.
+
+# 5.0.39
+- Fixed a defect in some custom card rendering.
+
+# 5.0.38
+- Fixed a defect where the Double Death sigil would cause continuous effects to duplicate.
+
+# 5.0.37
+- Fixed a defect with the \[redacted\] boss caused by a change in the Sigilarium to how gems were processed.
+
+# 5.0.36
+- Reverted a controversial change to the Swapper sigil. It should now behave more like it did in the original game, while still having the infinite spiral behavior kept in check.
+- Fixed an edge case defect with the portrait on the Activated Hunter card.
+
+# 5.0.35
+- Fixed a defect where, in rare circumstances, a gem providing card could die and still provide a gem after its death.
+- The bug fix patch for Double Death now marks the dying card's temporary mods as "not copyable" which prevents them from perpetuating with sigils like Iterate.
+
+# 5.0.34
+- Made a technical change with how the player's current username is determined which should improve compatibility when running in non-Steam environments.
+
+# 5.0.33
+- Made a technical change with how some textures were being imported. Theoretically, this should prevent issues that occur with loading the mod on some operating systems and graphics drivers.
+
+# 5.0.32
+- Fixed a defect with the way Gems were handled during the \[redacted\] boss that caused softlocks in edge cases.
+- Improved the logic for the board rotation sequence (Wiseclock) to handle edge cases better. Hopefully orphaned cards are a thing of the past now!
+- Fixed a defect with the Dredger battle where boss music would not always stop.
+- Added the Inspector's correct model as an NPC and player figurine
+- Updated the behavior of the Swapper sigil and all flavors of Evolve/Transform; if the card has 0 health after the effect, it now dies.
+
+# 5.0.31
+- In patch 5.0.12, the Double Death sigil was patched to prevent infinite loops. As it turns out, this inadvertently *also* prevented it from stacking. This is now fixed. If two cards on the board have Double Death, a third card would die a total of three times.
+- Fixed an issue where decals on Turbo Vessel cards weren't showing up.
+
+# 5.0.30
+- Only one cost change node will be generated per map instead of two (when eligible).
+- The robot charity donation quest will no longer be available if you choose not to donate before moving to the next map.
+- Reduced the volume of Sawyer's voice.
+
+# 5.0.29
+- Forced the camera view to start in the default position when doing a canvas rule battle. This resolves a compatibility issue with one of the quests in Expansion Pack 3.
+- When using a Wiseclock or fighting a Conveyor battle, triggers are delayed until after all cards have fully been assigned to their new slot. This is to work around an edge case where cards move when other cards die.
+
+# 5.0.28
+- Fixed a defect with the behavior of the gem displayer in the \[redacted\] boss.
+
+# 5.0.27
+- Fixed a defect where cards from other acts would softlock the game when rendered in Act 3 during battle.
+- Added a simple indicator for when cards are selected for sacrifice.
+- Fixed a defect with the bones displayer in the \[redacted\] boss.
+
+# 5.0.26
+- Fixed a defect where using the Upgrade command on cards with Leader did nothing.
+
+# 5.0.25
+- Reduced the rate at which G0lly's friend cards gain strength.
+
+# 5.0.24
+- Bugfix: Resolved an issue with how opponent cards were displayed in the secret final boss.
+- Balance Change: Elektron now powers every card on the board, not just adjacent cards.
+
 # 5.0.23
 - Bugfix: Fixed a defect where if quest NPC tried to remove an item from your backpack, it would fail if your backpack was full.
 - Bugfix: Fixed a defect related to non-combat damage in the secret final boss.

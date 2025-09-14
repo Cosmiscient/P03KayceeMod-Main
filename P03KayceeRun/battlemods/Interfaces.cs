@@ -14,7 +14,7 @@ namespace Infiniscryption.P03KayceeRun.BattleMods
     public interface IBattleModCleanup
     {
         /// <summary>
-        /// Action taken when it's time to setup the battle mod
+        /// Action taken when it's time to clean up the battle mod
         /// </summary>
         public IEnumerator OnBattleModCleanup();
     }

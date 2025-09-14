@@ -3,10 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using DigitalRuby.LightningBolt;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03KayceeRun.Cards;
 using Infiniscryption.P03KayceeRun.Sequences;
+using Infiniscryption.P03SigilLibrary.Helpers;
 using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
@@ -50,13 +52,72 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         //     return false;
         // }
 
+        [HarmonyPatch(typeof(CardAnimationController), nameof(CardAnimationController.SetMarkedForSacrifice))]
+        [HarmonyPrefix]
+        private static bool DiskCardSacrificed(CardAnimationController __instance, bool marked)
+        {
+            if (__instance is DiskCardAnimationController dcac)
+            {
+                dcac.StrongNegationEffect();
+                if (marked)
+                {
+                    dcac.StrongNegationEffect();
+                    dcac.lightningParent.SetActive(true);
+                    foreach (var line in dcac.lightningParent.GetComponentsInChildren<LineRenderer>())
+                    {
+                        line.startColor = new(1, 0, 0, 0);
+                        line.endColor = new(1, 0, 0, 1);
+                    }
+                }
+                else
+                {
+
+                    bool shouldHaveLightning = dcac.Card.Info.HasAbility(Ability.PermaDeath) || dcac.Card.Info.Mods.Any(m => m.fromOverclock);
+                    dcac.lightningParent.SetActive(shouldHaveLightning);
+                    foreach (var line in dcac.lightningParent.GetComponentsInChildren<LineRenderer>())
+                    {
+                        line.startColor = new(1, 1, 1, 0);
+                        line.endColor = new(1, 1, 1, .451f);
+                    }
+                }
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(Part3CombatPhaseManager), nameof(Part3CombatPhaseManager.ShowCardBlocked))]
+        [HarmonyPostfix]
+        private static IEnumerator PreventErrorWhenOutOfRegionCard(IEnumerator sequence, PlayableCard card)
+        {
+            if (card.Anim is DiskCardAnimationController dcac)
+            {
+                dcac.HideWeaponAnim();
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.1f);
+                card.Anim.StrongNegationEffect();
+                yield return new WaitForSeconds(0.15f);
+            }
+        }
+
         [HarmonyPatch(typeof(EvolveParams), nameof(EvolveParams.GetDefaultEvolution))]
         [HarmonyPrefix]
         internal static bool UpdateDefaultEvolutionWithCellEvolve(CardInfo info, ref CardInfo __result)
         {
-            if (info.HasAbility(CellEvolve.AbilityID))
+            var pCard = info.GetPlayableCard();
+            if (pCard == null)
+            {
+                P03Plugin.Log.LogWarning("Could not find a playable card for the info being transformed. This shouldn't happen!");
+            }
+            else
+            {
+                P03Plugin.Log.LogDebug($"Found playable card for info being transformed. It has {pCard.TemporaryMods.Count} temp mods");
+            }
+            if (pCard?.HasAbility(CellEvolve.AbilityID) ?? info.HasAbility(CellEvolve.AbilityID))
             {
                 CardInfo cardInfo = info.Clone() as CardInfo;
+
                 cardInfo.mods.RemoveAll(m => m.nonCopyable);
                 CardModificationInfo cardModificationInfo = new(0, 0)
                 {
@@ -66,6 +127,24 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     nonCopyable = true
                 };
 
+                // If we got cell evolve from a totem, latch, or card merge, pretend this was too
+                foreach (var mod in cardInfo.mods)
+                {
+                    if (mod.abilities.Contains(CellEvolve.AbilityID))
+                    {
+                        if (mod.fromCardMerge || mod.fromLatch || mod.fromTotem)
+                        {
+                            mod.abilities.Remove(CellEvolve.AbilityID);
+                            cardModificationInfo.fromCardMerge = mod.fromCardMerge;
+                            cardModificationInfo.fromLatch = mod.fromLatch;
+                            cardModificationInfo.fromTotem = mod.fromTotem;
+                            mod.fromLatch = false;
+                            mod.fromCardMerge = false;
+                            mod.fromTotem = false;
+                        }
+                    }
+                }
+
                 // If this came from CellEvolve (i.e., the default evolution is de-evolving)
                 // we don't need to change the name or change the attack or anything like that.
                 // The de-evolution will end up remove the evolution mod and the card will revert
@@ -74,7 +153,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 // But if it does not have an evolve mod, we need to add a default de-evolve mod.
                 if (!info.Mods.Any(m => m.fromEvolve))
                 {
-                    cardModificationInfo.nameReplacement = String.Format(Localization.Translate("{0} 2.0"), cardInfo.DisplayedNameLocalized);
+                    cardModificationInfo.nameReplacement = info.GetNextEvolutionName();
                     cardModificationInfo.attackAdjustment = 1;
                     cardModificationInfo.healthAdjustment = 1;
                 }
@@ -87,7 +166,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
                 return false;
             }
-            if (info.HasAbility(CellDeEvolve.AbilityID))
+            if (pCard?.HasAbility(CellDeEvolve.AbilityID) ?? info.HasAbility(CellDeEvolve.AbilityID))
             {
                 CardInfo cardInfo = info.Clone() as CardInfo;
                 cardInfo.mods.RemoveAll(m => m.nonCopyable);
@@ -99,6 +178,24 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     nonCopyable = true
                 };
 
+                // If we got cell evolve from a totem, latch, or card merge, pretend this was too
+                foreach (var mod in cardInfo.mods)
+                {
+                    if (mod.abilities.Contains(CellDeEvolve.AbilityID))
+                    {
+                        if (mod.fromCardMerge || mod.fromLatch || mod.fromTotem)
+                        {
+                            mod.abilities.Remove(CellDeEvolve.AbilityID);
+                            cardModificationInfo.fromCardMerge = mod.fromCardMerge;
+                            cardModificationInfo.fromLatch = mod.fromLatch;
+                            cardModificationInfo.fromTotem = mod.fromTotem;
+                            mod.fromLatch = false;
+                            mod.fromCardMerge = false;
+                            mod.fromTotem = false;
+                        }
+                    }
+                }
+
                 // If this came from CellDevEvolve (i.e., the default evolution is re-evolving)
                 // we don't need to change the name or change the attack or anything like that.
                 // The evolution will end up remove the de-evolution mod and the card will revert
@@ -107,7 +204,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                 // But if it does not have an evolve mod, we need to add a default evolve mod.
                 if (!info.Mods.Any(m => m.fromEvolve))
                 {
-                    cardModificationInfo.nameReplacement = string.Format(Localization.Translate("Beta {0}"), cardInfo.DisplayedNameLocalized);
+                    cardModificationInfo.nameReplacement = info.GetNextDevolutionName();
                     cardModificationInfo.attackAdjustment = -1;
                 }
 
@@ -174,18 +271,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                         if (cardInfo.name.ToLowerInvariant().Contains("ringworm"))
                             prevEvolveMod.healthAdjustment += 1;
 
-                        if (prevEvolveMod.nameReplacement.EndsWith(".0"))
-                        {
-                            int prevVersion = int.Parse(prevEvolveMod.nameReplacement
-                                                        .Split(' ')
-                                                        .Last()
-                                                        .Replace(".0", ""));
-                            prevEvolveMod.nameReplacement = prevEvolveMod.nameReplacement.Replace($"{prevVersion}.0", $"{prevVersion + 1}.0");
-                        }
-                        else
-                        {
-                            prevEvolveMod.nameReplacement += " 2.0";
-                        }
+                        prevEvolveMod.nameReplacement = info.GetNextEvolutionName();
                     }
                 }
                 else
@@ -207,7 +293,7 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                             attackAdjustment = cardInfo.HasAbility(Ability.BuffNeighbours) ? 0 : 1,
                             abilities = cardInfo.HasAbility(Ability.BuffNeighbours) ? new() { Ability.BuffNeighbours } : new(),
                             fromEvolve = true,
-                            nameReplacement = cardInfo.DisplayedNameEnglish + " 2.0",
+                            nameReplacement = info.GetNextEvolutionName(),
                             nonCopyable = false
                         };
                         cardInfo.mods.Add(evolveMod);
@@ -278,6 +364,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return true;
         }
 
+        [HarmonyPatch(typeof(GainGem), nameof(GainGem.OnResolveOnBoard))]
+        [HarmonyPostfix]
+        private static IEnumerator DontGainGemIfDead(IEnumerator sequence, GainGem __instance)
+        {
+            if (__instance.Card?.Dead ?? true)
+                yield break;
+
+            if (__instance.Card?.Slot == null)
+                yield break;
+
+            yield return sequence;
+        }
+
         // [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.Attack), MethodType.Getter)]
         // [HarmonyPostfix]
         // [HarmonyPriority(Priority.VeryLow)]
@@ -323,6 +422,19 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             return true;
         }
 
+        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.TransformIntoCard))]
+        [HarmonyPostfix]
+        private static IEnumerator DieAfterTransformIfZeroHealth(IEnumerator sequence, PlayableCard __instance)
+        {
+            yield return sequence;
+
+            if (!P03AscensionSaveData.IsP03Run)
+                yield break;
+
+            if (__instance.Health == 0)
+                yield return __instance.Die(false);
+        }
+
         [HarmonyPatch(typeof(SwapStats), nameof(SwapStats.OnTakeDamage))]
         [HarmonyPostfix]
         private static IEnumerator SimpleSwapStatsFixHopefully(IEnumerator sequence, SwapStats __instance)
@@ -347,15 +459,18 @@ namespace Infiniscryption.P03KayceeRun.Patchers
                     __instance.Card.SwitchToDefaultPortrait();
                 }
             }
-            int health = __instance.Card.Health - __instance.Card.GetPassiveHealthBuffs();
+            int health = __instance.Card.Health;// - __instance.Card.GetPassiveHealthBuffs();
             __instance.Card.HealDamage(__instance.Card.Status.damageTaken);
-            int attack = __instance.Card.Attack - __instance.Card.GetPassiveAttackBuffs();
+            int attack = __instance.Card.Attack;// - __instance.Card.GetPassiveAttackBuffs();
             __instance.mod.attackAdjustment = health - __instance.Card.TemporaryMods.Where(ShouldCountTempMod).Select(m => m.attackAdjustment).Sum();
             __instance.mod.healthAdjustment = attack - __instance.Card.TemporaryMods.Where(ShouldCountTempMod).Select(m => m.healthAdjustment).Sum();
             __instance.Card.OnStatsChanged();
             __instance.Card.Anim.StrongNegationEffect();
             yield return new WaitForSeconds(0.25f);
-            yield return __instance.Card.Health <= 0 ? __instance.Card.Die(false, null, true) : (object)__instance.LearnAbility(0.25f);
+            if (__instance.Card.Health <= 0)
+                yield return __instance.Card.Die(false, null, true);
+            else
+                yield return __instance.LearnAbility(0.25f);
             yield break;
         }
 
@@ -540,7 +655,23 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         private static readonly Trait NonDoubleDeathable = GuidManager.GetEnumValue<Trait>(P03Plugin.PluginGuid, "NoDoubleDeath");
 
         private const string RESURRECTED_KEY = "HasBeenResurrectedByDoubleDeath";
-        private static bool CanBeDoubleDeathed(PlayableCard card) => !card.TemporaryMods.Any(m => !string.IsNullOrEmpty(m.singletonId) && m.singletonId.Equals(RESURRECTED_KEY));
+        private static void MarkAsResurrectedBy(PlayableCard card, PlayableCard resurrectedBy)
+        {
+            if (resurrectedBy.Slot == null)
+                return;
+
+            string singletonId = $"{RESURRECTED_KEY}_{resurrectedBy.IsPlayerCard()}_{resurrectedBy.Slot.Index}";
+            if (!card.AllCardModificationInfos().Any(m => string.Equals(singletonId, m.singletonId)))
+                card.AddTemporaryMod(new() { singletonId = singletonId });
+        }
+        private static bool WasResurrectedBy(PlayableCard card, PlayableCard resurrectedBy)
+        {
+            if (resurrectedBy.Slot == null)
+                return true;
+
+            string singletonId = $"{RESURRECTED_KEY}_{resurrectedBy.IsPlayerCard()}_{resurrectedBy.Slot.Index}";
+            return card.AllCardModificationInfos().Any(m => string.Equals(singletonId, m.singletonId));
+        }
 
         [HarmonyPatch(typeof(DoubleDeath), nameof(DoubleDeath.RespondsToOtherCardDie))]
         [HarmonyPrefix]
@@ -549,7 +680,14 @@ namespace Infiniscryption.P03KayceeRun.Patchers
             if (!P03AscensionSaveData.IsP03Run)
                 return true;
 
-            return __instance.Card.OnBoard && deathSlot.Card != null && deathSlot.Card.OpponentCard == __instance.Card.OpponentCard && deathSlot.Card != __instance.Card && CanBeDoubleDeathed(card) && deathSlot.Card == card;
+            return __instance.Card.OnBoard && deathSlot.Card != null && deathSlot.Card.OpponentCard == __instance.Card.OpponentCard && deathSlot.Card != __instance.Card && !WasResurrectedBy(card, __instance.Card) && deathSlot.Card == card;
+        }
+
+        private static CardModificationInfo CloneAsNotCopyable(CardModificationInfo m)
+        {
+            var retval = m.Clone() as CardModificationInfo;
+            retval.nonCopyable = true;
+            return retval;
         }
 
         [HarmonyPatch(typeof(DoubleDeath), nameof(DoubleDeath.OnOtherCardDie))]
@@ -558,19 +696,20 @@ namespace Infiniscryption.P03KayceeRun.Patchers
         {
             yield return __instance.PreSuccessfulTriggerSequence();
             CardInfo deathInfo = (CardInfo)deathSlot.Card.Info.Clone();
-            deathInfo.mods = deathSlot.Card.Info.mods?.Select(m => (CardModificationInfo)m.Clone()).ToList();
+            deathInfo.mods = deathSlot.Card.Info.mods?.Select(CloneAsNotCopyable).ToList();
             deathInfo.mods ??= new();
-            deathInfo.mods.AddRange(deathSlot.Card.TemporaryMods.Select(m => (CardModificationInfo)m.Clone()));
+            deathInfo.mods.AddRange(deathSlot.Card.TemporaryMods.Where(m => !m.IsContinousEffectMod()).Select(m => (CardModificationInfo)m.Clone()));
             __instance.currentlyResurrectingCards.Add(deathInfo);
             yield return BoardManager.Instance.CreateCardInSlot(deathInfo, deathSlot, 0.1f, false);
             if (deathSlot.Card != null)
             {
-                deathSlot.Card.AddTemporaryMod(new() { singletonId = RESURRECTED_KEY });
+                MarkAsResurrectedBy(deathSlot.Card, __instance.Card);
                 if (deathSlot.Card.TriggerHandler.RespondsToTrigger(Trigger.ResolveOnBoard))
                     yield return deathSlot.Card.TriggerHandler.OnTrigger(Trigger.ResolveOnBoard);
 
-                yield return Singleton<GlobalTriggerHandler>.Instance.TriggerCardsOnBoard(Trigger.OtherCardResolve, false, deathSlot.Card);
+                yield return GlobalTriggerHandler.Instance.TriggerCardsOnBoard(Trigger.OtherCardResolve, false, deathSlot.Card);
             }
+            yield return new WaitForEndOfFrame();
             yield return new WaitForSeconds(0.1f);
             if (deathSlot.Card != null)
             {

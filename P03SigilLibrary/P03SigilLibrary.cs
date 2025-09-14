@@ -6,9 +6,11 @@ using BepInEx.Logging;
 using DiskCardGame;
 using HarmonyLib;
 using Infiniscryption.P03SigilLibrary.Helpers;
+using Infiniscryption.P03SigilLibrary.Sigils;
 using InscryptionAPI.Card;
 using InscryptionAPI.Encounters;
 using InscryptionAPI.Guid;
+using InscryptionAPI.RuleBook;
 using UnityEngine.SceneManagement;
 
 namespace Infiniscryption.P03SigilLibrary
@@ -45,6 +47,7 @@ namespace Infiniscryption.P03SigilLibrary
             harmony.Patch(targetMethod, prefix: new HarmonyMethod(patchMethod));
 
             harmony.PatchAll();
+            CustomTriggerPatches.SpecialPatchDamageTrigger(harmony);
 
             foreach (Type t in typeof(P03SigilLibraryPlugin).Assembly.GetTypes())
             {
@@ -58,6 +61,8 @@ namespace Infiniscryption.P03SigilLibrary
                     Log.LogWarning(ex);
                 }
             }
+
+            SceneManager.sceneLoaded += OnSceneLoaded;
 
             Initialized = true;
 
@@ -107,6 +112,7 @@ namespace Infiniscryption.P03SigilLibrary
             // Need to *guarantee* that all of our card mod patches take hold
             CardManager.SyncCardList();
             AbilityManager.SyncAbilityList();
+            RuleBookManager.SyncRuleBookList();
         }
     }
 }

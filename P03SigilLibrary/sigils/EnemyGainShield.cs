@@ -4,6 +4,7 @@ using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -22,7 +23,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = -1;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_enemygainshield.png", typeof(EnemyGainShield).Assembly));
 
             AbilityID = AbilityManager.Add(
@@ -31,6 +32,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(EnemyGainShield),
                 TextureHelper.GetImageAsTexture("ability_enemygainshield.png", typeof(EnemyGainShield).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("Nano Armor", Ability.DeathShield, GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToResolveOnBoard() => true;

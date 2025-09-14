@@ -17,7 +17,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Transforms When Unpowered";
-            info.rulebookDescription = "If [creature] is NOT within a circuit at the beginning of the turn, it will transform back its original form.";
+            info.rulebookDescription = "If [creature] is NOT within a circuit at the beginning of the turn, it will transform back into its original form.";
             info.canStack = false;
             info.powerLevel = 0;
             info.opponentUsable = true;
@@ -25,7 +25,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.passive = false;
             info.hasColorOverride = true;
             info.colorOverride = AbilityManager.BaseGameAbilities.AbilityByID(Ability.CellDrawRandomCardOnDeath).Info.colorOverride;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -36,5 +36,19 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         }
 
         public override bool RespondsToUpkeep(bool playerUpkeep) => base.RespondsToUpkeep(playerUpkeep) && !ConduitCircuitManager.Instance.SlotIsWithinCircuit(Card.Slot);
+
+        public override CardInfo GetTransformCardInfo()
+        {
+            // Handle the temporary mods
+            foreach (var mod in Card.TemporaryMods)
+            {
+                if (mod.HasAbility(AbilityID))
+                {
+                    mod.abilities.Remove(AbilityID);
+                    mod.abilities.Add(CellEvolve.AbilityID);
+                }
+            }
+            return base.GetTransformCardInfo();
+        }
     }
 }

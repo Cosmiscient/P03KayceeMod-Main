@@ -39,6 +39,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return new WaitForSeconds(0.1f);
             ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
             DefaultQuestDefinitions.DredgerBattle.CurrentState.Status = QuestState.QuestStateStatus.Failure;
+            yield return CleanupBossEffects();
         }
 
         public override IEnumerator PreDefeatedSequence()
@@ -49,6 +50,7 @@ namespace Infiniscryption.P03KayceeRun.Sequences
             yield return new WaitForSeconds(0.1f);
             ViewManager.Instance.Controller.LockState = ViewLockState.Unlocked;
             DefaultQuestDefinitions.DredgerBattle.CurrentState.Status = QuestState.QuestStateStatus.Success;
+            yield return CleanupBossEffects();
         }
     }
 }

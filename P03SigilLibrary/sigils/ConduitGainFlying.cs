@@ -3,6 +3,7 @@ using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -25,7 +26,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.opponentUsable = false;
             info.conduit = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -33,6 +34,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(ConduitGainFlying),
                 TextureHelper.GetImageAsTexture("ability_conduit_gain_flying.png", typeof(ConduitGainFlying).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("Airborne", Ability.Flying, GameColors.Instance.limeGreen);
         }
 
         [HarmonyPatch(typeof(DiskCardAnimationController), nameof(DiskCardAnimationController.SetHovering))]

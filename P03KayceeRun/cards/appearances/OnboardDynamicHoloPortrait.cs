@@ -104,6 +104,9 @@ namespace Infiniscryption.P03KayceeRun.Cards
             Renderer[] allRenderers = inChildren ? obj.GetComponentsInChildren<Renderer>() : obj.GetComponents<Renderer>();
             foreach (Renderer renderer in allRenderers)
             {
+                if (renderer is ParticleSystemRenderer)
+                    continue;
+
                 foreach (Material material in renderer.materials)
                 {
                     material.shader = Shader.Find(shaderKey);
@@ -214,7 +217,7 @@ namespace Infiniscryption.P03KayceeRun.Cards
         public override void ApplyAppearance()
         {
             bool showInHand = Card.Info.GetExtendedPropertyAsBool(IN_HAND).GetValueOrDefault(false);
-            if (Card.Anim is DiskCardAnimationController dcac && Card is PlayableCard pCard && (pCard.OnBoard || showInHand) && !portraitSpawned)
+            if (Card.Anim is DiskCardAnimationController dcac && Card is PlayableCard pCard && (pCard.OpponentCard || pCard.OnBoard || showInHand) && !portraitSpawned)
             {
                 SpawnHoloPortrait(dcac);
             }

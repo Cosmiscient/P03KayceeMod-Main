@@ -24,9 +24,9 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
         public static bool SlotIsOnFire(CardSlot slot) => OnFire.Contains(slot.GetSlotModification());
 
-        public static SlotModificationManager.ModificationType GetFireLevel(int fireLevel, CardSlot target, PlayableCard source = null)
+        public static SlotModificationManager.ModificationType GetFireLevel(int fireLevel, CardSlot target = null, PlayableCard source = null)
         {
-            if (source == null)
+            if (source == null || target == null)
                 return OnFire[fireLevel];
 
             if (target.IsOpponentSlot() != source.IsPlayerCard())
@@ -54,6 +54,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                     typeof(BurningSlotOne),
                     TextureHelper.GetImageAsTexture("card_slot_fire_1.png", typeof(FireBomb).Assembly),
                     TextureHelper.GetImageAsTexture("pixel_slot_fire_1.png", typeof(FireBomb).Assembly)
+                ).SetRulebook(
+                    "Burning Slot (1)",
+                    "This slot is on fire! It deals one damage to the card in it at the end of the turn. This effect lasts one turn.",
+                    TextureHelper.GetImageAsTexture("card_slot_fire_1.png", typeof(FireBomb).Assembly),
+                    SlotModificationManager.ModificationMetaCategory.Part1Rulebook,
+                    SlotModificationManager.ModificationMetaCategory.Part3Rulebook
                 ),
                 SlotModificationManager.New(
                     P03SigilLibraryPlugin.PluginGuid,
@@ -61,6 +67,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                     typeof(BurningSlotTwo),
                     TextureHelper.GetImageAsTexture("card_slot_fire_2.png", typeof(FireBomb).Assembly),
                     TextureHelper.GetImageAsTexture("pixel_slot_fire_2.png", typeof(FireBomb).Assembly)
+                ).SetRulebook(
+                    "Burning Slot (2)",
+                    "This slot is on fire! It deals one damage to the card in it at the end of the turn. This effect lasts two turns.",
+                    TextureHelper.GetImageAsTexture("card_slot_fire_2.png", typeof(FireBomb).Assembly),
+                    SlotModificationManager.ModificationMetaCategory.Part1Rulebook,
+                    SlotModificationManager.ModificationMetaCategory.Part3Rulebook
                 ),
                 SlotModificationManager.New(
                     P03SigilLibraryPlugin.PluginGuid,
@@ -68,6 +80,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                     typeof(BurningSlotThree),
                     TextureHelper.GetImageAsTexture("card_slot_fire_3.png", typeof(FireBomb).Assembly),
                     TextureHelper.GetImageAsTexture("pixel_slot_fire_3.png", typeof(FireBomb).Assembly)
+                ).SetRulebook(
+                    "Burning Slot (3)",
+                    "This slot is on fire! It deals one damage to the card in it at the end of the turn. This effect lasts three turns.",
+                    TextureHelper.GetImageAsTexture("card_slot_fire_3.png", typeof(FireBomb).Assembly),
+                    SlotModificationManager.ModificationMetaCategory.Part1Rulebook,
+                    SlotModificationManager.ModificationMetaCategory.Part3Rulebook
                 ),
                 SlotModificationManager.New(
                     P03SigilLibraryPlugin.PluginGuid,
@@ -75,7 +93,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                     typeof(BurningSlotFour),
                     TextureHelper.GetImageAsTexture("card_slot_fire_4.png", typeof(FireBomb).Assembly),
                     TextureHelper.GetImageAsTexture("pixel_slot_fire_4.png", typeof(FireBomb).Assembly, FilterMode.Point)
-                )
+                ).SetRulebook(
+                    "Burning Slot (4)",
+                    "This slot is on fire! It deals one damage to the card in it at the end of the turn. This effect lasts four turns.",
+                    TextureHelper.GetImageAsTexture("card_slot_fire_4.png", typeof(FireBomb).Assembly),
+                    SlotModificationManager.ModificationMetaCategory.Part1Rulebook,
+                    SlotModificationManager.ModificationMetaCategory.Part3Rulebook
+                ),
             };
         }
 
@@ -85,20 +109,32 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
         public static IEnumerator SetSlotOnFireBasic(int fireLevel, CardSlot targetSlot, CardSlot attackingSlot)
         {
-            GameObject fireball = Instantiate(AssetBundleManager.Prefabs["Fire_Ball"], targetSlot.transform);
+            var fireMod = GetFireLevel(fireLevel, targetSlot, attackingSlot?.Card);
+            if (targetSlot.GetSlotModification() == fireMod)
+                yield break;
 
             if (BoardManager.Instance is BoardManager3D)
+            {
+                string prefab = "Fire_Ball";
+                if (SaveManager.SaveFile.IsPart1)
+                    prefab += "_Red";
+                else if (!SaveManager.SaveFile.IsPart3)
+                    prefab += "_Green";
+
+                GameObject fireball = Instantiate(AssetBundleManager.Prefabs[prefab], targetSlot.transform);
+
                 AudioController.Instance.PlaySound3D("fireball", MixerGroup.TableObjectsSFX, fireball.transform.position, 0.5f);
 
-            CustomCoroutine.WaitThenExecute(3f, delegate ()
-            {
-                if (fireball != null)
+                CustomCoroutine.WaitThenExecute(3f, delegate ()
                 {
-                    Destroy(fireball);
-                }
-            });
+                    if (fireball != null)
+                    {
+                        Destroy(fireball);
+                    }
+                });
+            }
             yield return new WaitForSeconds(0.3f);
-            yield return targetSlot.SetSlotModification(GetFireLevel(fireLevel, targetSlot, attackingSlot?.Card));
+            yield return targetSlot.SetSlotModification(fireMod);
             yield return new WaitForSeconds(0.05f);
         }
 
@@ -116,7 +152,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             {
                 if (flames == null)
                 {
-                    GameObject newFlames = Instantiate(AssetBundleManager.Prefabs["Fire_Parent"], Slot.transform);
+                    string prefab = "Fire_Parent";
+                    if (SaveManager.SaveFile.IsPart1)
+                        prefab += "_Red";
+                    else if (!SaveManager.SaveFile.IsPart3)
+                        prefab += "_Green";
+                    GameObject newFlames = Instantiate(AssetBundleManager.Prefabs[prefab], Slot.transform);
                     newFlames.name = "Flames";
                     newFlames.transform.localPosition = new(0f, 0f, -0.95f);
                     flames = newFlames.transform;

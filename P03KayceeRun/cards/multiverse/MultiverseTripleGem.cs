@@ -27,10 +27,10 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             info.powerLevel = original.powerLevel;
             info.activated = original.activated;
             info.opponentUsable = original.opponentUsable;
-            info.passive = original.passive;
+            info.passive = false;
             info.hasColorOverride = true;
             info.colorOverride = Color.black;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, CustomCards.MultiverseAbility };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, CustomCards.MultiverseAbility };
 
             AbilityID = AbilityManager.Add(
                 P03Plugin.PluginGuid,
@@ -40,17 +40,28 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             ).Id;
         }
 
+        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.AddTemporaryMod))]
+        [HarmonyPostfix]
+        private static void ForceResourceUpdateOnTempMod() => ResourcesManager.Instance.ForceGemsUpdate();
+
+        [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.RemoveTemporaryMod))]
+        [HarmonyPostfix]
+        private static void ForceResourceUpdateOnRemoveTempMod() => ResourcesManager.Instance.ForceGemsUpdate();
+
         [HarmonyPatch(typeof(OpponentGemsManager), nameof(OpponentGemsManager.ForceGemsUpdate))]
         [HarmonyPostfix]
         private static void MultiverseOpponentGems(OpponentGemsManager __instance)
         {
-            if (MultiverseBattleSequencer.Instance == null)
+            if (__instance == null)
                 return;
 
             if (MultiverseBattleSequencer.Instance == null)
                 return;
 
-            if (MultiverseBattleSequencer.Instance.MultiverseGames.Any(m => m.HasAbility(AbilityID, true)))
+            if (MultiverseBattleSequencer.Instance.MultiverseGames == null)
+                return;
+
+            if (MultiverseBattleSequencer.Instance.MultiverseGames.Any(m => m?.HasAbility(AbilityID, true) ?? false))
             {
                 __instance.AddGems(
                     GemType.Green,
@@ -69,7 +80,10 @@ namespace Infiniscryption.P03KayceeRun.Cards.Multiverse
             if (MultiverseBattleSequencer.Instance == null)
                 return;
 
-            if (MultiverseBattleSequencer.Instance.MultiverseGames.Any(m => m.HasAbility(AbilityID, true)))
+            if (MultiverseBattleSequencer.Instance.MultiverseGames == null)
+                return;
+
+            if (MultiverseBattleSequencer.Instance.MultiverseGames.Any(m => m?.HasAbility(AbilityID, true) ?? false))
             {
                 __instance.gems.Add(GemType.Green);
                 __instance.gems.Add(GemType.Orange);

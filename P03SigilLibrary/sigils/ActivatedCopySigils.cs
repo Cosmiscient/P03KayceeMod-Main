@@ -57,13 +57,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Copy and Paste";
-            info.rulebookDescription = "The controller of [creature] chooses two cards they control. The second card's sigils are replaced with the sigil's of the first.";
+            info.rulebookDescription = "The controller of [creature] chooses two cards they control. The second card's sigils are replaced with the sigils of the first.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;
             info.passive = false;
             info.activated = true;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -94,6 +94,16 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             yield break;
         }
 
+        private List<Ability> GetAbilitiesFromCard(PlayableCard card)
+        {
+            List<Ability> retval = new(card.Info.Abilities);
+            foreach (var tMod in card.TemporaryMods)
+                retval.AddRange(tMod.abilities);
+            foreach (var tMod in card.TemporaryMods)
+                retval.RemoveAll(a => tMod.negateAbilities.Contains(a));
+            return retval;
+        }
+
         private IEnumerator OnSelectCopyToSlot(CardSlot slot)
         {
             // We need all abilities from all mods that are NOT continuous effect mods
@@ -106,7 +116,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 targetAbilities.AddRange(mod.abilities);
 
             CardModificationInfo newAbilityMod = slot.Card.GetOrCreateSingletonTempMod(SINGLETON_ID);
-            newAbilityMod.abilities = new(SelectedCopyFromSlot.Card.AllAbilities());
+            newAbilityMod.abilities = GetAbilitiesFromCard(SelectedCopyFromSlot.Card);
             newAbilityMod.negateAbilities = targetAbilities.Where(a => !newAbilityMod.abilities.Contains(a)).ToList();
 
             slot.Card.Anim.StrongNegationEffect();
@@ -123,7 +133,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 OnSelectCopyFromSlot,
                 this.CopyFromSlots,
                 EvaluateCopyFromSlot,
-                "Choose a card to copy sigils from"
+                "Choose a card to copy sigils from",
+                cursor: CursorType.Pickup
             );
 
             yield return new WaitForSeconds(0.2f);
@@ -132,7 +143,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 OnSelectCopyToSlot,
                 this.CopyToSlots,
                 EvaluateCopyToSlot,
-                "Choose a card to paste sigils onto"
+                "Choose a card to paste sigils onto",
+                cursor: CursorType.Place
             );
 
             yield return base.LearnAbility(0.2f);

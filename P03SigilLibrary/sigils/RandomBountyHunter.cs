@@ -34,6 +34,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             CardModificationInfo mod = BountyHunterGenerator.GenerateMod(Math.Min(TurnManager.Instance.TurnNumber, 3), 20);
             if (mod.energyCostAdjustment > 6) // Lucky you!
                 mod.energyCostAdjustment = 6;
+            mod.AddNegateAbilities(AbilityID);
             Card.AddTemporaryMod(mod);
             Card.RenderCard();
         }
@@ -42,12 +43,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Bounty Hunter";
-            info.rulebookDescription = "When drawn, [creature] will turn into a random bounty hunter";
+            info.rulebookDescription = "When drawn, [creature] will turn into a random bounty hunter.";
             info.canStack = false;
             info.powerLevel = 3;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,

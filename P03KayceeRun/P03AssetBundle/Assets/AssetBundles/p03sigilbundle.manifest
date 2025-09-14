@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 2648637927
+CRC: 1025664352
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: bd54d9496e1752c08f777eba9e0880af
+    Hash: 7fd8de620ecf6262df8a40e2eaa377cf
   TypeTreeHash:
     serializedVersion: 2
     Hash: afd12bf211ec48792818822e52781931
@@ -31,8 +31,15 @@ ClassTypes:
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers: []
 Assets:
+- Assets/Prefabs/fuelgauge.prefab
 - Assets/Prefabs/Molotov.prefab
+- Assets/Effects/Fire_Parent_Red.prefab
+- Assets/Models/Item_Hook.obj
 - Assets/Effects/Fire_Ball.prefab
+- Assets/Effects/Fire_Parent_Green.prefab
+- Assets/Models/bottle.fbx
+- Assets/Effects/Fire_Ball_Green.prefab
+- Assets/Effects/Fire_Ball_Red.prefab
 - Assets/Effects/Fire_Parent.prefab
 - Assets/Prefabs/Missile.prefab
 Dependencies:

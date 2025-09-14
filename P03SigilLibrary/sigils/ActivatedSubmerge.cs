@@ -6,6 +6,7 @@ using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
 using InscryptionAPI.Helpers.Extensions;
+using InscryptionAPI.RuleBook;
 using Pixelplacement;
 using UnityEngine;
 
@@ -25,13 +26,14 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Submerge";
-            info.rulebookDescription = "Submerge during the opponent's turn. While submerged, opposing creatures attack its owner directly.";
+            info.rulebookDescription = "Spend one fuel: submerge during the opponent's turn. While submerged, opposing creatures attack its owner directly.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = true;
             info.passive = false;
             info.activated = true;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.SetDefaultFuel(2);
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -39,6 +41,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(ActivatedSubmerge),
                 TextureHelper.GetImageAsTexture("ability_activated_submerge.png", typeof(ActivatedSubmerge).Assembly)
             ).Id;
+
+            info.SetUniqueRedirect("fuel", "fuelManagerPage", GameColors.Instance.limeGreen);
         }
 
         public override IEnumerator ActivateAfterSpendFuel()

@@ -3,6 +3,7 @@ using DiskCardGame;
 using HarmonyLib;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -26,7 +27,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.opponentUsable = true;
             info.conduit = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, BurningSlotBase.FlamingAbility, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, BurningSlotBase.FlamingAbility, AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -34,6 +35,9 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(ConduitGas),
                 TextureHelper.GetImageAsTexture("ability_conduitgas.png", typeof(ConduitGainDebuffEnemy).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("Fire Strike", FireBomb.AbilityID, GameColors.Instance.limeGreen);
+            info.SetAbilityRedirect("Burnt Out", BurntOut.AbilityID, GameColors.Instance.limeGreen);
         }
     }
 }

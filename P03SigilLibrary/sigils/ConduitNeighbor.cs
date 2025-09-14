@@ -17,12 +17,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Static Electricity";
-            info.rulebookDescription = "[creature] will cause adjacent cards to behave as if they are part of a completed conduit.";
+            info.rulebookDescription = "[creature] will cause all friendly cards to behave as if they are part of a completed conduit.";
             info.canStack = false;
-            info.powerLevel = 2;
+            info.powerLevel = 3;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -107,14 +107,19 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         [HarmonyPrefix]
         private static bool ConduitNeighborAsConduit(ConduitCircuitManager __instance, ref List<PlayableCard> __result, CardSlot slot)
         {
+            List<PlayableCard> list = new();
+            if (slot == null)
+            {
+                __result = list;
+                return false;
+            }
             List<CardSlot> slots = BoardManager.Instance.GetSlots(slot.IsPlayerSlot);
             int num = slots.IndexOf(slot);
-            List<PlayableCard> list = new();
             bool circuitOnLeft = false;
             bool circuitOnRight = false;
             for (int i = 0; i < slots.Count; i++)
             {
-                if (slots[i].Card != null && slots[i].Card.HasConduitAbility())
+                if (slots[i]?.Card?.HasConduitAbility() ?? false)
                 {
                     if (i < num)
                     {
@@ -133,19 +138,10 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 list.Clear();
             }
 
-            CardSlot toLeft = BoardManager.Instance.GetAdjacent(slot, adjacentOnLeft: true);
-            CardSlot toRight = BoardManager.Instance.GetAdjacent(slot, adjacentOnLeft: false);
-
-            //If slot is adjacent to conduit neighbor, add conduit neighbor card to list of conduits
-            if (toLeft?.Card != null && toLeft.Card.HasAbility(AbilityID))
-            {
-                list.Add(toLeft.Card);
-            }
-
-            if (toRight?.Card != null && toRight.Card.HasAbility(AbilityID))
-            {
-                list.Add(toRight.Card);
-            }
+            // IF this ability is on any slot, add it to the list
+            foreach (var s in slots)
+                if (s?.Card?.HasAbility(AbilityID) ?? false)
+                    list.Add(s.Card);
 
             __result = list;
 

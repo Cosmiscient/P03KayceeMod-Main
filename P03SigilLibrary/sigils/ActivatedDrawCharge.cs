@@ -24,7 +24,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.opponentUsable = false;
             info.activated = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
             info.SetPixelAbilityIcon(TextureHelper.GetImageAsTexture("pixelability_activated_drawcharge.png", typeof(ActivatedDrawCharge).Assembly));
 
             AbilityID = AbilityManager.Add(

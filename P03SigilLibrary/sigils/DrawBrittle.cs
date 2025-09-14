@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -21,7 +22,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             info.powerLevel = 4;
             info.opponentUsable = false;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part3Modular };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook, AbilityMetaCategory.Part3Modular };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -29,6 +30,8 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                 typeof(DrawBrittle),
                 TextureHelper.GetImageAsTexture("ability_drawbrittle.png", typeof(DrawBrittle).Assembly)
             ).Id;
+
+            info.SetAbilityRedirect("brittle", Ability.Brittle, GameColors.Instance.limeGreen);
         }
 
         public override bool RespondsToResolveOnBoard() => true;
@@ -82,6 +85,10 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                     }
                 }
             }
+
+            // This is a super hack to work around a bug deal with it
+            if (TurnManager.Instance.Opponent is Part3BossOpponent)
+                cardsWithBrittle.RemoveAll(ci => ci.temple != CardTemple.Tech);
 
             CardInfo CardToDraw = cardsWithBrittle[Random.Range(0, cardsWithBrittle.Count)];
 

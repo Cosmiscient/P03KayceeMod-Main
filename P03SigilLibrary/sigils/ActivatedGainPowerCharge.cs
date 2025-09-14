@@ -31,19 +31,19 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Enrage";
-            info.rulebookDescription = $"Pay Energy equal to the Power of this card plus 2 to increase the Power of this card by 1";
+            info.rulebookDescription = $"Pay Energy equal to the Power of this card plus 2 to increase the Power of this card by 1.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;
             info.activated = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
                 info,
                 typeof(ActivatedGainPowerCharge),
-                TextureHelper.GetImageAsTexture("ability_activated_powerup_0.png", typeof(TakeDamageSigil).Assembly)
+                TextureHelper.GetImageAsTexture("ability_activated_powerup_2.png", typeof(TakeDamageSigil).Assembly)
             ).Id;
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DiskCardGame;
 using HarmonyLib;
+using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
 {
@@ -12,10 +13,11 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         protected abstract Ability AbilityToGive { get; }
         protected virtual Ability SecondaryAbilityToGive => Ability.None;
         protected virtual bool Gemify => false;
+        private bool isActive = true;
 
         internal const string CONDUIT_ABILITY_ID = "ConduitGainAbilityMod";
 
-        public static List<ConduitGainAbility> ActiveAbilities = new();
+        public static HashSet<ConduitGainAbility> ActiveAbilities = new();
 
         static ConduitGainAbility()
         {
@@ -43,6 +45,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         public override IEnumerator OnDie(bool wasSacrifice, PlayableCard killer)
         {
             ActiveAbilities.Remove(this);
+            isActive = false;
             yield return base.OnResolveOnBoard();
         }
 
@@ -118,6 +121,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
                 if (!Match(conduitAbilities, info))
                 {
+                    // This is wacky. Because we've kept a reference to the original mod
+                    // And we then modify the mod in place
+                    // The logic for singleton mods is totally broken
+                    // We have to clear all the triggers manually
+                    foreach (var a in info.abilities)
+                        slot.Card.TriggerHandler.RemoveAbility(a);
+
                     info.abilities.Clear();
                     info.abilities.AddRange(conduitAbilities.Where(a => a != Ability.None));
                     info.gemify = conduitAbilities.Any(a => a == Ability.None);
@@ -151,7 +161,7 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
             }
         }
 
-        private static void CleanList() => ActiveAbilities.RemoveAll(ab => ab == null);
+        private static void CleanList() => ActiveAbilities.RemoveWhere(ab => ab == null);
 
         [HarmonyPatch(typeof(ConduitCircuitManager), nameof(ConduitCircuitManager.ManagedUpdate))]
         [HarmonyPostfix]
@@ -180,14 +190,10 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         [HarmonyPostfix]
         private static void CleanupActiveAbilities() => ActiveAbilities.Clear();
 
-        [HarmonyPatch(typeof(PhotographerSnapshotManager), nameof(PhotographerSnapshotManager.ApplySlotState))]
-        [HarmonyPostfix]
-        private static IEnumerator ResetAferPhotog(IEnumerator sequence)
+        public override void ManagedUpdate()
         {
-            yield return sequence;
-
-            ActiveAbilities = BoardManager.Instance.AllSlotsCopy.Where(s => s.Card != null).SelectMany(s => s.Card.GetComponents<ConduitGainAbility>()).ToList();
-            yield break;
+            if (this.isActive)
+                ActiveAbilities.Add(this);
         }
     }
 }

@@ -52,13 +52,13 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Launch Missile";
-            info.rulebookDescription = "Skip your attack this turn to launch a missile that lands on the next turn, splashing damage to adjacent spaces. Use carefully - ammo is limited.";
+            info.rulebookDescription = "[creature] can skip its attack this turn to launch a missile that lands on the next turn, splashing damage to adjacent spaces. Use carefully - ammo is limited.";
             info.canStack = false;
             info.powerLevel = 3;
             info.activated = true;
             info.opponentUsable = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
@@ -195,11 +195,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
                     }
                 }
 
-                yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
-                    attacker.TriggerHandler,
-                    t => t.RespondsToStrikeQueued(target),
-                    t => t.OnStrikeQueued(target)
-                );
+                if (attacker != null)
+                    yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
+                        attacker.TriggerHandler,
+                        t => t.RespondsToStrikeQueued(target),
+                        t => t.OnStrikeQueued(target)
+                    );
 
                 PendingAttacks.Add(new() { Attacker = attacker, AttackValue = value, Slot = target, Target = aimIcon, PlayerUpkeep = TurnManager.Instance.IsPlayerTurn, QueuedTurnNumber = TurnManager.Instance.TurnNumber });
             }
@@ -281,11 +282,12 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
                     foreach (CardSlot slot in slotsToAttack)
                     {
-                        yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
-                            atkDefn.Attacker.TriggerHandler,
-                            t => t.RespondsToPreStrikeHit(slot),
-                            t => t.OnPreStrikeHit(slot)
-                        );
+                        if (atkDefn.Attacker != null)
+                            yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
+                                atkDefn.Attacker.TriggerHandler,
+                                t => t.RespondsToPreStrikeHit(slot),
+                                t => t.OnPreStrikeHit(slot)
+                            );
                         if (slot == null)
                         {
                             yield return OverkillSimulator(atkDefn.AttackValue, atkDefn.Attacker, atkDefn.Slot);
@@ -314,18 +316,20 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
 
                         yield return CustomTriggerFinder.TriggerAll<IOnPostSlotAttackSequence>(false, x => x.RespondsToPostSlotAttackSequence(slot), x => x.OnPostSlotAttackSequence(slot));
 
-                        yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
-                            atkDefn.Attacker.TriggerHandler,
-                            t => t.RespondsToPostStrikeHit(slot),
-                            t => t.OnPostStrikeHit(slot)
-                        );
+                        if (atkDefn.Attacker != null)
+                            yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
+                                atkDefn.Attacker.TriggerHandler,
+                                t => t.RespondsToPostStrikeHit(slot),
+                                t => t.OnPostStrikeHit(slot)
+                            );
                     }
 
-                    yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
-                        atkDefn.Attacker.TriggerHandler,
-                        t => t.RespondsToPostAllStrike(),
-                        t => t.OnPostAllStrike()
-                    );
+                    if (atkDefn.Attacker != null)
+                        yield return CustomTriggerFinder.Trigger<IOnMissileStrike>(
+                            atkDefn.Attacker.TriggerHandler,
+                            t => t.RespondsToPostAllStrike(),
+                            t => t.OnPostAllStrike()
+                        );
 
                     if (setCardSlot)
                     {
@@ -354,18 +358,17 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         private static void CleanupStrikes() => MissileStrikeManager.Instance.CleanUp();
 
         [HarmonyPatch(typeof(PlayableCard), nameof(PlayableCard.GetOpposingSlots))]
-        [HarmonyPrefix]
-        private static bool NoAttacksForLaunches(PlayableCard __instance, ref List<CardSlot> __result)
+        [HarmonyPostfix]
+        [HarmonyPriority(HarmonyLib.Priority.Last)]
+        private static void NoAttacksForLaunches(PlayableCard __instance, ref List<CardSlot> __result)
         {
             if (__instance.HasAbility(AbilityID))
             {
                 if (__instance.GetComponent<MissileStrike>()._firedThisTurn)
                 {
                     __result = new();
-                    return false;
                 }
             }
-            return true;
         }
 
         public static IEnumerator LaunchMissile(CardSlot target, Transform source, int amount, PlayableCard attacker, Vector3? initialOffset = null, float? scale = null)

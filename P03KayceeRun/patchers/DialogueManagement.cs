@@ -192,7 +192,11 @@ namespace Infiniscryption.P03KayceeRun.Patchers
 
         public static void AddSequenceDialogue()
         {
-            string database = DataHelper.GetResourceString("dialogue_database", "csv");
+            AddSequenceDialogue(DataHelper.GetResourceString("dialogue_database", "csv"));
+        }
+
+        public static void AddSequenceDialogue(string database)
+        {
             string[] lines = database.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
             string dialogueId = string.Empty;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DiskCardGame;
 using InscryptionAPI.Card;
 using InscryptionAPI.Helpers;
+using InscryptionAPI.RuleBook;
 using UnityEngine;
 
 namespace Infiniscryption.P03SigilLibrary.Sigils
@@ -18,22 +19,24 @@ namespace Infiniscryption.P03SigilLibrary.Sigils
         {
             AbilityInfo info = ScriptableObject.CreateInstance<AbilityInfo>();
             info.rulebookName = "Drive";
-            info.rulebookDescription = $"Pay 1 Fuel to move in the direction inscribed in this sigil.";
+            info.rulebookDescription = $"Spend one fuel: move in the direction inscribed in this sigil. This ability can only be activated once per turn.";
             info.canStack = false;
             info.powerLevel = 1;
             info.opponentUsable = false;
             info.activated = true;
             info.passive = false;
-            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook };
+            info.SetDefaultFuel(4);
+            info.metaCategories = new List<AbilityMetaCategory>() { AbilityMetaCategory.Part3Rulebook, AbilityMetaCategory.Part1Rulebook };
 
             AbilityID = AbilityManager.Add(
                 P03SigilLibraryPlugin.PluginGuid,
                 info,
                 typeof(ActivatedStrafe),
-                TextureHelper.GetImageAsTexture("ability_activated_strafe_right.png", typeof(ActivatedStrafe).Assembly)
+                TextureHelper.GetImageAsTexture("ability_activated_strafe_right_fuel.png", typeof(ActivatedStrafe).Assembly)
             ).Id;
 
-            info.SetCustomFlippedTexture(TextureHelper.GetImageAsTexture("ability_activated_strafe_left.png", typeof(ActivatedStrafe).Assembly));
+            info.SetCustomFlippedTexture(TextureHelper.GetImageAsTexture("ability_activated_strafe_left_fuel.png", typeof(ActivatedStrafe).Assembly));
+            info.SetUniqueRedirect("fuel", "fuelManagerPage", GameColors.Instance.limeGreen);
         }
 
         public override IEnumerator ActivateAfterSpendFuel()
